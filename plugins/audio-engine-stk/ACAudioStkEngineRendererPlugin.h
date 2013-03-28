@@ -58,8 +58,8 @@ public:
     virtual bool performActionOnMedia(std::string action, long int mediaId, std::vector<boost::any> arguments=std::vector<boost::any>());
     virtual std::map<std::string,ACMediaType> availableMediaActions();
     virtual std::map<std::string,ACMediaActionParameters> mediaActionsParameters();
-    void updateVolume();
-    void updateRate();
+    void updateMasterVolume();
+    void updatePlaybackSpeed();
     void muteAll();
     void updateGrainVoices();
     void updateGrainRandomness();
@@ -81,13 +81,22 @@ public:
     //! Update the width (left-right mixing) parameter [0,1].
     void updateReverbPan();
 
+    void updatePlaybackPan();
+
+    void updatePlaybackVolume();
+
+    void muteMedia(int mediaId);
+
 public:
     RtAudio dac;
     std::map< long int, ACAudioStkFileWvIn*> inputs;
     std::map< long int, ACAudioStkFileLoop*> loops;
     std::map< long int, ACAudioStkGranulate*> grains;
     std::map< long int, int> current_frames;
-    stk::FreeVerb* frev;
+    std::map< long int, stk::FreeVerb*> frevs;
+    std::map< long int, stk::StkFloat> gains;
+    stk::StkFloat master_volume;
+    std::map< long int, stk::StkFloat> pans;
     void justReadFrames(long int mediaId, int nFrames);
     void removeInput(long int mediaId);
     void removeLoop(long int mediaId);

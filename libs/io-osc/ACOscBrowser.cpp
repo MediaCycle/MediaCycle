@@ -710,92 +710,108 @@ int ACOscBrowser::process_mess(const char *path, const char *types, lo_arg **arg
             std::cout << std::endl;
         }
     }
-    else if (tag.find("/list_media_actions", 0) != string::npos) {
+    else if (tag.find("/list_media_actions", 0) != string::npos || tag == "/who") {
         std::cout << "ACOscBrowser: available media actions " << std::endl;
         for(std::map<std::string,std::string>::iterator media_action = media_actions.begin();media_action!=media_actions.end();media_action++){
             std::cout << "ACOscBrowser: media action " << media_action->second << std::endl;
         }
         std::cout << "ACOscBrowser: available media actions with parameters " << std::endl;
         for(std::map<std::string,ACMediaActionParameters>::iterator action_parameters = actions_parameters.begin();action_parameters!=actions_parameters.end();action_parameters++){
-            std::cout << "ACOscBrowser: media action '" << media_actions[action_parameters->first] << "'";
+            std::cout << "ACOscBrowser: media action '" << action_parameters->first << "'";
             ACMediaActionParameters parameters = action_parameters->second;
             if(parameters.size()==0)
-                 std::cout << " without parameters";
+                std::cout << " without parameters";
             else if(parameters.size()==1)
-                 std::cout << " with parameter:";
+                std::cout << " with parameter:";
             else
-                 std::cout << " with parameters:";
+                std::cout << " with parameters:";
             for(ACMediaActionParameters::iterator parameter = parameters.begin();parameter != parameters.end();parameter++)
                 std::cout << " '" << parameter->getName() << "' (type: %" << (char)(parameter->getType()) << ")";
             std::cout << std::endl;
         }
     }
     else{
-        for(std::map<std::string,std::string>::iterator media_action = media_actions.begin();media_action!=media_actions.end();media_action++){
-            if (tag.find(media_action->second, 0) != string::npos) {
-                //Extracting the pointer/device integer id between "/player/" and subsequent "/..." strings
-                int id = -1;
-                std::string app("/mediacycle");
-                std::string prefix("");
-                if(ac)
-                    app = "/audiocycle";
-                //std::string prefix = "/" + media_action->second + "/";
-                prefix = app + "/pointer/";
-                std::string suffix = "/" + media_action->second;//("/");
-                size_t prefix_found = tag.find(prefix, 0);
-                if (prefix_found != string::npos) {
-                    size_t suffix_found = tag.find(suffix, prefix_found + prefix.size());
-                    if (suffix_found != string::npos) {
-                        std::string id_string = tag.substr(prefix_found + prefix.size(), suffix_found - (prefix_found + prefix.size()));
+        size_t action_start = tag.find_last_of ("/");
+        std::string action("");
+        if(action_start != string::npos){
+            action = tag.substr(action_start+1);
+        }
+        std::map<std::string,std::string>::iterator media_action = media_actions.find(action);
+        if(media_action!=media_actions.end()){
+            //Extracting the pointer/device integer id before the action
+            int id = -1;
+            std::string app("/mediacycle");
+            std::string prefix("");
+            if(ac)
+                app = "/audiocycle";
+            //std::string prefix = "/" + media_action->second + "/";
+            prefix = app + "/pointer/";
+            std::string suffix = "/" + media_action->first;//("/");
+            size_t prefix_found = tag.find(prefix, 0);
+            bool allMedia = false;
+            if (prefix_found != string::npos) {
+                size_t suffix_found = tag.find(suffix, prefix_found + prefix.size());
+                if (suffix_found != string::npos) {
+                    std::string id_string = tag.substr(prefix_found + prefix.size(), suffix_found - (prefix_found + prefix.size()));
+
+                    if(id_string == "*")
+                        allMedia = true;
+
+                    if(!allMedia){
                         istringstream id_ss(id_string);
                         if (!(id_ss >> id)){
                             std::cerr << "ACOscBrowser: wrong pointer id" << std::endl;
                             return -1;
                         }
                     }
-                    else{
-                        return -1;
-                    }
                 }
                 else{
                     return -1;
                 }
-                int node = -1;
+            }
+            else{
+                return -1;
+            }
+
+            int node = -1;
+            if(allMedia){
+                node = -2;
+            }
+            else{
                 if (media_cycle->getBrowser()->getPointerFromId(id))
                     node = media_cycle->getBrowser()->getPointerFromId(id)->getClosestNode();
                 if(node==-1){
                     std::cerr << "ACOscBrowser: no closest node for pointer id " << id << std::endl;
                     return -1;
                 }
-
-                std::vector<boost::any> arguments;
-
-                for(int argn = 0; argn<argc;argn++){
-                    if(types[argn]=='s'){
-                        std::string arg = std::string( &(argv[argn]->s) );
-                        arguments.push_back(arg);
-                    }
-                    else if(types[argn]=='i'){
-                        int arg = argv[argn]->i;
-                        float argf = (float)arg; // CF workaround: PureData might send int for sliders boundaries while required to send floats
-                        arguments.push_back(argf);
-                    }
-                    else if(types[argn]=='f'){
-                        float arg = argv[argn]->f;
-                        arguments.push_back(arg);
-                    }
-                    else if(types[argn]=='d'){
-                        double arg = argv[argn]->d;
-                        arguments.push_back(arg);
-                    }
-                    else{
-                        std::cerr << "ACOscBrowser: unsuported argument number " << argn << " of type " << types[argn] << std::endl;
-                        return -1;
-                    }
-
-                }
-                media_cycle->performActionOnMedia(media_action->first,node,arguments);
             }
+
+            std::vector<boost::any> arguments;
+
+            for(int argn = 0; argn<argc;argn++){
+                if(types[argn]=='s'){
+                    std::string arg = std::string( &(argv[argn]->s) );
+                    arguments.push_back(arg);
+                }
+                else if(types[argn]=='i'){
+                    int arg = argv[argn]->i;
+                    float argf = (float)arg; // CF workaround: PureData might send int for sliders boundaries while required to send floats
+                    arguments.push_back(argf);
+                }
+                else if(types[argn]=='f'){
+                    float arg = argv[argn]->f;
+                    arguments.push_back(arg);
+                }
+                else if(types[argn]=='d'){
+                    double arg = argv[argn]->d;
+                    arguments.push_back(arg);
+                }
+                else{
+                    std::cerr << "ACOscBrowser: unsuported argument number " << argn << " of type " << types[argn] << std::endl;
+                    return -1;
+                }
+            }
+            media_cycle->performActionOnMedia(media_action->second,node,arguments);
         }
     }
     return 1;
@@ -809,9 +825,6 @@ void ACOscBrowser::clearMediaActions(){
 bool ACOscBrowser::addMediaAction(std::string _action){
     if(_action=="")
         return false;
-    std::map<std::string,std::string>::iterator listed = media_actions.find(_action);
-    if(listed!=this->media_actions.end())
-        return false;
 
     std::string _tag(_action);
     size_t _space = 0;
@@ -822,7 +835,11 @@ bool ACOscBrowser::addMediaAction(std::string _action){
         }
     }
 
-    this->media_actions[_action] = _tag;
+    std::map<std::string,std::string>::iterator listed = media_actions.find(_tag);
+    if(listed!=this->media_actions.end())
+        return false;
+
+    this->media_actions[_tag] = _action;
     std::cout << "ACOscBrowser::addMediaAction: adding action '" << _action << "' (" << _tag << ")" << std::endl;
     return true;
 }

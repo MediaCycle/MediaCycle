@@ -53,8 +53,6 @@ ACAudioStkEngineRendererPlugin::ACAudioStkEngineRendererPlugin() : QObject(), AC
     // Set the global sample rate before creating class instances.
     Stk::setSampleRate( (StkFloat) 44100 );
 
-    frev = new stk::FreeVerb();
-
     this->action_parameters["play"] = ACMediaActionParameters();
     this->action_parameters["loop"] = ACMediaActionParameters();
     this->action_parameters["granulate"] = ACMediaActionParameters();
@@ -63,8 +61,18 @@ ACAudioStkEngineRendererPlugin::ACAudioStkEngineRendererPlugin() : QObject(), AC
     this->addCallback("Mute","Mute",boost::bind(&ACAudioStkEngineRendererPlugin::muteAll,this));
     this->action_parameters["mute"] = ACMediaActionParameters();
 
-    this->addNumberParameter("Playback Speed",1.0,-10.0,10.0,0.01,"Playback Speed (only for play and loop, not granulate)",boost::bind(&ACAudioStkEngineRendererPlugin::updateRate,this));
+    this->master_volume = 1.0f;
+    this->addNumberParameter("Master Volume",this->master_volume,0,1,0.01,"Master Volume",boost::bind(&ACAudioStkEngineRendererPlugin::updateMasterVolume,this));
+    this->action_parameters["master volume"] = ACMediaActionParameters(1,ACMediaActionParameter(AC_TYPE_FLOAT,this->getParameter("Master Volume")));
+
+    this->addNumberParameter("Playback Volume",1.0,0.0,1.0,0.01,"Playback Volume",boost::bind(&ACAudioStkEngineRendererPlugin::updatePlaybackVolume,this));
+    this->action_parameters["playback volume"] = ACMediaActionParameters(1,ACMediaActionParameter(AC_TYPE_FLOAT,this->getParameter("Playback Volume")));
+
+    this->addNumberParameter("Playback Speed",1.0,-10.0,10.0,0.01,"Playback Speed (only for play and loop, not granulate)",boost::bind(&ACAudioStkEngineRendererPlugin::updatePlaybackSpeed,this));
     this->action_parameters["playback speed"] = ACMediaActionParameters(1,ACMediaActionParameter(AC_TYPE_FLOAT,this->getParameter("Playback Speed")));
+
+    this->addNumberParameter("Playback Pan",0.0,-1.0,1.0,0.01,"Playback Pan (-1 left, 0 center, 1 right)",boost::bind(&ACAudioStkEngineRendererPlugin::updatePlaybackPan,this));
+    this->action_parameters["playback pan"] = ACMediaActionParameters(1,ACMediaActionParameter(AC_TYPE_FLOAT,this->getParameter("Playback Pan")));
 
     this->addNumberParameter("Grain Voices",1,0,25,1,"Grain Voices",boost::bind(&ACAudioStkEngineRendererPlugin::updateGrainVoices,this));
     this->action_parameters["grain voices"] = ACMediaActionParameters(1,ACMediaActionParameter(AC_TYPE_FLOAT,this->getParameter("Grain Voices")));
@@ -96,7 +104,6 @@ ACAudioStkEngineRendererPlugin::ACAudioStkEngineRendererPlugin() : QObject(), AC
     //! Reverb mix [0 = mostly dry, 1 = mostly wet].
     this->addNumberParameter("Reverb Mix",0,0,1,0.01,"Reverb Mix (0 = mostly dry, 1 = mostly wet)",boost::bind(&ACAudioStkEngineRendererPlugin::updateReverbEffectMix,this));
     this->action_parameters["reverb mix"] = ACMediaActionParameters(1,ACMediaActionParameter(AC_TYPE_FLOAT,this->getParameter("Reverb Mix")));
-    this->frev->setEffectMix( this->getNumberParameterValue("Reverb Mix"));
 
     //! Reverb room size (comb filter feedback gain) parameter [0,1].
     this->addNumberParameter("Reverb Room Size",1,0,1,0.01,"Reverb room size (comb filter feedback gain) parameter [0,1]",boost::bind(&ACAudioStkEngineRendererPlugin::updateReverbRoomSize,this));
@@ -113,8 +120,6 @@ ACAudioStkEngineRendererPlugin::ACAudioStkEngineRendererPlugin() : QObject(), AC
     //! Reverb width (left-right mixing) parameter [0,1].
     //this->addNumberParameter("Reverb Pan",1,0,1,0.01,"Reverb width (left-right mixing) parameter [0,1]",boost::bind(&ACAudioStkEngineRendererPlugin::updateReverbPan,this));
     //this->action_parameters["reverb pan"] = ACMediaActionParameters(1,ACMediaActionParameter(AC_TYPE_FLOAT,this->getParameter("Reverb Pan")));
-
-    /*this->addNumberParameter("Volume",100,1,100,1,"Main volume",boost::bind(&ACAudioStkEngineRendererPlugin::updateVolume,this));*/
 
     loopClickedNodeAction = new ACInputActionQt(tr("Loop clicked node"), this);
     loopClickedNodeAction->setShortcut(Qt::Key_L);
@@ -169,10 +174,6 @@ ACAudioStkEngineRendererPlugin::~ACAudioStkEngineRendererPlugin(){
     frames.clear();
 
     action_parameters.clear();
-
-    if(frev)
-        delete frev;
-    frev = 0;
 }
 
 void ACAudioStkEngineRendererPlugin::justReadFrames(long int mediaId, int nFrames){
@@ -195,6 +196,7 @@ void ACAudioStkEngineRendererPlugin::justReadFrames(long int mediaId, int nFrame
 void ACAudioStkEngineRendererPlugin::removeInput(long int mediaId){
     if(inputs.find(mediaId) != inputs.end()){
         current_frames[mediaId] = 0;
+        //delete inputs[mediaId];
         inputs.erase(mediaId);
         if(frames[mediaId])
             delete frames[mediaId];
@@ -206,6 +208,7 @@ void ACAudioStkEngineRendererPlugin::removeInput(long int mediaId){
     }
     if(loops.find(mediaId) != loops.end()){
         current_frames[mediaId] = 0;
+        //delete loops[mediaId];
         loops.erase(mediaId);
         if(frames[mediaId])
             delete frames[mediaId];
@@ -215,10 +218,21 @@ void ACAudioStkEngineRendererPlugin::removeInput(long int mediaId){
             media_cycle->getBrowser()->toggleSourceActivity(mediaId,0);
     }
     if(grains.find(mediaId) != grains.end()){
+        //delete grains[mediaId];
         grains.erase(mediaId);
         std::cout << "ACAudioStkEngineRendererPlugin::removeInput: stop granularizing media " << mediaId << std::endl;
         if(media_cycle)
             media_cycle->getBrowser()->toggleSourceActivity(mediaId,0);
+    }
+    if(frevs.find(mediaId) != frevs.end()){
+        //delete frevs[mediaId];
+        frevs.erase(mediaId);
+    }
+    if(gains.find(mediaId) != gains.end()){
+        gains.erase(mediaId);
+    }
+    if(pans.find(mediaId) != pans.end()){
+        pans.erase(mediaId);
     }
 }
 
@@ -228,7 +242,11 @@ int tick( void *outputBuffer, void *inputBuffer, unsigned int nBufferFrames,
     std::map <long int, ACAudioStkFileWvIn*> inputs = ((ACAudioStkEngineRendererPlugin *) userData)->inputs;
     std::map <long int, ACAudioStkFileLoop*> loops = ((ACAudioStkEngineRendererPlugin *) userData)->loops;
     std::map <long int, ACAudioStkGranulate*> grains = ((ACAudioStkEngineRendererPlugin *) userData)->grains;
-    stk::FreeVerb* frev = ((ACAudioStkEngineRendererPlugin *) userData)->frev;
+    std::map <long int, stk::FreeVerb*> frevs = ((ACAudioStkEngineRendererPlugin *) userData)->frevs;
+    std::map< long int, stk::StkFloat> gains = ((ACAudioStkEngineRendererPlugin *) userData)->gains;
+    std::map< long int, stk::StkFloat> pans = ((ACAudioStkEngineRendererPlugin *) userData)->pans;
+    StkFloat master_volume = ((ACAudioStkEngineRendererPlugin *) userData)->master_volume;
+
     register StkFloat *samples = (StkFloat *) outputBuffer;
     //if(outputBuffer == 0){
     //    std::cerr << "ACAudioStkEngineRenderer: output buffer not available" << std::endl;
@@ -290,8 +308,17 @@ int tick( void *outputBuffer, void *inputBuffer, unsigned int nBufferFrames,
                     grain->second->tick();
                     if(lastFrames[grain->first]){
                         unsigned int nChannels = lastFrames[grain->first]->channels();
-                        for ( unsigned int c=0; c<outputChannels; c++ ){
-                            frame[c] += (*(lastFrames[grain->first]))[c%nChannels];
+                        if(frevs.find(grain->first) != frevs.end()){
+                            for ( unsigned int c=0; c<outputChannels; c++ ){
+                                StkFloat pan = 0.5f*(1 + (c==0?-1:1)* pans[grain->first]);
+                                frame[c] += frevs[grain->first]->tick(  (*(lastFrames[grain->first]))[c%nChannels] ) * gains[grain->first] * pan;
+                            }
+                        }
+                        else{
+                            for ( unsigned int c=0; c<outputChannels; c++ ){
+                                StkFloat pan = 0.5f*(1 + (c==0?-1:1)* pans[grain->first]);
+                                frame[c] += (*(lastFrames[grain->first]))[c%nChannels]  * gains[grain->first] * pan;
+                            }
                         }
                     }
                 }
@@ -300,8 +327,17 @@ int tick( void *outputBuffer, void *inputBuffer, unsigned int nBufferFrames,
             for(std::map <long int, ACAudioStkFileWvIn*>::iterator input = inputs.begin(); input != inputs.end(); input++){
                 if( ((ACAudioStkEngineRendererPlugin *) userData)->frames[input->first]!=0 && ((ACAudioStkEngineRendererPlugin *) userData)->frames[input->first]->size()>i){
                     int fileChannels = input->second->channelsOut();
-                    for ( unsigned int c=0; c<outputChannels; c++ ){
-                        frame[c] += (*((ACAudioStkEngineRendererPlugin *) userData)->frames[input->first])[i*fileChannels+(c%fileChannels)];
+                    if(frevs.find(input->first) != frevs.end()){
+                        for ( unsigned int c=0; c<outputChannels; c++ ){
+                            StkFloat pan = 0.5f*(1 + (c==0?-1:1)* pans[input->first]);
+                            frame[c] += frevs[input->first]->tick( (*((ACAudioStkEngineRendererPlugin *) userData)->frames[input->first])[i*fileChannels+(c%fileChannels)] ) * gains[input->first] * pan;
+                        }
+                    }
+                    else{
+                        for ( unsigned int c=0; c<outputChannels; c++ ){
+                            StkFloat pan = 0.5f*(1 + (c==0?-1:1)* pans[input->first]);
+                            frame[c] += (*((ACAudioStkEngineRendererPlugin *) userData)->frames[input->first])[i*fileChannels+(c%fileChannels)] * gains[input->first] * pan;
+                        }
                     }
                     count++;
                 }
@@ -309,14 +345,24 @@ int tick( void *outputBuffer, void *inputBuffer, unsigned int nBufferFrames,
             for(std::map <long int, ACAudioStkFileLoop*>::iterator loop = loops.begin(); loop != loops.end(); loop++){
                 if( ((ACAudioStkEngineRendererPlugin *) userData)->frames[loop->first]!=0 && ((ACAudioStkEngineRendererPlugin *) userData)->frames[loop->first]->size()>i){
                     int fileChannels = loop->second->channelsOut();
-                    for ( unsigned int c=0; c<outputChannels; c++ ){
-                        frame[c] += (*((ACAudioStkEngineRendererPlugin *) userData)->frames[loop->first])[i*fileChannels+(c%fileChannels)];
+                    if(frevs.find(loop->first) != frevs.end()){
+                        for ( unsigned int c=0; c<outputChannels; c++ ){
+                            StkFloat pan = 0.5f*(1 + (c==0?-1:1)* pans[loop->first]);
+                            frame[c] += frevs[loop->first]->tick( (*((ACAudioStkEngineRendererPlugin *) userData)->frames[loop->first])[i*fileChannels+(c%fileChannels)] ) * gains[loop->first] * pan;
+                        }
                     }
+                    else{
+                        for ( unsigned int c=0; c<outputChannels; c++ ){
+                            StkFloat pan = 0.5f*(1 + (c==0?-1:1)* pans[loop->first]);
+                            frame[c] += (*((ACAudioStkEngineRendererPlugin *) userData)->frames[loop->first])[i*fileChannels+(c%fileChannels)] * gains[loop->first] * pan;
+                        }
+                    }
+
                     count++;
                 }
             }
             for ( unsigned int c=0; c<outputChannels; c++ ){
-                *samples++ = frev->tick(frame[c]); // / count;
+                *samples++ = frame[c] * master_volume; // / count;
             }
         }
     }
@@ -345,31 +391,41 @@ void ACAudioStkEngineRendererPlugin::muteAll(){
     for(std::map <long int, ACAudioStkFileWvIn*>::iterator input = inputs.begin(); input != inputs.end(); input++){
         if(media_cycle)
             media_cycle->getBrowser()->toggleSourceActivity(input->first,0);
+        //delete input->second;
         inputs.erase(input->first);
     }
     inputs.clear();
     for(std::map <long int, ACAudioStkFileLoop*>::iterator loop = loops.begin(); loop != loops.end(); loop++){
         if(media_cycle)
             media_cycle->getBrowser()->toggleSourceActivity(loop->first,0);
+        //delete loop->second;
         loops.erase(loop->first);
     }
     loops.clear();
     for(std::map <long int, ACAudioStkGranulate*>::iterator grain = grains.begin(); grain != grains.end(); grain++){
         if(media_cycle)
             media_cycle->getBrowser()->toggleSourceActivity(grain->first,0);
+        //delete grain->second;
         grains.erase(grain->first);
     }
     grains.clear();
     current_frames.clear();
     if(media_cycle)
         media_cycle->muteAllSources();
+    gains.clear();
+    pans.clear();
+    for(std::map <long int, stk::FreeVerb*>::iterator frev = frevs.begin(); frev != frevs.end(); frev++){
+        //delete frev->second;
+        frevs.erase(frev->first);
+    }
+    frevs.clear();
 }
 
-void ACAudioStkEngineRendererPlugin::updateVolume(){
-    //this->getNumberParameterValue("Volume")/100.0f );
+void ACAudioStkEngineRendererPlugin::updateMasterVolume(){
+    this->master_volume = this->getNumberParameterValue("Master Volume");
 }
 
-void ACAudioStkEngineRendererPlugin::updateRate(){
+void ACAudioStkEngineRendererPlugin::updatePlaybackSpeed(){
     float rate = this->getNumberParameterValue("Playback Speed");
     for(std::map <long int, ACAudioStkFileWvIn*>::iterator input = inputs.begin(); input != inputs.end(); input++){
         if(input->second)
@@ -422,27 +478,49 @@ void ACAudioStkEngineRendererPlugin::updateGrainParameters(){
 
 void ACAudioStkEngineRendererPlugin::updateReverbDamping(){
     float damping = this->getNumberParameterValue("Reverb Damping");
-    frev->setDamping( damping );
+    for(std::map <long int, stk::FreeVerb*>::iterator frev = frevs.begin(); frev != frevs.end(); frev++)
+        if(frev->second)
+            frev->second->setDamping( damping );
 }
 
 void ACAudioStkEngineRendererPlugin::updateReverbRoomSize(){
     float size = this->getNumberParameterValue("Reverb Room Size");
-    frev->setRoomSize( size );
+    for(std::map <long int, stk::FreeVerb*>::iterator frev = frevs.begin(); frev != frevs.end(); frev++)
+        if(frev->second)
+            frev->second->setRoomSize( size );
 }
 
 void ACAudioStkEngineRendererPlugin::updateReverbEffectMix(){
     float mix = this->getNumberParameterValue("Reverb Mix");
-    frev->setEffectMix( mix );
+    for(std::map <long int, stk::FreeVerb*>::iterator frev = frevs.begin(); frev != frevs.end(); frev++)
+        if(frev->second)
+            frev->second->setEffectMix( mix );
 }
 
 void ACAudioStkEngineRendererPlugin::updateReverbFreeze(){
     bool freeze = this->getNumberParameterValue("Reverb Freeze");
-    frev->setMode( freeze );
+    for(std::map <long int, stk::FreeVerb*>::iterator frev = frevs.begin(); frev != frevs.end(); frev++)
+        if(frev->second)
+            frev->second->setMode( freeze );
 }
 
 void ACAudioStkEngineRendererPlugin::updateReverbPan(){
     float pan = this->getNumberParameterValue("Reverb Pan");
-    frev->setWidth( pan );
+    for(std::map <long int, stk::FreeVerb*>::iterator frev = frevs.begin(); frev != frevs.end(); frev++)
+        if(frev->second)
+            frev->second->setWidth( pan );
+}
+
+void ACAudioStkEngineRendererPlugin::updatePlaybackPan(){
+    float value = this->getNumberParameterValue("Playback Pan");
+    for(std::map <long int, stk::StkFloat>::iterator pan = pans.begin(); pan != pans.end(); pan++)
+        pan->second = value;
+}
+
+void ACAudioStkEngineRendererPlugin::updatePlaybackVolume(){
+    float value = this->getNumberParameterValue("Playback Volume");
+    for(std::map <long int, stk::StkFloat>::iterator gain = gains.begin(); gain != gains.end(); gain++)
+        gain->second = value;
 }
 
 std::map<std::string,ACMediaType> ACAudioStkEngineRendererPlugin::getSupportedExtensions(ACMediaType media_type){
@@ -470,12 +548,24 @@ bool ACAudioStkEngineRendererPlugin::performActionOnMedia(std::string action, lo
         std::cerr << "ACAudioStkEngineRendererPlugin::performActionOnMedia: media id " << mediaId << " not available" << std::endl;
         return false;
     }
+    bool allMedia = (mediaId == -2);
 
     if(action == "loop" || action == "play" || action == "granulate"){
+        if(allMedia) // not playing all media, crash prone
+            return false;
         std::string filename = media_cycle->getMediaFileName(mediaId);
+        if(filename == "")
+            return false;
         int channels = 0;
         // Try to load the soundfile.
         if(action == "play"){
+
+            std::map <long int, ACAudioStkFileWvIn*>::iterator _input = inputs.find(mediaId);
+            if(_input != inputs.end()){
+                std::cerr << "ACAudioStkEngineRendererPlugin::performActionOnMedia: already playing media " << mediaId << " file " << filename << std::endl;
+                return false;
+            }
+
             ACAudioStkFileWvIn* input = 0;
             try {
                 input = new ACAudioStkFileWvIn();
@@ -498,8 +588,17 @@ bool ACAudioStkEngineRendererPlugin::performActionOnMedia(std::string action, lo
             std::cout << "ACAudioStkEngineRendererPlugin::performActionOnMedia: play: file has " << input->channelsOut() << " channels " << std::endl;
 
             inputs[mediaId] = input;
+            ACMediaNode* node = media_cycle->getMediaNode(mediaId);
+            if(node)
+                node->setActivity(1);
         }
         else if(action == "loop"){
+
+            std::map <long int, ACAudioStkFileLoop*>::iterator _loop = loops.find(mediaId);
+            if(_loop != loops.end()){
+                std::cerr << "ACAudioStkEngineRendererPlugin::performActionOnMedia: already looping media " << mediaId << " file " << filename << std::endl;
+                return false;
+            }
 
             ACAudioStkFileLoop* input = 0;
             try {
@@ -521,8 +620,16 @@ bool ACAudioStkEngineRendererPlugin::performActionOnMedia(std::string action, lo
             channels = input->channelsOut();
 
             loops[mediaId] = input;
+            ACMediaNode* node = media_cycle->getMediaNode(mediaId);
+            if(node)
+                node->setActivity(1);
         }
         else if(action == "granulate"){
+            std::map <long int, ACAudioStkGranulate*>::iterator _grain = grains.find(mediaId);
+            if(_grain != grains.end()){
+                std::cerr << "ACAudioStkEngineRendererPlugin::performActionOnMedia: already granulating media " << mediaId << " file " << filename << std::endl;
+                return false;
+            }
             ACAudioStkGranulate* grain = 0;
             try {
                 grain = new ACAudioStkGranulate();
@@ -541,7 +648,22 @@ bool ACAudioStkEngineRendererPlugin::performActionOnMedia(std::string action, lo
                 return false;
             }
             grains[mediaId] = grain;
+            ACMediaNode* node = media_cycle->getMediaNode(mediaId);
+            if(node)
+                node->setActivity(1);
         }
+
+        stk::FreeVerb* frev = 0;
+        try {
+            frev = new stk::FreeVerb();
+            frev->setEffectMix( this->getNumberParameterValue("Reverb Mix"));
+        }catch ( StkError & ) {
+            std::cerr << "ACAudioStkEngineRendererPlugin::performActionOnMedia: couldn't create reverb for media " << mediaId << " file " << filename << ", bypassing." << std::endl;
+        }
+        if(frev)
+            frevs[mediaId] = frev;
+        gains[mediaId] = 1.0f;
+        pans[mediaId] = 0.0f;
 
         //done = false;
 
@@ -608,32 +730,13 @@ bool ACAudioStkEngineRendererPlugin::performActionOnMedia(std::string action, lo
         return true;
     }
     else if(action == "mute"){
-        std::map <long int, ACAudioStkFileWvIn*>::iterator input = inputs.find(mediaId);
-        if(input != inputs.end()){
-            media_cycle->getBrowser()->toggleSourceActivity(input->first,0);
-            inputs.erase(input->first);
-            //return true;
-        }
-
-        std::map <long int, ACAudioStkFileLoop*>::iterator loop = loops.find(mediaId);
-        if(loop != loops.end()){
-            media_cycle->getBrowser()->toggleSourceActivity(loop->first,0);
-            loops.erase(loop->first);
-        }
-
-        std::map <long int, ACAudioStkGranulate*>::iterator grain = grains.find(mediaId);
-        if(grain != grains.end()){
-            media_cycle->getBrowser()->toggleSourceActivity(grain->first,0);
-            grains.erase(grain->first);
-        }
-
-        std::map< long int, int>::iterator current_frame = current_frames.find(mediaId);
-        if(current_frame != current_frames.end()){
-            media_cycle->getBrowser()->toggleSourceActivity(current_frame->first,0);
-            current_frames.erase(current_frame->first);
-        }
+        if(allMedia)
+            this->muteAll();
+        else
+            this->muteMedia(mediaId);
+        return true;
     }
-    else if(action == "playback speed"){
+    else if (action.find("playback", 0) != string::npos){
         if(arguments.size() !=1){
             std::cerr << "ACAudioStkEngineRendererPlugin::performActionOnMedia: couldn't convert parameter to float for action " << action << " , aborting..."<< std::endl;
             return false;
@@ -646,17 +749,62 @@ bool ACAudioStkEngineRendererPlugin::performActionOnMedia(std::string action, lo
             std::cerr << "ACAudioStkEngineRendererPlugin::performActionOnMedia: couldn't convert to float, aborting..."<< std::endl;
             return false;
         }
-        std::cout << "ACAudioStkEngineRendererPlugin::performActionOnMedia: action " << action << " rate " << new_value << std::endl;
-        std::map <long int, ACAudioStkFileWvIn*>::iterator input = inputs.find(mediaId);
-        if(input != inputs.end()){
-            float old_value = input->second->getRate();
-            input->second->setRate(new_value);
+
+        std::cout << "ACAudioStkEngineRendererPlugin::performActionOnMedia: action " << action << " value " << new_value << std::endl;
+
+        if(action == "playback speed"){
+            //float old_value = player->getRate();
+            std::map <long int, ACAudioStkFileWvIn*>::iterator input = inputs.find(mediaId);
+            if(input != inputs.end()){
+                //float old_value = input->second->getRate();
+                input->second->setRate(new_value);
+                return true;
+            }
+            std::map <long int, ACAudioStkFileLoop*>::iterator loop = loops.find(mediaId);
+            if(loop != loops.end()){
+                //float old_value = loop->second->getRate();
+                loop->second->setRate(new_value);
+                return true;
+            }
+            return false;
         }
-        std::map <long int, ACAudioStkFileLoop*>::iterator loop = loops.find(mediaId);
-        if(loop != loops.end()){
-            float old_value = loop->second->getRate();
-            loop->second->setRate(new_value);
+        else if(action == "playback volume"){
+            std::map <long int, StkFloat>::iterator gain = gains.find(mediaId);
+            if(gain != gains.end()){
+                gain->second = new_value;
+                return true;
+            }
+            return false;
         }
+        else if(action == "playback pan"){
+            std::map <long int, StkFloat>::iterator pan = pans.find(mediaId);
+            if(pan != pans.end()){
+                pan->second = new_value;
+                return true;
+            }
+            return false;
+        }
+        return false;
+    }
+    else if(action == "master volume"){
+        if(arguments.size() !=1){
+            std::cerr << "ACAudioStkEngineRendererPlugin::performActionOnMedia: couldn't convert parameter to float for action " << action << " , aborting..."<< std::endl;
+            return false;
+        }
+        float new_value = 0.0f;
+        try{
+            new_value = boost::any_cast<float>(arguments[0]);
+        }
+        catch(const boost::bad_any_cast &){
+            std::cerr << "ACAudioStkEngineRendererPlugin::performActionOnMedia: couldn't convert to float, aborting..."<< std::endl;
+            return false;
+        }
+        if(new_value > 1.0f)
+            new_value = 1.0f;
+        if(new_value < 0.0f)
+            new_value = 0.0f;
+        this->setNumberParameterValue("Master Volume",new_value);
+        master_volume = new_value;
     }
     else if (action.find("grain", 0) != string::npos){
         std::map <long int, ACAudioStkGranulate*>::iterator grain = grains.find(mediaId);
@@ -675,36 +823,62 @@ bool ACAudioStkEngineRendererPlugin::performActionOnMedia(std::string action, lo
             }
 
             if(action == "grain voices"){
-                float old_value = grain->second->getVoices();
+                //float old_value = grain->second->getVoices();
                 grain->second->setVoices(new_value);
             }
             else if(action == "grain randomness"){
-                float old_value = grain->second->getRandomFactor();
+                //float old_value = grain->second->getRandomFactor();
                 grain->second->setRandomFactor(new_value);
             }
             else if(action == "grain stretch"){
-                float old_value = grain->second->getStretch();
+                //float old_value = grain->second->getStretch();
                 grain->second->setStretch(new_value);
             }
             else if(action == "grain duration"){
-                float old_value = grain->second->getDuration();
+                //float old_value = grain->second->getDuration();
                 grain->second->setDuration(new_value);
             }
             else if(action == "grain ramp"){
-                float old_value = grain->second->getRampPercent();
+                //float old_value = grain->second->getRampPercent();
                 grain->second->setRampPercent(new_value);
             }
             else if(action == "grain offset"){
-                float old_value = grain->second->getOffset();
+                //float old_value = grain->second->getOffset();
                 grain->second->setOffset(new_value);
             }
             else if(action == "grain delay"){
-                float old_value = grain->second->getDelay();
+                //float old_value = grain->second->getDelay();
                 grain->second->setDelay(new_value);
             }
         }
     }
     return false;
+}
+
+void ACAudioStkEngineRendererPlugin::muteMedia(int mediaId){
+    std::map <long int, ACAudioStkFileWvIn*>::iterator input = inputs.find(mediaId);
+    if(input != inputs.end()){
+        media_cycle->getBrowser()->toggleSourceActivity(input->first,0);
+        inputs.erase(input->first);
+    }
+
+    std::map <long int, ACAudioStkFileLoop*>::iterator loop = loops.find(mediaId);
+    if(loop != loops.end()){
+        media_cycle->getBrowser()->toggleSourceActivity(loop->first,0);
+        loops.erase(loop->first);
+    }
+
+    std::map <long int, ACAudioStkGranulate*>::iterator grain = grains.find(mediaId);
+    if(grain != grains.end()){
+        media_cycle->getBrowser()->toggleSourceActivity(grain->first,0);
+        grains.erase(grain->first);
+    }
+
+    std::map< long int, int>::iterator current_frame = current_frames.find(mediaId);
+    if(current_frame != current_frames.end()){
+        media_cycle->getBrowser()->toggleSourceActivity(current_frame->first,0);
+        current_frames.erase(current_frame->first);
+    }
 }
 
 std::map<std::string,ACMediaType> ACAudioStkEngineRendererPlugin::availableMediaActions(){
@@ -714,7 +888,10 @@ std::map<std::string,ACMediaType> ACAudioStkEngineRendererPlugin::availableMedia
     media_actions["granulate"] = MEDIA_TYPE_AUDIO;
     media_actions["mute"] = MEDIA_TYPE_AUDIO;
     media_actions["mute all"] = MEDIA_TYPE_AUDIO;
+    media_actions["master volume"] = MEDIA_TYPE_AUDIO;
     media_actions["playback speed"] = MEDIA_TYPE_AUDIO;
+    media_actions["playback volume"] = MEDIA_TYPE_AUDIO;
+    media_actions["playback pan"] = MEDIA_TYPE_AUDIO;
     media_actions["grain voices"] = MEDIA_TYPE_AUDIO;
     media_actions["grain randomness"] = MEDIA_TYPE_AUDIO;
     media_actions["grain stretch"] = MEDIA_TYPE_AUDIO;
