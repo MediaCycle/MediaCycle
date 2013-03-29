@@ -121,7 +121,7 @@ ADD_DEPENDENCIES(${TARGET_NAME} mediacycle-osg-qt)
 TARGET_LINK_LIBRARIES(${TARGET_NAME} mediacycle mediacycle-osg mediacycle-osg-qt)
 
 IF(USE_OSC)
-        TARGET_LINK_LIBRARIES(${TARGET_NAME} mediacycle-io-osc mediacycle-io-osc-qt)
+        TARGET_LINK_LIBRARIES(${TARGET_NAME} mediacycle-io-osc)
 ENDIF()
 
 foreach(PLUGIN ${MC_PLUGINS})
