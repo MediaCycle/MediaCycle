@@ -63,7 +63,7 @@ void ACPluginControlsWidgetQt::on_comboBoxPlugins_activated(const QString & text
     std::cout << "Chosen plugin: " << text.toStdString() << std::endl;
     //std::cout << "Media type " << ACMediaFactory::getInstance().getNormalCaseStringFromMediaType(media_cycle->getMediaType()) << std::endl;
     if (media_cycle == 0)
-    if (media_cycle->getPluginManager() == 0) return;
+        if (media_cycle->getPluginManager() == 0) return;
     std::string pluginName = text.toStdString();
     if(pluginName != "None")
         media_cycle->changeActivePlugin(this->pluginType,pluginName);
@@ -183,11 +183,11 @@ void ACPluginControlsWidgetQt::buildPluginList()
                 || plugin->implementsPluginType(PLUGIN_TYPE_CLUSTERS_POSITIONS)
                 || plugin->implementsPluginType(PLUGIN_TYPE_NEIGHBORS_METHOD)
                 || plugin->implementsPluginType(PLUGIN_TYPE_NEIGHBORS_POSITIONS)
-           ){
-           comboBoxPlugins->addItem(plugin_name);
-           count++;
-           if(plugin_name.toStdString() == current_plugin_name)
-               index=count;
+                ){
+            comboBoxPlugins->addItem(plugin_name);
+            count++;
+            if(plugin_name.toStdString() == current_plugin_name)
+                index=count;
         }
 
         if(plugin_name.toStdString() == current_plugin_name && plugin->getParametersCount()>0){
@@ -205,6 +205,68 @@ void ACPluginControlsWidgetQt::buildPluginList()
             int paramIdx = 0;
 
             std::vector<std::string> callbacksNames = plugin->getCallbacksNames();
+            std::vector<std::string> strParamNames = plugin->getStringParametersNames();
+            std::vector<std::string> numParamNames = plugin->getNumberParametersNames();
+
+            // Check if parameters contain repeated first words
+            std::map<std::string,std::string> parameter_word;
+            std::map<std::string,int> word_count;
+            std::map<std::string,int> widget_count;
+            for(std::vector<std::string>::iterator callbackName=callbacksNames.begin();callbackName!=callbacksNames.end();callbackName++){
+                std::string word(*callbackName);
+                size_t space = word.find_first_of(" ");
+                if(space != string::npos){
+                    word = word.substr(0,space);
+                    parameter_word[*callbackName] = word;
+                }
+            }
+            for(std::vector<std::string>::iterator strParamName=strParamNames.begin();strParamName!=strParamNames.end();strParamName++){
+                std::string word(*strParamName);
+                size_t space = word.find_first_of(" ");
+                if(space != string::npos){
+                    word = word.substr(0,space);
+                    parameter_word[*strParamName] = word;
+                }
+            }
+            for(std::vector<std::string>::iterator numParamName=numParamNames.begin();numParamName!=numParamNames.end();numParamName++){
+                std::string word(*numParamName);
+                size_t space = word.find_first_of(" ");
+                if(space != string::npos){
+                    word = word.substr(0,space);
+                    parameter_word[*numParamName] = word;
+                }
+            }
+            for(std::map<std::string,std::string>::iterator word = parameter_word.begin();word != parameter_word.end();word++){
+                std::map<std::string,int>::iterator count = word_count.find(word->second);
+                if(count==word_count.end()){
+                    word_count[word->second]=0;
+                }
+                word_count[word->second] += 1;
+                widget_count[word->second] = 0;
+            }
+            // Create a tab for each first word repeated at least twice, to group parameters
+            QTabWidget* tabWidget = 0;
+            std::map<std::string,int> tab_index;
+            int _count = 0;
+            for(std::map<std::string,int>::iterator count = word_count.begin();count != word_count.end();count++){
+                if(count->second > 1){
+                    if(!tabWidget){
+                        tabWidget = new QTabWidget();
+                        tabWidget->setFont(font);
+                        //connect(tabWidget,SIGNAL(currentChanged(int)),this,SLOT(adjustHeight()));
+                    }
+                    QGridLayout* _layout = new QGridLayout();
+                    _layout->setMargin(0);
+                    _layout->setHorizontalSpacing(1);
+                    _layout->setVerticalSpacing(5);
+                    QWidget* _widget = new QWidget();
+                    _widget->setLayout(_layout);
+                    tabWidget->addTab(_widget,QString(count->first.c_str()));
+                    tab_index[count->first]=_count++;
+                    //std::cout << "ACPluginControlsWidgetQt::buildPluginList: plugin '" << current_plugin_name << "' has a parameter group '" << count->first << "' with " << count->second << " elements" << std::endl;
+                }
+            }
+
             //std::cout << "Number of callbacks " << clbParamNames.size() << std::endl;
             for(std::vector<std::string>::iterator callbackName=callbacksNames.begin();callbackName!=callbacksNames.end();callbackName++){
                 QString name = QString((*callbackName).c_str());
@@ -212,17 +274,21 @@ void ACPluginControlsWidgetQt::buildPluginList()
 
                 QPushButton* callbackButton = new QPushButton(name);
                 callbackButton->setFont(font);
-                layout->addWidget(callbackButton,paramIdx,0);
+
+                if(tabWidget && word_count[parameter_word[*callbackName]] > 1){
+                    dynamic_cast<QGridLayout*>(tabWidget->widget(tab_index[parameter_word[*callbackName]])->layout())->addWidget(callbackButton,widget_count[parameter_word[*callbackName]],0);
+                    widget_count[parameter_word[*callbackName]] += 1;
+                }
+                else{
+                    layout->addWidget(callbackButton,paramIdx++,0);
+                    callbackButton->adjustSize();
+                    minHeight += callbackButton->height();
+                }
 
                 ACPluginParameterQt* callbackParameter = new ACPluginParameterQt(plugin,name);
-
                 connect(callbackButton,SIGNAL(clicked()),callbackParameter,SLOT(triggerCallback()));
-                callbackButton->adjustSize();
-                minHeight += callbackButton->height();
-                paramIdx++;
             }
 
-            std::vector<std::string> strParamNames = plugin->getStringParametersNames();
             //std::cout << "Number of string parameters " << strParamNames.size() << std::endl;
             for(std::vector<std::string>::iterator strParamName=strParamNames.begin();strParamName!=strParamNames.end();strParamName++){
                 //std::cout << "String parameter: " << (*strParamName) << std::endl;//" = " << (*strParamName).name << std::endl;
@@ -233,7 +299,6 @@ void ACPluginControlsWidgetQt::buildPluginList()
 
                 QLabel* label = new QLabel(name);
                 label->setFont(font);
-                layout->addWidget(label,paramIdx,0);
 
                 ACPluginParameterQt* stringParameter = new ACPluginParameterQt(plugin,name);
 
@@ -244,29 +309,48 @@ void ACPluginControlsWidgetQt::buildPluginList()
                     }
                     combobox->setCurrentIndex( plugin->getStringParameterValueIndex(*strParamName) );
                     combobox->setFont(font);
-                    layout->addWidget(combobox,paramIdx,1);
+
+
+                    if(tabWidget && word_count[parameter_word[*strParamName]] > 1){
+                        dynamic_cast<QGridLayout*>(tabWidget->widget(tab_index[parameter_word[*strParamName]])->layout())->addWidget(label,widget_count[parameter_word[*strParamName]],0);
+                        dynamic_cast<QGridLayout*>(tabWidget->widget(tab_index[parameter_word[*strParamName]])->layout())->addWidget(combobox,widget_count[parameter_word[*strParamName]],1,1,2);
+                        widget_count[parameter_word[*strParamName]] += 1;
+                    }
+                    else{
+                        layout->addWidget(label,paramIdx,0);
+                        layout->addWidget(combobox,paramIdx++,1,1,2);
+                        combobox->adjustSize();
+                        minHeight += combobox->height();
+                    }
 
                     connect(combobox,SIGNAL(currentIndexChanged(QString)),stringParameter,SLOT(updateStringParameter(QString)) );
                     connect(pushbutton,SIGNAL(clicked()),stringParameter,SLOT(resetStringParameter()));
                     connect(stringParameter,SIGNAL(stringParameterIndexChanged(int)),combobox,SLOT(setCurrentIndex(int)));
-                    combobox->adjustSize();
-                    minHeight += combobox->height();
+
                 }
                 else{
                     QLineEdit* lineedit = new QLineEdit();
                     lineedit->setText( QString( plugin->getStringParameterInit(*strParamName).c_str()) );
                     lineedit->setFont(font);
-                    layout->addWidget(lineedit,paramIdx,1);
+
+                    if(tabWidget && word_count[parameter_word[*strParamName]] > 1){
+                        dynamic_cast<QGridLayout*>(tabWidget->widget(tab_index[parameter_word[*strParamName]])->layout())->addWidget(label,widget_count[parameter_word[*strParamName]],0);
+                        dynamic_cast<QGridLayout*>(tabWidget->widget(tab_index[parameter_word[*strParamName]])->layout())->addWidget(lineedit,widget_count[parameter_word[*strParamName]],1,1,2);
+                        widget_count[parameter_word[*strParamName]] += 1;
+                    }
+                    else{
+                        layout->addWidget(label,paramIdx,0);
+                        layout->addWidget(lineedit,paramIdx++,1,1,2);
+                        lineedit->adjustSize();
+                        minHeight += lineedit->height();
+                    }
 
                     connect(lineedit,SIGNAL( textChanged(QString)),stringParameter,SLOT(updateStringParameter(QString)) );
                     connect(pushbutton,SIGNAL(clicked()),stringParameter,SLOT(resetStringParameter()));
-                    lineedit->adjustSize();
-                    minHeight += lineedit->height();
+
                 }
-                paramIdx++;
             }
 
-            std::vector<std::string> numParamNames = plugin->getNumberParametersNames();
             //std::cout << "Number of number parameters " << numParamNames.size() << std::endl;
             for(std::vector<std::string>::iterator numParamName=numParamNames.begin();numParamName!=numParamNames.end();numParamName++){
                 //std::cout << "Number parameter: " << (*numParamName) << std::endl;//" = " << (*strParamName).name << std::endl;
@@ -285,23 +369,31 @@ void ACPluginControlsWidgetQt::buildPluginList()
 
                     QLabel* label = new QLabel(name);
                     label->setFont(font);
-                    layout->addWidget( label,paramIdx,0);
 
                     QCheckBox* checkbox = new QCheckBox("");
                     checkbox->setChecked((bool)init);
-                    layout->addWidget( checkbox,paramIdx,1);
+
+                    if(tabWidget && word_count[parameter_word[*numParamName]] > 1){
+                        dynamic_cast<QGridLayout*>(tabWidget->widget(tab_index[parameter_word[*numParamName]])->layout())->addWidget(label,widget_count[parameter_word[*numParamName]],0);
+                        dynamic_cast<QGridLayout*>(tabWidget->widget(tab_index[parameter_word[*numParamName]])->layout())->addWidget(checkbox,widget_count[parameter_word[*numParamName]],1);
+                        widget_count[parameter_word[*numParamName]] += 1;
+                    }
+                    else{
+                        layout->addWidget( label,paramIdx,0);
+                        layout->addWidget( checkbox,paramIdx++,1);
+                        checkbox->adjustSize();
+                        minHeight += checkbox->height();
+                    }
 
                     connect(checkbox,SIGNAL(toggled(bool)),numberParameter,SLOT(updateNumberParameter(bool)));
                     connect(numberParameter,SIGNAL(numberParameterChanged(bool)),checkbox,SLOT(setChecked(bool)));
-                    checkbox->adjustSize();
-                    minHeight += checkbox->height();
 
                     /*QPushButton* callbackButton = new QPushButton(name);
                     callbackButton->setCheckable(true);
                     if(init == 1)
                         callbackButton->setChecked(true);
                     callbackButton->setFont(font);
-                    layout->addWidget(callbackButton,paramIdx,0);
+                    layout->addWidget(callbackButton,paramIdx++,0);
 
                     ACPluginParameterQt* callbackParameter = new ACPluginParameterQt(plugin,name);
 
@@ -313,7 +405,6 @@ void ACPluginControlsWidgetQt::buildPluginList()
 
                     QLabel* label = new QLabel(name);
                     label->setFont(font);
-                    layout->addWidget( label,paramIdx,0);
 
                     QwtSlider* slider = new QwtSlider(0);
 #if QWT_VERSION > 0x060000
@@ -348,7 +439,6 @@ void ACPluginControlsWidgetQt::buildPluginList()
 
                     slider->setToolTip(desc);
                     slider->setAccessibleDescription(desc);
-                    layout->addWidget( slider,paramIdx,1);
 
                     QDoubleSpinBox* spinbox = new QDoubleSpinBox();
                     spinbox->setSingleStep(step);
@@ -360,18 +450,35 @@ void ACPluginControlsWidgetQt::buildPluginList()
                     spinbox->setToolTip(desc);
                     spinbox->setFont(font);
                     spinbox->setAccessibleDescription(desc);
-                    layout->addWidget( spinbox,paramIdx,2);
+
+                    if(tabWidget && word_count[parameter_word[*numParamName]] > 1){
+                        dynamic_cast<QGridLayout*>(tabWidget->widget(tab_index[parameter_word[*numParamName]])->layout())->addWidget(label,widget_count[parameter_word[*numParamName]],0);
+                        dynamic_cast<QGridLayout*>(tabWidget->widget(tab_index[parameter_word[*numParamName]])->layout())->addWidget(slider,widget_count[parameter_word[*numParamName]],1);
+                        dynamic_cast<QGridLayout*>(tabWidget->widget(tab_index[parameter_word[*numParamName]])->layout())->addWidget(spinbox,widget_count[parameter_word[*numParamName]],2);
+                        widget_count[parameter_word[*numParamName]] += 1;
+                    }
+                    else{
+                        layout->addWidget( label,paramIdx,0);
+                        layout->addWidget( slider,paramIdx,1);
+                        layout->addWidget( spinbox,paramIdx++,2);
+                        spinbox->adjustSize();
+                        minHeight += spinbox->height();
+                    }
 
                     connect(slider,SIGNAL(valueChanged(double)),spinbox,SLOT(setValue(double)));
                     connect(spinbox,SIGNAL(valueChanged(double)),slider,SLOT(setValue(double)));
 
                     connect(slider,SIGNAL(valueChanged(double)),numberParameter,SLOT(updateNumberParameter(double)));
                     connect(numberParameter,SIGNAL(numberParameterChanged(double)),slider,SLOT(setValue(double)));
-                    spinbox->adjustSize();
-                    minHeight += spinbox->height();
-
                 }
-                paramIdx++;
+            }
+
+            if(tabWidget){
+                layout->addWidget(tabWidget, paramIdx++,0,1,3);
+                if(tabWidget->currentWidget())
+                    tabWidget->currentWidget()->adjustSize();
+                tabWidget->adjustSize();
+                minHeight += tabWidget->height();
             }
 
             layout->addWidget(pushbutton, paramIdx,0);

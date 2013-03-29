@@ -54,8 +54,8 @@ ACOscPlugin::ACOscPlugin() : ACClientPlugin(){
     this->addNumberParameter("Browser Port",3333,1,65555,1,"Browser Port",boost::bind(&ACOscPlugin::changeBrowserPort,this));
     this->addStringParameter("Feedback IP","localhost",std::vector<std::string>(),"Feedback IP",boost::bind(&ACOscPlugin::changeFeedbackIP,this));
     this->addNumberParameter("Feedback Port",3334,1,65555,1,"Feedback Port",boost::bind(&ACOscPlugin::changeFeedbackPort,this));
-    this->addNumberParameter("Toggle Browser",0,0,1,1,"Toggle Browser",boost::bind(&ACOscPlugin::toggleBrowser,this));
-    this->addNumberParameter("Toggle Feedback",0,0,1,1,"Toggle Feedback",boost::bind(&ACOscPlugin::toggleFeedback,this));
+    this->addNumberParameter("Browser Status",0,0,1,1,"Toggle Browser",boost::bind(&ACOscPlugin::toggleBrowser,this));
+    this->addNumberParameter("Feedback Status",0,0,1,1,"Toggle Feedback",boost::bind(&ACOscPlugin::toggleFeedback,this));
 }
 
 void ACOscPlugin::changeBrowserIP(){
