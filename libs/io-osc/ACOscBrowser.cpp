@@ -117,20 +117,16 @@ int ACOscBrowser::static_mess_handler(const char *path, const char *types, lo_ar
 int ACOscBrowser::process_mess(const char *path, const char *types, lo_arg **argv, int argc, bool verbose) {
     std::string tag = std::string(path);
     //std::cout << "ACOscBrowser: OSC message: '" << tag << "'" << std::endl;
-    bool ac = (tag.find("/audiocycle", 0) != string::npos);
     bool mc = (tag.find("/mediacycle", 0) != string::npos);
     bool tuio = (tag.find("/tuio", 0) != string::npos);
-    if (!ac && !mc && !tuio)//we don't process messages not containing /audiocycle or /mediacycle or /tuio
+    if (!mc && !tuio)//we don't process messages not containing /mediacycle or /tuio
         return 1;
 
     // test - sends back message (console + OSC feedback) if received properly
     if (tag.find("/test", 0) != string::npos) {
         std::cout << "ACOscBrowser: OSC communication established" << std::endl;
         if (osc_feedback) {
-            if (ac)
-                osc_feedback->messageBegin("/audiocycle/received");
-            else
-                osc_feedback->messageBegin("/mediacycle/received");
+            osc_feedback->messageBegin("/mediacycle/received");
             osc_feedback->messageEnd();
             osc_feedback->messageSend();
             return 1;
@@ -243,10 +239,7 @@ int ACOscBrowser::process_mess(const char *path, const char *types, lo_arg **arg
                     float distance = this->getOsgView()->getBrowserRenderer()->getDistanceMouse()[closest_node];
                     if (osc_feedback)
                     {
-                        if (ac)
-                            osc_feedback->messageBegin("/audiocycle/closest_node_at");
-                        else
-                            osc_feedback->messageBegin("/mediacycle/closest_node_at");
+                        osc_feedback->messageBegin("/mediacycle/closest_node_at");
                         osc_feedback->messageAppendFloat(distance);
                         osc_feedback->messageEnd();
                         osc_feedback->messageSend();
@@ -742,8 +735,6 @@ int ACOscBrowser::process_mess(const char *path, const char *types, lo_arg **arg
             int id = -1;
             std::string app("/mediacycle");
             std::string prefix("");
-            if(ac)
-                app = "/audiocycle";
             //std::string prefix = "/" + media_action->second + "/";
             prefix = app + "/pointer/";
             std::string suffix = "/" + media_action->first;//("/");
