@@ -29,8 +29,10 @@ int main(int argc, char *argv[])
     QApplication::setLibraryPaths(QStringList(QApplication::applicationDirPath() + "/../PlugIns"));
 #endif
 
+#ifndef USE_DEBUG
     BreakpadQt::GlobalHandler::instance()->setDumpPath(QLatin1String("crashes"));
-
+#endif
+	
     MainWindow w;
     w.show();
 
