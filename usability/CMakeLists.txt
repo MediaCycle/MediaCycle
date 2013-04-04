@@ -1,7 +1,7 @@
 #List the files in "usability" and if there are directories, add them to the list of (potential) test programs
  
 MESSAGE("\nUsability testing:")
-SET(FOLDERNAME "tests")
+SET(FOLDERNAME "usability")
 
 FILE(GLOB DIRLIST * )
 
