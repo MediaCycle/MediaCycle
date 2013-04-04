@@ -1014,7 +1014,7 @@ void ACOsgCompositeViewQt::mousePressEvent( QMouseEvent* event )
     }
     //this->propagateEventToActions(event);
     osg_view->getEventQueue()->mouseButtonPress(event->x(), event->y(), button);
-    std::cout << "ACOsgCompositeViewQt::mousePressEvent clicked node " << media_cycle->getClickedNode() << std::endl;
+    //std::cout << "ACOsgCompositeViewQt::mousePressEvent clicked node " << media_cycle->getClickedNode() << std::endl;
     //browser_view->getEventQueue()->mouseButtonPress(event->x(), event->y()-sepy, button);
 
     this->propagateEventToActions(event);
@@ -1094,10 +1094,10 @@ void ACOsgCompositeViewQt::mouseReleaseEvent( QMouseEvent* event )
     }
     this->propagateEventToActions(event);
     osg_view->getEventQueue()->mouseButtonRelease(event->x(), event->y(), button);
-    std::cout << "ACOsgCompositeViewQt::mouseReleaseEvent clicked node " << media_cycle->getClickedNode() << std::endl;
+    //std::cout << "ACOsgCompositeViewQt::mouseReleaseEvent clicked node " << media_cycle->getClickedNode() << std::endl;
     if (media_cycle == 0) return;
     media_cycle->setClickedNode(-1);
-    std::cout << "mouseReleaseEvent clicked node erased " << std::endl;
+    //std::cout << "ACOsgCompositeViewQt::mouseReleaseEvent clicked node erased " << std::endl;
     mousedown = 0;
     borderdown = 0;
     media_cycle->setNeedsDisplay(true);

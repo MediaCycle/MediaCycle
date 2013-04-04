@@ -104,7 +104,7 @@ bool ACInputActionQt::event ( QEvent * _event )
             if(this->key_event_type == QEvent::KeyPress && (this->mouse_event_type == QEvent::None || this->mouse_event_type == QEvent::MouseMove) || this->mouse_event_type == QEvent::None){
                 emit triggered(true);
                 toggle = !toggle;
-                std::cout << "Action " << this->text().toStdString() << " key pressed and mouse pressed" << mouse_pressed << std::endl;
+                //std::cout << "Action " << this->text().toStdString() << " key pressed and mouse pressed" << mouse_pressed << std::endl;
                 emit toggled(toggle);
             }
         }
@@ -122,7 +122,7 @@ bool ACInputActionQt::event ( QEvent * _event )
             //std::cout << "ACInputActionQt KeyRelease" << std::endl;
             key_pressed = false;
             if(this->key_event_type == QEvent::KeyRelease && (this->mouse_event_type == QEvent::None || this->mouse_event_type == QEvent::MouseMove) || this->mouse_event_type == QEvent::None){
-                std::cout << "Action " << this->text().toStdString() << " key released and mouse pressed" << mouse_pressed << std::endl;
+                //std::cout << "Action " << this->text().toStdString() << " key released and mouse pressed" << mouse_pressed << std::endl;
                 emit triggered(false);
                 //emit toggled(false);
             }
@@ -144,7 +144,7 @@ bool ACInputActionQt::event ( QEvent * _event )
         if(this->mouse_event_type == QEvent::MouseButtonPress){
             //std::cout << "ACInputActionQt MouseButtonPress" << std::endl;
             if((this->key_event_type == QEvent::None && !other_key_pressed)|| (this->key_event_type != QEvent::None && key_pressed && !other_key_pressed) ){
-                std::cout << "Action " << this->text().toStdString() << " mouse pressed and key pressed " << key_pressed << std::endl;
+                //std::cout << "Action " << this->text().toStdString() << " mouse pressed and key pressed " << key_pressed << std::endl;
                 emit triggered();
             }
         }
@@ -159,7 +159,7 @@ bool ACInputActionQt::event ( QEvent * _event )
         if(this->mouse_event_type == QEvent::MouseButtonRelease){
             //std::cout << "ACInputActionQt MouseButtonRelease" << std::endl;
             if( (this->key_event_type == QEvent::None && !other_key_pressed)|| (this->key_event_type != QEvent::None && key_pressed && !other_key_pressed) ){
-                std::cout << "Action " << this->text().toStdString() << " mouse released and key pressed " << key_pressed << std::endl;
+                //std::cout << "Action " << this->text().toStdString() << " mouse released and key pressed " << key_pressed << std::endl;
                 emit triggered();
             }
         }
