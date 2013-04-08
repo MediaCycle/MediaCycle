@@ -182,7 +182,7 @@ public:
     void initClusterCenters();
     // XS TODO clean level / state ...
     void incrementNavigationLevels(int nodeIndex);
-    int getNavigationLevel(){ return mNavigationLevel; };
+    int getNavigationLevel(){ return mNavigationLevel;}
     ACNavigationState getCurrentNavigationState();
     void setCurrentNavigationState(ACNavigationState state);
     // go back/forward in the navigation into clusters
@@ -194,7 +194,7 @@ public:
 
     // == Nodes
     void setClickedNode(int inode);
-    int getClickedNode() {return mClickedNode; };
+    int getClickedNode() {return mClickedNode;}
     bool toggleNode(int node);
     void dumpSelectedNodes();
     set<int>& getSelectedNodes(){return mSelectedNodes;}
@@ -209,7 +209,7 @@ public:
     void setNodeNextPosition(int node_id, ACPoint p);
     // XS TODO : displayed vs active
     void setMediaNodeDisplayed(int node_id, bool iIsDisplayed) {this->getMediaNode(node_id)->setDisplayed(iIsDisplayed);}
-    void setMediaNodeActive(int node_id, int value) { this->getMediaNode(node_id)->setActivity(value); };
+    void setMediaNodeActive(int node_id, int value) { this->getMediaNode(node_id)->setActivity(value);}
     int getNumberOfDisplayedNodes();
     void setNumberOfDisplayedNodes(int nd);
     int getNumberOfMediaNodes();
@@ -221,11 +221,13 @@ public:
     ACPointerType getPointerTypeFromId(int i);
     ACPointer* getPointerFromIndex(int i); // for use when parsing pointers incrementally
     ACPointer* getPointerFromId(int i); // for use when parsing pointers from the ID set by the input device
+    std::list<int> getPointerIds();
     void resetPointers();
     void addPointer(int p_id,ACPointerType _pointerType=AC_POINTER_UNKNOWN);
     void removePointer(int p_id);
     void addMousePointer();
     void removeMousePointer();
+    bool hasMousePointer();
 
     // == Labels
     void setClickedLabel(int ilabel);
@@ -249,8 +251,9 @@ public:
     void setMode(ACBrowserMode _mode);
 
     // Quick Browser
-    bool setClosestNode(int node_id, int p_index);
+    std::map<long int,int> setClosestNode(int node_id, int p_index); // returns a map of media id and activity
     void setAutoPlay(int auto_play) { this->auto_play = auto_play; }
+    bool getAutoPlay() { return this->auto_play; }
     void setAutoDiscard(bool status) { this->auto_discard = status; }
     bool getAutoDiscard(){return this->auto_discard;}
 

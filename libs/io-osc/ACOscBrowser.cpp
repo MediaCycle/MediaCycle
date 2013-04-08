@@ -79,9 +79,13 @@ void ACOscBrowser::release() {
     this->active = false;
 }
 
-void ACOscBrowser::start() {
-    lo_server_thread_start(server_thread);
-    this->active = true;
+bool ACOscBrowser::start() {
+    if(server_thread){
+        lo_server_thread_start(server_thread);
+        this->active = true;
+        return true;
+    }
+    return false;
 }
 
 void ACOscBrowser::stop() {
@@ -555,26 +559,45 @@ int ACOscBrowser::process_mess(const char *path, const char *types, lo_arg **arg
             }
         }
         else if(status == "alive"){
-            if(argc-1 == 0){
+            if(verbose)
+                std::cout << "alive " << std::endl;
+            /*if(argc-1 == 0){
                 media_cycle->resetPointers();
                 media_cycle->setAutoPlay(0);
-                //media_cycle->muteAllSources();
+                media_cycle->muteAllSources();
                 media_cycle->setNeedsDisplay(true);
-            }
+            }*/
             bool refresh = false;
-            for(int arg = 1; arg<argc;arg++){
+
+            std::list<int> ids = media_cycle->getPointerIds();
+
+            for(int arg = 0; arg<argc;arg++){
                 if(types[arg]=='i'){
                     if(verbose)
                         std::cout << " " << argv[arg]->i32;
+
+                    std::list<int>::iterator _id = std::find(ids.begin(),ids.end(),argv[arg]->i32);
+                    if(_id != ids.end())
+                        ids.erase(_id);
+
                     if(!media_cycle->getPointerFromId( argv[arg]->i32 )){
                         media_cycle->addPointer( argv[arg]->i32 );
                         refresh = true;
                     }
                 }
-                else
+                /*else
                     if(verbose)
-                        std::cout << " err";
+                        std::cout << " err";*/
             }
+
+            for(std::list<int>::iterator _id = ids.begin(); _id != ids.end(); _id++){
+                media_cycle->removePointer(*_id);
+                if(verbose)
+                    std::cout << " remove " << *_id;
+            }
+            if(verbose)
+                std::cout << std::endl;
+
             if(refresh)
                 media_cycle->setNeedsDisplay(true);
         }

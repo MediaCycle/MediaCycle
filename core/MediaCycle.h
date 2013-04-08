@@ -192,6 +192,7 @@ public:
     void setCameraZoom(float z);
     void setCameraRecenter();
     void setAutoPlay(int i);
+    bool getAutoPlay();
     void setAutoDiscard(bool status);
     bool getAutoDiscard();
     int getClickedNode();
@@ -237,6 +238,7 @@ public:
     ACPointer* getPointerFromIndex(int i); // for use when parsing pointers incrementally
     ACPointer* getPointerFromId(int i); // for use when parsing pointers from the ID set by the input device
     void resetPointers();
+    std::list<int> getPointerIds();
     void addPointer(int p_id);
     void removePointer(int p_id);
 

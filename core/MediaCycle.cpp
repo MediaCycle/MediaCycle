@@ -212,6 +212,13 @@ void MediaCycle::loadDefaultConfig(std::string name){
         this->changeActivePlugin(PLUGIN_TYPE_NEIGHBORS_METHOD,config->neighborsMethodPlugin());
     if(config->neighborsPositionsPlugin() != "")
         this->changeActivePlugin(PLUGIN_TYPE_NEIGHBORS_POSITIONS,config->neighborsPositionsPlugin());
+    if(config->preProcessPlugin() != "")
+        this->changeActivePlugin(PLUGIN_TYPE_PREPROCESS,config->preProcessPlugin());
+
+    #if defined (SUPPORT_MULTIMEDIA)
+    mediaLibrary->setActiveMediaType( config->activeMediaType(), this->pluginManager );
+    mediaLibrary->setMediaReaderPlugin( this->getPlugin( config->mediaReaderPlugin() ) );
+    #endif
 }
 
 ACAbstractDefaultConfig* MediaCycle::getCurrentConfig(){
@@ -720,6 +727,10 @@ bool MediaCycle::changeActivePlugin(ACPluginType pluginType, std::string pluginN
         this->getPluginManager()->setActiveSegmentPlugin(pluginName);
         ok = true;
     }
+    if(plugin->implementsPluginType(PLUGIN_TYPE_PREPROCESS)){
+        this->getLibrary()->setPreProcessPlugin(plugin);
+        ok = true;
+    }
     return ok;
 }
 
@@ -866,17 +877,26 @@ void MediaCycle::getCameraPosition(float &x, float &y)		{ mediaBrowser->getCamer
 void MediaCycle::setCameraZoom(float z)				{ mediaBrowser->setCameraZoom(z); }
 void MediaCycle::setCameraRecenter()				{ mediaBrowser->setCameraRecenter(); }
 void MediaCycle::setAutoPlay(int i) { mediaBrowser->setAutoPlay(i); }
+bool MediaCycle::getAutoPlay() { return mediaBrowser->getAutoPlay(); }
 void MediaCycle::setAutoDiscard(bool status) { mediaBrowser->setAutoDiscard(status); }
 bool MediaCycle::getAutoDiscard(){return mediaBrowser->getAutoDiscard();}
 int MediaCycle::getClickedNode() { return mediaBrowser->getClickedNode(); }
 void MediaCycle::setClickedNode(int i) { mediaBrowser->setClickedNode(i); }
 void MediaCycle::setClosestNode(int i,int p_index) {
     int current = mediaBrowser->getClosestNode(p_index);
-    if( mediaBrowser->setClosestNode(i,p_index) && current != i){
-        stringstream pointer;
-        pointer << p_index;
+    std::map<long int,int> nodeActivities = mediaBrowser->setClosestNode(i,p_index);
+    if( nodeActivities.size()>0){// && current != i){
+
+        for(std::map<long int,int>::iterator nodeActivity = nodeActivities.begin(); nodeActivity != nodeActivities.end(); nodeActivity++){
+            if(nodeActivity->second == 2)
+                this->performActionOnMedia("hover closest node", nodeActivity->first);
+            else if(nodeActivity->second == 0)
+                this->performActionOnMedia("hover off node", nodeActivity->first);
+        }
+    }
+    if(current != i){
         std::vector<boost::any> arguments;
-        arguments.push_back(pointer.str());
+        arguments.push_back(p_index);
         this->performActionOnMedia("hover closest node",i,arguments);
     }
 }
@@ -1005,12 +1025,22 @@ void MediaCycle::resetPointers() {
     mediaBrowser->resetPointers();
 }
 
+std::list<int> MediaCycle::getPointerIds() {
+    return mediaBrowser->getPointerIds();
+}
+
 void MediaCycle::addPointer(int p_id) {
     mediaBrowser->addPointer(p_id);
 }
 
 void MediaCycle::removePointer(int p_id) {
-    mediaBrowser->removePointer(p_id);
+    ACPointer* pointer = this->getPointerFromId(p_id);
+    if(pointer){
+        int closest = pointer->getClosestNode();
+        if(closest != -1)
+            this->performActionOnMedia("hover off node",closest);
+        mediaBrowser->removePointer(p_id);
+    }
 }
 
 // == LABELS on VIEW

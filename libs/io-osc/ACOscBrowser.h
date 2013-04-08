@@ -59,7 +59,7 @@ public:
     void release();
 
     // Starts a background thread and listens to socket from there
-    void start();
+    bool start();
     void stop();
 
     void setUserData(void *_user_data);

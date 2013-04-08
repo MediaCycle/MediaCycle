@@ -1282,7 +1282,8 @@ int ACMediaBrowser::toggleSourceActivity(int lid, int type)
 }
 
 
-bool ACMediaBrowser::setClosestNode(int _node_id, int p_index) {
+std::map<long int,int> ACMediaBrowser::setClosestNode(int _node_id, int p_index) {
+    std::map<long int,int> nodeActivities;
     std::vector<int> hoveredNodes;
     hoveredNodes.resize(getNumberOfPointers());
     //std::cout << "hoverNodes ndeId=" << _node_id << " p_index=" << p_index << " : ";
@@ -1302,10 +1303,10 @@ bool ACMediaBrowser::setClosestNode(int _node_id, int p_index) {
     // XS: if _node_id < 0 should we still assign it to closest_node ?
     // note : MediaCycle::pickedObjectCallback will look for closest node if < 0
     if (_node_id<0) {
-        return false;
+        return nodeActivities;
     }
     if (this->getMediaNode(_node_id)->getNavigationLevel() < getNavigationLevel()) {
-        return false;
+        return nodeActivities;
     }
 
     if (auto_play) {
@@ -1317,6 +1318,7 @@ bool ACMediaBrowser::setClosestNode(int _node_id, int p_index) {
                 if ( (node->second->getMediaId()==_node_id) && (node->second->getActivity() == 0) ) {
                     // set closest from 0 to 2
                     toggleSourceActivity(node->second, 2);
+                    nodeActivities[node->first] = 2;
                 }
                 /*else if ( (node->second->getNodeId()==prev_node_id) && (node->second->getActivity() == 2) ) {
      toggleSourceActivity(*node, 0);
@@ -1331,6 +1333,7 @@ bool ACMediaBrowser::setClosestNode(int _node_id, int p_index) {
                     }
                     if ( (!donottoggle) && (node->second->getActivity() == 2)  ) {
                         toggleSourceActivity(node->second);
+                        nodeActivities[node->first] = 0;
                     }
                 }
             }
@@ -1342,6 +1345,7 @@ bool ACMediaBrowser::setClosestNode(int _node_id, int p_index) {
         for (ACMediaNodes::iterator node = mMediaNodes.begin(); node != mMediaNodes.end(); ++node){
             if ( node->second->getActivity() == 2 ) {
                 toggleSourceActivity(node->second);
+                nodeActivities[node->first] = 0;
             }
         }
         auto_play_toggle = 0;
@@ -1355,7 +1359,7 @@ bool ACMediaBrowser::setClosestNode(int _node_id, int p_index) {
                 media->setDiscarded(true);
         }
     }
-    return true;
+    return nodeActivities;
 }
 
 // XS TODO iterator + return value makes no sense
@@ -1541,6 +1545,14 @@ void ACMediaBrowser::resetPointers() {
     //std::cout << "ACMediaBrowser::resetPointers" << std::endl;
 }
 
+std::list<int> ACMediaBrowser::getPointerIds(){
+    std::list<int> ids;
+    for (ACPointers::iterator it=mPointers.begin();it!=mPointers.end();it++){
+        ids.push_back(it->first);
+    }
+    return ids;
+}
+
 void ACMediaBrowser::addPointer(int _id,ACPointerType _pointerType) {
     ACPointers::iterator p_iter = mPointers.find(_id);
     if (p_iter ==  mPointers.end()){ //new pointer
@@ -1562,12 +1574,12 @@ void ACMediaBrowser::addPointer(int _id,ACPointerType _pointerType) {
 void ACMediaBrowser::removePointer(int _id) {
     ACPointers::iterator p_iter = mPointers.find(_id);
     if (p_iter !=  mPointers.end()){ //existing*/
-        if (mLibrary->getSize()>0 && p_iter->second){
+        /*if (mLibrary->getSize()>0 && p_iter->second){
             //CF we need first to desactivate the closest node of the pointer to be removed, if in audiohover mode
-            /*ACMediaNode closest = getMediaNode(p_iter->second->getClosestNode());
-   if (closest.getActivity() == 2)
-    toggleSourceActivity(closest);*///TR NEM
-        }
+            ACMediaNode* closest = this->getMediaNode(p_iter->second->getClosestNode());
+            if (closest)
+                closest->setActivity(0);
+        }*/
         if (p_iter->second)
             delete p_iter->second;
         mPointers.erase(p_iter);
@@ -1581,6 +1593,10 @@ void ACMediaBrowser::addMousePointer(){
 
 void ACMediaBrowser::removeMousePointer(){
     this->removePointer(-1);
+}
+
+bool ACMediaBrowser::hasMousePointer(){
+    return (mPointers.find(-1) != mPointers.end());
 }
 
 void ACMediaBrowser::dumpNeighborNodes()
