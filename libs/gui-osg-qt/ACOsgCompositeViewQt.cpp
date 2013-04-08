@@ -352,7 +352,10 @@ void ACOsgCompositeViewQt::updateGL()
     {
         // Automatically erase the mouse pointer if outside the view for installations, keep it for other settings
         if(setting == AC_SETTING_INSTALLATION){
-            if(mouseover!=this->underMouse()){
+            this->setCursor(QCursor( Qt::BlankCursor ) );
+            // QApplication::setOverrideCursor( QCursor( Qt::BlankCursor ) );
+            // QApplication::restoreOverrideCursor();
+            /*if(mouseover!=this->underMouse()){
                 if(this->underMouse())//Qt
                     media_cycle->getBrowser()->addMousePointer();
                 else {
@@ -360,10 +363,13 @@ void ACOsgCompositeViewQt::updateGL()
                 }
                 //std::cout << "Mouse " << this->underMouse() << std::endl;
                 mouseover=this->underMouse();
-            }
+            }*/
+            if(media_cycle->getBrowser()->hasMousePointer())
+                media_cycle->getBrowser()->removeMousePointer();
         }
         else{
-            if(media_cycle->getNumberOfPointers()<1)
+            this->setCursor(QCursor());
+            if(media_cycle->getBrowser()->hasMousePointer() == false)
                 media_cycle->getBrowser()->addMousePointer();
         }
         media_cycle->updateState();

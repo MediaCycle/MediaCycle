@@ -152,7 +152,7 @@ IF(FULLSCREEN)
 ENDIF()
 
 IF(SETTING_INSTALLATION)
-    file(APPEND ${CMAKE_CURRENT_BINARY_DIR}/${CLASS_NAME}.h "\tvirtual ACSettingType settingType(){return AC_SETTING_DESKTOP;}\n")
+    file(APPEND ${CMAKE_CURRENT_BINARY_DIR}/${CLASS_NAME}.h "\tvirtual ACSettingType settingType(){return AC_SETTING_INSTALLATION;}\n")
 ENDIF()
 
 file(APPEND ${CMAKE_CURRENT_BINARY_DIR}/${CLASS_NAME}.h "};

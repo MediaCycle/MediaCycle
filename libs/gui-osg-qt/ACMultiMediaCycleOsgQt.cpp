@@ -1123,6 +1123,7 @@ bool ACMultiMediaCycleOsgQt::loadDefaultConfig(ACAbstractDefaultConfig* _config)
         return false;
     }
     this->setMediaType(media_cycle->getMediaType());
+    this->changeSetting(_config->settingType());
 
     // Check plugins:
     /*if(media_cycle->getPluginManager()->getAvailableFeaturesPlugins()->getSize(_config->mediaType()) == 0){
