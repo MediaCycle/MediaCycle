@@ -350,12 +350,12 @@ void ACOsgCompositeViewQt::updateGL()
 
     if(media_cycle && media_cycle->hasBrowser())
     {
+        // Automatically remove the mouse pointer if installation setting, adding it otherwise
+        // Moved to ACOsgCompositeViewQt::changeSetting
+        /*
         // Automatically erase the mouse pointer if outside the view for installations, keep it for other settings
         if(setting == AC_SETTING_INSTALLATION){
-            this->setCursor(QCursor( Qt::BlankCursor ) );
-            // QApplication::setOverrideCursor( QCursor( Qt::BlankCursor ) );
-            // QApplication::restoreOverrideCursor();
-            /*if(mouseover!=this->underMouse()){
+            if(mouseover!=this->underMouse()){
                 if(this->underMouse())//Qt
                     media_cycle->getBrowser()->addMousePointer();
                 else {
@@ -363,15 +363,9 @@ void ACOsgCompositeViewQt::updateGL()
                 }
                 //std::cout << "Mouse " << this->underMouse() << std::endl;
                 mouseover=this->underMouse();
-            }*/
-            if(media_cycle->getBrowser()->hasMousePointer())
-                media_cycle->getBrowser()->removeMousePointer();
-        }
-        else{
-            this->setCursor(QCursor());
-            if(media_cycle->getBrowser()->hasMousePointer() == false)
-                media_cycle->getBrowser()->addMousePointer();
-        }
+            }
+        }*/
+
         media_cycle->updateState();
         frac = media_cycle->getFrac();
 
@@ -1256,4 +1250,17 @@ void ACOsgCompositeViewQt::changeSetting(ACSettingType _setting)
         browser_renderer->changeSetting(this->setting);
     if(hud_renderer)
         hud_renderer->changeSetting(this->setting);
+
+    if(this->setting == AC_SETTING_INSTALLATION){
+        this->setCursor(QCursor( Qt::BlankCursor ) );
+        // QApplication::setOverrideCursor( QCursor( Qt::BlankCursor ) );
+        // QApplication::restoreOverrideCursor();
+        if(media_cycle->hasBrowser() && media_cycle->getBrowser()->hasMousePointer())
+            media_cycle->getBrowser()->removeMousePointer();
+       }
+    else{
+        this->setCursor(QCursor());
+        if(media_cycle->hasBrowser() && media_cycle->getBrowser()->hasMousePointer() == false)
+            media_cycle->getBrowser()->addMousePointer();
+    }
 }

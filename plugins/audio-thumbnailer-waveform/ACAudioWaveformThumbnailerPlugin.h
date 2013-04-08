@@ -34,8 +34,6 @@
 
 #include <ACPlugin.h>
 
-//#include "ACOsgRendererPlugin.h"
-
 #include <simple_svg.hpp>
 
 #include <boost/function.hpp>
@@ -95,7 +93,7 @@ class ACAudioWaveformThumbnailerPlugin : public ACThumbnailerPlugin
 {
 public:
     ACAudioWaveformThumbnailerPlugin();
-    ~ACAudioWaveformThumbnailerPlugin();
+    virtual ~ACAudioWaveformThumbnailerPlugin();
     virtual std::vector<std::string> getThumbnailNames();
     virtual std::map<std::string,ACMediaType> getThumbnailTypes();
     virtual std::map<std::string,std::string> getThumbnailDescriptions();

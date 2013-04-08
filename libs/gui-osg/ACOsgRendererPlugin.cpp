@@ -97,6 +97,14 @@ void ACOsgRendererPlugin::changeBrowserNodeColor(){
     }
 }
 
+void ACOsgRendererPlugin::changeBrowserNodeSize(){
+    double size = this->getNumberParameterValue("Browser node size");
+    std::cout << "ACOsgRendererPlugin::changeBrowserNodeSize: " << size << std::endl;
+    if(this->browser){
+        this->browser->changeAllNodesSize(size);
+    }
+}
+
 /*void ACOsgRendererPlugin::mediaCycleSet(){
 
     if(this->hasCallbackNamed("Stop all"))

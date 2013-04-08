@@ -113,6 +113,7 @@ ACOsgBrowserRenderer::ACOsgBrowserRenderer()
   //  pthread_mutexattr_destroy(&activity_update_mutex_attr);
     node_thumbnail = "None";
     node_color = osg::Vec4(1.0f,1.0f,1.0f,1.0f);
+    node_size = 1.0f;
     setting = AC_SETTING_NONE;
     group = new Group();
     media_group = new Group();
@@ -732,6 +733,7 @@ bool ACOsgBrowserRenderer::addNode(long int _id){//private method
         renderer->setSharedThumbnailName(shared_thumbnail_name);
         renderer->changeThumbnail(node_thumbnail);
         renderer->changeSetting(this->setting);
+        renderer->changeNodeSize(node_size);
         media_cycle_node = media_cycle->getMediaNode(_id);
         node_index =  _id;
         media_index = node_index;
@@ -948,3 +950,19 @@ void ACOsgBrowserRenderer::changeAllNodesThumbnail(std::string thumbnail)
     activity_update_mutex.unlock();
 }
 
+void ACOsgBrowserRenderer::changeNodeSize(int _node, double _size)
+{
+    activity_update_mutex.lock();
+    node_renderers[_node]->changeNodeSize(_size);
+    activity_update_mutex.unlock();
+}
+
+void ACOsgBrowserRenderer::changeAllNodesSize(double _size)
+{
+    activity_update_mutex.lock();
+    for(ACOsgMediaRenderers::iterator node_renderer = node_renderers.begin();node_renderer!=node_renderers.end();node_renderer++){
+        node_renderer->second->changeNodeSize(_size);
+    }
+    node_size = _size;
+    activity_update_mutex.unlock();
+}

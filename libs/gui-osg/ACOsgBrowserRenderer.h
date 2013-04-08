@@ -130,9 +130,14 @@ public:
 
     void changeNodeThumbnail(int _node, std::string thumbnail);
     void changeAllNodesThumbnail(std::string thumbnail);
+
+    void changeNodeSize(int _node, double _size);
+    void changeAllNodesSize(double _size);
+
 protected:
     std::string node_thumbnail;
     osg::Vec4 node_color;
+    double node_size;
 
 public:
 

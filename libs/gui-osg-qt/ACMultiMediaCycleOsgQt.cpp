@@ -198,7 +198,6 @@ ACMultiMediaCycleOsgQt::ACMultiMediaCycleOsgQt(QWidget *parent) : QMainWindow(pa
 
     compositeOsgView = new ACOsgCompositeViewQt();
     compositeOsgView->setSizePolicy ( QSizePolicy::MinimumExpanding, QSizePolicy::MinimumExpanding );
-    compositeOsgView->changeSetting(this->setting);
     osgViewDockLayout->addWidget(compositeOsgView);
 
     progressBar = new ACQProgressBar(); //QProgressBar();

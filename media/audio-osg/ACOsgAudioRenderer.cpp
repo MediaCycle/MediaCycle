@@ -54,7 +54,8 @@ ACOsgAudioRenderer::ACOsgAudioRenderer()
     waveform_geometry = 0;
     node_shape_drawable = 0;
     waveform_transform = 0;
-    entry_transform = 0;    
+    entry_transform = 0;
+    node_size = 1.0f;
 }
 
 ACOsgAudioRenderer::~ACOsgAudioRenderer() {
@@ -456,16 +457,27 @@ void ACOsgAudioRenderer::updateNodes(double ratio) {
     float magic_number = 0.0005; // since we're not using an ortho2D projection
 #ifdef AUTO_TRANSFORM
     if(waveform_transform)
-        waveform_transform->setScale(magic_number,magic_number,1.0);
-    if(entry_transform && node_geometry) // if the node is a thumbnail and not a shape
-        entry_transform->setScale(magic_number,magic_number,1.0);
+        waveform_transform->setScale(magic_number*node_size,magic_number*node_size,1.0);
+    if(entry_transform){
+        if(node_geometry) // if the node is a thumbnail and not a shape
+            entry_transform->setScale(magic_number*node_size,magic_number*node_size,1.0);
+        else
+            entry_transform->setScale(node_size,node_size,1.0);
+    }
 #else
     Matrix magic_numbers;
-    magic_numbers.makeScale(magic_number,magic_number,1.0);
+    magic_numbers.makeScale(magic_number*node_size,magic_number*node_size,1.0);
     if(waveform_transform)
         waveform_transform->setMatrix(magic_numbers);
-    if(entry_transform && node_geometry) // if the node is a thumbnail and not a shape
-        entry_transform->setMatrix(magic_numbers);
+    if(entry_transform){
+        if(node_geometry) // if the node is a thumbnail and not a shape
+            entry_transform->setMatrix(magic_numbers);
+        else{
+            Matrix node_scale;
+            node_scale.makeScale(node_size,node_size,1.0);
+            entry_transform->setMatrix(node_scale);
+        }
+    }
 #endif
 
 #ifdef AUTO_TRANSFORM
@@ -523,4 +535,8 @@ void ACOsgAudioRenderer::changeThumbnail(std::string thumbnail){
         entryGeode();
     entry_transform->addChild(entry_geode);
     media_node->addChild(entry_transform);
+}
+
+void ACOsgAudioRenderer::changeNodeSize(double _size){
+    this->node_size = _size;
 }

@@ -82,6 +82,8 @@ ACAudioOsgRendererPlugin::ACAudioOsgRendererPlugin() : ACOsgRendererPlugin(){
     timeline_summary_thumbnails.push_back("None");
     timeline_summary_thumbnails.push_back("Classic timeline waveform");
     this->addStringParameter("Timeline summary",timeline_summary_thumbnails.front(),timeline_summary_thumbnails,"Timeline summary",boost::bind(&ACOsgRendererPlugin::changeTimelineSummaryThumbnail,this));
+
+    this->addNumberParameter("Browser node size",1.0,0.01,10.0,0.01,"Browser node size",boost::bind(&ACOsgRendererPlugin::changeBrowserNodeSize,this));
 }
 
 ACAudioOsgRendererPlugin::~ACAudioOsgRendererPlugin(){

@@ -108,6 +108,8 @@ public:
     void changeNodeColor(osg::Vec4 _color){node_color = _color; user_defined_color = true;}
     void resetNodeColor(){node_color = osg::Vec4(1,1,0.5,1); user_defined_color = false;}
 
+    virtual void changeNodeSize(double _size){}
+
     /// This virtual function is called by ACOsgBrowserRenderer::changeNodeThumbnail
     virtual void changeThumbnail(std::string thumbnail){}
 
