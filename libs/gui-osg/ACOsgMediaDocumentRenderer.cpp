@@ -184,14 +184,20 @@ void ACOsgMediaDocumentRenderer::updateNodes(double ratio) {
         if (attribute->getActivity()>=2){//hover
             std::vector<ACMedia*> tmpSegments;
             tmpSegments = media->getAllSegments();
-            for (int j=0; j<tmpSegments.size(); j++)
-                media_cycle->getMediaNode(tmpSegments[j]->getId())->setDisplayed(true);
+            for (int j=0; j<tmpSegments.size(); j++){
+                ACMediaNode* node = media_cycle->getMediaNode(tmpSegments[j]->getId());
+                if(node)
+                    node->setDisplayed(true);
+            }
         }
         else {
             std::vector<ACMedia*> tmpSegments;
             tmpSegments = media->getAllSegments();
-            for (int j=0; j<tmpSegments.size(); j++)
-                media_cycle->getMediaNode(tmpSegments[j]->getId())->setDisplayed(true);// TR true CF false
+            for (int j=0; j<tmpSegments.size(); j++){
+                ACMediaNode* node = media_cycle->getMediaNode(tmpSegments[j]->getId());
+                if(node)
+                    node->setDisplayed(true);// TR true CF false
+            }
         }
 
         unsigned int mask = (unsigned int)-1;

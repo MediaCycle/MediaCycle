@@ -239,6 +239,7 @@ std::vector<int> ACMediaLibrary::importFile(std::string _filename, ACPluginManag
         cout << "<ACMediaLibrary::importFile> skipping "<< _filename << " : media already present at position " << is_present << endl;
         // Even if the file can't be imported, we have to notify the progress the file has been processed
         files_processed++;
+        failed_imports.push_back(_filename);
         return ret;
     }
 
@@ -247,15 +248,32 @@ std::vector<int> ACMediaLibrary::importFile(std::string _filename, ACPluginManag
     ACMediaType fileMediaType = ACMediaFactory::getInstance().getMediaTypeFromExtension(extension);
     ACMedia* media=0;
 #if defined (SUPPORT_MULTIMEDIA) 
-    //this->testFFMPEG(_filename);
     if (media_type==MEDIA_TYPE_MIXED){
-        if (mReaderPlugin!=0)
+        if (mReaderPlugin!=0){
             media=mReaderPlugin->mediaFactory(media_type);
+            if(media){
+                ACMediaData* _media_data = mReaderPlugin->mediaReader(media_type);
+                if(!_media_data){
+                    std::cerr << "ACMediaFactory::create: plugin "<< mReaderPlugin->getName() << " didn't set a media data" << std::endl;
+                    // Even if the file can't be imported, we have to notify the progress the file has been processed
+                    files_processed++;
+                    failed_imports.push_back(_filename);
+                    return ret;
+                }
+                media->setMediaData(_media_data);
+            }
+        }
+        else
+            std::cerr << "<ACMediaLibrary::importFile> no media document reader plugin set, trying with the media factory"<< std::endl;
+        if (media==0)
+            media = ACMediaFactory::getInstance().create(extension,MEDIA_TYPE_MIXED);
         /*if (media==0)
             media=new ACMediaDocument();*/
         if (media==0){
+            std::cerr << "<ACMediaLibrary::importFile> couldn't create the required media document with the media factory, skipping "<< std::endl;
             // Even if the file can't be imported, we have to notify the progress the file has been processed
             files_processed++;
+            failed_imports.push_back(_filename);
             return ret;
         }
         else {
@@ -264,6 +282,7 @@ std::vector<int> ACMediaLibrary::importFile(std::string _filename, ACPluginManag
             if (nbMedia == 0){
                 // Even if the file can't be imported, we have to notify the progress the file has been processed
                 files_processed++;
+                failed_imports.push_back(_filename);
                 return ret;
             }
             this->addMedia(media);
@@ -277,39 +296,48 @@ std::vector<int> ACMediaLibrary::importFile(std::string _filename, ACPluginManag
             }
             this->setActiveMediaType(((ACMediaDocument*)media)->getActiveMediaKey(), acpl);
             files_processed++;
-            return ret;
+            //return ret;
         }
     }
+    else{
 #endif	
-    // XS TODO: do we want to check the media type of the whole library (= impose a unique one)?
+        // XS TODO: do we want to check the media type of the whole library (= impose a unique one)?
 
-    if (media_type == fileMediaType){
-        media = ACMediaFactory::getInstance().create(extension);
-        cout << "extension:" << extension << endl;
-    }
-    else {
-        cout << "<ACMediaLibrary::importFile> other media type, skipping " << _filename << " ... " << endl;
-        cout << "-> media_type " << media_type << " ... " << endl;
-        cout << "-> fileMediaType " << fileMediaType << " ... " << endl;
-        // Even if the file can't be imported, we have to notify the progress the file has been processed
-        files_processed++;
-        return ret;
-    }
+        if (media_type == fileMediaType){
+            media = ACMediaFactory::getInstance().create(extension);
+            cout << "extension:" << extension << endl;
+        }
+        else {
+            cout << "<ACMediaLibrary::importFile> other media type, skipping " << _filename << " ... " << endl;
+            cout << "-> media_type " << media_type << " ... " << endl;
+            cout << "-> fileMediaType " << fileMediaType << " ... " << endl;
+            // Even if the file can't be imported, we have to notify the progress the file has been processed
+            files_processed++;
+            failed_imports.push_back(_filename);
+            return ret;
+        }
 
-    if (media == 0) {
-        cout << "<ACMediaLibrary::importFile> extension unknown, skipping " << _filename << " ... " << endl;
-        // Even if the file can't be imported, we have to notify the progress the file has been processed
-        files_processed++;
-        return ret;
-    }
-    // import has to be done before segmentation to have proper id.
-    media_at_import = media;
-    if (media->import(_filename, this->getAvailableMediaID(), acpl, _save_timed_feat)){
-        this->addMedia(media);
-        ret.push_back(media->getId());
+        if (media == 0) {
+            cout << "<ACMediaLibrary::importFile> extension unknown, skipping " << _filename << " ... " << endl;
+            // Even if the file can't be imported, we have to notify the progress the file has been processed
+            files_processed++;
+            failed_imports.push_back(_filename);
+            return ret;
+        }
+        // import has to be done before segmentation to have proper id.
+        media_at_import = media;
+        if (media->import(_filename, this->getAvailableMediaID(), acpl, _save_timed_feat)){
+            this->addMedia(media);
+            ret.push_back(media->getId());
 #ifdef VERBOSE
-        cout << "imported " << _filename << " with mid = " <<  media->getId() << endl;
+            cout << "imported " << _filename << " with mid = " <<  media->getId() << endl;
 #endif // VERBOSE
+
+#if defined (SUPPORT_MULTIMEDIA)
+        }
+    }
+#endif
+
         if (doSegment){
             // segments are created without id
             media->segment(acpl, _save_timed_feat);
@@ -326,7 +354,10 @@ std::vector<int> ACMediaLibrary::importFile(std::string _filename, ACPluginManag
                 // for the segments we do not save (again) timedFeatures
                 // XS TODO but we should not re-calculate them either !=> TR I put the mtf files names of the media parent in all his segments
                 media_at_import = mediaSegments[i];
-                if (mediaSegments[i]->import(_filename, this->getAvailableMediaID(), acpl)){
+                std::string _segmentfilename = mediaSegments[i]->getFileName();
+                if(_segmentfilename == "")
+                    _segmentfilename = _filename;
+                if (mediaSegments[i]->import(_segmentfilename, this->getAvailableMediaID(), acpl)){
                     this->addMedia(mediaSegments[i]);
                     mediaSegments[i]->setParentId(media->getId());
                     importedSegment.push_back(mediaSegments[i]);
@@ -340,16 +371,13 @@ std::vector<int> ACMediaLibrary::importFile(std::string _filename, ACPluginManag
                 }
                 files_processed++; // each segment is processed
                 media->setAllSegments(importedSegment);
-                
-
             }
-            //CF files_to_import--;
-            //			}
-
         }
         files_processed++; // the media is processed
+#if ! defined (SUPPORT_MULTIMEDIA)
     }
-    else {
+#endif
+    /*else {
         media_at_import = 0;
         cerr << "<ACMediaLibrary::importFile> problem importing file : " << _filename << " ... " << endl;
         failed_imports.push_back(_filename);
@@ -357,7 +385,7 @@ std::vector<int> ACMediaLibrary::importFile(std::string _filename, ACPluginManag
         files_processed++;
         return ret;
 
-    }
+    }*/
     // XS TODO this was an attempt to save on-the-fly each media
     // but it does not work well.
 
@@ -679,80 +707,80 @@ TiXmlElement* ACMediaLibrary::openNextMediaFromXMLLibrary(TiXmlElement* pMediaNo
     else {
         // loop over all medias
         for( pMediaNode; pMediaNode; pMediaNode=pMediaNode->NextSiblingElement()) {*/
-            ACMediaType typ;
-            int typi = -1;
-            pMediaNode->QueryIntAttribute("MediaType", &typi);
-            files_processed++;
-            if (typi < 0)
-                throw runtime_error("corrupted XML file, wrong media type");
-            else {
-                typ = (ACMediaType) typi;
-                ACMedia* local_media = ACMediaFactory::getInstance().create(typ);
-                if(!local_media){
-                    throw runtime_error("Couldn't create the media, no media reader available");
-                }
-                local_media->loadXML(pMediaNode);
-                if (mPreProcessPlugin==NULL)
-                    local_media->defaultPreProcFeatureInit();
-                this->addMedia(local_media);
-                if (local_media->getNumberOfSegments()>0){
-                    std::vector<ACMedia*> seg=local_media->getAllSegments();
-                    for (std::vector<ACMedia*>::iterator it=seg.begin();it!=seg.end();it++){
-                        this->addMedia((*it));
-                        (*it)->setParentId(local_media->getId());
-                        
-                    }
-                }
-                
-#ifdef SUPPORT_MULTIMEDIA
-                if(this->media_type == MEDIA_TYPE_MIXED){
-
-                    string activeMediaKey ="";
-                    activeMediaKey = pMediaNode->Attribute("ActiveMediaKey");
-                    if (activeMediaKey == "")
-                        throw runtime_error("corrupted XML file, no active submedia defined");
-                    std::cout<<"activeMediaKey"<<activeMediaKey<<std::endl;
-
-                    TiXmlHandle _pMediaNodeHandle(pMediaNode);
-                    TiXmlElement* mediasElement = _pMediaNodeHandle.FirstChild( "Medias" ).Element();
-                    if (!mediasElement)
-                        throw runtime_error("corrupted XML file, no medias in mediadocuments");
-
-                    TiXmlElement* mediaElement = _pMediaNodeHandle.FirstChild( "Medias" ).FirstChild( "Media" ).Element();
-                    for( mediaElement; mediaElement; mediaElement=mediaElement->NextSiblingElement()) {
-                        ACMediaType mtyp;
-                        int mtypi = -1;
-                        mediaElement->QueryIntAttribute("MediaType", &mtypi);
-                        if (mtypi < 0)
-                            throw runtime_error("corrupted XML file, wrong media type");
-                        else {
-                            mtyp = (ACMediaType) mtypi;
-                            ACMedia* local_submedia = ACMediaFactory::getInstance().create(mtyp);
-                            if (mPreProcessPlugin==NULL)
-                                local_submedia->defaultPreProcFeatureInit();
-                            this->addMedia(local_submedia);
-                            local_submedia->setParentId(local_media->getId());
-                            local_submedia->loadXML(mediaElement);
-
-                            string pKey ="";
-                            pKey = mediaElement->Attribute("Key");
-                            if (pKey == "")
-                                throw runtime_error("corrupted XML file, no key for media in media document");
-                            local_submedia->setKey(pKey);
-                            ACMediaDocument *mediaDoc=static_cast<ACMediaDocument *> (local_media);
-                            mediaDoc->addMedia(pKey,local_submedia);
-
-                            if (activeMediaKey == pKey)
-                                mediaDoc->setActiveSubMedia(pKey);
-                        }
-                    }
-                }
-#endif
+    ACMediaType typ;
+    int typi = -1;
+    pMediaNode->QueryIntAttribute("MediaType", &typi);
+    files_processed++;
+    if (typi < 0)
+        throw runtime_error("corrupted XML file, wrong media type");
+    else {
+        typ = (ACMediaType) typi;
+        ACMedia* local_media = ACMediaFactory::getInstance().create(typ);
+        if(!local_media){
+            throw runtime_error("Couldn't create the media, no media reader available");
+        }
+        local_media->loadXML(pMediaNode);
+        if (mPreProcessPlugin==NULL)
+            local_media->defaultPreProcFeatureInit();
+        this->addMedia(local_media);
+        if (local_media->getNumberOfSegments()>0){
+            std::vector<ACMedia*> seg=local_media->getAllSegments();
+            for (std::vector<ACMedia*>::iterator it=seg.begin();it!=seg.end();it++){
+                this->addMedia((*it));
+                (*it)->setParentId(local_media->getId());
 
             }
-            pMediaNode=pMediaNode->NextSiblingElement();
+        }
 
-        /*}
+#ifdef SUPPORT_MULTIMEDIA
+        if(this->media_type == MEDIA_TYPE_MIXED){
+
+            string activeMediaKey ="";
+            activeMediaKey = pMediaNode->Attribute("ActiveMediaKey");
+            if (activeMediaKey == "")
+                throw runtime_error("corrupted XML file, no active submedia defined");
+            std::cout<<"activeMediaKey"<<activeMediaKey<<std::endl;
+
+            TiXmlHandle _pMediaNodeHandle(pMediaNode);
+            TiXmlElement* mediasElement = _pMediaNodeHandle.FirstChild( "Medias" ).Element();
+            if (!mediasElement)
+                throw runtime_error("corrupted XML file, no medias in mediadocuments");
+
+            TiXmlElement* mediaElement = _pMediaNodeHandle.FirstChild( "Medias" ).FirstChild( "Media" ).Element();
+            for( mediaElement; mediaElement; mediaElement=mediaElement->NextSiblingElement()) {
+                ACMediaType mtyp;
+                int mtypi = -1;
+                mediaElement->QueryIntAttribute("MediaType", &mtypi);
+                if (mtypi < 0)
+                    throw runtime_error("corrupted XML file, wrong media type");
+                else {
+                    mtyp = (ACMediaType) mtypi;
+                    ACMedia* local_submedia = ACMediaFactory::getInstance().create(mtyp);
+                    if (mPreProcessPlugin==NULL)
+                        local_submedia->defaultPreProcFeatureInit();
+                    this->addMedia(local_submedia);
+                    local_submedia->setParentId(local_media->getId());
+                    local_submedia->loadXML(mediaElement);
+
+                    string pKey ="";
+                    pKey = mediaElement->Attribute("Key");
+                    if (pKey == "")
+                        throw runtime_error("corrupted XML file, no key for media in media document");
+                    local_submedia->setKey(pKey);
+                    ACMediaDocument *mediaDoc=static_cast<ACMediaDocument *> (local_media);
+                    mediaDoc->addMedia(pKey,local_submedia);
+
+                    if (activeMediaKey == pKey)
+                        mediaDoc->setActiveSubMedia(pKey);
+                }
+            }
+        }
+#endif
+
+    }
+    pMediaNode=pMediaNode->NextSiblingElement();
+
+    /*}
         // consistency check (XS TODO quits the app -> exceptions )
         /*if (cnt != n_medias){
             cerr << "<ACMediaLibrary::openXMLLibrary>: inconsistent number of media"<< endl;
@@ -761,9 +789,9 @@ TiXmlElement* ACMediaLibrary::openNextMediaFromXMLLibrary(TiXmlElement* pMediaNo
         }*/
     /*}
     return n_medias;*/
-           // if(files_processed == files_to_import){
-           //     files_processed = files_to_import = 0;
-           // }
+    // if(files_processed == files_to_import){
+    //     files_processed = files_to_import = 0;
+    // }
     return pMediaNode;
 }
 
@@ -1112,7 +1140,7 @@ void ACMediaLibrary::calculateStats() {
 
 void ACMediaLibrary::normalizeFeatures(int needsNormalize) {
 
-   // int start = 0;
+    // int start = 0;
 
     ACMediaFeatures* feature,* featureDest;
     cout << "normalizing features" << endl;
@@ -1290,16 +1318,16 @@ void ACMediaLibrary::saveSorted(string output_file){
     //	}
     for (int i=0; i<this->getSize() ;i++) {
         out << f[0][i].first << "\t" << f[0][i].second << "\t" <<
-               f[1][i].first << "\t" << f[1][i].second << "\t" <<
-               f[2][i].first << "\t" << f[2][i].second << "\t" <<
-               f[3][i].first << "\t" << f[3][i].second << "\t" <<
-               f[4][i].first << "\t" << f[4][i].second << "\t" <<
-               f[5][i].first << "\t" << f[5][i].second << "\t" <<
-               f[6][i].first << "\t" << f[6][i].second << "\t" <<
-               f[7][i].first << "\t" << f[7][i].second << "\t" <<
-               f[8][i].first << "\t" << f[8][i].second << "\t" <<
-               //				f[9][i].first << "\t" << f[9][i].second << "\t" <<
-               endl;
+                                f[1][i].first << "\t" << f[1][i].second << "\t" <<
+                                f[2][i].first << "\t" << f[2][i].second << "\t" <<
+                                f[3][i].first << "\t" << f[3][i].second << "\t" <<
+                                f[4][i].first << "\t" << f[4][i].second << "\t" <<
+                                f[5][i].first << "\t" << f[5][i].second << "\t" <<
+                                f[6][i].first << "\t" << f[6][i].second << "\t" <<
+                                f[7][i].first << "\t" << f[7][i].second << "\t" <<
+                                f[8][i].first << "\t" << f[8][i].second << "\t" <<
+                                //				f[9][i].first << "\t" << f[9][i].second << "\t" <<
+                                endl;
     }
     out.close();
 }
@@ -1309,7 +1337,7 @@ void ACMediaLibrary::setPreProcessPlugin(ACPlugin* acpl)
     if (mPreProcessPlugin)
         if (mPreProcessPlugin!=dynamic_cast<ACPreProcessPlugin*>(acpl))
             if (mPreProcessInfo!=NULL)
-            mPreProcessPlugin->freePreProcessInfo(mPreProcessInfo);
+                mPreProcessPlugin->freePreProcessInfo(mPreProcessInfo);
     if (acpl==NULL&&mPreProcessPlugin!=NULL)
     {
         mPreProcessPlugin=NULL;

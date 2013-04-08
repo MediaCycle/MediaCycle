@@ -48,6 +48,8 @@ ACMedia::ACMedia() {
     mid = -1;
     parentid = -1;
     parent = 0;
+    is_segment = false;
+    is_document = false;
     media_type = MEDIA_TYPE_NONE;
     width = 0.0f;
     height = 0.0f;
@@ -77,6 +79,8 @@ ACMedia::ACMedia(const ACMedia& m){
     this->mid = m.mid;
     this->parentid = m.parentid;
     this->parent = m.parent;
+    this->is_segment = m.is_segment;
+    this->is_document = m.is_document;
     this->media_type = m.media_type;
     this->width = m.width;
     this->height = m.height;
@@ -146,6 +150,36 @@ void ACMedia::setId(int _id)
     for(ACMediaThumbnails::iterator _thumbnail = thumbnails.begin(); _thumbnail != thumbnails.end(); _thumbnail++)
         (*_thumbnail)->setParentId(this->getId());
 }
+
+int ACMedia::getId() {return mid;}
+void ACMedia::setParentId(int _parentid) {this->parentid = _parentid;} //CF so that segments can be defined as ACMedia having other ACMedia as parents
+int ACMedia::getParentId() {return parentid;}
+void ACMedia::setParent(ACMedia* _parent){this->parent = _parent;}
+ACMedia* ACMedia::getParent(){return this->parent;}
+
+double ACMedia::getDuration(){return this->getEnd()-this->getStart();}
+
+void ACMedia::addSegment(ACMedia* _segment){
+    _segment->setAsSegment();
+    segments.push_back(_segment);
+}
+
+std::vector<ACMedia*> & ACMedia::getAllSegments() { return segments; }
+
+void ACMedia::setAllSegments(std::vector<ACMedia*> _segments){
+    for(std::vector<ACMedia*>::iterator _segment = _segments.begin(); _segment != _segments.end(); _segment++)
+        (*_segment)->setAsSegment();
+    segments=_segments;
+}
+
+void ACMedia::deleteAllSegments() { segments.clear();}
+ACMedia* ACMedia::getSegment(int i) { return segments[i]; }
+int ACMedia::getNumberOfSegments(){return segments.size();}
+
+bool ACMedia::isSegment(){return this->is_segment;}
+bool ACMedia::isDocument(){return this->is_document;}
+void ACMedia::setAsSegment(){this->is_segment = true;}
+void ACMedia::setAsDocument(){this->is_document = true;}
 
 void ACMedia::deleteData(){
     if (data)
@@ -988,7 +1022,7 @@ int ACMedia::extractFeatures(ACPluginManager *acpl, bool _save_timed_feat) {
 //      ex: in audio : plugin extracts features and then segments
 int ACMedia::segment(ACPluginManager *acpl, bool _saved_timed_features ) {	
     ACImportStep current_step = IMPORT_STEP_SEGMENT;
-    cerr << "<ACMedia::segment> segmenting media number: " << this->getId() << endl;
+    cout << "<ACMedia::segment> segmenting media number: " << this->getId() << endl;
     // check if data have been extracted properly by the import method
     if (this->getMediaData()==0){
         cerr << "<ACMedia::segment> failed accessing data for media number: " << this->getId() << endl;
@@ -1094,17 +1128,6 @@ int ACMedia::segment(ACPluginManager *acpl, bool _saved_timed_features ) {
     return segment_ok;
 }
 
-// int ACMedia::segment(){
-// 	for (int i = 0; i < 4; i++){
-// 		ACMedia* media = ACMediaFactory::getInstance()->create(this);
-// 		media->setParentId(this->mid);
-// 		media->setStart(this->start + ((float)i/4.0) * this->getDuration());
-// 		media->setEnd(this->start + ((float)(i+1)/4.0) * this->getDuration()-.01);
-// 		this->addSegment(media);
-// 	}
-// }
-
-
 ACMediaTimedFeature* ACMedia::getTimedFeatures() {
     bool _binary=false;//true
     ACMediaType mediaType=this->getType();
@@ -1139,7 +1162,6 @@ ACMediaTimedFeature* ACMedia::getTimedFeatures() {
     }
     return output;
 }
-
 
 // CPL 25/06
 // get only one TimedFeature

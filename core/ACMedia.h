@@ -111,21 +111,30 @@ public:
     virtual ACMediaType getActiveSubMediaType() {return media_type;}
 
     void setId(int _id);
-    int getId() {return mid;}
-    void setParentId(int _parentid) {parentid = _parentid;} //CF so that segments can be defined as ACMedia having other ACMedia as parents
-    int getParentId() {return parentid;}
-    void setParent(ACMedia* _parent){this->parent = _parent;}
-    ACMedia* getParent(){return this->parent;}
+    int getId();
+    void setParentId(int _parentid); //CF so that segments can be defined as ACMedia having other ACMedia as parents
+    int getParentId();
+    void setParent(ACMedia* _parent);
+    ACMedia* getParent();
 
-    double getDuration(){return this->getEnd()-this->getStart();}
+    double getDuration();
 
-    void addSegment(ACMedia* _segment){segments.push_back(_segment);}
-    //void removeSegment(ACMedia* _segment){segments.erase(_segment);}//CF wow, tricky
-    std::vector<ACMedia*> &getAllSegments() { return segments; }
-    void setAllSegments(std::vector<ACMedia*> _segments) { segments=_segments; }
-    void deleteAllSegments() { segments.clear();}
-    ACMedia* getSegment(int i) { return segments[i]; }
-    int getNumberOfSegments(){return segments.size();}
+    void addSegment(ACMedia* _segment);
+    std::vector<ACMedia*> &getAllSegments();
+    void setAllSegments(std::vector<ACMedia*> _segments);
+    void deleteAllSegments();
+    ACMedia* getSegment(int i);
+    int getNumberOfSegments();
+
+    bool isSegment();
+    bool isDocument();
+    void setAsSegment();
+    void setAsDocument();
+
+protected:
+    bool is_segment, is_document;
+
+public:
 
     virtual std::vector<ACMediaFeatures*> &getAllFeaturesVectors() { return features_vectors; }
     virtual ACMediaFeatures* getFeaturesVector(int i);

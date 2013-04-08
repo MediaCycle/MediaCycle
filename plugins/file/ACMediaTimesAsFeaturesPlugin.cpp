@@ -34,7 +34,7 @@ using namespace std;
 
 ACMediaTimesAsFeaturesPlugin::ACMediaTimesAsFeaturesPlugin() : ACFeaturesPlugin() {
     //vars herited from ACPlugin
-    this->mMediaType = MEDIA_TYPE_VIDEO | MEDIA_TYPE_AUDIO;
+    this->mMediaType = MEDIA_TYPE_VIDEO | MEDIA_TYPE_AUDIO | MEDIA_TYPE_MIXED;
     this->mName = "Media Times as Features";
     this->mDescription = "Wraps the media start/end times and duration as features";
     this->mId = "";

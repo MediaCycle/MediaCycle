@@ -55,7 +55,7 @@ ACMediaDocument::ACMediaDocument() : ACMedia() {
 	mediaID=0;
 	activeMedia=0;
 	activeMediaKey=string("");
-	
+    this->is_document = true;
 }
 
 int ACMediaDocument::import(std::string _filename, int _mid, ACPluginManager *acpl, bool _save_timed_feat){

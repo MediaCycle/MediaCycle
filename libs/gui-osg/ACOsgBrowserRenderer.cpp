@@ -186,16 +186,18 @@ void ACOsgBrowserRenderer::clean(){
 
 void ACOsgBrowserRenderer::mediaImported(int n, int nTot,int mId){
     
+    int nodes = node_renderers.size();
+
     if(n==0){
-        std::cout << "ACOsgBrowserRenderer::mediaImported: creating renderers for " << nTot << " medias " << std::endl;
+        std::cout << "ACOsgBrowserRenderer::mediaImported: creating renderers for " << nTot << " medias " << "(currently " << nodes << " renderers)" << std::endl;
         return;
     }
     else if(mId==-1 && n!=nTot){
-        std::cerr << "ACOsgBrowserRenderer::mediaImported " << n << "/" << nTot << " doesn't have a proper media id" << std::endl;
+        std::cerr << "ACOsgBrowserRenderer::mediaImported " << n << "/" << nTot << " doesn't have a proper media id" << "(currently " << nodes << " renderers)" << std::endl;
         return;
     }
     else if(n==nTot&&mId==-1){
-        std::cout << "ACOsgBrowserRenderer::mediaImported: finished importing" << std::endl;
+        std::cout << "ACOsgBrowserRenderer::mediaImported: finished importing" << "(currently " << nodes << " renderers)" << std::endl;
         return;
     }
     if(!media_cycle){
@@ -207,7 +209,7 @@ void ACOsgBrowserRenderer::mediaImported(int n, int nTot,int mId){
         return;
     }
     if(n==nTot&&mId!=-1){
-        std::cout << "ACOsgBrowserRenderer::mediaImported: last node importing" << std::endl;
+        std::cout << "ACOsgBrowserRenderer::mediaImported: last node importing" << "(currently " << nodes << " renderers)" << std::endl;
     
     }
     
@@ -215,7 +217,7 @@ void ACOsgBrowserRenderer::mediaImported(int n, int nTot,int mId){
     activity_update_mutex.lock();
    /* if(media_cycle->getMediaType() == media_cycle->getLibrary()->getMedia(mId)->getType())*/{
        
-       std::cout << "ACOsgBrowserRenderer::mediaImported adding to " << node_renderers.size() << " renderers the renderer for media id " << mId << " ("<< n << "/" << nTot << ") " << std::endl;
+       std::cout << "ACOsgBrowserRenderer::mediaImported adding to " << node_renderers.size() << " renderers the renderer for media id " << mId << " ("<< n << "/" << nTot << ") " << "(currently " << nodes << " renderers)" << std::endl;
        for (int i=0;i<100;i++){
            if (media_cycle->getMediaNode(mId)!=0) 
                break;

@@ -91,9 +91,9 @@ public:
     void cleanLibrary();
     std::vector<std::string> getExtensionsFromMediaType(ACMediaType media_type);
     bool isEmpty();
-    ACMediaType getMediaType(){return media_type;};
-    void setMediaType(ACMediaType m){media_type = m;};
-    int getSize() { return media_library.size(); };
+    ACMediaType getMediaType(){return media_type;}
+    void setMediaType(ACMediaType m){media_type = m;}
+    int getSize() { return media_library.size(); }
 
     void setTitle(std::string _title){this->metadata.title=_title;}
     void setAuthor(std::string _author){this->metadata.author=_author;}
@@ -121,7 +121,7 @@ public:
     std::string getCuratorLocation(){return this->curator.location;}
     std::string getCuratorPicture(){return this->curator.picture;}
 
-    //std::vector<ACMedia*> getAllMedia() {return media_library;};
+    //std::vector<ACMedia*> getAllMedia() {return media_library;}
     ACMedias getAllMedia() {return media_library;}
     std::vector<long> getAllMediaIds();
     int addMedia(ACMedia *aMedia);
@@ -134,8 +134,8 @@ public:
     int getMediaIndex(std::string media_file_name);
     std::string getThumbnailFileName(int i);
 
-    long getSynthesisID(){return synthesisID;};
-    void setSynthesisID(long _id){synthesisID = _id;};
+    long getSynthesisID(){return synthesisID;}
+    void setSynthesisID(long _id){synthesisID = _id;}
 
     std::vector<int> getParentIds();
 
@@ -145,10 +145,10 @@ public:
 
     std::vector<std::string> getListOfActivePlugins();
 
-    std::vector< std::vector<double> > getMeanFeatures() {return mean_features;};
-    std::vector< std::vector<double> > getStdevFeatures() {return stdev_features;};
-    //std::map< long,std::vector<double> > getMeanFeatures() {return mean_features;};
-    //std::map< long,std::vector<double> > getStdevFeatures() {return stdev_features;};
+    std::vector< std::vector<double> > getMeanFeatures() {return mean_features;}
+    std::vector< std::vector<double> > getStdevFeatures() {return stdev_features;}
+    //std::map< long,std::vector<double> > getMeanFeatures() {return mean_features;}
+    //std::map< long,std::vector<double> > getStdevFeatures() {return stdev_features;}
 
     int importDirectory(std::string _path, int recursive,  ACPluginManager *acpl=0, bool forward_order=true, bool doSegment=false, bool _save_timed_feat=false); //, TiXmlElement* _medias = 0);
     // returns the media id of the imported file

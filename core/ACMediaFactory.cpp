@@ -70,10 +70,12 @@ ACMedia* ACMediaFactory::create(string file_ext, ACMediaType media_type){
         std::cerr << "ACMediaFactory::create: couldn't find a reader plugin for extension "<< file_ext << std::endl;
 		return 0;
 	}
-    ACMediaReaderExtensions::iterator renderable_iter = renderable_extensions.find(file_ext);
-    if( use_rendering && renderable_iter == renderable_extensions.end() ) {
-        std::cerr << "ACMediaFactory::create: couldn't find a renderer plugin for extension "<< file_ext << std::endl;
-        return 0;
+    if(media_type != MEDIA_TYPE_MIXED){
+        ACMediaReaderExtensions::iterator renderable_iter = renderable_extensions.find(file_ext);
+        if( use_rendering && renderable_iter == renderable_extensions.end() ) {
+            std::cerr << "ACMediaFactory::create: couldn't find a renderer plugin for extension "<< file_ext << std::endl;
+            return 0;
+        }
     }
     ACMediaType m = readable_iter->second.second;
     if(media_type == MEDIA_TYPE_NONE)
@@ -236,7 +238,7 @@ std::vector< std::string > ACMediaFactory::listAvailableMediaTypes(){
 }
 
 bool ACMediaFactory::isMediaTypeSegmentable(ACMediaType _media_type){
-    if((_media_type & MEDIA_TYPE_AUDIO) || (_media_type & MEDIA_TYPE_VIDEO))
+    if((_media_type & MEDIA_TYPE_AUDIO) || (_media_type & MEDIA_TYPE_VIDEO) || (_media_type & MEDIA_TYPE_MIXED))
 		return true;
 	else
 		return false;
