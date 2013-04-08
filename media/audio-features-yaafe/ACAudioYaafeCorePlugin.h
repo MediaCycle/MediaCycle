@@ -79,6 +79,7 @@ private:
     bool dataflowLoaded;
     bool factoriesRegistered;
     ACFeatureDimensions featureDimensions;
+    std::vector<std::string> timedFeatureNames;
     bool with_centroid,with_spread,with_skewness,with_kurtosis,with_min,with_mean,with_max;
 };
 

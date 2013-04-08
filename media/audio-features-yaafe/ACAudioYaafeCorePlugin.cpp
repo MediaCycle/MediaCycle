@@ -346,6 +346,8 @@ ACFeatureDimensions ACAudioYaafeCorePlugin::getFeaturesDimensions(){
             return featdims;
         }
 
+        timedFeatureNames.push_back(name);
+
         size_t underscore = 0;
         while(underscore != std::string::npos){
             underscore = name.find_first_of("_",underscore);
@@ -589,15 +591,27 @@ std::vector<ACMediaFeatures*> ACAudioYaafeCorePlugin::calculate(ACMedia* theMedi
     int feature_length = -1;
     if(theMedia->getParentId()==-1){
         bool featuresAvailable = true;
-        for (ACFeatureDimensions::iterator featIt = featureDimensions.begin();featIt!=featureDimensions.end();featIt++){
+
+        // For each timed feature name, try to load it
+        for(std::vector<std::string>::iterator timedFeatureName = timedFeatureNames.begin(); timedFeatureName != timedFeatureNames.end();timedFeatureName++){
             ACMediaTimedFeature* feature = 0;
             feature = new ACMediaTimedFeature();
             bool featureAvailable = false;
-            //std::cout << "ACAudioYaafeCorePlugin: trying to load feature named '" << *feat << "'... " << std::endl;
-            mtf_file_name = aFileName_noext + "_" + featIt->first + file_ext;
+            mtf_file_name = aFileName_noext + "_" + *timedFeatureName  + file_ext;
+            std::cout << "ACAudioYaafeCorePlugin: trying to load feature named '" << mtf_file_name << "'... " << std::endl;
             featureAvailable = feature->loadFromFile(mtf_file_name,save_binary);
             if(featureAvailable && feature){
-                feature->setName(featIt->first);
+
+                std::string featureName(*timedFeatureName);
+                size_t underscore = 0;
+                while(underscore != std::string::npos){
+                    underscore = featureName.find_first_of("_",underscore);
+                    if(underscore != std::string::npos){
+                        featureName = featureName.replace(underscore,1," ");
+                    }
+                }
+
+                feature->setName(featureName);
                 featureAvailable = this->addMediaTimedFeature(feature, aFileName);
                 if(featureAvailable){
                     if(feature_length != -1){
@@ -626,7 +640,7 @@ std::vector<ACMediaFeatures*> ACAudioYaafeCorePlugin::calculate(ACMedia* theMedi
             featuresAvailable = false;
             std::cerr << "ACAudioYaafeCorePlugin: loaded features are empty" << std::endl;
         }
-        else if(featureDimensions.size()!=descmf.size()){
+        else if(timedFeatureNames.size()!=descmf.size()){
             featuresAvailable = false;
             std::cerr << "ACAudioYaafeCorePlugin: some features weren't calculated previously" << std::endl;
         }
@@ -727,7 +741,18 @@ std::vector<ACMediaFeatures*> ACAudioYaafeCorePlugin::calculate(ACMedia* theMedi
     // saving timed features on disk (if _save_timed_feat flag is on)
     if (theMedia->getParentId()==-1 && _save_timed_feat) {
         for(mf=descmf.begin();mf!=descmf.end();mf++){
-            mtf_file_name = aFileName_noext + "_" +(*mf).second->getName() + file_ext;
+
+            std::string featureName((*mf).second->getName());
+
+            size_t underscore = 0;
+            while(underscore != std::string::npos){
+                underscore = featureName.find_first_of(" ",underscore);
+                if(underscore != std::string::npos){
+                    featureName = featureName.replace(underscore,1,"_");
+                }
+            }
+            mtf_file_name = aFileName_noext + "_" + featureName  + file_ext;
+            std::cout << "ACAudioYaafeCorePlugin: trying to save feature named '" << mtf_file_name << "'... " << std::endl;
             (*mf).second->saveInFile(mtf_file_name, save_binary);
             theMedia->addTimedFileNames(mtf_file_name);
             //mtf_file_names.push_back(mtf_file_name); // keep track of saved features
