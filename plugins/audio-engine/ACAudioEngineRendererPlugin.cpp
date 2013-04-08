@@ -230,7 +230,7 @@ bool ACAudioEngineRendererPlugin::performActionOnMedia(std::string action, long 
     else{
 
         if(arguments.size() !=1){
-            std::cerr << "ACAudioEngineRendererPlugin::performActionOnMedia: action " << action << " requires 1 float argument" << std::endl;
+            //std::cerr << "ACAudioEngineRendererPlugin::performActionOnMedia: action " << action << " requires 1 float argument" << std::endl;
             return false;
         }
         float new_value = 0.0f;

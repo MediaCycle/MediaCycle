@@ -94,6 +94,7 @@ public:
     std::map< long int, ACAudioStkGranulate*> grains;
     std::map< long int, int> current_frames;
     std::map< long int, stk::FreeVerb*> frevs;
+    stk::FreeVerb* master_frev;
     std::map< long int, stk::StkFloat> gains;
     stk::StkFloat master_volume;
     std::map< long int, stk::StkFloat> pans;

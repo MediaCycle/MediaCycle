@@ -50,6 +50,9 @@ public:
     virtual ~ACAudioStkFileLoop( void ){}
 
     stk::StkFloat getRate(){return rate_;}
+
+    //! Query whether a file is open.
+    bool isOpen( void ) { return file_.isOpen(); }
 };
 
 #endif
