@@ -4,7 +4,7 @@ set(yaafe_io_INCLUDE_DIRS ${CMAKE_SOURCE_DIR}/src_cpp/ ${SMARC_INCLUDE_DIR})
 set(yaafe_io_LIBS "")
 
 if (WITH_SNDFILE)
-   list(APPEND yaafe_io_LIBS ${SNDFILE_LIBRARY})
+   list(APPEND yaafe_io_LIBS ${SNDFILE_LIBRARIES})
    list(APPEND yaafe_io_INCLUDE_DIRS ${SNDFILE_INCLUDE_DIR})
 else (WITH_SNDFILE)
     file(GLOB tmpfile io/AudioFileReader.cpp)

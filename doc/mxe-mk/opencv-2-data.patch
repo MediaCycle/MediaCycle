@@ -1,0 +1,16 @@
+This file is part of MXE.
+See index.html for further information.
+
+Allows to install cascade templates.
+
+--- a/data/CMakeLists.txt	2012-07-26 00:55:30.000000000 +0200
++++ b/data/CMakeLists.txt	2013-04-10 14:51:39.000000000 +0200
+@@ -4,7 +4,7 @@
+ if(ANDROID)
+   install(FILES ${HAAR_CASCADES} DESTINATION sdk/etc/haarcascades COMPONENT main)
+   install(FILES ${LBP_CASCADES}  DESTINATION sdk/etc/lbpcascades  COMPONENT main)
+-elseif(NOT WIN32)
++else()
+   install(FILES ${HAAR_CASCADES} DESTINATION share/OpenCV/haarcascades COMPONENT main)
+   install(FILES ${LBP_CASCADES}  DESTINATION share/OpenCV/lbpcascades  COMPONENT main)
+ endif()

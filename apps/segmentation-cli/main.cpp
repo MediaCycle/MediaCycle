@@ -1,8 +1,8 @@
 /**
  * @brief main.cpp
  * @author Christian Frisson
- * @date 04/12/2012
- * @copyright (c) 2012 – UMONS - Numediart
+ * @date 11/04/2013
+ * @copyright (c) 2013 – UMONS - Numediart
  * 
  * MediaCycle of University of Mons – Numediart institute is 
  * licensed under the GNU AFFERO GENERAL PUBLIC LICENSE Version 3 
@@ -189,7 +189,7 @@ int main(int argc, char** argv){
     acpl = media_cycle->getPluginManager();
     int i_o;
     // BICsegmentation
-    ACBicSegmentationPlugin* P = dynamic_cast<ACBicSegmentationPlugin*> (acpl->getPlugin("BIC Segmentation")); //CPL needed for using setParameters()
+    /*ACBicSegmentationPlugin* P = dynamic_cast<ACBicSegmentationPlugin*> (acpl->getPlugin("BIC Segmentation")); //CPL needed for using setParameters()
 
     std::cout << "-----------------------------------------" << std::endl;
     std::cout << "BIC parameters" << std::endl;
@@ -201,7 +201,7 @@ int main(int argc, char** argv){
     std::cout << "discard_borders : " << _discard_borders_ << std::endl;
 
     //std::cout << "Set parameters " << std::endl;
-    P->setParameters(_lambda, _sampling_rate, _Wmin, _bic_thresh, _jump_width, _discard_borders_);
+    P->setParameters(_lambda, _sampling_rate, _Wmin, _bic_thresh, _jump_width, _discard_borders_);*/
 
     // Saving results
     char name[] = "Segmentation.txt";
@@ -224,7 +224,7 @@ int main(int argc, char** argv){
     if (fs::is_directory(p))
     {
         std::cout << "\nIn directory: " << p << "\n\n";
-        soundDir = p.c_str();
+        soundDir = p.string();
         string sStr = boost::lexical_cast<string>(_sampling_rate);
         string WminStr = boost::lexical_cast<string>(_Wmin); // to put the size of the window in the file name
         string bicStr = boost::lexical_cast<string>(_bic_thresh);
@@ -274,7 +274,7 @@ int main(int argc, char** argv){
                         cerr <<  "features computed" << endl;
                         descM = ACM->getTimedFeatures();
 
-                        std::vector<ACMedia*> seg = P->segment(descM, ACM);
+    /*                    std::vector<ACMedia*> seg = P->segment(descM, ACM);
                         int Nseg = seg.size();
                         cerr << "NUMBER SEGs: " << Nseg << endl;
 
@@ -310,7 +310,7 @@ int main(int argc, char** argv){
                             }
                         }
                         cerr << "delete! " << endl;
-                        delete ACM, descM;
+                        delete ACM, descM;*/
 
                     }
                 }

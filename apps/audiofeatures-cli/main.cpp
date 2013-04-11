@@ -1,8 +1,8 @@
 /**
  * @brief main.cpp
- * @author Xavier Siebert
- * @date 31/01/2011
- * @copyright (c) 2011 – UMONS - Numediart
+ * @author Christian Frisson
+ * @date 11/04/2013
+ * @copyright (c) 2013 – UMONS - Numediart
  * 
  * MediaCycle of University of Mons – Numediart institute is 
  * licensed under the GNU AFFERO GENERAL PUBLIC LICENSE Version 3 
@@ -218,8 +218,13 @@ int main(int argc, char** argv){
 
 	struct stat st;
 	
-	if(!stat(descDir.c_str(),&st) == 0)
+	if(!stat(descDir.c_str(),&st) == 0){
+#ifdef __MINGW32__
+		mkdir(descDir.c_str());
+#else
 		mkdir(descDir.c_str(), 01777);
+#endif
+    }
 
 	for (int i=0; i<desc.size(); i++){
 		descFileName = descDir + rootFileName + "." + descAbbreviation(desc[i]->getName()) + ".txt";

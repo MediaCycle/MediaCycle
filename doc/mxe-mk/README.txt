@@ -1,25 +1,17 @@
 These are additional makefiles and patches for the MXE (M cross environment) project (http://mxe.cc) that allows to cross-compile dependencies for win32 from unix hosts (OSX and ubuntu for instance).
 
 Howto:
+
 * Install the requirements of MXE for your platform (see http://mxe.cc/#requirements)
-* Download and extract MXE (using: git clone -b stable https://github.com/mxe/mxe.git, see http://mxe.cc/#download for updates)
+
+* Download and extract MXE (using: git clone -b master https://github.com/mxe/mxe.git, see http://mxe.cc/#download for updates)
+
 * Edit index.html, look for List of Packages, and add alphabetically each of the following package definitions if more up to date versions aren't already listed:
-    <tr>
-        <td id="armadillo-package">armadillo</td>
-        <td id="armadillo-version">3.4.0</td>
-        <td id="armadillo-website"><a href="http://armadillo.sf.net/">Armadillo C++ linear algebra library</a></td>
-    </tr>
 
     <tr>
         <td id="argtable-package">argtable</td>
         <td id="argtable-version">2.13</td>
         <td id="argtable-website"><a href="http://argtable.sf.net/">ANSI C command line parser</a></td>
-    </tr>
-
-    <tr>
-        <td id="boost-package">boost</td>
-        <td id="boost-version">1.50.0</td>
-        <td id="boost-website"><a href="http://www.boost.org/">Boost C++ Library</a></td>
     </tr>
 
     <tr>
@@ -29,15 +21,9 @@ Howto:
     </tr>
 
     <tr>
-        <td id="gcc-package">gcc</td>
-        <td id="gcc-version">4.7.1</td>
-        <td id="gcc-website"><a href="http://gcc.gnu.org/">GCC</a></td>
-    </tr>
-
-    <tr>
-        <td id="lapack-package">lapack</td>
-        <td id="lapack-version">3.4.1</td>
-        <td id="lapack-website"><a href="http://www.netlib.org/lapack/">lapack</a></td>
+        <td id="glib-package">glib</td>
+        <td id="glib-version">2.34.3</td>
+        <td id="glib-website"><a href="http://www.gtk.org/">GLib</a></td>
     </tr>
 
     <tr>
@@ -47,24 +33,31 @@ Howto:
     </tr>
 
     <tr>
-        <td id="opencv-package">opencv</td>
-        <td id="opencv-version">2.4.2</td>
-        <td id="opencv-website"><a href="http://opencv.willowgarage.com">OpenCV</a></td>
+        <td id="openal-package">openal</td>
+        <td id="openal-version">1.15.1</td>
+        <td id="openal-website"><a href="http://kcat.strangesoft.net/openal.html">openal</a></td>
     </tr>
 
     <tr>
-        <td id="qwt-package">qwt</td>
-        <td id="qwt-version">6.0.1</td>
-        <td id="qwt-website"><a href="http://qwt.sourceforge.net/">Qwt</a></td>
+        <td id="opencv-package">opencv</td>
+        <td id="opencv-version">2.4.4</td>
+        <td id="opencv-website"><a href="http://opencv.org/">OpenCV</a></td>
     </tr>
+
 * For each package added into index.html, copy the associated files contained in the current folder into the src folder of MXE.
-* Open a terminal in the MXE root folder (containing doc, src, tools…), install the dependencies with the command:
-make gcc ...
+
+* Open a terminal in the MXE root folder (containing doc, src, tools...), install the dependencies with the command:
+make gcc argtable armadillo boost curl dlfcn-win32 ffmpeg liblo libsndfile mpg123 openal opencv openscenegraph pthreads qt qwt tinyxml JOBS=4 -j 4
+
+* Open a terminal in a MediaCycle build directory:
+cmake MC_SRC -DCMAKE_TOOLCHAIN_FILE=MXE_ROOT/usr/i686-pc-mingw32/share/cmake/mxe-conf.cmake
+(adapt the MediaCycle source directory MC_SRC and the mxd root directory MXE_ROOT accordingly)
 
 TODO:
 * add clucene
 
 Changelog:
+* (11/04/2013, mc changeset 1127): removed makefiles from armadillo, boost, gcc, lapack, qwt (part of mxe-master in sufficient versions); fixed opencv (now part of mxe-master), glib, openal
 * (09/09/2012, mc changeset 907): updated armadillo to 3.4.0, submitted to MacPorts <https://trac.macports.org/ticket/36062> (already accepted, seems it's gonna be available from the next MacPorts version, current is 2.1.2) and to MXE <https://github.com/mxe/mxe/pull/77>
 * (27/07/2012, mc changeset 838): debugged opencv 2.4.2
 * (27/07/2012, mc changeset 838): added mpg123 1.14.4 and argtable 2.13 and dlfcn r19

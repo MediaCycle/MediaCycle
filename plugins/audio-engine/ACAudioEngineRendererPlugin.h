@@ -32,16 +32,16 @@
  *
  */
 
+#ifndef ACAudioEngineRendererPlugin_H
+#define	ACAudioEngineRendererPlugin_H
+
 #include <MediaCycle.h>
 #include <ACPlugin.h>
 #include "ACAudioEngine.h"
 #include <ACPluginQt.h>
-//#include <QtGui>
+#include <QtGui>
 
-#ifndef ACAudioEngineRendererPlugin_H
-#define	ACAudioEngineRendererPlugin_H
-
-class ACAudioEngineRendererPlugin : public QObject, public ACPluginQt, virtual public ACMediaRendererPlugin
+class ACAudioEngineRendererPlugin : public QObject, public ACPluginQt, public ACMediaRendererPlugin
 {
     Q_OBJECT
     Q_INTERFACES(ACPluginQt)

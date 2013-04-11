@@ -1,8 +1,8 @@
 /**
  * @brief findpeaks.h
- * @author Thierry Ravet
- * @date 07/09/2012
- * @copyright (c) 2012 – UMONS - Numediart
+ * @author Christian Frisson
+ * @date 11/04/2013
+ * @copyright (c) 2013 – UMONS - Numediart
  * 
  * MediaCycle of University of Mons – Numediart institute is 
  * licensed under the GNU AFFERO GENERAL PUBLIC LICENSE Version 3 
@@ -74,7 +74,7 @@ arma::icolvec findpeaks(const arma::Col<eT>& Data, long Pd){
 #ifdef __clang__
         if( ((sum(Data(j) > temp)) == temp.n_rows) && (j != 0) && j!=L-1 ){
 #else //__clang__
-        if( (as_scalar(sum(Data(j) > temp)) == temp.n_rows) && (j != 0) && j!=L-1 ){
+            if( (arma::as_scalar(sum(Data(j) > temp)) == temp.n_rows) && (j != 0) && j!=L-1 ){
 #endif //__clang__
 			pks(m)  = Data(j); 
 			locs(m) = j;       

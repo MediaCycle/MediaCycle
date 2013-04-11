@@ -12,7 +12,7 @@ IF (SUPPORT_AUDIO AND USE_AUDIOFEAT AND BUILD_CLIS)
 	ADD_DEPENDENCIES(audiofeatures-cli mediacycle armadillo-utils mediacycle-audio-features)
 	ADD_DEPENDENCIES(audiofeatures-cli mc_audio mc_segmentation)
 
-	TARGET_LINK_LIBRARIES(audiofeatures-cli mediacycle mediacycle-audio-features ${SNDFILE_LIBRARY} ${SAMPLERATE_LIBRARY})
+	TARGET_LINK_LIBRARIES(audiofeatures-cli mediacycle mediacycle-audio-features ${SNDFILE_LIBRARIES} ${SAMPLERATE_LIBRARY})
 
 	SET_TARGET_PROPERTIES(${TARGET_NAME} PROPERTIES FOLDER "${FOLDERNAME}")
 	MESSAGE("[X] ${TARGET_NAME}")

@@ -9,7 +9,7 @@ if (WITH_FFTW3)
 endif (WITH_FFTW3)
 
 if (WITH_LAPACK)
-   list(APPEND yaafe_components_LIBS ${LAPACK_LIBRARY} ${BLAS_LIBRARY})
+   list(APPEND yaafe_components_LIBS ${LAPACK_LIBRARIES})
 else (WITH_LAPACK)
     file(GLOB tmpfile audio/LPC2LSF.cpp)
     list(REMOVE_ITEM yaafe_components_SOURCES ${tmpfile})

@@ -28,10 +28,10 @@ foreach(version ${_Qwt_KNOWN_VERSIONS})
   list(APPEND _Qwt_TEST_VERSIONS_LIBRARY "qwt-${version}/lib")
 endforeach()
 
-FIND_PATH(QWT_INCLUDE_DIR qwt.h PATH_SUFFIXES "qwt" "qwt-qt4" "qwt/include" ${_Qwt_TEST_VERSIONS_INCLUDE})
+FIND_PATH(QWT_INCLUDE_DIR qwt.h PATH_SUFFIXES "qwt" "qwt-qt4" "qwt/include" ${_Qwt_TEST_VERSIONS_INCLUDE} "qt/include")
 
 SET(QWT_NAMES ${QWT_NAMES} qwt qwt-qt4)
-FIND_LIBRARY(QWT_LIBRARY NAMES ${QWT_NAMES} PATH_SUFFIXES ${_Qwt_TEST_VERSIONS_LIBRARY})
+FIND_LIBRARY(QWT_LIBRARY NAMES ${QWT_NAMES} PATH_SUFFIXES ${_Qwt_TEST_VERSIONS_LIBRARY} "qt/lib")
 
 # handle the QUIETLY and REQUIRED arguments and set QWT_FOUND to TRUE if 
 # all listed variables are TRUE

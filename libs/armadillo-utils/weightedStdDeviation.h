@@ -1,8 +1,8 @@
 /**
  * @brief weightedStdDeviation.h
- * @author Thierry Ravet
- * @date 07/09/2012
- * @copyright (c) 2012 – UMONS - Numediart
+ * @author Christian Frisson
+ * @date 11/04/2013
+ * @copyright (c) 2013 – UMONS - Numediart
  * 
  * MediaCycle of University of Mons – Numediart institute is 
  * licensed under the GNU AFFERO GENERAL PUBLIC LICENSE Version 3 
@@ -41,7 +41,7 @@ const arma::Row<eT> weightedStdDeviation(const arma::Mat<eT>& x_m, const arma::C
 #ifdef __clang__
 	arma::Col<eT> weightN_v	= weight_v/(sum(weight_v));
 #else //__clang__
-    arma::Col<eT> weightN_v	= weight_v/as_scalar(sum(weight_v));
+    arma::Col<eT> weightN_v	= weight_v/arma::as_scalar(sum(weight_v));
 #endif //__clang__
 	arma::Mat<eT> m	= trans(x_m) * weightN_v;
 	arma::Mat<eT> xc_m	= trans(x_m) - repmat(m, 1, x_m.n_rows);

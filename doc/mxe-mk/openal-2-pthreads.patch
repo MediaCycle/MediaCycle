@@ -1,0 +1,60 @@
+--- openal-soft-1.15.1/Alc/helpers.c.orig.c	2012-12-11 21:35:55.000000000 +0100
++++ openal-soft-1.15.1/Alc/helpers.c	2013-04-10 18:20:10.000000000 +0200
+@@ -256,7 +256,7 @@
+ }
+ 
+ 
+-#ifdef _WIN32
++#if defined(_WIN32) && !defined(__MINGW32__)
+ void pthread_once(pthread_once_t *once, void (*callback)(void))
+ {
+     LONG ret;
+@@ -331,6 +331,7 @@
+ #endif
+ #include <sched.h>
+ 
++#ifndef __MINGW32__
+ void InitializeCriticalSection(CRITICAL_SECTION *cs)
+ {
+     pthread_mutexattr_t attrib;
+@@ -412,6 +413,7 @@
+     while(nanosleep(&tv, &rem) == -1 && errno == EINTR)
+         tv = rem;
+ }
++#endif
+ 
+ #ifdef HAVE_DLFCN_H
+ 
+--- openal-soft-1.15.1/OpenAL32/Include/alMain.h.orig.h	2012-12-11 21:35:55.000000000 +0100
++++ openal-soft-1.15.1/OpenAL32/Include/alMain.h	2013-04-10 18:15:59.000000000 +0200
+@@ -67,11 +67,15 @@
+ #define WIN32_LEAN_AND_MEAN
+ #include <windows.h>
+ 
++#ifndef __MINGW32__
+ typedef DWORD pthread_key_t;
+ int pthread_key_create(pthread_key_t *key, void (*callback)(void*));
+ int pthread_key_delete(pthread_key_t key);
+ void *pthread_getspecific(pthread_key_t key);
+ int pthread_setspecific(pthread_key_t key, void *val);
++#else
++#include <pthread.h>
++#endif
+ 
+ #define HAVE_DYNLOAD 1
+ void *LoadLib(const char *name);
+@@ -80,12 +84,14 @@
+ 
+ WCHAR *strdupW(const WCHAR *str);
+ 
++#ifndef __MINGW32__
+ typedef LONG pthread_once_t;
+ #define PTHREAD_ONCE_INIT 0
+ void pthread_once(pthread_once_t *once, void (*callback)(void));
+ 
+ static __inline int sched_yield(void)
+ { SwitchToThread(); return 0; }
++#endif
+ 
+ #else
+ 

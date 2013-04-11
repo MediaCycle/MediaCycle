@@ -1,8 +1,8 @@
 /**
  * @brief main.cpp
  * @author Christian Frisson
- * @date 04/12/2012
- * @copyright (c) 2012 – UMONS - Numediart
+ * @date 11/04/2013
+ * @copyright (c) 2013 – UMONS - Numediart
  * 
  * MediaCycle of University of Mons – Numediart institute is 
  * licensed under the GNU AFFERO GENERAL PUBLIC LICENSE Version 3 
@@ -38,6 +38,13 @@
 #include <signal.h>
 #include "ACAudio.h"
 #include "sndfile.h"
+
+//sleep()
+#include <iostream>
+#ifdef __MINGW32__
+#include <windows.h>
+#define sleep(n) Sleep(1000 * n)
+#endif
 
 using namespace std;
 

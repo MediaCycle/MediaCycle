@@ -1454,11 +1454,11 @@ std::string MediaCycle::getPluginPathFromBaseName(std::string basename)
 #endif
 #elif defined (__WIN32__)
     plugin_ext = ".dll";
-    plugins_path = s_path + "/";
+    plugins_path = s_path.string() + "/";
 #ifdef USE_DEBUG
     plugins_path = s_path.parent_path().parent_path().string() + "/plugins/";
     plugin_subfolder = basename + "/";
-#endif USE_DEBUG
+#endif
 #else // Linux
     plugin_ext = ".so";
 #if not defined (USE_DEBUG) // needs "make package" to be ran to work

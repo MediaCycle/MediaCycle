@@ -1,8 +1,8 @@
 /**
  * @brief linefit.h
- * @author Thierry Ravet
- * @date 07/09/2012
- * @copyright (c) 2012 – UMONS - Numediart
+ * @author Christian Frisson
+ * @date 11/04/2013
+ * @copyright (c) 2013 – UMONS - Numediart
  * 
  * MediaCycle of University of Mons – Numediart institute is 
  * licensed under the GNU AFFERO GENERAL PUBLIC LICENSE Version 3 
@@ -43,7 +43,7 @@ const arma::Row<eT> linefit(const arma::Col<eT>& x_v, const arma::Col<eT>& y_v){
 #ifdef __clang__
     p_v(1) = (mean(y_v) - mean(x_v) * p_v(0));
 #else //__clang__
-    p_v(1) = as_scalar(mean(y_v) - mean(x_v) * p_v(0));
+    p_v(1) = arma::as_scalar(mean(y_v) - mean(x_v) * p_v(0));
 #endif //__clang__
 	return p_v;
 }

@@ -37,7 +37,7 @@ endmacro()
 # as the cmake FindQt4 handles this poorly. Call with the components you want to 
 # compile for, e.g.
 # 
-#     eros_prepare_qt4(QtGui QtCore)
+#     mxe_prepare_qt4(QtGui QtCore)
 #
 # What this macro does:
 #
@@ -45,7 +45,7 @@ endmacro()
 # - if compiling statically
 #   - turns off -DQT_DLL if it's accidentally left on.
 #   - checks to see if there are .prl's which can fill out the lib dependencies.
-macro(eros_prepare_qt4)
+macro(mxe_prepare_qt4)
     if ( ${ARGC} GREATER 0 )
         #foreach(arg ${ARGV})
         #  set(QT_COMPONENTS_ "${QT_COMPONENTS_} ${arg}")

@@ -50,7 +50,7 @@ void ACImportProcess::run(int argc, char *argv[]){
 
     fs::path cli_path(argv[0]);
     std::string cli_name("");
-#ifdef __APPLE__
+#if defined (__APPLE__) || defined(__MINGW32__)
     cli_name = cli_path.stem().string();
 #else // this seems required on ubuntu to compile...
     cli_name = cli_path.stem();

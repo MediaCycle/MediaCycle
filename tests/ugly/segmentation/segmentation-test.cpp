@@ -1,8 +1,8 @@
 /**
  * @brief segmentation-test.cpp
  * @author Christian Frisson
- * @date 04/12/2012
- * @copyright (c) 2012 – UMONS - Numediart
+ * @date 11/04/2013
+ * @copyright (c) 2013 – UMONS - Numediart
  * 
  * MediaCycle of University of Mons – Numediart institute is 
  * licensed under the GNU AFFERO GENERAL PUBLIC LICENSE Version 3 
@@ -42,8 +42,9 @@
 #include "Armadillo-utils.h"
 #ifdef SUPPORT_AUDIO
 #include "ACAudioFeatures.h"
-#endif
 #include "ACAudioSelfSimSegmentationPlugin.h"
+#endif
+
 
 //sleep()
 #include <iostream>
@@ -70,7 +71,7 @@ void test_single_bic(std::string _dir, std::string _fname) {
     M.print();
 
     //default: lambda(1), sampling_rate(1), Wmin(20), bic_thresh(0.5), jump_width(5)
-    ACBicSegmentationPlugin* P = new ACBicSegmentationPlugin();
+    /*ACBicSegmentationPlugin* P = new ACBicSegmentationPlugin();
     clock_t start = clock();
     std::vector<int> seg = P->testSegment(M, 1, 1, 20, 1, 5);
     std::cout << "Time elapsed (segmentation alone): " << ((double) clock() - start) / CLOCKS_PER_SEC << std::endl;
@@ -112,7 +113,7 @@ void test_single_bic(std::string _dir, std::string _fname) {
     char c;
     cin >> c;
 
-    delete P;
+    delete P;*/
 }
 
 void test_double_bic(std::string _dir, std::string _fname) {
@@ -140,7 +141,7 @@ void test_double_bic(std::string _dir, std::string _fname) {
 
     M.print();
 
-    ACBicSegmentationPlugin* P = new ACBicSegmentationPlugin();
+    /*ACBicSegmentationPlugin* P = new ACBicSegmentationPlugin();
     clock_t start = clock();
     //default: lambda(1), sampling_rate(1), Wmin(20), bic_thresh(0.5), jump_width(5)
 
@@ -187,7 +188,7 @@ void test_double_bic(std::string _dir, std::string _fname) {
     char c;
     cin >> c;
 
-    delete P;
+    delete P;*/
 }
 
 void test_multiple_bic(int n) {
@@ -216,7 +217,7 @@ void test_multiple_bic(int n) {
 
     M.print();
 
-    ACBicSegmentationPlugin* P = new ACBicSegmentationPlugin();
+    /*ACBicSegmentationPlugin* P = new ACBicSegmentationPlugin();
     clock_t start = clock();
     //default: lambda(1), sampling_rate(1), Wmin(20), bic_thresh(0.5), jump_width(5), discard_borders(5)
 
@@ -259,7 +260,7 @@ void test_multiple_bic(int n) {
     char c;
     cin >> c;
 
-    delete P;
+    delete P;*/
 }
 
 void test_multiple_selfsim(int n) {
@@ -291,7 +292,7 @@ void test_multiple_selfsim(int n) {
 
 
     M.print();
-
+#ifdef SUPPORT_AUDIO
     ACAudioSelfSimSegmentationPlugin* P = new ACAudioSelfSimSegmentationPlugin();
     clock_t start = clock();
     //default: float _SelfSimThresh=0.8, _L=8, _Wmin=8, KernelType=SELFSIMSTEP, KernelDistance=COSINE;
@@ -334,6 +335,7 @@ void test_multiple_selfsim(int n) {
     cin >> c;
 
     delete P;
+#endif
 }
 
 #ifdef SUPPORT_AUDIO
@@ -649,7 +651,7 @@ void test_bic_from_file(std::string _dir, std::string _fname) {
 
     M.print();
 
-    ACBicSegmentationPlugin* P = new ACBicSegmentationPlugin();
+    /*ACBicSegmentationPlugin* P = new ACBicSegmentationPlugin();
 
     //default: lambda(1), sampling_rate(1), Wmin(20), bic_thresh(0.5), jump_width(5)
     clock_t start = clock();
@@ -671,7 +673,7 @@ void test_bic_from_file(std::string _dir, std::string _fname) {
     g1.plot_x(m, "data");
     g1.set_style("impulses");
     g1.plot_xy(seg_d, seg_i, "segments");
-    sleep(10);
+    sleep(10);*/
 }
 
 int main(int argc, char *argv[]) {

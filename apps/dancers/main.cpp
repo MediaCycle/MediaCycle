@@ -49,6 +49,14 @@
 
 #include <armadillo> // for sort(rand())
 #include <ctime> // for timing with clock()
+
+//sleep()
+#include <iostream>
+#ifdef __MINGW32__
+#include <windows.h>
+#define sleep(n) Sleep(1000 * n)
+#endif
+
 using namespace std;
 using namespace arma;
 

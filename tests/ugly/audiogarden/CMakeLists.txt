@@ -11,7 +11,7 @@ IF(SUPPORT_AUDIO AND USE_AUDIOGARDEN AND USE_AUDIOFEAT)
 
         ADD_DEPENDENCIES(audiogarden-test mediacycle armadillo-utils mediacycle-audio-features mediacycle-audiogarden-synthesis mc_segmentation mc_audio-segmentation)
 
-        TARGET_LINK_LIBRARIES(audiogarden-test mediacycle mediacycle-audio-features mediacycle-audiogarden-synthesis ${SNDFILE_LIBRARY} ${SAMPLERATE_LIBRARY})
+        TARGET_LINK_LIBRARIES(audiogarden-test mediacycle mediacycle-audio-features mediacycle-audiogarden-synthesis ${SNDFILE_LIBRARY} ${SAMPLERATE_LIBRARIES})
 
 	MESSAGE("[X] audiogarden")
 ELSE()

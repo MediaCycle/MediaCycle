@@ -1,8 +1,8 @@
 /**
  * @brief main.cpp
- * @author Jérôme Urbain
- * @date 06/05/2011
- * @copyright (c) 2011 – UMONS - Numediart
+ * @author Christian Frisson
+ * @date 11/04/2013
+ * @copyright (c) 2013 – UMONS - Numediart
  * 
  * MediaCycle of University of Mons – Numediart institute is 
  * licensed under the GNU AFFERO GENERAL PUBLIC LICENSE Version 3 
@@ -247,9 +247,13 @@ int main(int argc, char** argv){
 
 	struct stat st;
 	
-	if(!stat(descDir.c_str(),&st) == 0)
-		mkdir(descDir.c_str(), 01777);
-
+	if(!stat(descDir.c_str(),&st) == 0){
+#ifdef __MINGW32__
+		mkdir(descDir.c_str());
+#else
+		mkdir(descDir.c_str(), 01777);    
+#endif
+    }
         arma::fmat allfeat;
         allfeat=vectorACMTF2fmat(desc);
         std::string matname;
