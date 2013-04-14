@@ -99,7 +99,11 @@ int ACPluginLibrary::initialize() {
     freePlugins();
 
     if(!list || !create || !destroy){ // || !dependencies not mandatory
-        std::cerr << "ACPluginLibrary::initialize: invalid plugin library" << std::endl;
+        std::cerr << "ACPluginLibrary::initialize: invalid plugin library, missing callbacks: ";
+        if(!list) std::cerr << "list ";
+        if(!create) std::cerr << "create ";
+        if(!destroy) std::cerr << "destroy ";
+        std::cerr << std::endl;
         return -1;
     }
 
@@ -184,16 +188,12 @@ void ACPluginLibrary::dump() {
 //typedef void destroyPluginFactory(ACPlugin*);
 //typedef std::vector<std::string> listPluginFactory();
 
-ACDefaultPluginsLibrary::ACDefaultPluginsLibrary() : ACPluginLibrary(){
+ACStaticPluginsLibrary::ACStaticPluginsLibrary() : ACPluginLibrary(){
     this->library_path = "";
     this->mLib = 0;
-    
-    mPlugins.push_back(new ACNormalizePlugin());
-    mPlugins.push_back(new ACKMeansPlugin());
-    mPlugins.push_back(new ACClusterPositionsPropellerPlugin());
 }
 
-ACDefaultPluginsLibrary::~ACDefaultPluginsLibrary(){
+ACStaticPluginsLibrary::~ACStaticPluginsLibrary(){
     for (std::vector<ACPlugin *>::iterator iter = this->mPlugins.begin(); iter != this->mPlugins.end(); iter++) {
         delete(*iter);
         *iter = 0;
@@ -201,9 +201,27 @@ ACDefaultPluginsLibrary::~ACDefaultPluginsLibrary(){
     mPlugins.clear();
 }
 
-int ACDefaultPluginsLibrary::initialize() {
+int ACStaticPluginsLibrary::initialize() {
     for (std::vector<ACPlugin *>::iterator iter = this->mPlugins.begin(); iter != this->mPlugins.end(); iter++) {
         (*iter)->setMediaCycle(this->media_cycle);
     }
     return 1;
+}
+
+ACDefaultPluginsLibrary::ACDefaultPluginsLibrary() : ACStaticPluginsLibrary(){
+    mPlugins.push_back(new ACNormalizePlugin());
+    mPlugins.push_back(new ACKMeansPlugin());
+    mPlugins.push_back(new ACClusterPositionsPropellerPlugin());
+}
+
+ACDefaultPluginsLibrary::~ACDefaultPluginsLibrary(){
+}
+
+std::string ACDefaultPluginsLibrary::getName()
+{
+    return "default-plugins";
+}
+
+std::vector<ACThirdPartyMetadata> ACDefaultPluginsLibrary::getThirdPartyMetadata(){
+    return std::vector<ACThirdPartyMetadata>();
 }

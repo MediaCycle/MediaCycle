@@ -604,10 +604,20 @@ int MediaCycle::importLibrary(string path) {
 }
 */
 
-int MediaCycle::getLibrarySize() { return mediaLibrary->getSize(); }
-int MediaCycle::getNumberOfMediaNodes(){return mediaBrowser->getNumberOfMediaNodes();}
+int MediaCycle::getLibrarySize()
+{
+    int _size = 0;
+    if(mediaLibrary)
+        _size = mediaLibrary->getSize();
+    return _size;
+}
 
-
+int MediaCycle::getNumberOfMediaNodes(){
+    int _nodes;
+    if(mediaBrowser)
+        _nodes = mediaBrowser->getNumberOfMediaNodes();
+    return _nodes;
+}
 
 // == Search by Similarity
 

@@ -112,6 +112,8 @@ using namespace std;
 #include "cba-yaafe-extension/audio/WindowConvolution.h"
 #include "cba-yaafe-extension/audio/WindowNormalize.h"
 
+#include <boost/filesystem/operations.hpp>
+namespace fs = boost::filesystem;
 
 ACAudioYaafeCorePlugin::ACAudioYaafeCorePlugin() : ACTimedFeaturesPlugin() {
     //vars herited from ACPlugin
@@ -201,13 +203,13 @@ bool ACAudioYaafeCorePlugin::registerFactories(){
     ComponentFactory::instance()->registerPrototype(new Join());
 
     // Alternate version if yaafe-io and yaafe-components are built as modules
-    /*setenv("YAAFE_PATH","/Volumes/data/Builds/numediart/audiocycle-osx10.6.8-qtcreator/3rdparty/yaafe/src_cpp/yaafe-io",1);
+    /*setenv("YAAFbuild_path","/Volumes/data/Builds/numediart/audiocycle-osx10.6.8-qtcreator/3rdparty/yaafe/src_cpp/yaafe-io",1);
     int yaafe_io = 0;
     yaafe_io = ComponentFactory::instance()->loadLibrary("yaafe-io");
     if (yaafe_io)
         std::cerr << "Couldn't load yaafe-io" << std::endl;
 
-    setenv("YAAFE_PATH","/Volumes/data/Builds/numediart/audiocycle-osx10.6.8-qtcreator/3rdparty/yaafe/src_cpp/yaafe-components",1);
+    setenv("YAAFbuild_path","/Volumes/data/Builds/numediart/audiocycle-osx10.6.8-qtcreator/3rdparty/yaafe/src_cpp/yaafe-components",1);
     // The following is not necessary if the following line is on the dataflow file: useComponentLibrary yaafe-components
     //int yaafe_comp = 0;
     //yaafe_comp = ComponentFactory::instance()->loadLibrary("yaafe-components");
@@ -238,7 +240,7 @@ void ACAudioYaafeCorePlugin::loadDataflow(){
 
     std::string dataflow_file = "";
 #ifdef USE_DEBUG
-    boost::filesystem::path c_path( __FILE__ );
+    boost::filesystem::path source_path( __FILE__ );
     ///dataflow_file += s_path.parent_path().string() + "/" + this->dataflowFilename();
     std::string library_path("");
     if(media_cycle)
@@ -248,7 +250,26 @@ void ACAudioYaafeCorePlugin::loadDataflow(){
         return;
     }
     boost::filesystem::path b_path( library_path );
-    dataflow_file = c_path.parent_path().parent_path().parent_path().string() + "/" + b_path.parent_path().stem().string() + "/" + b_path.stem().string() + "/" + this->dataflowFilename();
+    dataflow_file = source_path.parent_path().parent_path().parent_path().string() + "/" + b_path.parent_path().stem().string() + "/" + b_path.stem().string() + "/" + this->dataflowFilename();
+    
+    string slash = "/";
+#ifdef __WIN32__
+    slash = "\\";
+    
+    if(!media_cycle){
+        std::cerr << "ACAudioYaafeCorePlugin::loadDataflow: mediacycle instance not set, will try reload the dataflow later" << std::endl;
+        return;
+    }
+    std::string _path = this->media_cycle->getLibraryPathFromPlugin(this->mName);
+    if(_path==""){
+        std::cerr << "ACAudioYaafeCorePlugin::loadDataflow: plugin path not available" << std::endl;
+        return;
+    }
+       
+    boost::filesystem::path dataflow_path ( _path + slash + this->dataflowFilename());
+    dataflow_file = dataflow_path.string();
+     
+#endif
 #else
 #ifdef __APPLE__
     dataflow_file = getExecutablePath() + "/" + this->dataflowFilename();
@@ -260,18 +281,18 @@ void ACAudioYaafeCorePlugin::loadDataflow(){
 #endif
     DataFlow df;
     if (!df.load(dataflow_file)) {
-        cerr << "ERROR: cannot load dataflow from file "<< endl;
+        cerr << "ACAudioYaafeCorePlugin::loadDataflow: cannot load dataflow from file " << dataflow_file << endl;
         return;
     }
+    cout << "ACAudioYaafeCorePlugin::loadDataflow: loaded dataflow from file " << dataflow_file << endl;
     //df.display();
 
     //Engine engine;
     if (!engine.load(df)) {
-        cerr << "ERROR: cannot initialize dataflow engine" << endl;
+        cerr << "ACAudioYaafeCorePlugin::loadDataflow: cannot initialize dataflow engine from file " << dataflow_file << endl;
         return;
     }
-
-
+    cout << "ACAudioYaafeCorePlugin::loadDataflow: initialized dataflow engine from file " << dataflow_file << endl;
 
     /* std::cout << "ACAudioYaafeCorePlugin: inputs" << std::endl;
     std::vector<std::string> inputs = engine.getInputs();
@@ -586,11 +607,12 @@ std::vector<ACMediaFeatures*> ACAudioYaafeCorePlugin::calculate(ACMedia* theMedi
     std::map<std::string,ACMediaTimedFeature*>::iterator mf;
 
     // Trying to open previously-computed files for parent files (TODO should test/compare parameters and plugin versions)
+    bool featuresAvailable = false;
 #ifdef USE_DEBUG
     _save_timed_feat = true; // forcing saving features so that we don't have to calculate them all the time
     int feature_length = -1;
     if(theMedia->getParentId()==-1){
-        bool featuresAvailable = true;
+        featuresAvailable = true;
 
         // For each timed feature name, try to load it
         for(std::vector<std::string>::iterator timedFeatureName = timedFeatureNames.begin(); timedFeatureName != timedFeatureNames.end();timedFeatureName++){
@@ -655,7 +677,7 @@ std::vector<ACMediaFeatures*> ACAudioYaafeCorePlugin::calculate(ACMedia* theMedi
     // CF TODO check if the features length matches the expected length based on the file length and block/step sizes and resample rate
     // CF TODO if some features weren't previously calcultated, only recalculate these
 
-    // Compute the features if not mtf file is found
+    // Compute the features if no mtf file is found
     if(descmf.size()==0){
 
         //AudioFileProcessor processor;
@@ -738,8 +760,8 @@ std::vector<ACMediaFeatures*> ACAudioYaafeCorePlugin::calculate(ACMedia* theMedi
             }*/
     }
 
-    // saving timed features on disk (if _save_timed_feat flag is on)
-    if (theMedia->getParentId()==-1 && _save_timed_feat) {
+    // saving timed features on disk if _save_timed_feat flag is on and if not loaded from files (should check if parameters changed)
+    if (theMedia->getParentId()==-1 && _save_timed_feat && !featuresAvailable) {
         for(mf=descmf.begin();mf!=descmf.end();mf++){
 
             std::string featureName((*mf).second->getName());
@@ -753,7 +775,9 @@ std::vector<ACMediaFeatures*> ACAudioYaafeCorePlugin::calculate(ACMedia* theMedi
             }
             mtf_file_name = aFileName_noext + "_" + featureName  + file_ext;
             std::cout << "ACAudioYaafeCorePlugin: trying to save feature named '" << mtf_file_name << "'... " << std::endl;
-            (*mf).second->saveInFile(mtf_file_name, save_binary);
+            bool saved = (*mf).second->saveInFile(mtf_file_name, save_binary);
+            if(!saved)
+                std::cerr << "ACAudioYaafeCorePlugin: couldn't save feature named '" << mtf_file_name << "'" << std::endl;
             theMedia->addTimedFileNames(mtf_file_name);
             //mtf_file_names.push_back(mtf_file_name); // keep track of saved features
         }

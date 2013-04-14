@@ -64,7 +64,7 @@ public:
     int getSize() {return this->mPlugins.size();}
     DynamicLibrary* getLib() { return this->mLib;}
     void freePlugins();
-    std::vector<ACThirdPartyMetadata> getThirdPartyMetadata();
+    virtual std::vector<ACThirdPartyMetadata> getThirdPartyMetadata();
     void dump();
 
     // store library path, e.g. so that you can remove a whole library
@@ -86,12 +86,21 @@ protected:
     MediaCycle* media_cycle;
 };
 
-class ACDefaultPluginsLibrary : public ACPluginLibrary{
+class ACStaticPluginsLibrary : public ACPluginLibrary{
+public:
+    ACStaticPluginsLibrary();
+    virtual ~ACStaticPluginsLibrary();
+    virtual int initialize();
+    virtual std::string getName()=0;
+    virtual std::vector<ACThirdPartyMetadata> getThirdPartyMetadata()=0;
+};
+
+class ACDefaultPluginsLibrary : public ACStaticPluginsLibrary{
 public:
     ACDefaultPluginsLibrary();
-    ~ACDefaultPluginsLibrary();
-    virtual int initialize();
-    virtual std::string getName(){return "default-plugins";}
+    virtual ~ACDefaultPluginsLibrary();
+    virtual std::string getName();
+    virtual std::vector<ACThirdPartyMetadata> getThirdPartyMetadata();
 };
 
 #endif	/* _ACPLUGINLIBRARY_H */

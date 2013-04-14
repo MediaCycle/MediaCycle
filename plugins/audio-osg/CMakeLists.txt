@@ -1,5 +1,6 @@
 SET(MEDIA_TYPE "audio")
 SET(PLUGIN_NAME "audio-osg")
+SET(OSG_PLUGINS "osgdb_svg")
 SET(MC_MEDIA_LIBS "${MEDIA_TYPE}-core;${MEDIA_TYPE}-osg")
 list(APPEND 3RDPARTY_NAMES "libsndfile")
 list(APPEND 3RDPARTY_LICENSES "LGPL or GPL")

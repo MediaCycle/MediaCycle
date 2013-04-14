@@ -1,5 +1,6 @@
 SET(MEDIA_TYPE "video")
 SET(LIBRARY_NAME "mediacycle-${MEDIA_TYPE}-osg")
+SET(OSG_PLUGINS "osgdb_ffmpeg")
 IF(USE_OSG AND SUPPORT_VIDEO)
         INCLUDE_DIRECTORIES(../${MEDIA_TYPE}-core)
 	FILE(GLOB SRC *.cpp *.c)

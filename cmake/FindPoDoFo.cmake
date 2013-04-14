@@ -1,4 +1,4 @@
-# - Find PoDoFo
+# - Find LibPoDoFo
 # Find the native PoDoFo includes and library
 # This module defines
 #  PODOFO_INCLUDE_DIR, where to find podofo.h, etc.
@@ -8,7 +8,8 @@
 #  PODOFO_LIBRARY, where to find the PODOFO library.
 
 #=============================================================================
-# Copyright 2001-2009 Kitware, Inc.
+# Author: Christian Frisson
+# Copyright (c) 2012 – UMONS - Numediart
 #
 # Distributed under the OSI-approved BSD License (the "License");
 # see accompanying file Copyright.txt for details.
@@ -41,4 +42,4 @@ IF(PODOFO_LIBRARY)
   GET_FILENAME_COMPONENT (NATIVE_PODOFO_LIB_PATH ${PODOFO_LIBRARY} PATH)
 ENDIF(PODOFO_LIBRARY)
 
-MARK_AS_ADVANCED(PODOFO_LIBRARY PODOFO_INCLUDE_DIR PODOFO_LINK_DIRECTORIES)
+MARK_AS_ADVANCED(PODOFO_LIBRARY PODOFO_LIBRARIES PODOFO_INCLUDE_DIR PODOFO_LINK_DIRECTORIES)

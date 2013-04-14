@@ -1,0 +1,920 @@
+Binary files openscenegraph-osg-800b103-orig/.DS_Store and openscenegraph-osg-800b103/.DS_Store differ
+diff -urN openscenegraph-osg-800b103-orig/CMakeLists.txt openscenegraph-osg-800b103/CMakeLists.txt
+--- openscenegraph-osg-800b103-orig/CMakeLists.txt	2013-04-14 21:24:41.000000000 +0200
++++ openscenegraph-osg-800b103/CMakeLists.txt	2013-04-14 23:00:30.000000000 +0200
+@@ -589,7 +589,6 @@
+         IF(WIN32)
+             FIND_PACKAGE(QuickTime)
+         ENDIF()
+-
+     ELSE()
+         FIND_PACKAGE(TIFF)
+         FIND_PACKAGE(QuickTime)
+@@ -1020,6 +1019,7 @@
+   openscenegraph-osgShadow
+   openscenegraph-osgAnimation
+   openscenegraph-osgVolume
++  openscenegraph-osgPresentation
+ )
+ 
+ IF(QT4_FOUND)
+@@ -1034,6 +1034,154 @@
+   INSTALL(FILES ${PROJECT_BINARY_DIR}/packaging/pkgconfig/${PKGCONFIG_FILE}.pc DESTINATION lib${LIB_POSTFIX}/pkgconfig COMPONENT libopenscenegraph-dev)
+ ENDFOREACH(PKGCONFIG_FILE)
+ 
++# pkg config files and header for each plugin
++FILE(GLOB OSG_LIBS_LIST RELATIVE ${CMAKE_SOURCE_DIR}/src ${CMAKE_SOURCE_DIR}/src/*)
++LIST(REMOVE_ITEM OSG_LIBS_LIST "CMakeLists.txt")
++LIST(REMOVE_ITEM OSG_LIBS_LIST ".DS_Store")
++FILE(GLOB OSG_PLUGINS_LIST RELATIVE ${CMAKE_SOURCE_DIR}/src/osgPlugins ${CMAKE_SOURCE_DIR}/src/osgPlugins/*)
++LIST(REMOVE_ITEM OSG_PLUGINS_LIST "CMakeLists.txt")
++FOREACH(OSG_PLUGIN_NAME ${OSG_PLUGINS_LIST})
++	IF(IS_DIRECTORY ${CMAKE_SOURCE_DIR}/src/osgPlugins/${OSG_PLUGIN_NAME})
++		IF(osgdb_${OSG_PLUGIN_NAME}_LIB_DEPENDS)
++			SET(OSG_PLUGIN_LIB_DEPENDS_EXISTS ON)
++		ENDIF()
++		SET(OSG_PLUGIN_LIB_DEPENDS ${osgdb_${OSG_PLUGIN_NAME}_LIB_DEPENDS})
++		IF(OSG_PLUGIN_LIB_DEPENDS)
++			LIST(REMOVE_ITEM OSG_PLUGIN_LIB_DEPENDS "general")
++			LIST(REMOVE_ITEM OSG_PLUGIN_LIB_DEPENDS "optimized")
++			LIST(REMOVE_ITEM OSG_PLUGIN_LIB_DEPENDS "debug")
++			SET(OSG_PLUGIN_LIBS)
++			SET(OSG_LIBS)
++			SET(NEW_PREFICES)
++			FOREACH(LIB_DEPEND ${OSG_PLUGIN_LIB_DEPENDS})
++				list(FIND OSG_LIBS_LIST "${LIB_DEPEND}" LIB_DEPEND_OSG_LIB_INDEX)
++				IF(LIB_DEPEND_OSG_LIB_INDEX EQUAL "-1")
++					SET(LIB_DEPEND_IS_OSG_LIB 0)
++				ELSE()
++					SET(LIB_DEPEND_IS_OSG_LIB 1)
++				ENDIF()
++					
++				STRING(REGEX MATCH "${CMAKE_INSTALL_PREFIX}/lib/lib" LIB_DEPEND_FULL "${LIB_DEPEND}")
++				STRING(REGEX MATCH "-l" LIB_DEPEND_SHORT "${LIB_DEPEND}")
++				STRING(REGEX MATCH "-L${CMAKE_INSTALL_PREFIX}/lib" LIB_DEPEND_PREFIX_PATH "${LIB_DEPEND}")
++				STRING(REGEX MATCH "-L" LIB_DEPEND_PATH "${LIB_DEPEND}")
++				STRING(REGEX MATCH "${CMAKE_INSTALL_PREFIX}/[a-zA-Z/]+/lib/lib" LIB_DEPEND_NEW_PREFIX "${LIB_DEPEND}")
++
++				IF(LIB_DEPEND_NEW_PREFIX)
++					STRING(REGEX REPLACE "lib[a-zA-Z.]+" "" NEW_PREFIX "${LIB_DEPEND}")
++					STRING(REGEX REPLACE "${CMAKE_INSTALL_PREFIX}/[a-zA-Z/]+/lib/lib" "" LIB_DEPEND "${LIB_DEPEND}")
++					MESSAGE("New prefix ${LIB_DEPEND} ${NEW_PREFIX}")
++					LIST(APPEND NEW_PREFICES -L${NEW_PREFIX})
++
++				ENDIF()
++
++				STRING(REGEX REPLACE "${CMAKE_INSTALL_PREFIX}/lib/" "" LIB_DEPEND "${LIB_DEPEND}")
++				STRING(REGEX REPLACE "[.]a" "" LIB_DEPEND "${LIB_DEPEND}")
++				STRING(REGEX REPLACE "[.]lib" "" LIB_DEPEND "${LIB_DEPEND}")
++
++				IF(LIB_DEPEND_FULL)
++					STRING(REGEX REPLACE "lib" "" LIB_DEPEND "${LIB_DEPEND}")
++				ENDIF()
++				IF(NOT LIB_DEPEND_SHORT AND NOT LIB_DEPEND_PATH AND NOT LIB_DEPEND_IS_OSG_LIB)
++					SET(LIB_DEPEND  "-l${LIB_DEPEND}")
++				ENDIF()
++
++				IF(NOT LIB_DEPEND_IS_OSG_LIB)
++					LIST(APPEND OSG_PLUGIN_LIBS ${LIB_DEPEND})
++				ELSE()
++					IF(${LIB_DEPEND} MATCHES "OpenThreads")
++						LIST(APPEND OSG_LIBS "openthreads")
++					ELSE()
++						LIST(APPEND OSG_LIBS "openscenegraph-${LIB_DEPEND}")
++					ENDIF()
++				ENDIF()
++				IF(LIB_DEPEND_PATH OR LIB_DEPEND_PREFIX_PATH)
++					MESSAGE("Plugin ${OSG_PLUGIN_NAME}: skipped ${LIB_DEPEND}")
++				ENDIF()
++			ENDFOREACH(LIB_DEPEND)
++			IF(OSG_PLUGIN_LIBS)
++				LIST(REVERSE OSG_PLUGIN_LIBS)
++				LIST(REMOVE_DUPLICATES OSG_PLUGIN_LIBS)
++				LIST(REVERSE OSG_PLUGIN_LIBS)
++				STRING(REGEX REPLACE ";" " " OSG_PLUGIN_LIBS "${OSG_PLUGIN_LIBS}")
++			ENDIF()
++			IF(OSG_LIBS)
++				#LIST(REVERSE OSG_LIBS)
++				STRING(REGEX REPLACE ";" " " OSG_LIBS "${OSG_LIBS}")
++			ENDIF()
++			IF(NEW_PREFICES)
++				LIST(REMOVE_DUPLICATES NEW_PREFICES)
++				STRING(REGEX REPLACE ";" " " NEW_PREFICES "${NEW_PREFICES}")
++			ENDIF()
++IF(OSG_PLUGIN_LIBS)
++MESSAGE("Plugin ${OSG_PLUGIN_NAME}: ${NEW_PREFICES} ${OSG_PLUGIN_LIBS}")
++ENDIF()
++			IF(NOT DYNAMIC_OPENSCENEGRAPH)
++
++				FILE(GLOB OSG_PLUGIN_CLASSES ${CMAKE_SOURCE_DIR}/src/osgPlugins/${OSG_PLUGIN_NAME}/*.h ${CMAKE_SOURCE_DIR}/src/osgPlugins/${OSG_PLUGIN_NAME}/*.hh ${CMAKE_SOURCE_DIR}/src/osgPlugins/${OSG_PLUGIN_NAME}/*.mm ${CMAKE_SOURCE_DIR}/src/osgPlugins/${OSG_PLUGIN_NAME}/*.cc ${CMAKE_SOURCE_DIR}/src/osgPlugins/${OSG_PLUGIN_NAME}/*.cpp)
++				FOREACH(OSG_PLUGIN_CLASS ${OSG_PLUGIN_CLASSES})
++        				FILE(READ "${OSG_PLUGIN_CLASS}" OSG_PLUGIN_CLASS_CONTENTS)
++					STRING(REGEX MATCH "REGISTER_OSGPLUGIN" REGISTER_OSGPLUGIN "${OSG_PLUGIN_CLASS_CONTENTS}")
++					IF(REGISTER_OSGPLUGIN)
++						STRING(REGEX MATCH "REGISTER_OSGPLUGIN[(][ ]" REGISTER_OSGPLUGIN_SPACED "${OSG_PLUGIN_CLASS_CONTENTS}")
++						IF(REGISTER_OSGPLUGIN_SPACED)
++							STRING(REGEX REPLACE ".*REGISTER_OSGPLUGIN[(][ ]([0-9a-zA-Z]+).*" "\\1" REGISTER_OSGPLUGIN_NAME ${OSG_PLUGIN_CLASS_CONTENTS})
++						ELSE()
++							STRING(REGEX REPLACE ".*REGISTER_OSGPLUGIN[(]([0-9a-zA-Z]+).*" "\\1" REGISTER_OSGPLUGIN_NAME ${OSG_PLUGIN_CLASS_CONTENTS})
++						ENDIF()
++						#MESSAGE("Plugin ${OSG_PLUGIN_NAME}: ${OSG_PLUGIN_CLASS}: ${REGISTER_OSGPLUGIN_NAME}")
++						file(WRITE ${CMAKE_BINARY_DIR}/include/osgPlugins/${OSG_PLUGIN_NAME} "USE_OSGPLUGIN(${REGISTER_OSGPLUGIN_NAME})\n")
++						file(APPEND ${CMAKE_BINARY_DIR}/include/osgPlugins/all "USE_OSGPLUGIN(${REGISTER_OSGPLUGIN_NAME})\n")
++					ENDIF()
++				ENDFOREACH(OSG_PLUGIN_CLASS)
++
++			ENDIF()
++
++			file(WRITE ${CMAKE_BINARY_DIR}/packaging/pkgconfig/openscenegraph-osgPlugin-${OSG_PLUGIN_NAME}.pc "
++prefix=${CMAKE_INSTALL_PREFIX}
++exec_prefix=\${prefix}
++libdir=\${exec_prefix}/lib
++includedir=\${prefix}/include
++
++Name: openscenegraph-osgPlugin-${OSG_PLUGIN_NAME}
++Description: ${OSG_PLUGIN_NAME} plugin for OpenSceneGraph
++Version: ${OPENSCENEGRAPH_VERSION}
++Requires: ${OSG_LIBS}
++Libs: -L\${libdir}/${OSG_PLUGINS} -losgdb_${OSG_PLUGIN_NAME}
++Libs.private: -L\${libdir} ${NEW_PREFICES} ${OSG_PLUGIN_LIBS}
++Cflags: -I\${includedir}
++")
++INSTALL(FILES ${CMAKE_BINARY_DIR}/packaging/pkgconfig/openscenegraph-osgPlugin-${OSG_PLUGIN_NAME}.pc
++    DESTINATION "${CMAKE_INSTALL_PREFIX}/lib/pkgconfig"
++)
++		ENDIF()
++	ENDIF()
++ENDFOREACH(OSG_PLUGIN_NAME)
++IF(NOT DYNAMIC_OPENSCENEGRAPH)
++	INSTALL(DIRECTORY ${CMAKE_BINARY_DIR}/include/osgPlugins DESTINATION include)
++ENDIF()
++
++# pkg config file for all plugins
++FILE(GLOB OSG_PLUGINS_PKGS ${CMAKE_BINARY_DIR}/packaging/pkgconfig/openscenegraph-osgPlugin-*.pc)
++file(WRITE ${CMAKE_BINARY_DIR}/packaging/pkgconfig/openscenegraph-osgPlugin-all.pc "
++prefix=${CMAKE_INSTALL_PREFIX}
++exec_prefix=\${prefix}
++libdir=\${exec_prefix}/lib
++includedir=\${prefix}/include
++
++Name: openscenegraph-osgPlugin-all
++Description: all plugins distributed with OpenSceneGraph
++Version: ${OPENSCENEGRAPH_VERSION}
++Requires: ")
++FOREACH(OSG_PLUGINS_PKG ${OSG_PLUGINS_PKGS})
++	GET_FILENAME_COMPONENT(OSG_PLUGIN_NAME ${OSG_PLUGINS_PKG} NAME_WE)
++	file(APPEND ${CMAKE_BINARY_DIR}/packaging/pkgconfig/openscenegraph-osgPlugin-all.pc "${OSG_PLUGIN_NAME} ")
++ENDFOREACH(OSG_PLUGINS_PKG)
++file(APPEND ${CMAKE_BINARY_DIR}/packaging/pkgconfig/openscenegraph-osgPlugin-all.pc "
++Libs: -L\${libdir}/${OSG_PLUGINS}
++Libs.private: -L\${libdir}
++Cflags: -I\${includedir}
++")
+ 
+ # Run this as late as possible so users can easier spot the message
+ IF (NOT DEFINED REQUIRES_LIBPATH_MESSAGE AND ${CMAKE_INSTALL_PREFIX} STREQUAL "/usr/local")
+@@ -1103,4 +1251,3 @@
+     configure_file("${OSG_ANDROID_TEMPLATES}/Application.mk.master.in" "${CMAKE_BINARY_DIR}/Application.mk")
+     configure_file("${OSG_ANDROID_TEMPLATES}/AndroidManifest.xml.master.in" "${CMAKE_BINARY_DIR}/AndroidManifest.xml")
+ ENDIF(ANDROID)
+-
+Binary files openscenegraph-osg-800b103-orig/CMakeModules/.DS_Store and openscenegraph-osg-800b103/CMakeModules/.DS_Store differ
+diff -urN openscenegraph-osg-800b103-orig/CMakeModules/FindCURL.cmake openscenegraph-osg-800b103/CMakeModules/FindCURL.cmake
+--- openscenegraph-osg-800b103-orig/CMakeModules/FindCURL.cmake	1970-01-01 01:00:00.000000000 +0100
++++ openscenegraph-osg-800b103/CMakeModules/FindCURL.cmake	2013-04-14 22:22:32.000000000 +0200
+@@ -0,0 +1,18 @@
++#use pkg-config to find various modules
++INCLUDE(FindPkgConfig OPTIONAL)
++
++IF(PKG_CONFIG_FOUND)
++
++    INCLUDE(FindPkgConfig)
++
++    PKG_CHECK_MODULES(CURL libcurl)
++
++    IF (CURL_FOUND)
++
++        INCLUDE(CheckCXXSourceRuns)
++
++        SET(CMAKE_REQUIRED_INCLUDES ${CURL_INCLUDE_DIRS})
++
++    ENDIF()
++
++ENDIF()
+diff -urN openscenegraph-osg-800b103-orig/CMakeModules/FindFFmpeg.cmake openscenegraph-osg-800b103/CMakeModules/FindFFmpeg.cmake
+--- openscenegraph-osg-800b103-orig/CMakeModules/FindFFmpeg.cmake	2013-02-13 17:29:03.000000000 +0100
++++ openscenegraph-osg-800b103/CMakeModules/FindFFmpeg.cmake	2013-04-14 22:07:45.000000000 +0200
+@@ -21,143 +21,39 @@
+ #                                                       (in new version case, use by ffmpeg header) 
+ #and ${FFMPEG_libname_INCLUDE_DIRS/libname}             (in new version case, use by osg plugin code)
+ 
++IF(PKG_CONFIG_FOUND)
++    PKG_CHECK_MODULES(FFMPEG_LIBAVFORMAT libavformat)
++    PKG_CHECK_MODULES(FFMPEG_LIBAVDEVICE libavdevice)
++    PKG_CHECK_MODULES(FFMPEG_LIBAVCODEC libavcodec)
++    PKG_CHECK_MODULES(FFMPEG_LIBAVUTIL libavutil)
++    PKG_CHECK_MODULES(FFMPEG_LIBSWSCALE libswscale)
++	
+ 
+-# Macro to find header and lib directories
+-# example: FFMPEG_FIND(AVFORMAT avformat avformat.h)
+-MACRO(FFMPEG_FIND varname shortname headername)
+-    # old version of ffmpeg put header in $prefix/include/[ffmpeg]
+-    # so try to find header in include directory
+-
+-    FIND_PATH(FFMPEG_${varname}_INCLUDE_DIRS lib${shortname}/${headername}
+-        PATHS
+-        ${FFMPEG_ROOT}/include
+-        $ENV{FFMPEG_DIR}/include
+-        ~/Library/Frameworks
+-        /Library/Frameworks
+-        /usr/local/include
+-        /usr/include
+-        /sw/include # Fink
+-        /opt/local/include # DarwinPorts
+-        /opt/csw/include # Blastwave
+-        /opt/include
+-        /usr/freeware/include
+-        PATH_SUFFIXES ffmpeg
+-        DOC "Location of FFMPEG Headers"
+-    )
+-
+-    FIND_PATH(FFMPEG_${varname}_INCLUDE_DIRS ${headername}
+-        PATHS
+-        ${FFMPEG_ROOT}/include
+-        $ENV{FFMPEG_DIR}/include
+-        ~/Library/Frameworks
+-        /Library/Frameworks
+-        /usr/local/include
+-        /usr/include
+-        /sw/include # Fink
+-        /opt/local/include # DarwinPorts
+-        /opt/csw/include # Blastwave
+-        /opt/include
+-        /usr/freeware/include
+-        PATH_SUFFIXES ffmpeg
+-        DOC "Location of FFMPEG Headers"
+-    )
+-
+-    FIND_LIBRARY(FFMPEG_${varname}_LIBRARIES
+-        NAMES ${shortname}
+-        PATHS
+-        ${FFMPEG_ROOT}/lib
+-        $ENV{FFMPEG_DIR}/lib
+-        ~/Library/Frameworks
+-        /Library/Frameworks
+-        /usr/local/lib
+-        /usr/local/lib64
+-        /usr/lib
+-        /usr/lib64
+-        /sw/lib
+-        /opt/local/lib
+-        /opt/csw/lib
+-        /opt/lib
+-        /usr/freeware/lib64
+-        DOC "Location of FFMPEG Libraries"
+-    )
+-
+-    IF (FFMPEG_${varname}_LIBRARIES AND FFMPEG_${varname}_INCLUDE_DIRS)
+-        SET(FFMPEG_${varname}_FOUND 1)
+-    ENDIF(FFMPEG_${varname}_LIBRARIES AND FFMPEG_${varname}_INCLUDE_DIRS)
+-
+-ENDMACRO(FFMPEG_FIND)
+-
+-SET(FFMPEG_ROOT "$ENV{FFMPEG_DIR}" CACHE PATH "Location of FFMPEG")
+-
+-# find stdint.h
+-IF(WIN32)
+-
+-    FIND_PATH(FFMPEG_STDINT_INCLUDE_DIR stdint.h
+-        PATHS
+-        ${FFMPEG_ROOT}/include
+-        $ENV{FFMPEG_DIR}/include
+-        ~/Library/Frameworks
+-        /Library/Frameworks
+-        /usr/local/include
+-        /usr/include
+-        /sw/include # Fink
+-        /opt/local/include # DarwinPorts
+-        /opt/csw/include # Blastwave
+-        /opt/include
+-        /usr/freeware/include
+-        PATH_SUFFIXES ffmpeg
+-        DOC "Location of FFMPEG stdint.h Header"
+-    )
++    IF (FFMPEG_LIBAVFORMAT_FOUND AND FFMPEG_LIBAVDEVICE_FOUND AND FFMPEG_LIBAVCODEC_FOUND AND FFMPEG_LIBAVUTIL_FOUND)
+ 
+-    IF (FFMPEG_STDINT_INCLUDE_DIR)
+-        SET(STDINT_OK TRUE)
+-    ENDIF()
+-
+-ELSE()
+ 
+-    SET(STDINT_OK TRUE)
++    	SET(FFMPEG_INCLUDE_DIRS
++        	${FFMPEG_LIBAVFORMAT_INCLUDE_DIRS}
++        	${FFMPEG_LIBAVDEVICE_INCLUDE_DIRS}
++        	${FFMPEG_LIBAVCODEC_INCLUDE_DIRS}
++        	${FFMPEG_LIBAVUTIL_INCLUDE_DIRS}
++    	)
+ 
+-ENDIF()
++        INCLUDE(CheckCXXSourceRuns)
+ 
+-FFMPEG_FIND(LIBAVFORMAT avformat avformat.h)
+-FFMPEG_FIND(LIBAVDEVICE avdevice avdevice.h)
+-FFMPEG_FIND(LIBAVCODEC  avcodec  avcodec.h)
+-FFMPEG_FIND(LIBAVUTIL   avutil   avutil.h)
+-FFMPEG_FIND(LIBSWSCALE  swscale  swscale.h)  # not sure about the header to look for here.
+-
+-SET(FFMPEG_FOUND "NO")
+-# Note we don't check FFMPEG_LIBSWSCALE_FOUND here, it's optional.
+-IF   (FFMPEG_LIBAVFORMAT_FOUND AND FFMPEG_LIBAVDEVICE_FOUND AND FFMPEG_LIBAVCODEC_FOUND AND FFMPEG_LIBAVUTIL_FOUND AND STDINT_OK)
+-
+-    SET(FFMPEG_FOUND "YES")
+-
+-    SET(FFMPEG_INCLUDE_DIRS
+-        ${FFMPEG_LIBAVFORMAT_INCLUDE_DIRS}
+-        ${FFMPEG_LIBAVDEVICE_INCLUDE_DIRS}
+-        ${FFMPEG_LIBAVCODEC_INCLUDE_DIRS}
+-        ${FFMPEG_LIBAVUTIL_INCLUDE_DIRS}
+-    )
+-
+-# Using the new include style for FFmpeg prevents issues with #include <time.h>
+-    IF (FFMPEG_STDINT_INCLUDE_DIR)
+-        SET(FFMPEG_INCLUDE_DIRS
+-            ${FFMPEG_INCLUDE_DIRS}
+-            ${FFMPEG_STDINT_INCLUDE_DIR}
+-        )
+-    ENDIF()
++        SET(CMAKE_REQUIRED_INCLUDES ${FFMPEG_INCLUDE_DIRS})
+ 
++    	SET(FFMPEG_FOUND "YES")
+ 
+-    SET(FFMPEG_LIBRARY_DIRS ${FFMPEG_LIBAVFORMAT_LIBRARY_DIRS})
++    	SET(FFMPEG_LIBRARY_DIRS ${FFMPEG_LIBAVFORMAT_LIBRARY_DIRS})
+ 
+-    # Note we don't add FFMPEG_LIBSWSCALE_LIBRARIES here, it will be added if found later.
+-    SET(FFMPEG_LIBRARIES
++    	# Note we don't add FFMPEG_LIBSWSCALE_LIBRARIES here, it will be added if found later.
++    	SET(FFMPEG_LIBRARIES
+         ${FFMPEG_LIBAVFORMAT_LIBRARIES}
+         ${FFMPEG_LIBAVDEVICE_LIBRARIES}
+         ${FFMPEG_LIBAVCODEC_LIBRARIES}
+         ${FFMPEG_LIBAVUTIL_LIBRARIES})
+ 
+-ELSE ()
+-
+-#    MESSAGE(STATUS "Could not find FFMPEG")
++    ENDIF()
+ 
+ ENDIF()
+diff -urN openscenegraph-osg-800b103-orig/CMakeModules/FindFreeType.cmake openscenegraph-osg-800b103/CMakeModules/FindFreeType.cmake
+--- openscenegraph-osg-800b103-orig/CMakeModules/FindFreeType.cmake	2013-02-13 17:29:03.000000000 +0100
++++ openscenegraph-osg-800b103/CMakeModules/FindFreeType.cmake	2013-04-14 22:58:14.000000000 +0200
+@@ -1,117 +1,18 @@
+-# - Locate FreeType library
+-# This module defines
+-#  FREETYPE_LIBRARY, the library to link against
+-#  FREETYPE_FOUND, if false, do not try to link to FREETYPE
+-#  FREETYPE_INCLUDE_DIRS, where to find headers.
+-#  This is the concatenation of the paths:
+-#  FREETYPE_INCLUDE_DIR_ft2build
+-#  FREETYPE_INCLUDE_DIR_freetype2
+-#   
+-# $FREETYPE_DIR is an environment variable that would
+-# correspond to the ./configure --prefix=$FREETYPE_DIR
+-# used in building FREETYPE.
+-# Created by Eric Wing. 
+-
+-# Ugh, FreeType seems to use some #include trickery which 
+-# makes this harder than it should be. It looks like they
+-# put ft2build.h in a common/easier-to-find location which
+-# then contains a #include to a more specific header in a 
+-# more specific location (#include <freetype/config/ftheader.h>).
+-# Then from there, they need to set a bunch of #define's 
+-# so you can do something like:
+-# #include FT_FREETYPE_H
+-# Unfortunately, using CMake's mechanisms like INCLUDE_DIRECTORIES()
+-# wants explicit full paths and this trickery doesn't work too well.
+-# I'm going to attempt to cut out the middleman and hope 
+-# everything still works.
+-FIND_PATH(FREETYPE_INCLUDE_DIR_ft2build ft2build.h 
+-  PATHS
+-  $ENV{FREETYPE_DIR}
+-  NO_DEFAULT_PATH
+-  PATH_SUFFIXES include    
+-)
+-FIND_PATH(FREETYPE_INCLUDE_DIR_ft2build ft2build.h 
+-  PATHS ${CMAKE_PREFIX_PATH} # Unofficial: We are proposing this.
+-  NO_DEFAULT_PATH
+-  PATH_SUFFIXES include
+-)
+-FIND_PATH(FREETYPE_INCLUDE_DIR_ft2build ft2build.h 
+-  PATHS
+-  /usr/local
+-  /usr
+-  /usr/local/X11R6
+-  /usr/local/X11
+-  /usr/X11R6
+-  /usr/X11
+-  /sw
+-  /opt/local
+-  /opt/csw
+-  /opt
+-  /usr/freeware
+-  PATH_SUFFIXES include
+-)
+-
+-FIND_PATH(FREETYPE_INCLUDE_DIR_freetype2 freetype/config/ftheader.h 
+-  $ENV{FREETYPE_DIR}/include/freetype2
+-  NO_DEFAULT_PATH
+-)
+-FIND_PATH(FREETYPE_INCLUDE_DIR_freetype2 freetype/config/ftheader.h 
+-  PATHS ${CMAKE_PREFIX_PATH} # Unofficial: We are proposing this.
+-  NO_DEFAULT_PATH
+-  PATH_SUFFIXES include/freetype2
+-)
+-FIND_PATH(FREETYPE_INCLUDE_DIR_freetype2 freetype/config/ftheader.h 
+-  /usr/local/include/freetype2
+-  /usr/include/freetype2
+-  /usr/local/X11R6/include/freetype2
+-  /usr/local/X11/include/freetype2
+-  /usr/X11R6/include/freetype2
+-  /usr/X11/include/freetype2
+-  /sw/include/freetype2
+-  /opt/local/include/freetype2
+-  /opt/csw/include/freetype2
+-  /opt/include/freetype2
+-  /usr/freeware/include/freetype2
+-)
+-
+-FIND_LIBRARY(FREETYPE_LIBRARY 
+-  NAMES freetype libfreetype freetype219
+-  PATHS
+-  $ENV{FREETYPE_DIR}
+-  NO_DEFAULT_PATH
+-  PATH_SUFFIXES lib64 lib 
+-)
+-FIND_LIBRARY(FREETYPE_LIBRARY 
+-  NAMES freetype libfreetype freetype219
+-  PATHS ${CMAKE_PREFIX_PATH} # Unofficial: We are proposing this.
+-  NO_DEFAULT_PATH
+-  PATH_SUFFIXES lib64 lib 
+-)
+-FIND_LIBRARY(FREETYPE_LIBRARY 
+-  NAMES freetype libfreetype freetype219
+-  PATHS
+-  /usr/local
+-  /usr
+-  /usr/local/X11R6
+-  /usr/local/X11
+-  /usr/X11R6
+-  /usr/X11
+-  /sw
+-  /opt/local
+-  /opt/csw
+-  /opt
+-  /usr/freeware
+-  PATH_SUFFIXES lib64 lib
+-)
+-
+-IF(FREETYPE_INCLUDE_DIR_ft2build AND FREETYPE_INCLUDE_DIR_freetype2)
+-  SET(FREETYPE_INCLUDE_DIRS "${FREETYPE_INCLUDE_DIR_ft2build};${FREETYPE_INCLUDE_DIR_freetype2}")
+-ENDIF(FREETYPE_INCLUDE_DIR_ft2build AND FREETYPE_INCLUDE_DIR_freetype2)
+-
+-
+-SET(FREETYPE_FOUND "NO")
+-IF(FREETYPE_LIBRARY AND FREETYPE_INCLUDE_DIRS)
+-  SET(FREETYPE_FOUND "YES")
+-ENDIF(FREETYPE_LIBRARY AND FREETYPE_INCLUDE_DIRS)
++#use pkg-config to find various modules
++INCLUDE(FindPkgConfig OPTIONAL)
+ 
++IF(PKG_CONFIG_FOUND)
+ 
++    INCLUDE(FindPkgConfig)
++
++    PKG_CHECK_MODULES(FREETYPE freetype2)
++
++    IF (FREETYPE_FOUND)
++
++        INCLUDE(CheckCXXSourceRuns)
++
++        SET(CMAKE_REQUIRED_INCLUDES ${FREETYPE_INCLUDE_DIRS})
++
++    ENDIF()
++
++ENDIF()
+diff -urN openscenegraph-osg-800b103-orig/CMakeModules/FindJasper.cmake openscenegraph-osg-800b103/CMakeModules/FindJasper.cmake
+--- openscenegraph-osg-800b103-orig/CMakeModules/FindJasper.cmake	2013-02-13 17:29:03.000000000 +0100
++++ openscenegraph-osg-800b103/CMakeModules/FindJasper.cmake	2013-04-14 23:01:17.000000000 +0200
+@@ -1,67 +1,18 @@
+-# Locate gdal
+-# This module defines
+-# JASPER_LIBRARY
+-# JASPER_FOUND, if false, do not try to link to gdal 
+-# JASPER_INCLUDE_DIR, where to find the headers
+-#
+-# $JASPER_DIR is an environment variable that would
+-# correspond to the ./configure --prefix=$JASPER_DIR
+-#
+-# Created by Robert Osfield. 
+-
+-FIND_PATH(JASPER_INCLUDE_DIR jasper/jasper.h
+-    $ENV{JASPER_DIR}/include
+-    $ENV{JASPER_DIR}/src/libjasper/include
+-    $ENV{JASPER_DIR}
+-    ~/Library/Frameworks
+-    /Library/Frameworks
+-    /usr/local/include
+-    /usr/include
+-    /sw/include # Fink
+-    /opt/local/include # DarwinPorts
+-    /opt/csw/include # Blastwave
+-    /opt/include
+-    /usr/freeware/include
+-)
+-
+-FIND_LIBRARY(JASPER_LIBRARY 
+-    NAMES jasper libjasper
+-    PATHS
+-    $ENV{JASPER_DIR}/lib
+-    $ENV{JASPER_DIR}/src/libjasper/lib
+-    $ENV{JASPER_DIR}/src/msvc/Win32_Release
+-    $ENV{JASPER_DIR}
+-    ~/Library/Frameworks
+-    /Library/Frameworks
+-    /usr/local/lib
+-    /usr/lib
+-    /sw/lib
+-    /opt/local/lib
+-    /opt/csw/lib
+-    /opt/lib
+-    /usr/freeware/lib64
+-)
+-
+-FIND_LIBRARY(JASPER_LIBRARY_DEBUG
+-    NAMES jasper libjasper jasperd libjasperd
+-    PATHS
+-    $ENV{JASPER_DIR}/lib
+-    $ENV{JASPER_DIR}/src/libjasper/lib
+-    $ENV{JASPER_DIR}/src/msvc/Win32_Debug
+-    $ENV{JASPER_DIR}
+-    ~/Library/Frameworks
+-    /Library/Frameworks
+-    /usr/local/lib
+-    /usr/lib
+-    /sw/lib
+-    /opt/local/lib
+-    /opt/csw/lib
+-    /opt/lib
+-    /usr/freeware/lib64
+-)
+-
+-SET(JASPER_FOUND "NO")
+-IF(JASPER_LIBRARY AND JASPER_INCLUDE_DIR)
+-    SET(JASPER_FOUND "YES")
+-ENDIF(JASPER_LIBRARY AND JASPER_INCLUDE_DIR)
++#use pkg-config to find various modules
++INCLUDE(FindPkgConfig OPTIONAL)
+ 
++IF(PKG_CONFIG_FOUND)
++
++    INCLUDE(FindPkgConfig)
++
++    PKG_CHECK_MODULES(JASPER jasper)
++
++    IF (JASPER_FOUND)
++
++        INCLUDE(CheckCXXSourceRuns)
++
++        SET(CMAKE_REQUIRED_INCLUDES ${JASPER_INCLUDE_DIRS})
++
++    ENDIF()
++
++ENDIF()
+diff -urN openscenegraph-osg-800b103-orig/CMakeModules/FindSDL.cmake openscenegraph-osg-800b103/CMakeModules/FindSDL.cmake
+--- openscenegraph-osg-800b103-orig/CMakeModules/FindSDL.cmake	1970-01-01 01:00:00.000000000 +0100
++++ openscenegraph-osg-800b103/CMakeModules/FindSDL.cmake	2013-04-14 22:17:02.000000000 +0200
+@@ -0,0 +1,18 @@
++#use pkg-config to find various modules
++INCLUDE(FindPkgConfig OPTIONAL)
++
++IF(PKG_CONFIG_FOUND)
++
++    INCLUDE(FindPkgConfig)
++
++    PKG_CHECK_MODULES(SDL sdl)
++
++    IF (SDL_FOUND)
++
++        INCLUDE(CheckCXXSourceRuns)
++
++        SET(CMAKE_REQUIRED_INCLUDES ${SDL_INCLUDE_DIRS})
++
++    ENDIF()
++
++ENDIF()
+diff -urN openscenegraph-osg-800b103-orig/CMakeModules/FindTIFF.cmake openscenegraph-osg-800b103/CMakeModules/FindTIFF.cmake
+--- openscenegraph-osg-800b103-orig/CMakeModules/FindTIFF.cmake	1970-01-01 01:00:00.000000000 +0100
++++ openscenegraph-osg-800b103/CMakeModules/FindTIFF.cmake	2013-04-14 22:31:32.000000000 +0200
+@@ -0,0 +1,18 @@
++#use pkg-config to find various modules
++INCLUDE(FindPkgConfig OPTIONAL)
++
++IF(PKG_CONFIG_FOUND)
++
++    INCLUDE(FindPkgConfig)
++
++    PKG_CHECK_MODULES(TIFF libtiff-4)
++
++    IF (TIFF_FOUND)
++
++        INCLUDE(CheckCXXSourceRuns)
++
++        SET(CMAKE_REQUIRED_INCLUDES ${TIFF_INCLUDE_DIRS})
++
++    ENDIF()
++
++ENDIF()
+diff -urN openscenegraph-osg-800b103-orig/CMakeModules/FindXine.cmake openscenegraph-osg-800b103/CMakeModules/FindXine.cmake
+--- openscenegraph-osg-800b103-orig/CMakeModules/FindXine.cmake	2013-02-13 17:29:03.000000000 +0100
++++ openscenegraph-osg-800b103/CMakeModules/FindXine.cmake	2013-04-14 22:58:14.000000000 +0200
+@@ -1,47 +1,20 @@
+-# Locate gdal
+-# This module defines
+-# XINE_LIBRARY
+-# XINE_FOUND, if false, do not try to link to gdal 
+-# XINE_INCLUDE_DIR, where to find the headers
+-#
+-# $XINE_DIR is an environment variable that would
+-# correspond to the ./configure --prefix=$XINE_DIR
+-#
+-# Created by Robert Osfield. 
+-
+-FIND_PATH(XINE_INCLUDE_DIR xine.h
+-    $ENV{XINE_DIR}/include
+-    $ENV{XINE_DIR}
+-    ~/Library/Frameworks
+-    /Library/Frameworks
+-    /usr/local/include
+-    /usr/include
+-    /sw/include # Fink
+-    /opt/local/include # DarwinPorts
+-    /opt/csw/include # Blastwave
+-    /opt/include
+-    /usr/freeware/include
+-)
+-
+-FIND_LIBRARY(XINE_LIBRARY 
+-    NAMES xine
+-    PATHS
+-    $ENV{XINE_DIR}/lib
+-    $ENV{XINE_DIR}
+-    ~/Library/Frameworks
+-    /Library/Frameworks
+-    /usr/local/lib
+-    /usr/lib
+-    /sw/lib
+-    /opt/local/lib
+-    /opt/csw/lib
+-    /opt/lib
+-    /usr/freeware/lib64
+-)
+-
+-SET(XINE_FOUND "NO")
+-IF(XINE_LIBRARY AND XINE_INCLUDE_DIR)
+-    SET(XINE_FOUND "YES")
+-ENDIF(XINE_LIBRARY AND XINE_INCLUDE_DIR)
++#use pkg-config to find various modules
++INCLUDE(FindPkgConfig OPTIONAL)
+ 
++IF(PKG_CONFIG_FOUND)
+ 
++    INCLUDE(FindPkgConfig)
++
++    PKG_CHECK_MODULES(XINE libxine freetype2 fontconfig)
++
++    IF (XINE_FOUND)
++
++        INCLUDE(CheckCXXSourceRuns)
++
++        SET(CMAKE_REQUIRED_INCLUDES ${XINE_INCLUDE_DIRS})
++
++	LIST(APPEND XINE_LIBRARIES -liconv)
++
++    ENDIF()
++
++ENDIF()
+diff -urN openscenegraph-osg-800b103-orig/applications/present3D/CMakeLists.txt openscenegraph-osg-800b103/applications/present3D/CMakeLists.txt
+--- openscenegraph-osg-800b103-orig/applications/present3D/CMakeLists.txt	2013-02-13 17:29:03.000000000 +0100
++++ openscenegraph-osg-800b103/applications/present3D/CMakeLists.txt	2013-04-14 22:13:58.000000000 +0200
+@@ -23,8 +23,8 @@
+ 
+     IF (BUILD_PRESENT3D_WITH_SDL)
+ 
+-        SET(TARGET_EXTERNAL_LIBRARIES ${SDL_LIBRARY} )
+-        INCLUDE_DIRECTORIES(${SDL_INCLUDE_DIR} )
++        SET(TARGET_EXTERNAL_LIBRARIES ${SDL_LIBRARIES} )
++        INCLUDE_DIRECTORIES(${SDL_INCLUDE_DIRS} )
+ 
+         SET(TARGET_SRC
+            ${TARGET_SRC}
+Binary files openscenegraph-osg-800b103-orig/examples/.DS_Store and openscenegraph-osg-800b103/examples/.DS_Store differ
+diff -urN openscenegraph-osg-800b103-orig/examples/osgmovie/CMakeLists.txt openscenegraph-osg-800b103/examples/osgmovie/CMakeLists.txt
+--- openscenegraph-osg-800b103-orig/examples/osgmovie/CMakeLists.txt	2013-02-13 17:29:03.000000000 +0100
++++ openscenegraph-osg-800b103/examples/osgmovie/CMakeLists.txt	2013-04-14 22:15:41.000000000 +0200
+@@ -2,12 +2,12 @@
+ # SET(TARGET_EXTERNAL_LIBRARIES ${OPENAL_LIBRARY} alut)
+ 
+ IF   (SDL_FOUND)
+-    SET(TARGET_EXTERNAL_LIBRARIES ${SDL_LIBRARY} )
+-    INCLUDE_DIRECTORIES(${SDL_INCLUDE_DIR} )
++    SET(TARGET_EXTERNAL_LIBRARIES ${SDL_LIBRARIES} )
++    INCLUDE_DIRECTORIES(${SDL_INCLUDE_DIRS} )
+     ADD_DEFINITIONS(-DUSE_SDL)
+-    IF (MINGW)
+-        SET(TARGET_EXTERNAL_LIBRARIES ${TARGET_EXTERNAL_LIBRARIES} winmm dinput ddraw dxguid)
+-    ENDIF()
++    #IF (MINGW)
++    #    SET(TARGET_EXTERNAL_LIBRARIES ${TARGET_EXTERNAL_LIBRARIES} winmm dinput ddraw dxguid)
++    #ENDIF()
+ ENDIF(SDL_FOUND)
+ 
+ SET(TARGET_SRC osgmovie.cpp )
+diff -urN openscenegraph-osg-800b103-orig/examples/osgmultiplemovies/CMakeLists.txt openscenegraph-osg-800b103/examples/osgmultiplemovies/CMakeLists.txt
+--- openscenegraph-osg-800b103-orig/examples/osgmultiplemovies/CMakeLists.txt	2013-02-13 17:29:03.000000000 +0100
++++ openscenegraph-osg-800b103/examples/osgmultiplemovies/CMakeLists.txt	2013-04-14 22:14:24.000000000 +0200
+@@ -2,12 +2,12 @@
+ # SET(TARGET_EXTERNAL_LIBRARIES ${OPENAL_LIBRARY} alut)
+ 
+ IF (SDL_FOUND)
+-    SET(TARGET_EXTERNAL_LIBRARIES ${SDL_LIBRARY} )
+-    INCLUDE_DIRECTORIES(${SDL_INCLUDE_DIR} )
++    SET(TARGET_EXTERNAL_LIBRARIES ${SDL_LIBRARIES} )
++    INCLUDE_DIRECTORIES(${SDL_INCLUDE_DIRS} )
+     ADD_DEFINITIONS(-DUSE_SDL)
+-    IF (MINGW)
+-        SET(TARGET_EXTERNAL_LIBRARIES ${TARGET_EXTERNAL_LIBRARIES} winmm dinput ddraw dxguid)
+-    ENDIF()
++    #IF (MINGW)
++    #   SET(TARGET_EXTERNAL_LIBRARIES ${TARGET_EXTERNAL_LIBRARIES} winmm dinput ddraw dxguid)
++    #ENDIF()
+ ENDIF(SDL_FOUND)
+ 
+ SET(TARGET_SRC osgmultiplemovies.cpp )
+diff -urN openscenegraph-osg-800b103-orig/examples/osgviewerSDL/CMakeLists.txt openscenegraph-osg-800b103/examples/osgviewerSDL/CMakeLists.txt
+--- openscenegraph-osg-800b103-orig/examples/osgviewerSDL/CMakeLists.txt	2013-02-13 17:29:03.000000000 +0100
++++ openscenegraph-osg-800b103/examples/osgviewerSDL/CMakeLists.txt	2013-04-14 22:15:15.000000000 +0200
+@@ -1,4 +1,4 @@
+-SET(TARGET_EXTERNAL_LIBRARIES ${SDL_LIBRARY} )
++SET(TARGET_EXTERNAL_LIBRARIES ${SDL_LIBRARIES} )
+ 
+ IF("${SDL_LIBRARY}" MATCHES "SDLmain")
+        # Found a precompiled SDLmain library.
+@@ -13,15 +13,15 @@
+                # Depending on platform (or SDL version),
+                # this may or may not link successfully.
+                SET(TARGET_SRC osgviewerSDL.cpp)
+-               SET(TARGET_EXTERNAL_LIBRARIES ${SDLMAIN_LIBRARY} ${TARGET_EXTERNAL_LIBRARIES} )
++               SET(TARGET_EXTERNAL_LIBRARIES ${SDL_LIBRARIES} ${TARGET_EXTERNAL_LIBRARIES} )
+        ENDIF()
+ ENDIF()
+ 
+-IF (MINGW)
+-    SET(TARGET_EXTERNAL_LIBRARIES mingw32 ${TARGET_EXTERNAL_LIBRARIES} winmm dinput ddraw dxguid)
+-ENDIF()
++#IF (MINGW)
++#    SET(TARGET_EXTERNAL_LIBRARIES mingw32 ${TARGET_EXTERNAL_LIBRARIES} winmm dinput ddraw dxguid)
++#ENDIF()
+ 
+-INCLUDE_DIRECTORIES(${SDL_INCLUDE_DIR} )
++INCLUDE_DIRECTORIES(${SDL_INCLUDE_DIRS} )
+ 
+ #### end var setup  ###
+ SETUP_EXAMPLE(osgviewerSDL)
+Binary files openscenegraph-osg-800b103-orig/include/.DS_Store and openscenegraph-osg-800b103/include/.DS_Store differ
+diff -urN openscenegraph-osg-800b103-orig/packaging/pkgconfig/openscenegraph-osgPresentation.pc.in openscenegraph-osg-800b103/packaging/pkgconfig/openscenegraph-osgPresentation.pc.in
+--- openscenegraph-osg-800b103-orig/packaging/pkgconfig/openscenegraph-osgPresentation.pc.in	1970-01-01 01:00:00.000000000 +0100
++++ openscenegraph-osg-800b103/packaging/pkgconfig/openscenegraph-osgPresentation.pc.in	2013-04-14 20:14:56.000000000 +0200
+@@ -0,0 +1,14 @@
++# pkg-config source file
++
++prefix=@CMAKE_INSTALL_PREFIX@
++exec_prefix=${prefix}
++libdir=${exec_prefix}/lib@LIB_POSTFIX@
++includedir=${prefix}/include
++
++Name: openscenegraph-osgPresentation
++Description: osgPresentation utility library.
++Version: @OPENSCENEGRAPH_VERSION@
++Requires: openscenegraph-osgViewer openscenegraph-osgManipulator openscenegraph-osgVolume openscenegraph-osgFX openscenegraph-osgText openscenegraph-osgGA openscenegraph-osgUtil openscenegraph-osgDB openscenegraph-osg openthreads
++Conflicts:
++Libs: -L${libdir} -losgPresentation@CMAKE_BUILD_POSTFIX@
++Cflags: -I${includedir}
+diff -urN openscenegraph-osg-800b103-orig/packaging/pkgconfig/openscenegraph-osgText.pc.in openscenegraph-osg-800b103/packaging/pkgconfig/openscenegraph-osgText.pc.in
+--- openscenegraph-osg-800b103-orig/packaging/pkgconfig/openscenegraph-osgText.pc.in	2013-02-13 17:29:03.000000000 +0100
++++ openscenegraph-osg-800b103/packaging/pkgconfig/openscenegraph-osgText.pc.in	2013-04-14 21:48:24.000000000 +0200
+@@ -8,7 +8,7 @@
+ Name: openscenegraph-osgText
+ Description: Text rendering library for Openscenegraph
+ Version: @OPENSCENEGRAPH_VERSION@
+-Requires: openscenegraph-osgDB openscenegraph-osg openthreads
++Requires: openscenegraph-osgDB openscenegraph-osgUtil openscenegraph-osg openthreads
+ Conflicts:
+ Libs: -L${libdir} -losgText@CMAKE_BUILD_POSTFIX@
+ Cflags: -I${includedir}
+Binary files openscenegraph-osg-800b103-orig/src/.DS_Store and openscenegraph-osg-800b103/src/.DS_Store differ
+Binary files openscenegraph-osg-800b103-orig/src/osgPlugins/.DS_Store and openscenegraph-osg-800b103/src/osgPlugins/.DS_Store differ
+Binary files openscenegraph-osg-800b103-orig/src/osgPlugins/3ds/.DS_Store and openscenegraph-osg-800b103/src/osgPlugins/3ds/.DS_Store differ
+Binary files openscenegraph-osg-800b103-orig/src/osgPlugins/cfg/.DS_Store and openscenegraph-osg-800b103/src/osgPlugins/cfg/.DS_Store differ
+diff -urN openscenegraph-osg-800b103-orig/src/osgPlugins/cfg/CMakeLists.txt openscenegraph-osg-800b103/src/osgPlugins/cfg/CMakeLists.txt
+--- openscenegraph-osg-800b103-orig/src/osgPlugins/cfg/CMakeLists.txt	2013-02-13 17:29:03.000000000 +0100
++++ openscenegraph-osg-800b103/src/osgPlugins/cfg/CMakeLists.txt	2013-04-14 20:55:44.000000000 +0200
+@@ -30,7 +30,7 @@
+ endif()
+ # 
+ 
+-SET(TARGET_ADDED_LIBRARIES osgViewer)
++SET(TARGET_ADDED_LIBRARIES osgUtil osgViewer)
+ 
+ #### end var setup  ###
+ SETUP_PLUGIN(cfg)
+diff -urN openscenegraph-osg-800b103-orig/src/osgPlugins/curl/CMakeLists.txt openscenegraph-osg-800b103/src/osgPlugins/curl/CMakeLists.txt
+--- openscenegraph-osg-800b103-orig/src/osgPlugins/curl/CMakeLists.txt	2013-02-13 17:29:03.000000000 +0100
++++ openscenegraph-osg-800b103/src/osgPlugins/curl/CMakeLists.txt	2013-04-14 21:58:08.000000000 +0200
+@@ -23,7 +23,7 @@
+ 
+ IF(ZLIB_FOUND)   
+     SET(TARGET_LIBRARIES_VARS
+-        CURL_LIBRARY
++        CURL_LIBRARIES
+         ZLIB_LIBRARY)
+ ELSE()
+     SET(TARGET_LIBRARIES_VARS
+Binary files openscenegraph-osg-800b103-orig/src/osgPlugins/freetype/.DS_Store and openscenegraph-osg-800b103/src/osgPlugins/freetype/.DS_Store differ
+diff -urN openscenegraph-osg-800b103-orig/src/osgPlugins/freetype/CMakeLists.txt openscenegraph-osg-800b103/src/osgPlugins/freetype/CMakeLists.txt
+--- openscenegraph-osg-800b103-orig/src/osgPlugins/freetype/CMakeLists.txt	2013-02-13 17:29:03.000000000 +0100
++++ openscenegraph-osg-800b103/src/osgPlugins/freetype/CMakeLists.txt	2013-04-14 22:11:11.000000000 +0200
+@@ -22,6 +22,6 @@
+ )
+ 
+ SET(TARGET_ADDED_LIBRARIES osgText )
+-SET(TARGET_LIBRARIES_VARS FREETYPE_LIBRARY )
++SET(TARGET_EXTERNAL_LIBRARIES ${FREETYPE_LIBRARIES} )
+ #### end var setup  ###
+ SETUP_PLUGIN(freetype)
+diff -urN openscenegraph-osg-800b103-orig/src/osgPlugins/qfont/CMakeLists.txt openscenegraph-osg-800b103/src/osgPlugins/qfont/CMakeLists.txt
+--- openscenegraph-osg-800b103-orig/src/osgPlugins/qfont/CMakeLists.txt	2013-02-13 17:29:03.000000000 +0100
++++ openscenegraph-osg-800b103/src/osgPlugins/qfont/CMakeLists.txt	2013-04-14 20:19:21.000000000 +0200
+@@ -2,5 +2,5 @@
+ SET(TARGET_SRC ReaderQFont.cpp)
+ SET(TARGET_ADDED_LIBRARIES osgText osgQt)
+ 
+-SET(TARGET_LIBRARIES_VARS ${QT_QTCORE_LIBRARY_RELEASE} ${QT_QTGUI_LIBRARY_RELEASE})
++SET(TARGET_EXTERNAL_LIBRARIES ${QT_QTCORE_LIBRARY_RELEASE} ${QT_QTGUI_LIBRARY_RELEASE})
+ SETUP_PLUGIN(qfont)
+diff -urN openscenegraph-osg-800b103-orig/src/osgPlugins/sdl/CMakeLists.txt openscenegraph-osg-800b103/src/osgPlugins/sdl/CMakeLists.txt
+--- openscenegraph-osg-800b103-orig/src/osgPlugins/sdl/CMakeLists.txt	2013-02-13 17:29:03.000000000 +0100
++++ openscenegraph-osg-800b103/src/osgPlugins/sdl/CMakeLists.txt	2013-04-14 22:15:26.000000000 +0200
+@@ -1,5 +1,5 @@
+-SET(TARGET_EXTERNAL_LIBRARIES ${SDL_LIBRARY} )
+-INCLUDE_DIRECTORIES(${SDL_INCLUDE_DIR} )
++SET(TARGET_EXTERNAL_LIBRARIES ${SDL_LIBRARIES} )
++INCLUDE_DIRECTORIES(${SDL_INCLUDE_DIRS} )
+ 
+ SET(TARGET_SRC
+     JoystickDevice.cpp
+diff -urN openscenegraph-osg-800b103-orig/src/osgPlugins/tiff/CMakeLists.txt openscenegraph-osg-800b103/src/osgPlugins/tiff/CMakeLists.txt
+--- openscenegraph-osg-800b103-orig/src/osgPlugins/tiff/CMakeLists.txt	2013-02-13 17:29:03.000000000 +0100
++++ openscenegraph-osg-800b103/src/osgPlugins/tiff/CMakeLists.txt	2013-04-14 22:27:41.000000000 +0200
+@@ -1,8 +1,8 @@
+-INCLUDE_DIRECTORIES( ${TIFF_INCLUDE_DIR} )
++INCLUDE_DIRECTORIES( ${TIFF_INCLUDE_DIRS} )
+ 
+ SET(TARGET_SRC ReaderWriterTIFF.cpp )
+ 
+-SET(TARGET_LIBRARIES_VARS TIFF_LIBRARY)
++SET(TARGET_LIBRARIES_VARS TIFF_LIBRARIES)
+ 
+ #### end var setup  ###
+ SETUP_PLUGIN(tiff)
+diff -urN openscenegraph-osg-800b103-orig/src/osgPlugins/xine/CMakeLists.txt openscenegraph-osg-800b103/src/osgPlugins/xine/CMakeLists.txt
+--- openscenegraph-osg-800b103-orig/src/osgPlugins/xine/CMakeLists.txt	2013-02-13 17:29:03.000000000 +0100
++++ openscenegraph-osg-800b103/src/osgPlugins/xine/CMakeLists.txt	2013-04-14 22:54:52.000000000 +0200
+@@ -1,11 +1,11 @@
+-INCLUDE_DIRECTORIES( ${XINE_INCLUDE_DIR} )
++INCLUDE_DIRECTORIES( ${XINE_INCLUDE_DIRS} )
+ 
+ SET(TARGET_SRC 
+     video_out_rgb.c
+     ReaderWriterXine.cpp
+ )
+ 
+-SET(TARGET_LIBRARIES_VARS XINE_LIBRARY )
++SET(TARGET_EXTERNAL_LIBRARIES ${XINE_LIBRARIES})
+ 
+ IF(CMAKE_COMPILER_IS_GNUCXX)
+     SET(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -Wno-deprecated-declarations")
+Binary files openscenegraph-osg-800b103-orig/src/osgWrappers/.DS_Store and openscenegraph-osg-800b103/src/osgWrappers/.DS_Store differ

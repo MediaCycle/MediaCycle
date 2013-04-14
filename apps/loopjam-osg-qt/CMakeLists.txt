@@ -11,6 +11,7 @@ IF ( BUILD_LOOPJAM_APP AND SUPPORT_AUDIO AND USE_QT4 AND USE_OSG AND USE_OSC AND
         SET(CLUSTERS_METHOD "MediaCycle KMeans")
         SET(CLUSTERS_POSITIONS "AudioGarden Flower")
 	SET(OSG_PLUGINS "osgdb_ffmpeg")
+	SET(SETTING_INSTALLATION ON)
 	SET(MAIN_CLASS "ACAudioCycleLoopJam")
         SET(DESCRIPTION "LoopJam is an interactive dancefloor for collaborative music creation, using a sound map organized by similarity. This application version is customized for installations (fullscreen, loops over libraries with a timer).")
 

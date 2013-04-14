@@ -45,7 +45,7 @@ using namespace std;
 using namespace svg;
 
 std::string generateThumbnailName(std::string filename, std::string thumbnail_name, std::string extension){
-    std::stringstream thumbnail_path;
+    boost::filesystem::path thumbnail_path;
     boost::filesystem::path media_path(filename.c_str());
     std::string thumbnail_suffix(thumbnail_name);
     boost::to_lower(thumbnail_suffix);
@@ -55,12 +55,8 @@ std::string generateThumbnailName(std::string filename, std::string thumbnail_na
 #ifdef WIN32
     slash = "\\";
 #endif
-#ifdef __APPLE__
-    thumbnail_path << media_path.parent_path().string() << slash << media_path.stem().string() << "_" << thumbnail_suffix << extension;
-#else // this seems required on ubuntu to compile...
-    thumbnail_path << media_path.parent_path() << slash << media_path.stem() << "_" << thumbnail_suffix << extension;
-#endif
-    return thumbnail_path.str();
+    thumbnail_path = boost::filesystem::path( media_path.parent_path().string() + slash + media_path.stem().string() + "_" + thumbnail_suffix + extension);
+    return thumbnail_path.string();
 }
 
 ACAudioWaveformThumbnailerPlugin::ACAudioWaveformThumbnailerPlugin() : ACThumbnailerPlugin(){
@@ -335,7 +331,9 @@ std::vector<ACMediaThumbnail*> ACAudioWaveformThumbnailerPlugin::summarize(ACMed
 
         doc << thumbnail_specs->second.top_p;
         doc << thumbnail_specs->second.down_p;
-        doc.save();
+        bool saved = doc.save();
+        if(!saved)
+            std::cerr << "ACAudioWaveformThumbnailerPlugin::summarize: couldn't save thumbnail " << thumbnail_specs->second.filename << std::endl;
 
         ACMediaThumbnail* thumbnail = new ACMediaThumbnail(MEDIA_TYPE_IMAGE);
         thumbnail->setFileName(thumbnail_specs->second.filename);

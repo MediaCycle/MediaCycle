@@ -43,7 +43,7 @@ bool ACVideoOpenCVData::readData(string _fname){
 	// check if video successfully opened 
     if (!capture->isOpened()){
 		// Either the video does not exist, or it uses a codec OpenCV does not support. 
-		cerr << "<ACVideoData::readData> Could not initialize capturing from file " << _fname << endl;
+        cerr << "<ACVideoOpenCVData::readData> Could not initialize capturing from file " << _fname << endl;
         delete capture;
         capture = 0;
 		return false;

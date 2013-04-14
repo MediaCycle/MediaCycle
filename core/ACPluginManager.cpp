@@ -230,7 +230,7 @@ int ACPluginManager::clean() {
         *iter = 0;
     }
     this->mPluginLibrary.clear();
-    this->mPluginLibrary.push_back(new ACDefaultPluginsLibrary());
+    //this->mPluginLibrary.push_back(new ACDefaultPluginsLibrary());
     return 0;
 }
 

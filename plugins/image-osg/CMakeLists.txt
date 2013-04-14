@@ -1,5 +1,10 @@
 SET(MEDIA_TYPE "image")
 SET(PLUGIN_NAME "image-osg")
+IF(APPLE)
+	SET(OSG_PLUGINS "osgdb_imageio")
+ELSE()
+	SET(OSG_PLUGINS "osgdb_bmp;osgdb_jpeg;osgdb_png")#;osgdb_tiff
+ENDIF()
 SET(MC_MEDIA_LIBS "${MEDIA_TYPE}-core;${MEDIA_TYPE}-osg")
 IF(SUPPORT_IMAGE AND BUILD_APPS AND USE_OSG AND OSG_FOUND)
 	INCLUDE (${CMAKE_SOURCE_DIR}/cmake/AddMediaCyclePlugin.cmake)

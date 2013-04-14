@@ -106,14 +106,7 @@ static const stringToAudioEngineScaleModeMap::value_type _initAudioEngineScaleMo
 static const stringToAudioEngineScaleModeMap stringToAudioEngineScaleMode(_initAudioEngineScaleModeMap, _initAudioEngineScaleModeMap + sizeof _initAudioEngineScaleModeMap / sizeof *_initAudioEngineScaleModeMap);
 //usage: stringToAudioEngineScaleModeMap::const_iterator iterm = stringToAudioEngineScaleMode.find(s_mode);
 
-class ACMediaFeedback {
-	
-public:
-	ACMediaFeedback() {};
-	~ACMediaFeedback() {};
-};
-
-class ACAudioFeedback : public ACMediaFeedback {
+class ACAudioFeedback {
 	
 public:
 #ifdef USE_OPENAL
@@ -128,7 +121,7 @@ public:
 	
 	// MediaCycle to query database and browser
 	MediaCycle				*media_cycle;
-	void setMediaCycle(MediaCycle *media_cycle) { this->media_cycle = media_cycle; };
+    void setMediaCycle(MediaCycle *media_cycle) { this->media_cycle = media_cycle; }
 	
 	// OpenAL general settings
 	void setListenerGain(float gain);

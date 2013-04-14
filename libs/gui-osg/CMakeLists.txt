@@ -5,7 +5,10 @@ IF(USE_OSG)
 	ADD_LIBRARY(mediacycle-osg ${mediacycle-osg_SRC} ${mediacycle-osg_HDR})
 	ADD_DEPENDENCIES(mediacycle-osg mediacycle)
 	TARGET_LINK_LIBRARIES(mediacycle-osg mediacycle)
-	TARGET_LINK_LIBRARIES(mediacycle-osg ${OPENSCENEGRAPH_LIBRARIES})
+
+        #TARGET_LINK_LIBRARIES(mediacycle-osg osgdb_svg)
+
+        TARGET_LINK_LIBRARIES(mediacycle-osg ${OPENSCENEGRAPH_LIBRARIES})
 	IF(MINGW)#OR APPLE_IOS_DEV OR APPLE_IOS_SIM)
 		TARGET_LINK_LIBRARIES(mediacycle-osg ${OSGPLUGINS_STATIC_LDFLAGS})#${OSGPLUGINS_LDFLAGS})
 	ENDIF(MINGW)#OR APPLE_IOS_DEV OR APPLE_IOS_SIM)

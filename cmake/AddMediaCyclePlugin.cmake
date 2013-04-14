@@ -4,6 +4,10 @@
 #  3RDPARTY_NAMES (list): example list(APPEND 3RDPARTY_NAMES "cvBlobsLib")
 #  3RDPARTY_LICENSES (list): example list(APPEND 3RDPARTY_LICENSES "free")
 #  3RDPARTY_URLS (list): example list(APPEND 3RDPARTY_URLS "http://opencv.willowgarage.com/wiki/cvBlobsLib")
+#
+# Required (osg)
+#  OSG_PLUGINS (list): example SET(OSG_PLUGINS "osgdb_ffmpeg;osgdb_svg")
+#
 
 macro(ADD_MC_PLUGIN_LIBRARY PLUGIN_NAME)
 
@@ -46,9 +50,43 @@ file(WRITE ${CMAKE_CURRENT_BINARY_DIR}/factory.cpp
  *  Don't modify this file, rather its generator:
  *  ${CMAKE_CURRENT_SOURCE_DIR}/CMakeLists.txt
  */
+")
 
+IF(CMAKE_TOOLCHAIN_FILE AND MINGW)
+
+        string(REGEX MATCH ".*osg.*" WITH_OSG "${MC_MEDIA_LIBS}")
+        IF(WITH_OSG AND NOT OSG_PLUGINS)
+            MESSAGE("Warning: no required OSG format plugin?")
+        ENDIF()
+
+        IF(OSG_PLUGINS)
+
+            file(APPEND ${CMAKE_CURRENT_BINARY_DIR}/factory.cpp "
+#ifdef OSG_LIBRARY_STATIC
+#include <osgDB/ReadFile>\n")
+
+            foreach(OSG_PLUGIN ${OSG_PLUGINS})
+                string(REGEX MATCH ".*svg.*" WITH_OSGDB_SVG "${OSG_PLUGIN}")
+                string(REGEX MATCH ".*ffmpeg.*" WITH_OSGDB_FFMPEG "${OSG_PLUGIN}")
+                IF(WITH_OSGDB_SVG AND WITH_OSGDB_SVG AND RSVG_FOUND)
+                    file(APPEND ${CMAKE_CURRENT_BINARY_DIR}/factory.cpp "USE_OSGPLUGIN(SVG)\n")
+                ELSEIF(WITH_OSGDB_FFMPEG AND WITH_OSGDB_FFMPEG AND FFMPEG_FOUND)
+                    file(APPEND ${CMAKE_CURRENT_BINARY_DIR}/factory.cpp "USE_OSGPLUGIN(ffmpeg)\n")
+                ELSE()
+                    string(REPLACE "osgdb_" ""  OSG_PLUGIN "${OSG_PLUGIN}")
+                     file(APPEND ${CMAKE_CURRENT_BINARY_DIR}/factory.cpp "USE_OSGPLUGIN(${OSG_PLUGIN})\n")
+                ENDIF()
+            endforeach(OSG_PLUGIN)
+
+            file(APPEND ${CMAKE_CURRENT_BINARY_DIR}/factory.cpp "#endif\n")
+        ENDIF()
+ENDIF()
+
+
+file(APPEND ${CMAKE_CURRENT_BINARY_DIR}/factory.cpp "
 #include <ACPlugin.h>
 ")
+
 foreach(PLUGIN_CLASS ${PLUGIN_CLASSES})
 	file(APPEND ${CMAKE_CURRENT_BINARY_DIR}/factory.cpp "#include \"${PLUGIN_CLASS}.h\"\n")
 endforeach(PLUGIN_CLASS)
@@ -93,7 +131,7 @@ file(APPEND ${CMAKE_CURRENT_BINARY_DIR}/factory.cpp "\treturn thirdPartyMetadata
 
 INCLUDE_DIRECTORIES(${CMAKE_CURRENT_SOURCE_DIR})
 IF(WITH_QT4)
-    MESSAGE("Qt4-powered MediaCycle plugin")
+    #MESSAGE("Qt4-powered MediaCycle plugin")
     FILE(GLOB ${TARGET_NAME}_UIS ${CMAKE_CURRENT_SOURCE_DIR}/*.ui ${CMAKE_CURRENT_BINARY_DIR}/*.ui)
     # Generates ui_*.h files
     QT4_WRAP_UI(${TARGET_NAME}_UIS_H ${${TARGET_NAME}_UIS})
@@ -109,10 +147,27 @@ IF(WITH_QT4)
     endforeach(MC_MEDIA_LIB)
 
     ADD_LIBRARY(${TARGET_NAME} SHARED ${${TARGET_NAME}_SRC} ${${TARGET_NAME}_HDR} ${${TARGET_NAME}_UIS_H} ${${TARGET_NAME}_MOC_SRCS})
-    TARGET_LINK_LIBRARIES(${TARGET_NAME} mediacycle-osg-qt ${OPENGL_LIBRARIES})
 ELSE()
     include_directories(${CMAKE_CURRENT_BINARY_DIR})
     ADD_LIBRARY(${TARGET_NAME} SHARED ${${TARGET_NAME}_SRC} ${${TARGET_NAME}_HDR})
+ENDIF()
+
+IF(CMAKE_TOOLCHAIN_FILE AND MINGW AND OSG_PLUGINS)
+    foreach(OSG_PLUGIN ${OSG_PLUGINS})
+        string(REGEX MATCH ".*svg.*" WITH_OSGDB_SVG "${OSG_PLUGIN}")
+        string(REGEX MATCH ".*ffmpeg.*" WITH_OSGDB_FFMPEG "${OSG_PLUGIN}")
+        IF(WITH_OSGDB_SVG AND WITH_OSGDB_SVG AND RSVG_FOUND)
+                TARGET_LINK_LIBRARIES(${TARGET_NAME} osgdb_svg)
+        ELSEIF(WITH_OSGDB_FFMPEG AND WITH_OSGDB_FFMPEG AND FFMPEG_FOUND)
+                TARGET_LINK_LIBRARIES(${TARGET_NAME} osgdb_ffmpeg)
+        ELSE()
+                TARGET_LINK_LIBRARIES(${TARGET_NAME} -L${OSG_LIBRARY_DIR}/osgPlugins-${OPENSCENEGRAPH_VERSION} -l${OSG_PLUGIN})
+        ENDIF()
+    endforeach(OSG_PLUGIN)
+ENDIF()
+
+IF(WITH_QT4)
+    TARGET_LINK_LIBRARIES(${TARGET_NAME} mediacycle-osg-qt ${OPENGL_LIBRARIES})
 ENDIF()
 
 foreach(MC_3RDPARTY ${MC_3RDPARTIES})

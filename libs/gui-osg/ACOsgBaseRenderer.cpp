@@ -44,6 +44,8 @@
 #include <osg/Image>
 #include <osg/Texture2D>
 
+//USE_OSGPLUGIN(SVG)
+
 using namespace osg;
 
 ACOsgBaseRenderer::ACOsgBaseRenderer() {

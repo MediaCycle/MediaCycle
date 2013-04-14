@@ -46,6 +46,8 @@
 #define TIXML_USE_STL
 #include <tinyxml.h>
 
+#include <pthread.h>
+
 /// These import steps must be ordered and indexed incrementally
 typedef	unsigned int ACImportStep;
 const ACImportStep	IMPORT_STEP_UNKNOWN     	=	0;
@@ -244,8 +246,10 @@ private:
     std::map<ACImportStep, float> import_progress;
     std::map<ACImportStep, ACMediaAnalysisPlugin*> plugin_at_step;
     std::map<ACImportStep, int> plugins_per_step;
-private:
-    virtual int computeThumbnails(ACPluginManager *acpl, bool feature_extracted, bool segmentation_done);
+    pthread_mutex_t import_mutex;
+    pthread_mutexattr_t import_mutex_attr;
+    private:
+        virtual int computeThumbnails(ACPluginManager *acpl, bool feature_extracted, bool segmentation_done);
 protected:
     virtual int extractFeatures(ACPluginManager *acpl=0, bool _save_timed_feat=false);
 public:

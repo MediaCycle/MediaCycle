@@ -256,6 +256,11 @@ void ACOsgCompositeViewQt::initFont()
     //CF this should be done once per application runtime, for instance in the browser renderer or composite viewer
     font = 0;
     std::string font_path(""),font_file("fudd.ttf");
+
+#ifdef __WIN32__
+    font_path = "C:\\Windows\\Fonts\\";
+    font_file = "Arial.ttf";
+#else
 #ifdef USE_DEBUG
     boost::filesystem::path s_path( __FILE__ );
     font_path = s_path.parent_path().parent_path().parent_path().string() + "/data/fonts/";
@@ -263,10 +268,9 @@ void ACOsgCompositeViewQt::initFont()
 #ifdef __APPLE__
     boost::filesystem::path e_path( getExecutablePath() );
     font_path = e_path.parent_path().parent_path().string() + "/Resources/fonts/";
-#elif __WIN32__
-    font_path = "./";
 #else
     font_path = "/usr/share/mediacycle/fonts/";
+#endif
 #endif
 #endif
     std::cout << "Current font path " << font_path << std::endl;

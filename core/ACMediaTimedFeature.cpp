@@ -49,18 +49,16 @@
 #include <boost/accumulators/statistics/kurtosis.hpp>
 #include <boost/accumulators/statistics/moment.hpp>
 
+#include "boost/filesystem.hpp"
+
 // USE_SDIF is off by default :
 #ifdef USE_SDIF
 #include "sdif.h"
 #endif
 
-
 using namespace arma;
 using namespace std;
-// CPL
 using namespace boost;
-
-
 
 ACMediaTimedFeature::ACMediaTimedFeature(){
 }
@@ -1012,6 +1010,21 @@ bool ACMediaTimedFeature::saveInFile(string _fname, bool _binary){
 bool ACMediaTimedFeature::loadFromFile(string _fname, bool _binary){
 	fmat tmp_m;
 	bool load_ok = false;
+    
+    boost::filesystem::path p( _fname.c_str());// , boost::filesystem::native );
+    if ( !boost::filesystem::exists( p ) ){
+        std::cout << "ACMediaTimedFeature::loadFromFile: file " << _fname << " doesn't exist " << std::endl;
+        return false;
+    }
+    /*if(!boost::filesystem::is_regular( p ) ){
+        std::cout << "ACMediaTimedFeature::loadFromFile: file " << _fname << " isn't regular " << std::endl;
+        return false;
+    }
+    if(boost::filesystem::file_size( p ) == 0 ){
+        std::cout << "ACMediaTimedFeature::loadFromFile: file " << _fname << " has null size " << std::endl;
+        return false;
+    }*/
+    
 	if (_binary){
 		#ifdef ARMADILLO_HAVE_RANDU // randu and .save returns were both introduced in version 0.9.50
 			load_ok = tmp_m.load(_fname, arma_binary); // default format = arma_binary

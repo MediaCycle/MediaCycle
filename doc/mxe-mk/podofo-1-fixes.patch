@@ -1,0 +1,356 @@
+This file is part of MXE.
+See index.html for further information.
+
+--- a/CMakeLists.txt	2013-04-11 16:14:17.000000000 +0200
++++ b/CMakeLists.txt	2013-04-11 16:30:40.000000000 +0200
+@@ -22,7 +22,15 @@
+ #
+ INCLUDE(CheckIncludeFile)
+ INCLUDE(CheckLibraryExists)
+-INCLUDE(UsePkgConfig)
++#INCLUDE(UsePkgConfig)
++FIND_PACKAGE (PkgConfig)
++IF(MINGW AND CMAKE_TOOLCHAIN_FILE)
++	IF(PKG_CONFIG_FOUND)
++		SET(PKG_CONFIG_EXECUTABLE ${PKG_CONFIG_EXECUTABLE} CACHE STRING "pkg-config")
++	ELSE()
++		MESSAGE(FATAL_ERROR "pkgconfig required for cross-compiling with MXE for windows")
++	ENDIF()
++ENDIF()
+ INCLUDE(TestBigEndian)
+ INCLUDE(CheckTypeSize)
+ 
+@@ -342,10 +350,25 @@
+   MESSAGE("Found libtiff headers in ${TIFF_INCLUDE_DIR}, library at ${TIFF_LIBRARIES}")
+   SET(PODOFO_HAVE_TIFF_LIB TRUE)
+   INCLUDE_DIRECTORIES(${TIFF_INCLUDE_DIR})
++  IF(MINGW AND CMAKE_TOOLCHAIN_FILE)
++	PKG_SEARCH_MODULE(TIFF_PKG REQUIRED libtiff libtiff-4)
++	IF(TIFF_PKG_FOUND)
++		MESSAGE( "Tiff cflags found through pkg-config: ${TIFF_PKG_CFLAGS}" )
++		MESSAGE( "Tiff ldflags found through pkg-config: ${TIFF_PKG_LDFLAGS}" )
++		STRING(REGEX REPLACE ";" " " TIFF_CFLAGS "${TIFF_PKG_CFLAGS}")
++		SET(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} ${TIFF_CFLAGS}")
++		SET(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} ${TIFF_CFLAGS}")
++		LIST(APPEND TIFF_LIBRARIES ${TIFF_PKG_LDFLAGS})
++		MESSAGE("Tiff static libraries: ${TIFF_LIBRARIES}")
++	ELSE(TIFF_PKG_FOUND)
++		MESSAGE( FATAL_ERROR "Tiff cflags/ldflags not found through pkg-config." )
++	ENDIF(TIFF_PKG_FOUND)
++  ENDIF()
+ ELSE(TIFF_FOUND)
+   MESSAGE("Libtiff not found. TIFF support will be disabled")
+ ENDIF(TIFF_FOUND)
+ 
++
+ FIND_PACKAGE(PNG)
+ 
+ IF(PNG_FOUND)
+@@ -371,6 +394,20 @@
+ 
+ FIND_PACKAGE(FREETYPE REQUIRED)
+ MESSAGE("Found freetype library at ${FREETYPE_LIBRARIES}, headers ${FREETYPE_INCLUDE_DIR}")
++IF(MINGW AND CMAKE_TOOLCHAIN_FILE)
++	PKG_CHECK_MODULES (FREETYPEPKG REQUIRED freetype2)
++	IF(FREETYPEPKG_FOUND)
++		MESSAGE( "FreeType cflags found through pkg-config: ${FREETYPEPKG_CFLAGS}" )
++		MESSAGE( "FreeType ldflags found through pkg-config: ${FREETYPEPKG_LDFLAGS}" )
++		STRING(REGEX REPLACE ";" " " FREETYPE_CFLAGS "${FREETYPEPKG_CFLAGS}")
++		SET(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} ${FREETYPE_CFLAGS}")
++		SET(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} ${FREETYPE_CFLAGS}")
++		LIST(APPEND FREETYPE_LIBRARIES ${FREETYPEPKG_LDFLAGS})
++		MESSAGE("FreeType static libraries: ${FREETYPE_LIBRARIES}")
++	ELSE(FREETYPEPKG_FOUND)
++		MESSAGE( FATAL_ERROR "FreeType cflags/ldflags not found through pkg-config." )
++	ENDIF(FREETYPEPKG_FOUND)
++ENDIF()
+ 
+ FIND_PACKAGE(LIBSTLPORT)
+ SET(stlport_libraries_if_use_stlport)
+@@ -570,9 +570,41 @@
+ # Export some variables into the config file so it's easier for others
+ # to build and link against PoDoFo
+ 
+-# To use these dependencies set PODOFO_DIR to the podofo BUILD directory in
+-# your build (eg -DPODOFO_DIR=/path/to/podofo when running cmake to configure
+-# the app that'll use podofo). See: FIND_PACKAGE(...) in the cmake docs.
+-EXPORT_LIBRARY_DEPENDENCIES(
+-	"${CMAKE_CURRENT_BINARY_DIR}/PoDoFoConfig.cmake"
+-	APPEND)
++# pkgconfig file
++foreach(LIB_DEPEND ${podofo_static_LIB_DEPENDS})
++	STRING(REGEX MATCH "${CMAKE_INSTALL_PREFIX}/lib/" LIB_DEPEND_FULL "${LIB_DEPEND}")
++	STRING(REGEX MATCH "-l" LIB_DEPEND_SHORT "${LIB_DEPEND}")
++	STRING(REGEX MATCH "-L${CMAKE_INSTALL_PREFIX}/lib" LIB_DEPEND_PREFIX_PATH "${LIB_DEPEND}")
++	STRING(REGEX MATCH "-L" LIB_DEPEND_PATH "${LIB_DEPEND}")
++	STRING(REGEX MATCH "general" GENERAL "${LIB_DEPEND}")
++	IF(LIB_DEPEND_FULL)
++		STRING(REGEX REPLACE "${CMAKE_INSTALL_PREFIX}/lib/lib" "-l" LIB_DEPEND "${LIB_DEPEND}")
++		STRING(REGEX REPLACE ".a" "" LIB_DEPEND "${LIB_DEPEND}")
++	ELSEIF(NOT LIB_DEPEND_SHORT AND NOT LIB_DEPEND_PATH)
++		SET(LIB_DEPEND  "-l${LIB_DEPEND}")
++	ENDIF()
++	IF(NOT ${LIB_DEPEND} MATCHES "general" AND NOT LIB_DEPEND_PREFIX_PATH)
++		LIST(APPEND LIB_DEPENDS ${LIB_DEPEND})
++	ENDIF()
++endforeach(LIB_DEPEND)
++LIST(REVERSE LIB_DEPENDS)
++LIST(REMOVE_DUPLICATES LIB_DEPENDS)
++LIST(REVERSE LIB_DEPENDS)
++STRING(REGEX REPLACE ";" " " LIB_DEPENDS "${LIB_DEPENDS}")
++file(WRITE ${CMAKE_BINARY_DIR}/podofo.pc "
++prefix=${CMAKE_INSTALL_PREFIX}
++exec_prefix=\${prefix}
++libdir=\${exec_prefix}/lib
++includedir=\${prefix}/include
++
++Name: PoDoFo
++Description: A free, portable C++ library which includes classes to parse PDF files and modify their contents into memory.
++Version: ${PODOFO_VERSION_MAJOR}.${PODOFO_VERSION_MINOR}.${PODOFO_VERSION_PATCH}
++Requires:
++Libs: -L\${libdir} -lpodofo
++Libs.private: ${LIB_DEPENDS}
++Cflags: -I\${includedir}/podofo -I\${includedir}
++")
++INSTALL(FILES ${CMAKE_BINARY_DIR}/podofo.pc
++    DESTINATION "${CMAKE_INSTALL_PREFIX}/lib/pkgconfig"
++    )
+\ No newline at end of file
+--- a/cmake/modules/FindCppUnit.cmake	2007-11-20 22:05:26.000000000 +0100
++++ b/cmake/modules/FindCppUnit.cmake	2013-04-11 16:26:08.000000000 +0200
+@@ -11,7 +11,9 @@
+   SET(CPPUNIT_MIN_VERSION 1.12.0)
+ endif(NOT CPPUNIT_MIN_VERSION)
+ 
+-FIND_PROGRAM(CPPUNIT_CONFIG_EXECUTABLE cppunit-config )
++IF(NOT CMAKE_TOOLCHAIN_FILE)
++	FIND_PROGRAM(CPPUNIT_CONFIG_EXECUTABLE cppunit-config )
++ENDIF()
+ 
+ IF(CPPUNIT_INCLUDE_DIR AND CPPUNIT_LIBRARIES)
+ 
+@@ -30,8 +32,8 @@
+         STRING(REGEX REPLACE "-I(.+)" "\\1" CPPUNIT_CFLAGS "${CPPUNIT_CFLAGS}")
+     ELSE(CPPUNIT_CONFIG_EXECUTABLE)
+         # in case win32 needs to find it the old way?
+-        FIND_PATH(CPPUNIT_CFLAGS cppunit/TestRunner.h PATHS /usr/include /usr/local/include )
+-        FIND_LIBRARY(CPPUNIT_LIBRARIES NAMES cppunit PATHS /usr/lib /usr/local/lib )
++        FIND_PATH(CPPUNIT_CFLAGS cppunit/TestRunner.h)# PATHS /usr/include /usr/local/include )
++        FIND_LIBRARY(CPPUNIT_LIBRARIES NAMES cppunit)# PATHS /usr/lib /usr/local/lib )
+         # how can we find cppunit version?
+         MESSAGE (STATUS "Ensure you cppunit installed version is at least ${CPPUNIT_MIN_VERSION}")
+         SET (CPPUNIT_INSTALLED_VERSION ${CPPUNIT_MIN_VERSION})
+--- a/cmake/modules/FindFREETYPE.cmake	2012-12-12 23:55:14.000000000 +0100
++++ b/cmake/modules/FindFREETYPE.cmake	2013-04-11 14:44:48.000000000 +0200
+@@ -1,79 +1,117 @@
+-#
+-# Find the native FREETYPE includes and library
+-#
+-
+-# This module defines
+-# FREETYPE_INCLUDE_DIR, where to find ft2build.h, ftheader.h, ...
+-# FREETYPE_LIBRARIES, the libraries to link against to use FREETYPE.
+-# FREETYPE_FOUND, If false, do not try to use FREETYPE.
+-
+-# also defined, but not for general use are
+-# FREETYPE_LIBRARY, where to find the FREETYPE library.
+-
+-SET(FREETYPE_FIND_QUIETLY 1)
+-
+-FIND_PATH(FREETYPE_INCLUDE_DIR_FT2BUILD ft2build.h
+-  /usr/include/
+-  /usr/local/include/
+-  /usr/X11/include/
+-  NO_CMAKE_SYSTEM_PATH
+-)
+-
+-FIND_PATH(FREETYPE_INCLUDE_DIR_FTHEADER freetype/config/ftheader.h
+-  /usr/include/freetype2
+-  /usr/local/include/freetype2
+-  /usr/X11/include/freetype2
+-  ${FREETYPE_INCLUDE_DIR_FT2BUILD}
+-  ${FREETYPE_INCLUDE_DIR_FT2BUILD}/freetype2
+-  NO_CMAKE_SYSTEM_PATH
+-)
+-
+-IF ( FREETYPE_INCLUDE_DIR_FTHEADER AND FREETYPE_INCLUDE_DIR_FT2BUILD )
+-	SET(FREETYPE_INCLUDE_DIR
+-		${FREETYPE_INCLUDE_DIR_FTHEADER}
+-		${FREETYPE_INCLUDE_DIR_FT2BUILD})
+-ENDIF ( FREETYPE_INCLUDE_DIR_FTHEADER AND FREETYPE_INCLUDE_DIR_FT2BUILD )
+-
+-IF(NOT FREETYPE_FIND_QUIETLY)
+-  MESSAGE("FREETYPE_INCLUDE_DIR_FT2BUILD ${FREETYPE_INCLUDE_DIR_FT2BUILD}")
+-  MESSAGE("FREETYPE_INCLUDE_DIR_FTHEADER ${FREETYPE_INCLUDE_DIR_FTHEADER}")
+-  MESSAGE("FREETYPE_INCLUDE_DIR ${FREETYPE_INCLUDE_DIR}")
+-ENDIF(NOT FREETYPE_FIND_QUIETLY)
+-
+-SET(FREETYPE_LIBRARY_NAMES_DEBUG ${FREETYPE_LIBRARY_NAMES_DEBUG} freetyped libfreetyped)
+-SET(FREETYPE_LIBRARY_NAMES_RELEASE ${FREETYPE_LIBRARY_NAMES_RELEASE} freetype libfreetype)
+-
+-SET(FREETYPE_LIB_PATHS /usr/lib /usr/local/lib /usr/X11/lib)
+-
+-FIND_LIBRARY(FREETYPE_LIBRARY_RELEASE
+-  ${FREETYPE_LIBRARY_NAMES_RELEASE}
+-  ${FREETYPE_LIBRARY_NAMES}
+-  PATHS
+-  ${FREETYPE_LIB_PATHS}
+-)
+-FIND_LIBRARY(FREETYPE_LIBRARY_DEBUG
+-  ${FREETYPE_LIBRARY_NAMES_DEBUG}
+-  PATHS
+-  ${FREETYPE_LIB_PATHS}
+-)
+-
+-INCLUDE(LibraryDebugAndRelease)
+-SET_LIBRARY_FROM_DEBUG_AND_RELEASE(FREETYPE)
+-SET(FREETYPE_LIBRARIES ${FREETYPE_LIBRARY})
+-
+-IF(NOT FREETYPE_FIND_QUIETLY)
+-  MESSAGE("FREETYPE_LIBRARY_DEBUG ${FREETYPE_LIBRARY_DEBUG}")
+-  MESSAGE("FREETYPE_LIBRARY_RELEASE ${FREETYPE_LIBRARY_RELEASE}")
+-  MESSAGE("FREETYPE_LIBRARY ${FREETYPE_LIBRARY}")
+-ENDIF(NOT FREETYPE_FIND_QUIETLY)
+-
+-# MESSAGE(STATUS "ft lib ${FREETYPE_LIBRARY}")
+-# MESSAGE(STATUS "ft2 build ${FREETYPE_INCLUDE_DIR_FT2BUILD}")
+-# MESSAGE(STATUS "ft header ${FREETYPE_INCLUDE_DIR_FTHEADER}")
+-
+-INCLUDE(PoDoFoFindPackageHandleStandardArgs)
+-FIND_PACKAGE_HANDLE_STANDARD_ARGS(FREETYPE DEFAULT_MSG FREETYPE_LIBRARY FREETYPE_INCLUDE_DIR)
+-
+-IF (NOT FREETYPE_FIND_QUIETLY)
+-MESSAGE(STATUS "Found Freetype2: ${FREETYPE_LIBRARY}")
+-ENDIF (NOT FREETYPE_FIND_QUIETLY)
++# - Locate FreeType library
++# This module defines
++#  FREETYPE_LIBRARIES, the library to link against
++#  FREETYPE_FOUND, if false, do not try to link to FREETYPE
++#  FREETYPE_INCLUDE_DIR, where to find headers.
++#  This is the concatenation of the paths:
++#  FREETYPE_INCLUDE_DIR_ft2build
++#  FREETYPE_INCLUDE_DIR_freetype2
++#   
++# $FREETYPE_DIR is an environment variable that would
++# correspond to the ./configure --prefix=$FREETYPE_DIR
++# used in building FREETYPE.
++# Created by Eric Wing. 
++
++# Ugh, FreeType seems to use some #include trickery which 
++# makes this harder than it should be. It looks like they
++# put ft2build.h in a common/easier-to-find location which
++# then contains a #include to a more specific header in a 
++# more specific location (#include <freetype/config/ftheader.h>).
++# Then from there, they need to set a bunch of #define's 
++# so you can do something like:
++# #include FT_FREETYPE_H
++# Unfortunately, using CMake's mechanisms like INCLUDE_DIRECTORIES()
++# wants explicit full paths and this trickery doesn't work too well.
++# I'm going to attempt to cut out the middleman and hope 
++# everything still works.
++FIND_PATH(FREETYPE_INCLUDE_DIR_ft2build ft2build.h 
++  PATHS
++  $ENV{FREETYPE_DIR}
++  NO_DEFAULT_PATH
++  PATH_SUFFIXES include    
++)
++FIND_PATH(FREETYPE_INCLUDE_DIR_ft2build ft2build.h 
++  PATHS ${CMAKE_PREFIX_PATH} # Unofficial: We are proposing this.
++  NO_DEFAULT_PATH
++  PATH_SUFFIXES include
++)
++FIND_PATH(FREETYPE_INCLUDE_DIR_ft2build ft2build.h 
++  PATHS
++  /usr/local
++  /usr
++  /usr/local/X11R6
++  /usr/local/X11
++  /usr/X11R6
++  /usr/X11
++  /sw
++  /opt/local
++  /opt/csw
++  /opt
++  /usr/freeware
++  PATH_SUFFIXES include
++)
++
++FIND_PATH(FREETYPE_INCLUDE_DIR_freetype2 freetype/config/ftheader.h 
++  $ENV{FREETYPE_DIR}/include/freetype2
++  NO_DEFAULT_PATH
++)
++FIND_PATH(FREETYPE_INCLUDE_DIR_freetype2 freetype/config/ftheader.h 
++  PATHS ${CMAKE_PREFIX_PATH} # Unofficial: We are proposing this.
++  NO_DEFAULT_PATH
++  PATH_SUFFIXES include/freetype2
++)
++FIND_PATH(FREETYPE_INCLUDE_DIR_freetype2 freetype/config/ftheader.h 
++  /usr/local/include/freetype2
++  /usr/include/freetype2
++  /usr/local/X11R6/include/freetype2
++  /usr/local/X11/include/freetype2
++  /usr/X11R6/include/freetype2
++  /usr/X11/include/freetype2
++  /sw/include/freetype2
++  /opt/local/include/freetype2
++  /opt/csw/include/freetype2
++  /opt/include/freetype2
++  /usr/freeware/include/freetype2
++)
++
++FIND_LIBRARY(FREETYPE_LIBRARIES 
++  NAMES freetype libfreetype freetype219
++  PATHS
++  $ENV{FREETYPE_DIR}
++  NO_DEFAULT_PATH
++  PATH_SUFFIXES lib64 lib 
++)
++FIND_LIBRARY(FREETYPE_LIBRARIES 
++  NAMES freetype libfreetype freetype219
++  PATHS ${CMAKE_PREFIX_PATH} # Unofficial: We are proposing this.
++  NO_DEFAULT_PATH
++  PATH_SUFFIXES lib64 lib 
++)
++FIND_LIBRARY(FREETYPE_LIBRARIES 
++  NAMES freetype libfreetype freetype219
++  PATHS
++  /usr/local
++  /usr
++  /usr/local/X11R6
++  /usr/local/X11
++  /usr/X11R6
++  /usr/X11
++  /sw
++  /opt/local
++  /opt/csw
++  /opt
++  /usr/freeware
++  PATH_SUFFIXES lib64 lib
++)
++
++IF(FREETYPE_INCLUDE_DIR_ft2build AND FREETYPE_INCLUDE_DIR_freetype2)
++  SET(FREETYPE_INCLUDE_DIR "${FREETYPE_INCLUDE_DIR_ft2build};${FREETYPE_INCLUDE_DIR_freetype2}")
++ENDIF(FREETYPE_INCLUDE_DIR_ft2build AND FREETYPE_INCLUDE_DIR_freetype2)
++
++
++SET(FREETYPE_FOUND "NO")
++IF(FREETYPE_LIBRARIES AND FREETYPE_INCLUDE_DIR)
++  SET(FREETYPE_FOUND "YES")
++ENDIF(FREETYPE_LIBRARIES AND FREETYPE_INCLUDE_DIR)
++
++
+--- a/src/CMakeLists.txt	2012-12-12 23:55:46.000000000 +0100
++++ b/src/CMakeLists.txt	2013-04-11 16:27:39.000000000 +0200
+@@ -101,10 +101,10 @@
+   doc/PdfCMapEncoding.cpp
+   )
+ 
+-IF(WIN32)
++IF(WIN32 AND NOT MINGW)
+     # If we build for windows systems, we also include the resource file
+     SET(PODOFO_DOC_SOURCES ${PODOFO_DOC_SOURCES} doc/podofo-doc.rc)
+-ENDIF(WIN32)
++ENDIF(WIN32 AND NOT MINGW)
+ 
+ SET(PODOFO_HEADERS
+   podofo-base.h

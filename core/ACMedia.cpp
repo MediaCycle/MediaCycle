@@ -73,6 +73,9 @@ ACMedia::ACMedia() {
         plugin_at_step[import_step->first] = 0;
         plugins_per_step[import_step->first] = 0;
     }
+    pthread_mutexattr_init(&import_mutex_attr);
+    pthread_mutex_init(&import_mutex, &import_mutex_attr);
+    pthread_mutexattr_destroy(&import_mutex_attr);
 }
 
 ACMedia::ACMedia(const ACMedia& m){
@@ -842,9 +845,14 @@ float ACMedia::getImportProgressAtStep(ACImportStep current_step){
         return 0.0f;
     }
     progress += import_progress[current_step];
-    if(import_progress[current_step] <1.0f && plugin_at_step[current_step] != 0 && plugins_per_step[current_step] != 0){
-        progress += plugin_at_step[current_step]->getProgress()/(float)(plugins_per_step[current_step]);
+    pthread_mutex_lock(&import_mutex);
+    float plugin_progress = 0.0f;
+    if(plugin_at_step[current_step])
+        plugin_progress = plugin_at_step[current_step]->getProgress();
+    if(import_progress[current_step] <1.0f && plugin_progress != 0 && plugins_per_step[current_step] != 0){
+        progress += plugin_progress/(float)(plugins_per_step[current_step]);
     }
+    pthread_mutex_unlock(&import_mutex);
     return progress;
 }
 

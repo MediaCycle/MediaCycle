@@ -33,9 +33,13 @@
  */
 
 #include "ACImageNumberOfFacesPlugin.h"
+#include "MediaCycle.h"
 
 #include <vector>
 #include <string>
+
+//#include <boost/filesystem/operations.hpp>
+//namespace fs = boost::filesystem;
 
 using namespace std;
 
@@ -74,8 +78,26 @@ std::vector<ACMediaFeatures*> ACImageNumberOfFacesPlugin::calculate(ACMedia* _th
 	return allImageFeatures;
 }
 
-ACMediaFeatures* ACImageNumberOfFacesPlugin::calculateNumberOfFaces(ACColorImageAnalysis* image){ 
-    image->computeNumberOfFaces(haar_cascade);
+ACMediaFeatures* ACImageNumberOfFacesPlugin::calculateNumberOfFaces(ACColorImageAnalysis* image){
+    std::string haar_cascade_file(haar_cascade);
+
+    #ifdef __MINGW32__
+    string slash = "\\";
+    if(!media_cycle){
+        std::cerr << "ACAudioYaafeCorePlugin::loadDataflow: mediacycle instance not set, will try reload the dataflow later" << std::endl;
+        return 0;
+    }
+    std::string _path = media_cycle->getLibraryPathFromPlugin(this->mName);
+    if(_path==""){
+        std::cerr << "ACAudioYaafeCorePlugin::loadDataflow: plugin path not available" << std::endl;
+        return 0;
+    }
+    
+    boost::filesystem::path haar_cascade_path ( _path + slash + haar_cascade);
+    haar_cascade_file = haar_cascade_path.string();
+    #endif
+    
+    image->computeNumberOfFaces(haar_cascade_file);
     ACMediaFeatures* number_of_faces = new ACMediaFeatures(image->getNumberOfFaces(), "Number of Faces");
 	return number_of_faces;	
 }

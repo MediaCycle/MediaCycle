@@ -32,8 +32,8 @@
 #ifndef _ACAudioYaafeCorePlugin_H
 #define	_ACAudioYaafeCorePlugin_H
 
-#include "MediaCycle.h"
 
+#include "MediaCycle.h"
 #include<iostream>
 
 #include <algorithm>

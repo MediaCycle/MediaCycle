@@ -657,8 +657,8 @@ void ACAudioFeedback::processAudioUpdate()
 	mNeedsActivityUpdateMedia = media_cycle->getNeedsActivityUpdateMedia();
     if(!mNeedsActivityUpdateMedia)
         return;
-	for (i=0;i<(*mNeedsActivityUpdateMedia).size();i++) {
-            loop_id = (*mNeedsActivityUpdateMedia)[i];
+    for (vector<int>::iterator _id = (*mNeedsActivityUpdateMedia).begin(); _id != (*mNeedsActivityUpdateMedia).end();_id++) {
+            loop_id = *_id;
             const ACMediaNode* attribute(0);
             if(media_cycle->getLibrarySize() >0) //CF when cleaning a library when some nodes are still active
                 attribute = media_cycle->getMediaNode(loop_id);
