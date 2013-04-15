@@ -1,0 +1,408 @@
+diff -urN clucene-orig/CMakeLists.txt clucene/CMakeLists.txt
+--- clucene-orig/CMakeLists.txt	2013-04-14 23:49:20.000000000 +0200
++++ clucene/CMakeLists.txt	2013-04-15 16:17:45.000000000 +0200
+@@ -35,7 +35,9 @@
+ #define options...
+ 
+ Include (CLuceneDocs)
+-Include (FindThreads)
++IF(NOT DISABLE_MULTITHREADING)
++	Include (FindThreads)
++ENDIF()
+ 
+ IF(NOT CMAKE_BUILD_TYPE)
+     SET(CMAKE_BUILD_TYPE RelWithDebInfo CACHE STRING
+@@ -153,7 +155,7 @@
+ INCLUDE_DIRECTORIES( ${_CL_BOOST_INCLUDE_PATH} )
+ 
+ #include the projects
+-ADD_SUBDIRECTORY (src/ext)
++#ADD_SUBDIRECTORY (src/ext)
+ ADD_SUBDIRECTORY (src/shared)
+ ADD_SUBDIRECTORY (src/core)
+ ADD_SUBDIRECTORY (src/test)
+diff -urN clucene-orig/cmake/CLuceneBoost.cmake clucene/cmake/CLuceneBoost.cmake
+--- clucene-orig/cmake/CLuceneBoost.cmake	2013-04-14 23:49:20.000000000 +0200
++++ clucene/cmake/CLuceneBoost.cmake	2013-04-15 16:19:12.000000000 +0200
+@@ -2,7 +2,7 @@
+ #See the site FAQ for more details.
+ 
+ MACRO (GET_BOOST_INCLUDE_PATH path)
+-  #todo: allow this to fall back on a local distributed copy, so user doesn't have to d/l Boost seperately
++  #todo: allow this to fall back on a local distributed copy, so user doesn't have to d/l Boost separately
+   SET(Boost_USE_MULTITHREAD ON)
+   FIND_PACKAGE( Boost )
+   
+@@ -15,8 +15,8 @@
+     ENDIF (NOT _boost_IN_CACHE)
+     SET(${path} ${Boost_INCLUDE_DIRS} )
+   ELSE()
+-    MESSAGE( "Boost not found, using local: ${clucene_SOURCE_DIR}/src/ext" )
+-    SET(${path} ${clucene_SOURCE_DIR}/src/ext )
++    MESSAGE(FATAL_ERROR "Boost not found")#, using local: ${clucene_SOURCE_DIR}/src/ext" )
++    #SET(${path} ${clucene_SOURCE_DIR}/src/ext )
+   ENDIF()
+ ENDMACRO (GET_BOOST_INCLUDE_PATH path)
+ 
+diff -urN clucene-orig/cmake/DefineOptions.cmake clucene/cmake/DefineOptions.cmake
+--- clucene-orig/cmake/DefineOptions.cmake	2013-04-14 23:49:20.000000000 +0200
++++ clucene/cmake/DefineOptions.cmake	2013-04-15 14:23:33.000000000 +0200
+@@ -18,7 +18,8 @@
+   ENDIF(ENABLE_DMALLOC)
+ 
+   IF(DISABLE_MULTITHREADING)
+-    SET (${extraOptions} "${${extraOptions}} -D_CL_DISABLE_MULTITHREADING")
++    SET ( _CL_DISABLE_MULTITHREADING 1 )
++    #SET (${extraOptions} "${${extraOptions}} -D_CL_DISABLE_MULTITHREADING")
+   ELSE(DISABLE_MULTITHREADING)
+     SET(${extraOptions} "${${extraOptions}} -D_REENTRANT")
+   ENDIF(DISABLE_MULTITHREADING)
+Binary files clucene-orig/src/core/.DS_Store and clucene/src/core/.DS_Store differ
+Binary files clucene-orig/src/core/CLucene/.DS_Store and clucene/src/core/CLucene/.DS_Store differ
+diff -urN clucene-orig/src/core/CLucene/index/_DocumentsWriter.h clucene/src/core/CLucene/index/_DocumentsWriter.h
+--- clucene-orig/src/core/CLucene/index/_DocumentsWriter.h	2013-04-14 23:49:20.000000000 +0200
++++ clucene/src/core/CLucene/index/_DocumentsWriter.h	2013-04-15 11:32:53.000000000 +0200
+@@ -10,6 +10,7 @@
+ #include "CLucene/store/IndexInput.h"
+ #include "CLucene/config/_threads.h"
+ #include "CLucene/util/Array.h"
++#include "CLucene/util/Equators.h"
+ #include "CLucene/store/_RAMDirectory.h"
+ #include "_TermInfo.h"
+ 
+@@ -464,7 +465,7 @@
+ 
+ 	    const char* getObjectName() const;
+       static const char* getClassName();
+-      int32_t compareTo(lucene::util::NamedObject *);
++      int32_t compareTo(NamedObject *);
+       friend class ThreadState;
+       friend class FieldMergeState;
+     };
+diff -urN clucene-orig/src/core/CLucene/store/FSDirectory.cpp clucene/src/core/CLucene/store/FSDirectory.cpp
+--- clucene-orig/src/core/CLucene/store/FSDirectory.cpp	2013-04-14 23:49:20.000000000 +0200
++++ clucene/src/core/CLucene/store/FSDirectory.cpp	2013-04-15 11:26:17.000000000 +0200
+@@ -582,7 +582,9 @@
+   void FSDirectory::close(){
+     SCOPED_LOCK_MUTEX(DIRECTORIES_LOCK)
+     {
++        #ifndef _CL_DISABLE_MULTITHREADING
+ 	    THIS_LOCK.lock();
++        #endif
+ 
+ 	    CND_PRECONDITION(directory[0]!=0,"directory is not open");
+ 
+@@ -595,7 +597,9 @@
+ 	            return;
+ 	        }
+ 	    }
+-	    THIS_LOCK.unlock();  
++        #ifndef _CL_DISABLE_MULTITHREADING
++	    THIS_LOCK.unlock();
++        #endif
+ 	  }
+    }
+ 
+diff -urN clucene-orig/src/core/CLucene/util/ThreadLocal.cpp clucene/src/core/CLucene/util/ThreadLocal.cpp
+--- clucene-orig/src/core/CLucene/util/ThreadLocal.cpp	2013-04-14 23:49:20.000000000 +0200
++++ clucene/src/core/CLucene/util/ThreadLocal.cpp	2013-04-15 11:37:00.000000000 +0200
+@@ -160,7 +160,9 @@
+ 	}
+ 	//make sure we have a threadlocal context (for cleanup)
+ 	bool ret;
++#if !defined(_CL_DISABLE_MULTITHREADING)
+ 	INIT_THREAD(ret);
++    #endif
+ 	assert(ret);
+ 
+ 	_LUCENE_THREADID_TYPE id = _LUCENE_CURRTHREADID;
+diff -urN clucene-orig/src/core/CMakeLists.txt clucene/src/core/CMakeLists.txt
+--- clucene-orig/src/core/CMakeLists.txt	2013-04-14 23:49:20.000000000 +0200
++++ clucene/src/core/CMakeLists.txt	2013-04-15 17:20:26.000000000 +0200
+@@ -33,17 +33,17 @@
+ 	./CLucene/util/MD5Digester.cpp
+ 	./CLucene/util/StringIntern.cpp
+ 	./CLucene/util/BitSet.cpp
+-	./CLucene/queryParser/FastCharStream.cpp
+-	./CLucene/queryParser/MultiFieldQueryParser.cpp
+-	./CLucene/queryParser/QueryParser.cpp
+-	./CLucene/queryParser/QueryParserTokenManager.cpp
+-	./CLucene/queryParser/QueryToken.cpp
+-	./CLucene/queryParser/legacy/Lexer.cpp
+-	./CLucene/queryParser/legacy/MultiFieldQueryParser.cpp
+-	./CLucene/queryParser/legacy/QueryParser.cpp
+-	./CLucene/queryParser/legacy/QueryParserBase.cpp
+-	./CLucene/queryParser/legacy/QueryToken.cpp
+-	./CLucene/queryParser/legacy/TokenList.cpp
++#	./CLucene/queryParser/FastCharStream.cpp
++#	./CLucene/queryParser/MultiFieldQueryParser.cpp
++#	./CLucene/queryParser/QueryParser.cpp
++#	./CLucene/queryParser/QueryParserTokenManager.cpp
++#	./CLucene/queryParser/QueryToken.cpp
++#	./CLucene/queryParser/legacy/Lexer.cpp
++#	./CLucene/queryParser/legacy/MultiFieldQueryParser.cpp
++#	./CLucene/queryParser/legacy/QueryParser.cpp
++#	./CLucene/queryParser/legacy/QueryParserBase.cpp
++#	./CLucene/queryParser/legacy/QueryToken.cpp
++#	./CLucene/queryParser/legacy/TokenList.cpp
+ 	./CLucene/analysis/standard/StandardAnalyzer.cpp
+ 	./CLucene/analysis/standard/StandardFilter.cpp
+ 	./CLucene/analysis/standard/StandardTokenizer.cpp
+@@ -186,7 +186,7 @@
+ #create the libraries
+ INCLUDE_DIRECTORIES( ${clucene_SOURCE_DIR}/src/core )
+ 
+-add_library(clucene-core SHARED
++add_library(clucene-core 
+ 	${clucene_core_Files} ${clucene_shared_Files} ${HEADERS}
+ )
+ 
+@@ -202,24 +202,6 @@
+     TARGET_LINK_LIBRARIES(clucene-core clucene-shared ${EXTRA_LIBS})
+ ENDIF ( NOT USE_SHARED_OBJECT_FILES )
+ 
+-
+-IF ( BUILD_STATIC_LIBRARIES )
+-	add_library(clucene-core-static STATIC
+-		${clucene_core_Files} ${clucene_shared_Files} ${HEADERS}
+-	)
+-	
+-	SET_TARGET_PROPERTIES(clucene-core-static PROPERTIES
+-	    VERSION ${CLUCENE_VERSION}
+-	    SOVERSION ${CLUCENE_SOVERSION}
+-	    COMPILE_DEFINITIONS_DEBUG _DEBUG
+-	)
+-	
+-	#and install library
+-	install(TARGETS clucene-core-static 
+-	        DESTINATION ${LIB_DESTINATION} 
+-	        COMPONENT runtime )
+-ENDIF ( BUILD_STATIC_LIBRARIES )
+-
+ #install public headers.
+ FOREACH(file ${HEADERS})
+ 	get_filename_component(apath ${file} PATH)
+@@ -255,11 +237,11 @@
+         DESTINATION ${LIB_DESTINATION}/CLuceneConfig.cmake)
+ 
+ # install pkg-config file
+-IF(NOT WIN32)
++IF(NOT WIN32 OR MINGW)
+   configure_file(${CMAKE_CURRENT_SOURCE_DIR}/libclucene-core.pc.cmake ${CMAKE_CURRENT_BINARY_DIR}/libclucene-core.pc @ONLY)
+   install(FILES ${CMAKE_CURRENT_BINARY_DIR}/libclucene-core.pc
+           DESTINATION ${LIB_DESTINATION}/pkgconfig )
+-ENDIF(NOT WIN32)
++ENDIF(NOT WIN32 OR MINGW)
+ 
+ 
+ #install non system-independent
+diff -urN clucene-orig/src/shared/CLucene/LuceneThreads.h clucene/src/shared/CLucene/LuceneThreads.h
+--- clucene-orig/src/shared/CLucene/LuceneThreads.h	2013-04-14 23:49:20.000000000 +0200
++++ clucene/src/shared/CLucene/LuceneThreads.h	2013-04-15 13:52:02.000000000 +0200
+@@ -30,6 +30,8 @@
+   #define _LUCENE_ATOMIC_INC(theInteger) (++(*theInteger))
+   #define _LUCENE_ATOMIC_DEC(theInteger) (--(*theInteger))
+   #define _LUCENE_ATOMIC_INT int
++  #define _LUCENE_ATOMIC_INT_SET(x, v) x=v
++  #define _LUCENE_ATOMIC_INT_GET(x) x
+ #else
+ 	#if defined(_LUCENE_DONTIMPLEMENT_THREADMUTEX)
+ 		//do nothing
+diff -urN clucene-orig/src/shared/CLucene/SharedHeader.cpp clucene/src/shared/CLucene/SharedHeader.cpp
+--- clucene-orig/src/shared/CLucene/SharedHeader.cpp	2013-04-14 23:49:20.000000000 +0200
++++ clucene/src/shared/CLucene/SharedHeader.cpp	2013-04-15 11:24:31.000000000 +0200
+@@ -13,7 +13,7 @@
+ #endif
+ 
+ 
+-const TCHAR* _LUCENE_BLANK_STRING=_T("");
++const TCHAR* _LUCENE_BLANK_STRING=L"";
+ const char* _LUCENE_BLANK_ASTRING="";
+ 
+ 
+diff -urN clucene-orig/src/shared/CLucene/config/_threads.h clucene/src/shared/CLucene/config/_threads.h
+--- clucene-orig/src/shared/CLucene/config/_threads.h	2013-04-14 23:49:20.000000000 +0200
++++ clucene/src/shared/CLucene/config/_threads.h	2013-04-15 03:53:31.000000000 +0200
+@@ -48,8 +48,7 @@
+             bool bInheritHandle;
+           }	SECURITY_ATTRIBUTES;
+            __declspec(dllimport) _cl_dword_t __stdcall WaitForSingleObject( void* hHandle, _cl_dword_t dwMilliseconds );
+-    	  __declspec(dllimport) void* __stdcall CreateEventA(  SECURITY_ATTRIBUTES* lpEventAttributes,
+-			  bool bManualReset, bool bInitialState, char* lpName );
++    	  __declspec(dllimport) void* __stdcall CreateEventA(  SECURITY_ATTRIBUTES* lpEventAttributes, bool bManualReset, bool bInitialState, char* lpName );
+ 		  __declspec(dllimport) bool __stdcall SetEvent(void* hEvent);
+ 		  __declspec(dllimport) bool __stdcall CloseHandle(void* hObject);
+ 		  void* _beginthread( void( __stdcall *start_address )( void * ), unsigned stack_size, void *arglist );
+@@ -99,7 +98,7 @@
+     		return t1 < t2;
+     	}
+     };
+-	
++	*/
+ #endif //thread impl choice
+ 
+ 
+diff -urN clucene-orig/src/shared/CLucene/config/repl_tprintf.cpp clucene/src/shared/CLucene/config/repl_tprintf.cpp
+--- clucene-orig/src/shared/CLucene/config/repl_tprintf.cpp	2013-04-14 23:49:20.000000000 +0200
++++ clucene/src/shared/CLucene/config/repl_tprintf.cpp	2013-04-15 00:20:14.000000000 +0200
+@@ -47,7 +47,7 @@
+ 					//print a string or null
+ 					const TCHAR *wstr = va_arg(valist, TCHAR *);
+ 					if ( !wstr )
+-						wstr = _T("(null)");
++						wstr = (TCHAR*)("(null)");
+ 
+ 					tmp->append(wstr);
+ 					iter++;
+diff -urN clucene-orig/src/shared/CLucene/config/threads.cpp clucene/src/shared/CLucene/config/threads.cpp
+--- clucene-orig/src/shared/CLucene/config/threads.cpp	2013-04-14 23:49:20.000000000 +0200
++++ clucene/src/shared/CLucene/config/threads.cpp	2013-04-15 01:27:49.000000000 +0200
+@@ -150,7 +150,7 @@
+ 				_CLPTHREAD_CHECK(pthread_mutex_init(&_internal->mtx, 0), "mutex_thread(clone) constructor failed")
+ 			#endif
+ 			_internal->lockCount=0;
+-			_internal->lockOwner=0;
++			//_internal->lockOwner=0;
+ 		#endif
+ 	}
+ 	mutex_thread::mutex_thread():
+@@ -170,7 +170,7 @@
+ 			_CLPTHREAD_CHECK(pthread_mutex_init(&_internal->mtx, 0), "mutex_thread(clone) constructor failed")
+ 		#endif
+ 		_internal->lockCount=0;
+-		_internal->lockOwner=0;
++		//_internal->lockOwner=0;
+ 		#endif
+ 	}
+ 
+@@ -234,7 +234,7 @@
+ 		--_internal->lockCount;
+ 		if( _internal->lockCount == 0 )
+ 		{
+-			_internal->lockOwner = 0;
++			//_internal->lockOwner = 0;
+ 			_CLPTHREAD_CHECK(pthread_mutex_unlock(&_internal->mtx), "mutex_thread::unlock")
+ 		}
+ 		#else
+diff -urN clucene-orig/src/shared/CLucene/util/Misc.cpp clucene/src/shared/CLucene/util/Misc.cpp
+--- clucene-orig/src/shared/CLucene/util/Misc.cpp	2013-04-14 23:49:20.000000000 +0200
++++ clucene/src/shared/CLucene/util/Misc.cpp	2013-04-15 03:26:27.000000000 +0200
+@@ -466,6 +466,8 @@
+ std::string Misc::toString(const bool value){
+   return value ? "true" : "false";
+ }
++
++#if !defined(_CL_DISABLE_MULTITHREADING)
+ std::string Misc::toString(_LUCENE_THREADID_TYPE value){
+   static int32_t nextindex = 0;
+   static std::map<_LUCENE_THREADID_TYPE, int32_t> ids;
+@@ -474,6 +476,8 @@
+   }
+   return toString(ids[value]);
+ }
++#endif
++
+ std::string Misc::toString(const int32_t value){
+   char buf[20];
+   TCHAR tbuf[20];
+@@ -481,6 +485,7 @@
+   STRCPY_TtoA(buf,tbuf,20);
+   return buf;
+ }
++
+ std::string Misc::toString(const int64_t value){
+   char buf[20];
+   TCHAR tbuf[20];
+diff -urN clucene-orig/src/shared/CLucene/util/Misc.h clucene/src/shared/CLucene/util/Misc.h
+--- clucene-orig/src/shared/CLucene/util/Misc.h	2013-04-14 23:49:20.000000000 +0200
++++ clucene/src/shared/CLucene/util/Misc.h	2013-04-15 11:36:19.000000000 +0200
+@@ -65,7 +65,9 @@
+ 	static size_t longToBase( int64_t value, int32_t base, char* to ); //< length of to should be at least ((sizeof(unsigned long) << 3) + 1). returns actual length used
+ 	static int64_t base36ToLong( const char* value );
+ 
++#ifndef _CL_DISABLE_MULTITHREADING
+   static std::string toString(const int32_t value);
++#endif
+   static std::string toString(const int64_t value);
+   static std::string toString(const _LUCENE_THREADID_TYPE value);
+   static std::string toString(const bool value);
+diff -urN clucene-orig/src/shared/CMakeLists.txt clucene/src/shared/CMakeLists.txt
+--- clucene-orig/src/shared/CMakeLists.txt	2013-04-14 23:49:20.000000000 +0200
++++ clucene/src/shared/CMakeLists.txt	2013-04-15 17:20:07.000000000 +0200
+@@ -35,8 +35,10 @@
+ INCLUDE (CheckSnprintf)
+ INCLUDE (CheckStdCallFunctionExists)
+ 
+-find_package(Threads REQUIRED)
+-INCLUDE (CheckPthread)
++IF(NOT DISABLE_MULTITHREADING)
++	find_package(Threads REQUIRED)
++	INCLUDE (CheckPthread)
++ENDIF()
+ INCLUDE (CheckAtomicFunctions)
+ 
+ find_package(ZLIB)
+@@ -210,19 +212,21 @@
+ # test for compiler capabilities.
+ ########################################################################
+ 
+-#check for pthreads
+-IF ( CMAKE_USE_WIN32_THREADS_INIT )
+-    SET ( _CL_HAVE_WIN32_THREADS 1 )
+-ENDIF ( CMAKE_USE_WIN32_THREADS_INIT )
+-IF ( CMAKE_USE_PTHREADS_INIT )
+-    SET ( _CL_HAVE_PTHREAD 1 )
+-ENDIF (CMAKE_USE_PTHREADS_INIT)
+-IF ( CMAKE_USE_SPROC_INIT OR CMAKE_HP_PTHREADS_INIT )
+-    MESSAGE(FATAL_ERROR "Threads library not implemented")
+-ENDIF( CMAKE_USE_SPROC_INIT OR CMAKE_HP_PTHREADS_INIT )
+-
+-#define if we have pthreads with recursive capabilities
+-CHECK_PTHREAD_RECURSIVE(_CL_HAVE_PTHREAD _CL_HAVE_PTHREAD_MUTEX_RECURSIVE)
++IF(NOT DISABLE_MULTITHREADING)
++	#check for pthreads
++	IF ( CMAKE_USE_WIN32_THREADS_INIT )
++    	SET ( _CL_HAVE_WIN32_THREADS 1 )
++	ENDIF ( CMAKE_USE_WIN32_THREADS_INIT )
++	IF ( CMAKE_USE_PTHREADS_INIT )
++    	SET ( _CL_HAVE_PTHREAD 1 )
++	ENDIF (CMAKE_USE_PTHREADS_INIT)
++	IF ( CMAKE_USE_SPROC_INIT OR CMAKE_HP_PTHREADS_INIT )
++    	MESSAGE(FATAL_ERROR "Threads library not implemented")
++	ENDIF( CMAKE_USE_SPROC_INIT OR CMAKE_HP_PTHREADS_INIT )
++
++	#define if we have pthreads with recursive capabilities
++	CHECK_PTHREAD_RECURSIVE(_CL_HAVE_PTHREAD _CL_HAVE_PTHREAD_MUTEX_RECURSIVE)
++ENDIF()
+ 
+ CHECK_HAVE_GCC_ATOMIC_FUNCTIONS(_CL_HAVE_GCC_ATOMIC_FUNCTIONS)
+ 
+@@ -324,7 +328,7 @@
+ #find our headers
+ file(GLOB_RECURSE HEADERS ${clucene-shared_SOURCE_DIR}/*.h)
+ 
+-add_library(clucene-shared SHARED
++add_library(clucene-shared
+ 	${clucene_shared_Files} ${HEADERS}
+ )
+ 
+@@ -342,19 +346,3 @@
+ install(TARGETS clucene-shared 
+         DESTINATION ${LIB_DESTINATION} 
+         COMPONENT development )
+-
+-IF ( BUILD_STATIC_LIBRARIES )
+-	add_library(clucene-shared-static STATIC
+-		${clucene_shared_Files} ${HEADERS}
+-	)
+-	
+-	SET_TARGET_PROPERTIES(clucene-shared-static PROPERTIES
+-	    VERSION ${CLUCENE_VERSION}
+-	    SOVERSION ${CLUCENE_SOVERSION}
+-	    COMPILE_DEFINITIONS_DEBUG _DEBUG
+-	)
+-  TARGET_LINK_LIBRARIES(clucene-shared-static ${CMAKE_THREAD_LIBS_INIT})
+-	install(TARGETS clucene-shared-static 
+-	        DESTINATION ${LIB_DESTINATION} 
+-	        COMPONENT runtime )
+-ENDIF ( BUILD_STATIC_LIBRARIES )

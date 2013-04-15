@@ -15,6 +15,12 @@ Howto:
     </tr>
 
     <tr>
+        <td id="clucene-package">clucene</td>
+        <td id="clucene-version">2.3.3.4</td>
+        <td id="clucene-website"><a href="http://clucene.sourceforge.net">CLucene</a></td>
+    </tr>
+
+    <tr>
         <td id="dlfcn-win32-package">dlfcn-win32</td>
         <td id="dlfcn-win32-version">r19</td>
         <td id="dlfcn-win32-website"><a href="http://code.google.com/p/dlfcn-win32/">dlfcn library for Windows</a></td>
@@ -59,16 +65,14 @@ Howto:
 * For each package added into index.html, copy the associated files contained in the current folder into the src folder of MXE.
 
 * Open a terminal in the MXE root folder (containing doc, src, tools...), install the dependencies with the command:
-make gcc argtable armadillo boost curl dlfcn-win32 ffmpeg liblo libsndfile mpg123 openal opencv openscenegraph podofo pthreads qt qwt tinyxml JOBS=4 -j 4
+make gcc argtable armadillo boost clucene curl dlfcn-win32 ffmpeg liblo libsndfile mpg123 openal opencv openscenegraph podofo pthreads qt qwt tinyxml JOBS=4 -j 4
 
 * Open a terminal in a MediaCycle build directory:
 cmake MC_SRC -DCMAKE_TOOLCHAIN_FILE=MXE_ROOT/usr/i686-pc-mingw32/share/cmake/mxe-conf.cmake
 (adapt the MediaCycle source directory MC_SRC and the mxd root directory MXE_ROOT accordingly)
 
-TODO:
-* add clucene
-
 Changelog:
+* (15/04/2013, mc changeset 1129): added clucene 2.3.3.4
 * (14/04/2013, mc changeset 1128): added podofo 0.9.2, fixed openscenegraph with pkg config files for plugins
 * (11/04/2013, mc changeset 1127): removed makefiles from armadillo, boost, gcc, lapack, qwt (part of mxe-master in sufficient versions); fixed opencv (now part of mxe-master), glib, openal
 * (09/09/2012, mc changeset 907): updated armadillo to 3.4.0, submitted to MacPorts <https://trac.macports.org/ticket/36062> (already accepted, seems it's gonna be available from the next MacPorts version, current is 2.1.2) and to MXE <https://github.com/mxe/mxe/pull/77>

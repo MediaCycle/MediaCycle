@@ -18,38 +18,11 @@ SET(CLUCENE_NAMES ${CLUCENE_NAMES} libclucene)
 SET(CLUCENE_NAMES ${CLUCENE_NAMES} clucene)
 SET(CLUCENE_NAMES ${CLUCENE_NAMES} clucene-core)
 
-FIND_LIBRARY(CLUCENE_LIBRARY
-        NAMES ${CLUCENE_NAMES}
-        PATHS
-        ~/Library/Frameworks
-        /Library/Frameworks
-        /usr/local/lib
-        /usr/lib
-        /sw/lib
-        /opt/local/lib
-        /opt/csw/lib
-        /opt/lib
-        [HKEY_LOCAL_MACHINE\\SYSTEM\\CurrentControlSet\\Control\\Session\ Manager\\Environment]/lib
-        /usr/freeware/lib64
-    )
-
+FIND_LIBRARY(CLUCENE_LIBRARY NAMES ${CLUCENE_NAMES})
 
 SET(CLUCENE_NAMES_SHARED ${CLUCENE_NAMES_SHARED} clucene-shared)
 
-FIND_LIBRARY(CLUCENE_LIBRARY_SHARED
-        NAMES ${CLUCENE_NAMES_SHARED}
-        PATHS
-        ~/Library/Frameworks
-        /Library/Frameworks
-        /usr/local/lib
-        /usr/lib
-        /sw/lib
-        /opt/local/lib
-        /opt/csw/lib
-        /opt/lib
-        [HKEY_LOCAL_MACHINE\\SYSTEM\\CurrentControlSet\\Control\\Session\ Manager\\Environment]/lib
-        /usr/freeware/lib64
-    )
+FIND_LIBRARY(CLUCENE_LIBRARY_SHARED NAMES ${CLUCENE_NAMES_SHARED})
 
 # handle the QUIETLY and REQUIRED arguments and set ARMADILLO_FOUND to TRUE if 
 # all listed variables are TRUE

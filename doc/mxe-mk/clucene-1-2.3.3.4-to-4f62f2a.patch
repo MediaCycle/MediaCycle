@@ -1,0 +1,747 @@
+Binary files clucene-core-2.3.3.4-orig/.DS_Store and clucene-orig/.DS_Store differ
+diff -urN clucene-core-2.3.3.4-orig/.git/HEAD clucene-orig/.git/HEAD
+--- clucene-core-2.3.3.4-orig/.git/HEAD	1970-01-01 01:00:00.000000000 +0100
++++ clucene-orig/.git/HEAD	2013-04-14 23:49:20.000000000 +0200
+@@ -0,0 +1 @@
++ref: refs/heads/master
+diff -urN clucene-core-2.3.3.4-orig/.git/config clucene-orig/.git/config
+--- clucene-core-2.3.3.4-orig/.git/config	1970-01-01 01:00:00.000000000 +0100
++++ clucene-orig/.git/config	2013-04-14 23:49:20.000000000 +0200
+@@ -0,0 +1,13 @@
++[core]
++	repositoryformatversion = 0
++	filemode = true
++	bare = false
++	logallrefupdates = true
++	ignorecase = true
++	precomposeunicode = false
++[remote "origin"]
++	url = git://clucene.git.sourceforge.net/gitroot/clucene/clucene
++	fetch = +refs/heads/*:refs/remotes/origin/*
++[branch "master"]
++	remote = origin
++	merge = refs/heads/master
+diff -urN clucene-core-2.3.3.4-orig/.git/description clucene-orig/.git/description
+--- clucene-core-2.3.3.4-orig/.git/description	1970-01-01 01:00:00.000000000 +0100
++++ clucene-orig/.git/description	2013-04-14 23:48:15.000000000 +0200
+@@ -0,0 +1 @@
++Unnamed repository; edit this file 'description' to name the repository.
+diff -urN clucene-core-2.3.3.4-orig/.git/hooks/applypatch-msg.sample clucene-orig/.git/hooks/applypatch-msg.sample
+--- clucene-core-2.3.3.4-orig/.git/hooks/applypatch-msg.sample	1970-01-01 01:00:00.000000000 +0100
++++ clucene-orig/.git/hooks/applypatch-msg.sample	2013-04-14 23:48:15.000000000 +0200
+@@ -0,0 +1,15 @@
++#!/bin/sh
++#
++# An example hook script to check the commit log message taken by
++# applypatch from an e-mail message.
++#
++# The hook should exit with non-zero status after issuing an
++# appropriate message if it wants to stop the commit.  The hook is
++# allowed to edit the commit message file.
++#
++# To enable this hook, rename this file to "applypatch-msg".
++
++. git-sh-setup
++test -x "$GIT_DIR/hooks/commit-msg" &&
++	exec "$GIT_DIR/hooks/commit-msg" ${1+"$@"}
++:
+diff -urN clucene-core-2.3.3.4-orig/.git/hooks/commit-msg.sample clucene-orig/.git/hooks/commit-msg.sample
+--- clucene-core-2.3.3.4-orig/.git/hooks/commit-msg.sample	1970-01-01 01:00:00.000000000 +0100
++++ clucene-orig/.git/hooks/commit-msg.sample	2013-04-14 23:48:15.000000000 +0200
+@@ -0,0 +1,24 @@
++#!/bin/sh
++#
++# An example hook script to check the commit log message.
++# Called by "git commit" with one argument, the name of the file
++# that has the commit message.  The hook should exit with non-zero
++# status after issuing an appropriate message if it wants to stop the
++# commit.  The hook is allowed to edit the commit message file.
++#
++# To enable this hook, rename this file to "commit-msg".
++
++# Uncomment the below to add a Signed-off-by line to the message.
++# Doing this in a hook is a bad idea in general, but the prepare-commit-msg
++# hook is more suited to it.
++#
++# SOB=$(git var GIT_AUTHOR_IDENT | sed -n 's/^\(.*>\).*$/Signed-off-by: \1/p')
++# grep -qs "^$SOB" "$1" || echo "$SOB" >> "$1"
++
++# This example catches duplicate Signed-off-by lines.
++
++test "" = "$(grep '^Signed-off-by: ' "$1" |
++	 sort | uniq -c | sed -e '/^[ 	]*1[ 	]/d')" || {
++	echo >&2 Duplicate Signed-off-by lines.
++	exit 1
++}
+diff -urN clucene-core-2.3.3.4-orig/.git/hooks/post-update.sample clucene-orig/.git/hooks/post-update.sample
+--- clucene-core-2.3.3.4-orig/.git/hooks/post-update.sample	1970-01-01 01:00:00.000000000 +0100
++++ clucene-orig/.git/hooks/post-update.sample	2013-04-14 23:48:15.000000000 +0200
+@@ -0,0 +1,8 @@
++#!/bin/sh
++#
++# An example hook script to prepare a packed repository for use over
++# dumb transports.
++#
++# To enable this hook, rename this file to "post-update".
++
++exec git update-server-info
+diff -urN clucene-core-2.3.3.4-orig/.git/hooks/pre-applypatch.sample clucene-orig/.git/hooks/pre-applypatch.sample
+--- clucene-core-2.3.3.4-orig/.git/hooks/pre-applypatch.sample	1970-01-01 01:00:00.000000000 +0100
++++ clucene-orig/.git/hooks/pre-applypatch.sample	2013-04-14 23:48:15.000000000 +0200
+@@ -0,0 +1,14 @@
++#!/bin/sh
++#
++# An example hook script to verify what is about to be committed
++# by applypatch from an e-mail message.
++#
++# The hook should exit with non-zero status after issuing an
++# appropriate message if it wants to stop the commit.
++#
++# To enable this hook, rename this file to "pre-applypatch".
++
++. git-sh-setup
++test -x "$GIT_DIR/hooks/pre-commit" &&
++	exec "$GIT_DIR/hooks/pre-commit" ${1+"$@"}
++:
+diff -urN clucene-core-2.3.3.4-orig/.git/hooks/pre-commit.sample clucene-orig/.git/hooks/pre-commit.sample
+--- clucene-core-2.3.3.4-orig/.git/hooks/pre-commit.sample	1970-01-01 01:00:00.000000000 +0100
++++ clucene-orig/.git/hooks/pre-commit.sample	2013-04-14 23:48:15.000000000 +0200
+@@ -0,0 +1,50 @@
++#!/bin/sh
++#
++# An example hook script to verify what is about to be committed.
++# Called by "git commit" with no arguments.  The hook should
++# exit with non-zero status after issuing an appropriate message if
++# it wants to stop the commit.
++#
++# To enable this hook, rename this file to "pre-commit".
++
++if git rev-parse --verify HEAD >/dev/null 2>&1
++then
++	against=HEAD
++else
++	# Initial commit: diff against an empty tree object
++	against=4b825dc642cb6eb9a060e54bf8d69288fbee4904
++fi
++
++# If you want to allow non-ascii filenames set this variable to true.
++allownonascii=$(git config hooks.allownonascii)
++
++# Redirect output to stderr.
++exec 1>&2
++
++# Cross platform projects tend to avoid non-ascii filenames; prevent
++# them from being added to the repository. We exploit the fact that the
++# printable range starts at the space character and ends with tilde.
++if [ "$allownonascii" != "true" ] &&
++	# Note that the use of brackets around a tr range is ok here, (it's
++	# even required, for portability to Solaris 10's /usr/bin/tr), since
++	# the square bracket bytes happen to fall in the designated range.
++	test $(git diff --cached --name-only --diff-filter=A -z $against |
++	  LC_ALL=C tr -d '[ -~]\0' | wc -c) != 0
++then
++	echo "Error: Attempt to add a non-ascii file name."
++	echo
++	echo "This can cause problems if you want to work"
++	echo "with people on other platforms."
++	echo
++	echo "To be portable it is advisable to rename the file ..."
++	echo
++	echo "If you know what you are doing you can disable this"
++	echo "check using:"
++	echo
++	echo "  git config hooks.allownonascii true"
++	echo
++	exit 1
++fi
++
++# If there are whitespace errors, print the offending file names and fail.
++exec git diff-index --check --cached $against --
+diff -urN clucene-core-2.3.3.4-orig/.git/hooks/pre-push.sample clucene-orig/.git/hooks/pre-push.sample
+--- clucene-core-2.3.3.4-orig/.git/hooks/pre-push.sample	1970-01-01 01:00:00.000000000 +0100
++++ clucene-orig/.git/hooks/pre-push.sample	2013-04-14 23:48:15.000000000 +0200
+@@ -0,0 +1,53 @@
++#!/bin/sh
++
++# An example hook script to verify what is about to be pushed.  Called by "git
++# push" after it has checked the remote status, but before anything has been
++# pushed.  If this script exits with a non-zero status nothing will be pushed.
++#
++# This hook is called with the following parameters:
++#
++# $1 -- Name of the remote to which the push is being done
++# $2 -- URL to which the push is being done
++#
++# If pushing without using a named remote those arguments will be equal.
++#
++# Information about the commits which are being pushed is supplied as lines to
++# the standard input in the form:
++#
++#   <local ref> <local sha1> <remote ref> <remote sha1>
++#
++# This sample shows how to prevent push of commits where the log message starts
++# with "WIP" (work in progress).
++
++remote="$1"
++url="$2"
++
++z40=0000000000000000000000000000000000000000
++
++IFS=' '
++while read local_ref local_sha remote_ref remote_sha
++do
++	if [ "$local_sha" = $z40 ]
++	then
++		# Handle delete
++	else
++		if [ "$remote_sha" = $z40 ]
++		then
++			# New branch, examine all commits
++			range="$local_sha"
++		else
++			# Update to existing branch, examine new commits
++			range="$remote_sha..$local_sha"
++		fi
++
++		# Check for WIP commit
++		commit=`git rev-list -n 1 --grep '^WIP' "$range"`
++		if [ -n "$commit" ]
++		then
++			echo "Found WIP commit in $local_ref, not pushing"
++			exit 1
++		fi
++	fi
++done
++
++exit 0
+diff -urN clucene-core-2.3.3.4-orig/.git/hooks/pre-rebase.sample clucene-orig/.git/hooks/pre-rebase.sample
+--- clucene-core-2.3.3.4-orig/.git/hooks/pre-rebase.sample	1970-01-01 01:00:00.000000000 +0100
++++ clucene-orig/.git/hooks/pre-rebase.sample	2013-04-14 23:48:15.000000000 +0200
+@@ -0,0 +1,169 @@
++#!/bin/sh
++#
++# Copyright (c) 2006, 2008 Junio C Hamano
++#
++# The "pre-rebase" hook is run just before "git rebase" starts doing
++# its job, and can prevent the command from running by exiting with
++# non-zero status.
++#
++# The hook is called with the following parameters:
++#
++# $1 -- the upstream the series was forked from.
++# $2 -- the branch being rebased (or empty when rebasing the current branch).
++#
++# This sample shows how to prevent topic branches that are already
++# merged to 'next' branch from getting rebased, because allowing it
++# would result in rebasing already published history.
++
++publish=next
++basebranch="$1"
++if test "$#" = 2
++then
++	topic="refs/heads/$2"
++else
++	topic=`git symbolic-ref HEAD` ||
++	exit 0 ;# we do not interrupt rebasing detached HEAD
++fi
++
++case "$topic" in
++refs/heads/??/*)
++	;;
++*)
++	exit 0 ;# we do not interrupt others.
++	;;
++esac
++
++# Now we are dealing with a topic branch being rebased
++# on top of master.  Is it OK to rebase it?
++
++# Does the topic really exist?
++git show-ref -q "$topic" || {
++	echo >&2 "No such branch $topic"
++	exit 1
++}
++
++# Is topic fully merged to master?
++not_in_master=`git rev-list --pretty=oneline ^master "$topic"`
++if test -z "$not_in_master"
++then
++	echo >&2 "$topic is fully merged to master; better remove it."
++	exit 1 ;# we could allow it, but there is no point.
++fi
++
++# Is topic ever merged to next?  If so you should not be rebasing it.
++only_next_1=`git rev-list ^master "^$topic" ${publish} | sort`
++only_next_2=`git rev-list ^master           ${publish} | sort`
++if test "$only_next_1" = "$only_next_2"
++then
++	not_in_topic=`git rev-list "^$topic" master`
++	if test -z "$not_in_topic"
++	then
++		echo >&2 "$topic is already up-to-date with master"
++		exit 1 ;# we could allow it, but there is no point.
++	else
++		exit 0
++	fi
++else
++	not_in_next=`git rev-list --pretty=oneline ^${publish} "$topic"`
++	/opt/local/bin/perl5.12 -e '
++		my $topic = $ARGV[0];
++		my $msg = "* $topic has commits already merged to public branch:\n";
++		my (%not_in_next) = map {
++			/^([0-9a-f]+) /;
++			($1 => 1);
++		} split(/\n/, $ARGV[1]);
++		for my $elem (map {
++				/^([0-9a-f]+) (.*)$/;
++				[$1 => $2];
++			} split(/\n/, $ARGV[2])) {
++			if (!exists $not_in_next{$elem->[0]}) {
++				if ($msg) {
++					print STDERR $msg;
++					undef $msg;
++				}
++				print STDERR " $elem->[1]\n";
++			}
++		}
++	' "$topic" "$not_in_next" "$not_in_master"
++	exit 1
++fi
++
++exit 0
++
++################################################################
++
++This sample hook safeguards topic branches that have been
++published from being rewound.
++
++The workflow assumed here is:
++
++ * Once a topic branch forks from "master", "master" is never
++   merged into it again (either directly or indirectly).
++
++ * Once a topic branch is fully cooked and merged into "master",
++   it is deleted.  If you need to build on top of it to correct
++   earlier mistakes, a new topic branch is created by forking at
++   the tip of the "master".  This is not strictly necessary, but
++   it makes it easier to keep your history simple.
++
++ * Whenever you need to test or publish your changes to topic
++   branches, merge them into "next" branch.
++
++The script, being an example, hardcodes the publish branch name
++to be "next", but it is trivial to make it configurable via
++$GIT_DIR/config mechanism.
++
++With this workflow, you would want to know:
++
++(1) ... if a topic branch has ever been merged to "next".  Young
++    topic branches can have stupid mistakes you would rather
++    clean up before publishing, and things that have not been
++    merged into other branches can be easily rebased without
++    affecting other people.  But once it is published, you would
++    not want to rewind it.
++
++(2) ... if a topic branch has been fully merged to "master".
++    Then you can delete it.  More importantly, you should not
++    build on top of it -- other people may already want to
++    change things related to the topic as patches against your
++    "master", so if you need further changes, it is better to
++    fork the topic (perhaps with the same name) afresh from the
++    tip of "master".
++
++Let's look at this example:
++
++		   o---o---o---o---o---o---o---o---o---o "next"
++		  /       /           /           /
++		 /   a---a---b A     /           /
++		/   /               /           /
++	       /   /   c---c---c---c B         /
++	      /   /   /             \         /
++	     /   /   /   b---b C     \       /
++	    /   /   /   /             \     /
++    ---o---o---o---o---o---o---o---o---o---o---o "master"
++
++
++A, B and C are topic branches.
++
++ * A has one fix since it was merged up to "next".
++
++ * B has finished.  It has been fully merged up to "master" and "next",
++   and is ready to be deleted.
++
++ * C has not merged to "next" at all.
++
++We would want to allow C to be rebased, refuse A, and encourage
++B to be deleted.
++
++To compute (1):
++
++	git rev-list ^master ^topic next
++	git rev-list ^master        next
++
++	if these match, topic has not merged in next at all.
++
++To compute (2):
++
++	git rev-list master..topic
++
++	if this is empty, it is fully merged to "master".
+diff -urN clucene-core-2.3.3.4-orig/.git/hooks/prepare-commit-msg.sample clucene-orig/.git/hooks/prepare-commit-msg.sample
+--- clucene-core-2.3.3.4-orig/.git/hooks/prepare-commit-msg.sample	1970-01-01 01:00:00.000000000 +0100
++++ clucene-orig/.git/hooks/prepare-commit-msg.sample	2013-04-14 23:48:15.000000000 +0200
+@@ -0,0 +1,36 @@
++#!/bin/sh
++#
++# An example hook script to prepare the commit log message.
++# Called by "git commit" with the name of the file that has the
++# commit message, followed by the description of the commit
++# message's source.  The hook's purpose is to edit the commit
++# message file.  If the hook fails with a non-zero status,
++# the commit is aborted.
++#
++# To enable this hook, rename this file to "prepare-commit-msg".
++
++# This hook includes three examples.  The first comments out the
++# "Conflicts:" part of a merge commit.
++#
++# The second includes the output of "git diff --name-status -r"
++# into the message, just before the "git status" output.  It is
++# commented because it doesn't cope with --amend or with squashed
++# commits.
++#
++# The third example adds a Signed-off-by line to the message, that can
++# still be edited.  This is rarely a good idea.
++
++case "$2,$3" in
++  merge,)
++    /opt/local/bin/perl5.12 -i.bak -ne 's/^/# /, s/^# #/#/ if /^Conflicts/ .. /#/; print' "$1" ;;
++
++# ,|template,)
++#   /opt/local/bin/perl5.12 -i.bak -pe '
++#      print "\n" . `git diff --cached --name-status -r`
++#	 if /^#/ && $first++ == 0' "$1" ;;
++
++  *) ;;
++esac
++
++# SOB=$(git var GIT_AUTHOR_IDENT | sed -n 's/^\(.*>\).*$/Signed-off-by: \1/p')
++# grep -qs "^$SOB" "$1" || echo "$SOB" >> "$1"
+diff -urN clucene-core-2.3.3.4-orig/.git/hooks/update.sample clucene-orig/.git/hooks/update.sample
+--- clucene-core-2.3.3.4-orig/.git/hooks/update.sample	1970-01-01 01:00:00.000000000 +0100
++++ clucene-orig/.git/hooks/update.sample	2013-04-14 23:48:15.000000000 +0200
+@@ -0,0 +1,128 @@
++#!/bin/sh
++#
++# An example hook script to blocks unannotated tags from entering.
++# Called by "git receive-pack" with arguments: refname sha1-old sha1-new
++#
++# To enable this hook, rename this file to "update".
++#
++# Config
++# ------
++# hooks.allowunannotated
++#   This boolean sets whether unannotated tags will be allowed into the
++#   repository.  By default they won't be.
++# hooks.allowdeletetag
++#   This boolean sets whether deleting tags will be allowed in the
++#   repository.  By default they won't be.
++# hooks.allowmodifytag
++#   This boolean sets whether a tag may be modified after creation. By default
++#   it won't be.
++# hooks.allowdeletebranch
++#   This boolean sets whether deleting branches will be allowed in the
++#   repository.  By default they won't be.
++# hooks.denycreatebranch
++#   This boolean sets whether remotely creating branches will be denied
++#   in the repository.  By default this is allowed.
++#
++
++# --- Command line
++refname="$1"
++oldrev="$2"
++newrev="$3"
++
++# --- Safety check
++if [ -z "$GIT_DIR" ]; then
++	echo "Don't run this script from the command line." >&2
++	echo " (if you want, you could supply GIT_DIR then run" >&2
++	echo "  $0 <ref> <oldrev> <newrev>)" >&2
++	exit 1
++fi
++
++if [ -z "$refname" -o -z "$oldrev" -o -z "$newrev" ]; then
++	echo "usage: $0 <ref> <oldrev> <newrev>" >&2
++	exit 1
++fi
++
++# --- Config
++allowunannotated=$(git config --bool hooks.allowunannotated)
++allowdeletebranch=$(git config --bool hooks.allowdeletebranch)
++denycreatebranch=$(git config --bool hooks.denycreatebranch)
++allowdeletetag=$(git config --bool hooks.allowdeletetag)
++allowmodifytag=$(git config --bool hooks.allowmodifytag)
++
++# check for no description
++projectdesc=$(sed -e '1q' "$GIT_DIR/description")
++case "$projectdesc" in
++"Unnamed repository"* | "")
++	echo "*** Project description file hasn't been set" >&2
++	exit 1
++	;;
++esac
++
++# --- Check types
++# if $newrev is 0000...0000, it's a commit to delete a ref.
++zero="0000000000000000000000000000000000000000"
++if [ "$newrev" = "$zero" ]; then
++	newrev_type=delete
++else
++	newrev_type=$(git cat-file -t $newrev)
++fi
++
++case "$refname","$newrev_type" in
++	refs/tags/*,commit)
++		# un-annotated tag
++		short_refname=${refname##refs/tags/}
++		if [ "$allowunannotated" != "true" ]; then
++			echo "*** The un-annotated tag, $short_refname, is not allowed in this repository" >&2
++			echo "*** Use 'git tag [ -a | -s ]' for tags you want to propagate." >&2
++			exit 1
++		fi
++		;;
++	refs/tags/*,delete)
++		# delete tag
++		if [ "$allowdeletetag" != "true" ]; then
++			echo "*** Deleting a tag is not allowed in this repository" >&2
++			exit 1
++		fi
++		;;
++	refs/tags/*,tag)
++		# annotated tag
++		if [ "$allowmodifytag" != "true" ] && git rev-parse $refname > /dev/null 2>&1
++		then
++			echo "*** Tag '$refname' already exists." >&2
++			echo "*** Modifying a tag is not allowed in this repository." >&2
++			exit 1
++		fi
++		;;
++	refs/heads/*,commit)
++		# branch
++		if [ "$oldrev" = "$zero" -a "$denycreatebranch" = "true" ]; then
++			echo "*** Creating a branch is not allowed in this repository" >&2
++			exit 1
++		fi
++		;;
++	refs/heads/*,delete)
++		# delete branch
++		if [ "$allowdeletebranch" != "true" ]; then
++			echo "*** Deleting a branch is not allowed in this repository" >&2
++			exit 1
++		fi
++		;;
++	refs/remotes/*,commit)
++		# tracking branch
++		;;
++	refs/remotes/*,delete)
++		# delete tracking branch
++		if [ "$allowdeletebranch" != "true" ]; then
++			echo "*** Deleting a tracking branch is not allowed in this repository" >&2
++			exit 1
++		fi
++		;;
++	*)
++		# Anything else (is there anything else?)
++		echo "*** Update hook: unknown type of update to ref $refname of type $newrev_type" >&2
++		exit 1
++		;;
++esac
++
++# --- Finished
++exit 0
+Binary files clucene-core-2.3.3.4-orig/.git/index and clucene-orig/.git/index differ
+diff -urN clucene-core-2.3.3.4-orig/.git/info/exclude clucene-orig/.git/info/exclude
+--- clucene-core-2.3.3.4-orig/.git/info/exclude	1970-01-01 01:00:00.000000000 +0100
++++ clucene-orig/.git/info/exclude	2013-04-14 23:48:15.000000000 +0200
+@@ -0,0 +1,6 @@
++# git ls-files --others --exclude-from=.git/info/exclude
++# Lines that start with '#' are comments.
++# For a project mostly in C, the following would be a good set of
++# exclude patterns (uncomment them if you want to use them):
++# *.[oa]
++# *~
+diff -urN clucene-core-2.3.3.4-orig/.git/logs/HEAD clucene-orig/.git/logs/HEAD
+--- clucene-core-2.3.3.4-orig/.git/logs/HEAD	1970-01-01 01:00:00.000000000 +0100
++++ clucene-orig/.git/logs/HEAD	2013-04-14 23:49:20.000000000 +0200
+@@ -0,0 +1 @@
++0000000000000000000000000000000000000000 4f62f2a90ecbea0d6d14e4bc0902056996144023 MediaCycle <mediacycle@server.mediacycle.private> 1365976160 +0200	clone: from git://clucene.git.sourceforge.net/gitroot/clucene/clucene
+diff -urN clucene-core-2.3.3.4-orig/.git/logs/refs/heads/master clucene-orig/.git/logs/refs/heads/master
+--- clucene-core-2.3.3.4-orig/.git/logs/refs/heads/master	1970-01-01 01:00:00.000000000 +0100
++++ clucene-orig/.git/logs/refs/heads/master	2013-04-14 23:49:20.000000000 +0200
+@@ -0,0 +1 @@
++0000000000000000000000000000000000000000 4f62f2a90ecbea0d6d14e4bc0902056996144023 MediaCycle <mediacycle@server.mediacycle.private> 1365976160 +0200	clone: from git://clucene.git.sourceforge.net/gitroot/clucene/clucene
+diff -urN clucene-core-2.3.3.4-orig/.git/logs/refs/remotes/origin/HEAD clucene-orig/.git/logs/refs/remotes/origin/HEAD
+--- clucene-core-2.3.3.4-orig/.git/logs/refs/remotes/origin/HEAD	1970-01-01 01:00:00.000000000 +0100
++++ clucene-orig/.git/logs/refs/remotes/origin/HEAD	2013-04-14 23:49:20.000000000 +0200
+@@ -0,0 +1 @@
++0000000000000000000000000000000000000000 4f62f2a90ecbea0d6d14e4bc0902056996144023 MediaCycle <mediacycle@server.mediacycle.private> 1365976160 +0200	clone: from git://clucene.git.sourceforge.net/gitroot/clucene/clucene
+Binary files clucene-core-2.3.3.4-orig/.git/objects/pack/pack-32b4087541d904afc93cb97e61e35c878fc51dc2.idx and clucene-orig/.git/objects/pack/pack-32b4087541d904afc93cb97e61e35c878fc51dc2.idx differ
+Binary files clucene-core-2.3.3.4-orig/.git/objects/pack/pack-32b4087541d904afc93cb97e61e35c878fc51dc2.pack and clucene-orig/.git/objects/pack/pack-32b4087541d904afc93cb97e61e35c878fc51dc2.pack differ
+diff -urN clucene-core-2.3.3.4-orig/.git/packed-refs clucene-orig/.git/packed-refs
+--- clucene-core-2.3.3.4-orig/.git/packed-refs	1970-01-01 01:00:00.000000000 +0100
++++ clucene-orig/.git/packed-refs	2013-04-14 23:49:20.000000000 +0200
+@@ -0,0 +1,18 @@
++# pack-refs with: peeled fully-peeled 
++1ab148a9f46cb857d45d39f29b95a8fc9ca887c9 refs/remotes/origin/ConstantScoreQuery_BugFix
++17e53d7a23d8d3f94237392b73134febfc59945c refs/remotes/origin/OPTIMIZED_BITSET
++06520ed665cadbdb75695d7dd0251c968a13c8c6 refs/remotes/origin/ben_directory-refactor
++c250d9daeb3a199285b2d48c94427926a403da14 refs/remotes/origin/bs2_memoryleak_fix
++04be818b89de0e334e1a408cdbff5cdd8e4cbba8 refs/remotes/origin/comparable-storage
++3d023c7df184d77807fa1447e8013e9744d4055c refs/remotes/origin/highlighter
++c488dbd6a5555d10d3d073afa609ba355d553aa7 refs/remotes/origin/isidor_comparable-storage
++e1029728c80ba5a10de6d1f9aae45c74859030f2 refs/remotes/origin/isidor_mpi
++a53667b1efb664352d86fa9e9f51c74f5a7d8623 refs/remotes/origin/itamar_working
++4f62f2a90ecbea0d6d14e4bc0902056996144023 refs/remotes/origin/master
++13d7d2c71904d4af9de448ea727ad1b8d9009267 refs/remotes/origin/smart_pointers
++d4830ed4af597b9daa39420e33da40f7a3068195 refs/remotes/origin/tracker_3113462_fix
++5868e79bb0e7414236ee86e89c6235c2d6262470 refs/remotes/origin/tracker_3119239_fix
++fba2b1842c1136852716a769a39bd82615783061 refs/remotes/origin/tracker_3123294_fix
++b3b610b0e3c4687781c77407c69d579c9e137105 refs/remotes/origin/tracker_3183890_fix
++605a1f9fe69b76601329fe6b35f6c5d9ec952ba3 refs/remotes/origin/vc6-fixes-working
++a834f87bad3543b2a0331cef7202c15ded4245be refs/tags/clucene-src-2.3.3.4
+diff -urN clucene-core-2.3.3.4-orig/.git/refs/heads/master clucene-orig/.git/refs/heads/master
+--- clucene-core-2.3.3.4-orig/.git/refs/heads/master	1970-01-01 01:00:00.000000000 +0100
++++ clucene-orig/.git/refs/heads/master	2013-04-14 23:49:20.000000000 +0200
+@@ -0,0 +1 @@
++4f62f2a90ecbea0d6d14e4bc0902056996144023
+diff -urN clucene-core-2.3.3.4-orig/.git/refs/remotes/origin/HEAD clucene-orig/.git/refs/remotes/origin/HEAD
+--- clucene-core-2.3.3.4-orig/.git/refs/remotes/origin/HEAD	1970-01-01 01:00:00.000000000 +0100
++++ clucene-orig/.git/refs/remotes/origin/HEAD	2013-04-14 23:49:20.000000000 +0200
+@@ -0,0 +1 @@
++ref: refs/remotes/origin/master
+Binary files clucene-core-2.3.3.4-orig/src/.DS_Store and clucene-orig/src/.DS_Store differ
+diff -urN clucene-core-2.3.3.4-orig/src/core/CLucene/index/DocumentsWriter.cpp clucene-orig/src/core/CLucene/index/DocumentsWriter.cpp
+--- clucene-core-2.3.3.4-orig/src/core/CLucene/index/DocumentsWriter.cpp	2011-03-17 01:21:07.000000000 +0100
++++ clucene-orig/src/core/CLucene/index/DocumentsWriter.cpp	2013-04-14 23:49:20.000000000 +0200
+@@ -125,7 +125,7 @@
+   if (this->postingsFreeListDW.values){
+       if (this->postingsFreeCountDW < this->postingsFreeListDW.length) {
+           memset(this->postingsFreeListDW.values + this->postingsFreeCountDW
+-              , NULL
++              , 0
+               , sizeof(Posting*));
+       }
+       postingsFreeListDW.deleteUntilNULL();
+diff -urN clucene-core-2.3.3.4-orig/src/core/CLucene/search/ConstantScoreQuery.cpp clucene-orig/src/core/CLucene/search/ConstantScoreQuery.cpp
+--- clucene-core-2.3.3.4-orig/src/core/CLucene/search/ConstantScoreQuery.cpp	2011-03-17 01:21:07.000000000 +0100
++++ clucene-orig/src/core/CLucene/search/ConstantScoreQuery.cpp	2013-04-14 23:49:20.000000000 +0200
+@@ -25,14 +25,17 @@
+     BitSet* bits;
+     const float_t theScore;
+     int32_t _doc;
++    bool shouldDelete;
+ 
+ public:
+     ConstantScorer(Similarity* similarity, IndexReader* reader, Weight* w, Filter* filter) : Scorer(similarity),
+         bits(filter->bits(reader)), theScore(w->getValue()), _doc(-1)
+     {
++        shouldDelete = filter->shouldDeleteBitSet(bits);
+     }
+     virtual ~ConstantScorer() {
+-        _CLLDELETE(bits);
++        if ( shouldDelete)
++            _CLLDELETE(bits);
+     }
+ 
+     bool next() {
+diff -urN clucene-core-2.3.3.4-orig/src/core/CLucene/util/BitSet.cpp clucene-orig/src/core/CLucene/util/BitSet.cpp
+--- clucene-core-2.3.3.4-orig/src/core/CLucene/util/BitSet.cpp	2011-03-17 01:21:07.000000000 +0100
++++ clucene-orig/src/core/CLucene/util/BitSet.cpp	2013-04-14 23:49:20.000000000 +0200
+@@ -32,6 +32,25 @@
+     3, 4, 4, 5, 4, 5, 5, 6, 4, 5, 5, 6, 5, 6, 6, 7,
+     4, 5, 5, 6, 5, 6, 6, 7, 5, 6, 6, 7, 6, 7, 7, 8};
+ 
++const uint8_t BitSet::BYTE_OFFSETS[256] = {
++    8, 0, 1, 0, 2, 0, 1, 0, 3, 0, 1, 0, 2, 0, 1, 0,
++    4, 0, 1, 0, 2, 0, 1, 0, 3, 0, 1, 0, 2, 0, 1, 0,
++    5, 0, 1, 0, 2, 0, 1, 0, 3, 0, 1, 0, 2, 0, 1, 0,
++    4, 0, 1, 0, 2, 0, 1, 0, 3, 0, 1, 0, 2, 0, 1, 0,
++    6, 0, 1, 0, 2, 0, 1, 0, 3, 0, 1, 0, 2, 0, 1, 0,
++    4, 0, 1, 0, 2, 0, 1, 0, 3, 0, 1, 0, 2, 0, 1, 0, 
++    5, 0, 1, 0, 2, 0, 1, 0, 3, 0, 1, 0, 2, 0, 1, 0, 
++    4, 0, 1, 0, 2, 0, 1, 0, 3, 0, 1, 0, 2, 0, 1, 0, 
++    7, 0, 1, 0, 2, 0, 1, 0, 3, 0, 1, 0, 2, 0, 1, 0, 
++    4, 0, 1, 0, 2, 0, 1, 0, 3, 0, 1, 0, 2, 0, 1, 0, 
++    5, 0, 1, 0, 2, 0, 1, 0, 3, 0, 1, 0, 2, 0, 1, 0, 
++    4, 0, 1, 0, 2, 0, 1, 0, 3, 0, 1, 0, 2, 0, 1, 0, 
++    6, 0, 1, 0, 2, 0, 1, 0, 3, 0, 1, 0, 2, 0, 1, 0, 
++    4, 0, 1, 0, 2, 0, 1, 0, 3, 0, 1, 0, 2, 0, 1, 0, 
++    5, 0, 1, 0, 2, 0, 1, 0, 3, 0, 1, 0, 2, 0, 1, 0, 
++    4, 0, 1, 0, 2, 0, 1, 0, 3, 0, 1, 0, 2, 0, 1, 0};
++
++
+ BitSet::BitSet( const BitSet& copy ) :
+ 	_size( copy._size ),
+ 	_count(-1)
+@@ -180,19 +199,32 @@
+     return                            factor * (4 + (8+40)*count()) < size();
+   }
+ 
+-  int32_t BitSet::nextSetBit(int32_t fromIndex) const {
++  int32_t BitSet::nextSetBit(int32_t fromIndex) const 
++  {
+       if (fromIndex < 0)
+           _CLTHROWT(CL_ERR_IndexOutOfBounds, _T("fromIndex < 0"));
+ 
+       if (fromIndex >= _size)
+           return -1;
+ 
+-      while (true) {
+-          if ((bits[fromIndex >> 3] & (1 << (fromIndex & 7))) != 0)
+-              return fromIndex;
+-          if (++fromIndex == _size)
+-              return -1;
++      int _max = ( _size+7 ) >> 3;
++
++      unsigned int i = (int)( fromIndex>>3 );
++      unsigned int subIndex = fromIndex & 0x7; // index within the byte
++      uint8_t byte = bits[i] >> subIndex;  // skip all the bits to the right of index
++
++      if ( byte != 0 ) 
++      {
++          return ( ( i<<3 ) + subIndex + BYTE_OFFSETS[ byte ] );
++      }
++
++      while( ++i < _max ) 
++      {
++          byte = bits[i];
++          if ( byte != 0 ) 
++              return ( ( i<<3 ) + BYTE_OFFSETS[ byte ] );
+       }
++      return -1;
+   }
+ 
+ CL_NS_END
+diff -urN clucene-core-2.3.3.4-orig/src/core/CLucene/util/BitSet.h clucene-orig/src/core/CLucene/util/BitSet.h
+--- clucene-core-2.3.3.4-orig/src/core/CLucene/util/BitSet.h	2011-03-17 01:21:07.000000000 +0100
++++ clucene-orig/src/core/CLucene/util/BitSet.h	2013-04-14 23:49:20.000000000 +0200
+@@ -39,6 +39,7 @@
+   /** Indicates if the bit vector is sparse and should be saved as a d-gaps list, or dense, and should be saved as a bit set. */
+   bool isSparse();
+   static const uint8_t BYTE_COUNTS[256];
++  static const uint8_t BYTE_OFFSETS[256];
+ protected:
+ 	BitSet( const BitSet& copy );
+ 
+diff -urN clucene-core-2.3.3.4-orig/src/shared/CMakeLists.txt clucene-orig/src/shared/CMakeLists.txt
+--- clucene-core-2.3.3.4-orig/src/shared/CMakeLists.txt	2011-03-17 01:21:07.000000000 +0100
++++ clucene-orig/src/shared/CMakeLists.txt	2013-04-14 23:49:20.000000000 +0200
+@@ -42,7 +42,7 @@
+ find_package(ZLIB)
+ IF ( ZLIB_FOUND )
+   SET ( EXTRA_LIBS ${EXTRA_LIBS} ${ZLIB_LIBRARY} )
+-ELSEIF ( ZLIB_FOUND )
++ELSE ( ZLIB_FOUND )
+   MESSAGE( "ZLIB not found, using local: ${clucene-ext_SOURCE_DIR}/zlib" )
+   SET(ZLIB_INCLUDE_DIR ${clucene-ext_SOURCE_DIR}/zlib )
+   SET(ZLIB_LIBRARY ${clucene-ext_BINARY_DIR})
