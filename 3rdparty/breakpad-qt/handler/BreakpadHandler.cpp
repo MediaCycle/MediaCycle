@@ -32,6 +32,8 @@
 #include <QtCore/QProcess>
 #include <QtCore/QCoreApplication>
 
+#include <iostream>
+
 #if defined(Q_OS_MAC)
 #include "client/mac/handler/exception_handler.h"
 #elif defined(Q_OS_LINUX)
@@ -157,6 +159,7 @@ void GlobalHandler::setDumpPath(const QString& path)
 	if(!QDir::isAbsolutePath(absPath)) {
 		absPath = QDir::cleanPath(qApp->applicationDirPath() + QLatin1String("/") + path);
 		qDebug("BreakpadQt: setDumpPath: %s -> %s", qPrintable(path), qPrintable(absPath));
+		std::cout << "BreakPadQt: setDumpPath " << path.toStdString() << " / " << absPath.toStdString() << std::endl;
 	}
 	Q_ASSERT(QDir::isAbsolutePath(absPath));
 
@@ -209,9 +212,11 @@ bool GlobalHandler::writeMinidump()
 {
 	bool res = d->handler_->WriteMinidump();
 	if (res) {
-		qDebug("BreakpadQt: writeMinidump() successed.");
+		qDebug("BreakpadQt: writeMinidump() succeeded.");
+		std::cout << "BreakpadQt: writeMinidump() succeeded" << std::endl;
 	} else {
 		qWarning("BreakpadQt: writeMinidump() failed.");
+		std::cerr << "BreakpadQt: writeMinidump() failed" << std::endl;
 	}
 	return res;
 }

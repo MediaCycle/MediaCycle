@@ -32,7 +32,9 @@
 
 #include <windows.h>
 #include <dbghelp.h>
-#include <iostream> //CF
+#ifdef __MINGW32__
+#include<iostream>
+#endif
 #include <list>
 #include "google_breakpad/common/minidump_format.h"
 

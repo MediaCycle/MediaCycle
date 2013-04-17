@@ -823,7 +823,7 @@ typedef enum _MINIDUMP_STREAM_TYPE
     MiscInfoStream              = 15,
     MemoryInfoListStream        = 16,
     ThreadInfoListStream        = 17,
-
+    HandleOperationListStream = 18,//CF
     LastReservedStream          = 0xffff
 } MINIDUMP_STREAM_TYPE;
 

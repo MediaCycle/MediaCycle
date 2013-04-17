@@ -30,9 +30,7 @@
 #include "client/windows/crash_generation/minidump_generator.h"
 
 #include <assert.h>
-#ifndef __MINGW32__ //CF
 #include <avrfsdk.h>
-#endif
 
 #include <algorithm>
 #include <iterator>
@@ -41,6 +39,18 @@
 
 #include "client/windows/common/auto_critical_section.h"
 #include "common/windows/guid_string.h"
+
+#ifdef __MINGW32__
+//CF from http://sourceforge.net/apps/trac/mingw-w64/browser/trunk/mingw-w64-headers/include/psdk_inc/_dbg_common.h
+#ifndef MINIDUMP_HANDLE_OPERATION_LIST
+typedef struct _MINIDUMP_HANDLE_OPERATION_LIST {
+    ULONG32 SizeOfHeader;
+    ULONG32 SizeOfEntry;
+    ULONG32 NumberOfEntries;
+    ULONG32 Reserved;
+} MINIDUMP_HANDLE_OPERATION_LIST, *PMINIDUMP_HANDLE_OPERATION_LIST;
+#endif
+#endif
 
 using std::wstring;
 
@@ -82,9 +92,7 @@ class HandleTraceData {
       HANDLE Process,
       ULONG Flags,
       ULONG ResourceType,
-#ifndef __MINGW32__ //CF
       AVRF_RESOURCE_ENUMERATE_CALLBACK ResourceCallback,
-#endif
       PVOID EnumerationContext);
 
   // Handle to dynamically loaded verifier.dll.
@@ -95,10 +103,8 @@ class HandleTraceData {
 
   // Handle value to look for.
   ULONG64 handle_;
-#ifndef __MINGW32__ //CF
   // List of handle operations for |handle_|.
   std::list<AVRF_HANDLE_OPERATION> operations_;
-#endif
   // Minidump stream data.
   std::vector<char> stream_;
 };
@@ -148,17 +154,13 @@ bool HandleTraceData::CollectHandleData(
   // and record only the operations for that handle value.
   if (enumerate_resource_(process_handle,
                           0,
-#ifndef __MINGW32__ //CF
                           AvrfResourceHandleTrace,
-#endif
                           &RecordHandleOperations,
                           this) != ERROR_SUCCESS) {
     // The handle tracing must have not been enabled.
     return true;
   }
-
   // Now that |handle_| is initialized, purge all irrelevant operations.
-#ifndef __MINGW32__ //CF
   std::list<AVRF_HANDLE_OPERATION>::iterator i = operations_.begin();
   std::list<AVRF_HANDLE_OPERATION>::iterator i_end = operations_.end();
   while (i != i_end) {
@@ -169,6 +171,7 @@ bool HandleTraceData::CollectHandleData(
     }
   }
 
+//#ifndef __MINGW32__
   // Convert the list of recorded operations to a minidump stream.
   stream_.resize(sizeof(MINIDUMP_HANDLE_OPERATION_LIST) +
       sizeof(AVRF_HANDLE_OPERATION) * operations_.size());
@@ -182,9 +185,12 @@ bool HandleTraceData::CollectHandleData(
   stream_data->Reserved = 0;
   std::copy(operations_.begin(),
             operations_.end(),
+            #ifndef __MINGW32__
             stdext::checked_array_iterator<AVRF_HANDLE_OPERATION*>(
                 reinterpret_cast<AVRF_HANDLE_OPERATION*>(stream_data + 1),
                 operations_.size()));
+#else
+            reinterpret_cast<AVRF_HANDLE_OPERATION*>(stream_data + 1));
 #endif
   return true;
 }
@@ -193,9 +199,7 @@ bool HandleTraceData::GetUserStream(MINIDUMP_USER_STREAM* user_stream) {
   if (stream_.empty()) {
     return false;
   } else {
-#ifndef __MINGW32__ //CF
     user_stream->Type = HandleOperationListStream;
-#endif
     user_stream->BufferSize = static_cast<ULONG>(stream_.size());
     user_stream->Buffer = &stream_.front();
     return true;
@@ -230,15 +234,12 @@ ULONG CALLBACK HandleTraceData::RecordHandleOperations(
     void* resource_description,
     void* enumeration_context,
     ULONG* enumeration_level) {
-#ifndef __MINGW32__ //CF
   AVRF_HANDLE_OPERATION* description =
       reinterpret_cast<AVRF_HANDLE_OPERATION*>(resource_description);
-#endif
   HandleTraceData* self =
       reinterpret_cast<HandleTraceData*>(enumeration_context);
 
   // Remember the last invalid handle operation.
-#ifndef __MINGW32__ //CF
   if (description->OperationType == OperationDbBADREF) {
     self->handle_ = description->Handle;
   }
@@ -247,7 +248,6 @@ ULONG CALLBACK HandleTraceData::RecordHandleOperations(
   self->operations_.push_back(*description);
 
   *enumeration_level = HeapEnumerationEverything;
-#endif
 	return ERROR_SUCCESS;
 }
 
