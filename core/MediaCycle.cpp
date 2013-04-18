@@ -782,6 +782,9 @@ std::vector<std::string> MediaCycle::getActivePluginNames(ACPluginType pluginTyp
     case PLUGIN_TYPE_MEDIARENDERER:
         names = this->getPluginManager()->getAvailablePluginsNames(pluginType,mediaType);
         break;
+    case PLUGIN_TYPE_PREPROCESS:
+        plugin = this->getLibrary()->getPreProcessPlugin();
+        break;
     default:
         names = this->getPluginManager()->getAvailablePluginsNames(pluginType,mediaType);
         break;

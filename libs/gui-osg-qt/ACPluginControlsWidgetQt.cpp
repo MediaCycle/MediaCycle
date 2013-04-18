@@ -178,6 +178,7 @@ void ACPluginControlsWidgetQt::buildPluginList()
         // For plugin types with one active plugin at a time, the combox box is used to set the active plugin
         // For other types, we don't need to list plugins that don't have parameters
         if(plugin->getParametersCount()>0
+                || plugin->implementsPluginType(PLUGIN_TYPE_PREPROCESS)
                 || plugin->implementsPluginType(PLUGIN_TYPE_SEGMENTATION)
                 || plugin->implementsPluginType(PLUGIN_TYPE_CLUSTERS_METHOD)
                 || plugin->implementsPluginType(PLUGIN_TYPE_CLUSTERS_POSITIONS)
@@ -516,17 +517,18 @@ void ACPluginControlsWidgetQt::buildPluginList()
 }
 
 void ACPluginControlsWidgetQt::adjustHeight(){
+    int space = 16;
     if(comboBoxPlugins){
         if(parametersContainer){
             parametersContainer->adjustSize();
             //comboBoxPlugins->setMinimumHeight( comboBoxPlugins->height() );
             //parametersContainer->setMinimumHeight( parametersContainer->height() );
-            this->setMinimumHeight( comboBoxPlugins->minimumHeight() + parametersContainer->minimumHeight() );
-            this->setFixedHeight( comboBoxPlugins->height() + parametersContainer->height() );
+            this->setMinimumHeight( comboBoxPlugins->minimumHeight() + parametersContainer->minimumHeight() + space );
+            this->setFixedHeight( comboBoxPlugins->height() + parametersContainer->height() + space );
         }
         else{
-            this->setMinimumHeight( comboBoxPlugins->height() );
-            this->setFixedHeight( comboBoxPlugins->height() );
+            this->setMinimumHeight( comboBoxPlugins->height() + space );
+            this->setFixedHeight( comboBoxPlugins->height() + space );
         }
     }
     else{

@@ -178,6 +178,7 @@ public:
     int scanDirectories(std::vector<std::string> _path, int _recursive, std::vector<std::string>& filenames);
 
     void setPreProcessPlugin(ACPlugin* acpl);
+    ACPreProcessPlugin* getPreProcessPlugin(){return mPreProcessPlugin;}
     void setMediaReaderPlugin(ACPlugin* acpl);
     ACMediaReaderPlugin* getMediaReaderPlugin(){return mReaderPlugin;}
 
