@@ -59,6 +59,8 @@ public:
     virtual ACBrowserMode browserMode()=0;
     //virtual ACBrowserLayout browserLayout()=0;
     virtual std::vector<std::string> pluginLibraries()=0;
+    virtual bool staticLibraries()=0;
+    virtual ACPluginLibrary* createPluginLibrary(std::string _name)=0;
     virtual bool useNeighbors(){return true;}
     virtual std::string clustersMethodPlugin()=0;
     virtual std::string clustersPositionsPlugin()=0;

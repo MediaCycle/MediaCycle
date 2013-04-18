@@ -85,6 +85,31 @@ void ACPluginManager::setMediaCycle(MediaCycle* _media_cycle){
  *   -1 if it encountered a problem loading
  *    1 if things went smoothly
  */
+
+std::vector<std::string> ACPluginManager::addLibrary(ACPluginLibrary *acpl){
+    std::vector<std::string> plugins_names;
+
+    acpl->setMediaCycle(this->media_cycle);
+    acpl->initialize();
+    //acpl->setLibraryPath(aPluginLibraryPath);
+
+    std::vector<ACPlugin*> plugins = acpl->getPlugins();
+    for(std::vector<ACPlugin*>::iterator plugin=plugins.begin();plugin!=plugins.end();plugin++){
+        plugins_names.push_back((*plugin)->getName());
+    }
+
+    mPluginLibrary.push_back(acpl);
+
+    //this->updateAvailablePluginLists(acpl);
+    this->addLibraryToPluginLists(acpl);
+    // plugins can only be added to mActiveSegmentPlugins by the user directly
+
+    for(std::vector<ACPlugin*>::iterator plugin=plugins.begin();plugin!=plugins.end();plugin++){
+        this->pluginLoaded((*plugin)->getName());
+    }
+    return plugins_names;
+}
+
 std::vector<std::string> ACPluginManager::addLibrary(std::string aPluginLibraryPath) {
     std::vector<std::string> plugins_names;
     for (vector<ACPluginLibrary *>::iterator it=mPluginLibrary.begin();it!=mPluginLibrary.end();it++){

@@ -21,7 +21,7 @@ IF(SUPPORT_VIDEO)
 
         ADD_DEPENDENCIES(video-test mediacycle ${PLUGIN_PREFIX}video gnuplot_i)
 
-        TARGET_LINK_LIBRARIES(video-test mediacycle ${PLUGIN_PREFIX}video ${PLUGIN_PREFIX}video-features-dancers gnuplot_i)
+        TARGET_LINK_LIBRARIES(video-test mediacycle ${LIBRARY_PREFIX}mediacycle-video-plugin ${LIBRARY_PREFIX}mediacycle-video-features-dancers-plugin gnuplot_i)
 
 	SET_TARGET_PROPERTIES("video-test" PROPERTIES FOLDER "${FOLDERNAME}")
 	MESSAGE("[X] video")

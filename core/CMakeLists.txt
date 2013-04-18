@@ -9,7 +9,6 @@ IF(UNIX AND NOT APPLE)
 	TARGET_LINK_LIBRARIES(mediacycle dl)
 ENDIF()
 
-ADD_DEPENDENCIES(mediacycle armadillo-utils)
 IF(TINYXML_FOUND)
 	TARGET_LINK_LIBRARIES(mediacycle ${TINYXML_LIBRARY})
 ELSE()
@@ -17,7 +16,9 @@ ELSE()
 	TARGET_LINK_LIBRARIES(mediacycle tinyxml)
 ENDIF()
 
+ADD_DEPENDENCIES(mediacycle armadillo-utils)
 TARGET_LINK_LIBRARIES(mediacycle armadillo-utils)
+
 IF (APPLE)
 	TARGET_LINK_LIBRARIES(mediacycle stdc++)# CF otherwise "make package" fails
 ENDIF(APPLE)

@@ -191,16 +191,28 @@ void MediaCycle::loadDefaultConfig(std::string name){
 
     std::vector<std::string> plugins = config->pluginLibraries();
     for(std::vector<std::string>::iterator plugin = plugins.begin();plugin != plugins.end();++plugin){
-        std::string path = this->getPluginPathFromBaseName(*plugin);
-        if(path == ""){
-            //std::cerr << "Couldn't load plugin library " << *plugin << std::endl;
-            //break;
-            throw runtime_error("Couldn't load plugin library '" + *plugin + "'");
+        if(config->staticLibraries()){
+            ACPluginLibrary* library = 0;
+            library = config->createPluginLibrary(*plugin);
+            if(!library){
+                throw runtime_error("Couldn't load plugin library '" + *plugin + "'");
+            }
+            int n_elements = this->addPluginLibrary(library);
+            if( n_elements <= 0){
+                throw runtime_error("Couldn't load any plugin from library '" + *plugin + "'.");
+            }
         }
-
-        int n_elements = this->addPluginLibrary(path);
-        if( n_elements <= 0){
-            throw runtime_error("Couldn't load any plugin from library '" + *plugin + "' from path '" + path + "'.");
+        else{
+            std::string path = this->getPluginPathFromBaseName(*plugin);
+            if(path == ""){
+                //std::cerr << "Couldn't load plugin library " << *plugin << std::endl;
+                //break;
+                throw runtime_error("Couldn't load plugin library '" + *plugin + "'");
+            }
+            int n_elements = this->addPluginLibrary(path);
+            if( n_elements <= 0){
+                throw runtime_error("Couldn't load any plugin from library '" + *plugin + "' from path '" + path + "'.");
+            }
         }
     }
 
@@ -672,6 +684,14 @@ int MediaCycle::loadPluginLibraryFromBasename(std::string basename){
 
 int MediaCycle::addPluginLibrary(string aPluginLibraryPath) {
     std::vector<std::string> plugins_names = this->pluginManager->addLibrary(aPluginLibraryPath);
+    for(std::vector<std::string>::iterator plugin_name = plugins_names.begin();plugin_name!=plugins_names.end();plugin_name++){
+        eventManager->sig_pluginLoaded(*plugin_name);
+    }
+    return plugins_names.size();
+}
+
+int MediaCycle::addPluginLibrary(ACPluginLibrary* library) {
+    std::vector<std::string> plugins_names = this->pluginManager->addLibrary(library);
     for(std::vector<std::string>::iterator plugin_name = plugins_names.begin();plugin_name!=plugins_names.end();plugin_name++){
         eventManager->sig_pluginLoaded(*plugin_name);
     }

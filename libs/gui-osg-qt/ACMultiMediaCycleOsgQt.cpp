@@ -35,13 +35,15 @@
 #include "ACMultiMediaCycleOsgQt.h"
 #include "ACPluginQt.h"
 #include <fstream>
-#include <iomanip> // for setw
-#include <cstdlib> // for atoi
+//#include <iomanip> // for setw
+//#include <cstdlib> // for atoi
 
 #ifdef OSG_LIBRARY_STATIC
 #include <osgViewer/GraphicsWindow>
 USE_GRAPHICSWINDOW()
 #endif
+
+#include <osgDB/Registry>
 
 #include "ACPluginControlsDockWidgetQt.h"
 
@@ -1157,7 +1159,10 @@ bool ACMultiMediaCycleOsgQt::loadDefaultConfig(ACAbstractDefaultConfig* _config)
     }
     else
         this->addControlDock("MCBrowserControlsClusters");
-    this->addControlDock("MCMediaControls");
+
+    if(media_cycle->getAvailablePluginNames(PLUGIN_TYPE_MEDIARENDERER,_config->mediaType()).size()>0)
+        this->addControlDock("MCMediaControls");
+
     //if(_osg_qt_config->useSegmentation())
     //    this->addControlDock("MCSegmentationControls");
 

@@ -5,6 +5,10 @@ IF (SUPPORT_AUDIO AND USE_QT4 AND USE_OSG AND USE_OSC )
         SET(WITH_SEGMENTATION OFF)
 	SET(WITH_OSC ON)
 
+        #IF(MINGW AND CMAKE_TOOLCHAIN_FILE)
+                SET(MC_PLUGINS_STATIC ON)
+        #ENDIF()
+
 	SET(MEDIA_TYPE "MEDIA_TYPE_AUDIO")
         #SET(MC_PLUGINS "audio-engine;audio-features-yaafe;audio-osg;audio-reader-sndfile;audio-segmentation;file;io-osc;io-3m-multitouch-screen;pcapreprocess;segmentation;visualisation")
         SET(MC_PLUGINS "audio-engine-stk;audio-osg;audio-reader-sndfile;io-osc;audio-thumbnailer-waveform;file;visualisation")#io-3m-multitouch-screen;

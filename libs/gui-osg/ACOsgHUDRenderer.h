@@ -44,38 +44,11 @@
 #include "ACOsgPointerRenderer.h"
 #include "ACOsgLibraryRenderer.h"
 
-#include <osgDB/ReadFile>
-//#include <osgDB/WriteFile>
-
-#include <osg/ref_ptr>
-#include <osg/Group>
-#include <osg/MatrixTransform>
-#include <osg/Geode>
-#include <osg/Geometry>
-#include <osg/StateSet>
-//#include <osg/Material>
-#include <osg/Texture2D>
-//#include <osg/TextureRectangle>
-//#include <osg/TextureCubeMap>
-//#include <osg/TexMat>
-//#include <osg/CullFace>
-#include <osg/Image>
-#include <osg/ImageStream>
-
-#include <osg/io_utils>
-#include <osg/LineWidth>
-#include <osg/ShapeDrawable>
-//#include <osg/BlendFunc>
-//#include <osg/BlendColor>
-
-#include <osgUtil/SceneView>
 #include <osgViewer/Viewer>
 
 #include "ACRefId.h"
 
 #include <sys/time.h>
-
-//#include "ACPlugin.h"
 
 class ACOsgHUDRenderer {
 protected:

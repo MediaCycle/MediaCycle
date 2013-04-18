@@ -138,6 +138,7 @@ public:
     /// Plugins
     // XS TODO cleanPlugins
     int addPluginLibrary(std::string aPluginLibraryPath);
+    int addPluginLibrary(ACPluginLibrary* library);
     int loadPluginLibraryFromBasename(std::string basename);
     int removePluginLibrary(std::string aPluginLibraryPath);
     int removePluginLibraryFromBasename(std::string basename);

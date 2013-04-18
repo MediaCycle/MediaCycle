@@ -1,6 +1,11 @@
 IF(SUPPORT_AUDIO AND USE_YAAFE)
 #cmake_minimum_required (VERSION 2.6)
 #project (yaafe CXX C)
+SET(TARGET_NAME "yaafe")
+add_custom_target(${TARGET_NAME})
+IF(CMAKE_CAN_APPEND_PROPERTIES)
+    set_property(TARGET "${TARGET_NAME}" APPEND PROPERTY INCLUDE_DIRECTORIES "${CMAKE_CURRENT_SOURCE_DIR}/src_cpp")
+ENDIF()
 include_directories(src_cpp)#CF
 #set (CMAKE_MODULE_PATH "${CMAKE_SOURCE_DIR}/cmake-modules")
 

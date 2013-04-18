@@ -1,12 +1,12 @@
 SET(TARGET_NAME "MultiMediaCycle")
-IF(BUILD_MULTIMEDIACYCLE_APP AND USE_QT4 AND USE_OSG AND USE_OSC )
+IF(BUILD_MULTIMEDIACYCLE_APP AND USE_QT4 AND USE_OSG)
 
         # Media configurations that currently don't have specific apps
         INCLUDE (${CMAKE_SOURCE_DIR}/cmake/CreateDefaultConfig.cmake)
 	# 3DmodelCycle
         SET(DESCRIPTION "3DmodelCycle allows to organize 3D models by similarity.")
         SET(MEDIA_TYPE "MEDIA_TYPE_3DMODEL")
-        SET(MC_PLUGINS "3dmodel;file;pcapreprocess;visualisation")
+        SET(MC_PLUGINS "3Dmodel;file;pcapreprocess;visualisation")
         SET(OSG_PLUGINS "osgdb_osg")
         CREATE_DEFAULT_CONFIG("3DmodelCycle")
 	# MakamCycle
@@ -24,11 +24,9 @@ IF(BUILD_MULTIMEDIACYCLE_APP AND USE_QT4 AND USE_OSG AND USE_OSC )
 	foreach(PLUGIN_DIR ${PLUGIN_DIRS})
 		GET_FILENAME_COMPONENT(PLUGIN_NAME ${PLUGIN_DIR} NAME_WE)
 		#MESSAGE("Adding plugin: '${PLUGIN_NAME}'")
-		IF(MC_PLUGINS)
-			SET(MC_PLUGINS "${MC_PLUGINS}" "${PLUGIN_NAME}")
-		ELSE()
-			SET(MC_PLUGINS "${PLUGIN_NAME}")
-		ENDIF()
+                IF(TARGET ${LIBRARY_PREFIX}mediacycle-${PLUGIN_NAME}-plugin)
+                    LIST(APPEND MC_PLUGINS "${PLUGIN_NAME}")
+                ENDIF()
 	endforeach(PLUGIN_DIR)
         #MESSAGE("List of plugins: '${MC_PLUGINS}'")
 

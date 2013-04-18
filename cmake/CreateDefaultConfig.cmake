@@ -7,6 +7,7 @@
 #  OSG_PLUGINS (list): example SET(OSG_PLUGINS "osgdb_ffmpeg;osgdb_svg")
 #
 # Optional
+#  MC_PLUGINS_STATIC: example SET(MC_PLUGINS_STATIC ON)
 #  BROWSER_MODE: example: SET(BROWSER_MODE "AC_MODE_CLUSTERS"), otherwise defaults to clusters mode
 #  CLUSTERS_METHOD: example: SET(CLUSTERS_METHOD "MediaCycle KMeans")
 #  CLUSTERS_POSITIONS: example: SET(CLUSTERS_POSITIONS "MediaCycle Propeller")
@@ -37,7 +38,7 @@ IF(NOT BROWSER_MODE)
         SET(BROWSER_MODE "AC_MODE_CLUSTERS")
         #MESSAGE("BROWSER_MODE not set, defaulting to ${BROWSER_MODE}")
 ENDIF()
-IF(NOT MC_PLUGINS)
+IF(NOT MC_PLUGINS AND NOT MC_PLUGINS_STATIC)
 	MESSAGE(FATAL_ERROR "No plugin set, list in MC_PLUGINS")
 ENDIF()
 
@@ -76,6 +77,37 @@ file(WRITE ${CMAKE_CURRENT_BINARY_DIR}/${CLASS_NAME}.h "
 #ifndef __${CLASS_NAME}_H__
 #define __${CLASS_NAME}_H__
 
+
+#ifdef MC_PLUGINS_STATIC
+")
+
+SET(MC_PLUGIN_LIBRARIES)
+SET(MC_PLUGIN_FACTORIES)
+FOREACH(PLUGIN_NAME ${MC_PLUGINS})
+    IF(NOT TARGET ${LIBRARY_PREFIX}mediacycle-${PLUGIN_NAME}-plugin)
+        MESSAGE(FATAL_ERROR "Plugin '${LIBRARY_PREFIX}mediacycle-${PLUGIN_NAME}-plugin' doesn't exist in ${CMAKE_SOURCE_DIR}/plugins/${PLUGIN_NAME} (case sensitive)")
+    ENDIF()
+    SET(PLUGIN_LIBRARY_NAME "AC")
+    SET(PLUGIN_WORDS ${PLUGIN_NAME})
+    STRING(REGEX REPLACE "-" ";" PLUGIN_WORDS ${PLUGIN_WORDS})
+    FOREACH(PLUGIN_WORD ${PLUGIN_WORDS})
+        STRING(SUBSTRING ${PLUGIN_WORD} 0 1 FIRST_LETTER)
+        STRING(TOUPPER ${FIRST_LETTER} FIRST_LETTER)
+        STRING(REGEX REPLACE "^.(.*)" "${FIRST_LETTER}\\1" PLUGIN_WORD_CAP "${PLUGIN_WORD}")
+        SET(PLUGIN_LIBRARY_NAME "${PLUGIN_LIBRARY_NAME}${PLUGIN_WORD_CAP}")
+    ENDFOREACH(PLUGIN_WORD)
+    SET(PLUGIN_LIBRARY_NAME "${PLUGIN_LIBRARY_NAME}PluginLibrary")
+    #MESSAGE("PLUGIN_LIBRARY_NAME: ${PLUGIN_LIBRARY_NAME}")
+
+    #IF(EXISTS ${CMAKE_BINARY_DIR}/plugins/mc_${MC_PLUGINS}/${PLUGIN_LIBRARY_NAME}.h)
+        file(APPEND ${CMAKE_CURRENT_BINARY_DIR}/${CLASS_NAME}.h "#include<${PLUGIN_LIBRARY_NAME}.h>\n")
+        LIST(APPEND MC_PLUGIN_LIBRARIES ${PLUGIN_LIBRARY_NAME})
+        LIST(APPEND MC_PLUGIN_FACTORIES "if(_name==\"${PLUGIN_NAME}\"){ return new ${PLUGIN_LIBRARY_NAME}()")
+    #ENDIF()
+ENDFOREACH(PLUGIN_NAME)
+
+file(APPEND ${CMAKE_CURRENT_BINARY_DIR}/${CLASS_NAME}.h "#endif
+
 #include \"${BASE_CLASS}.h\"
 
 class ${CLASS_NAME}: public ${BASE_CLASS} {
@@ -87,17 +119,37 @@ public:
     virtual std::string description(){return \"${DESCRIPTION}\";}
     virtual ACMediaType mediaType(){return ${MEDIA_TYPE};}
     virtual ACBrowserMode browserMode(){return ${BROWSER_MODE};}
+")
+
+file(APPEND ${CMAKE_CURRENT_BINARY_DIR}/${CLASS_NAME}.h "
     virtual std::vector<std::string> pluginLibraries(){
         std::vector<std::string> plugins;
 ")
-
+#IF(NOT MC_PLUGINS_STATIC)
 foreach(PLUGIN ${MC_PLUGINS})
-	file(APPEND ${CMAKE_CURRENT_BINARY_DIR}/${CLASS_NAME}.h "\t\tplugins.push_back(\"${PLUGIN}\");\n")
+        file(APPEND ${CMAKE_CURRENT_BINARY_DIR}/${CLASS_NAME}.h "\t\tplugins.push_back(\"${PLUGIN}\");\n")
 endforeach(PLUGIN)
-
+#ENDIF()
 file(APPEND ${CMAKE_CURRENT_BINARY_DIR}/${CLASS_NAME}.h "\t\treturn plugins;
     }
 ")
+
+IF(MC_PLUGINS_STATIC)
+    file(APPEND ${CMAKE_CURRENT_BINARY_DIR}/${CLASS_NAME}.h "\tvirtual bool staticLibraries(){return true;}")
+ELSE()
+    file(APPEND ${CMAKE_CURRENT_BINARY_DIR}/${CLASS_NAME}.h "\tvirtual bool staticLibraries(){return false;}\n")
+ENDIF()
+
+file(APPEND ${CMAKE_CURRENT_BINARY_DIR}/${CLASS_NAME}.h "
+    virtual ACPluginLibrary* createPluginLibrary(std::string _name){
+        ACPluginLibrary* library = 0;
+        #ifdef MC_PLUGINS_STATIC\n")
+
+    FOREACH(MC_PLUGIN_FACTORY ${MC_PLUGIN_FACTORIES})
+        file(APPEND ${CMAKE_CURRENT_BINARY_DIR}/${CLASS_NAME}.h "\t${MC_PLUGIN_FACTORY};}\n")
+    ENDFOREACH(MC_PLUGIN_FACTORY)
+
+file(APPEND ${CMAKE_CURRENT_BINARY_DIR}/${CLASS_NAME}.h "\t#endif\n\treturn library;\n\t}\n")
 
 IF(WITH_OSG)
 file(APPEND ${CMAKE_CURRENT_BINARY_DIR}/${CLASS_NAME}.h "\tvirtual std::vector<std::string> osgPlugins(){

@@ -133,8 +133,8 @@ int ACOscBrowser::process_mess(const char *path, const char *types, lo_arg **arg
             osc_feedback->messageBegin("/mediacycle/received");
             osc_feedback->messageEnd();
             osc_feedback->messageSend();
-            return 1;
         }
+        return 1;
     }
     // XS TODO: this one is useless, fix it ?
     else if (tag.find("/fullscreen", 0) != string::npos) {
@@ -152,8 +152,45 @@ int ACOscBrowser::process_mess(const char *path, const char *types, lo_arg **arg
     if (!this->media_cycle)// || !this->getOsgView())
         return 1;
 
+    if (tag.find("/list_media_actions", 0) != string::npos || tag == "/who") {
+        std::cout << "ACOscBrowser: available media actions " << std::endl;
+        for(std::map<std::string,std::string>::iterator media_action = media_actions.begin();media_action!=media_actions.end();media_action++){
+            std::string _message = "/mediacycle/pointer/<id>/" + media_action->second;
+            std::cout << "ACOscBrowser: media action "<< _message << std::endl;
+            /*if (osc_feedback) {
+                osc_feedback->messageBegin(_message.c_str());
+                osc_feedback->messageEnd();
+                osc_feedback->messageSend();
+            }*/
+        }
+        std::cout << "ACOscBrowser: available media actions with parameters " << std::endl;
+        std::map<std::string,std::string>::iterator media_action = media_actions.begin();
+        for(std::map<std::string,ACMediaActionParameters>::iterator action_parameters = actions_parameters.begin();action_parameters!=actions_parameters.end();action_parameters++){
+            std::cout << "ACOscBrowser: media action '" << action_parameters->first << "'";
+            std::string _message = "/mediacycle/pointer/<id>/" + media_action->first;
+            media_action++;
+            ACMediaActionParameters parameters = action_parameters->second;
+            if(parameters.size()==0)
+                std::cout << " without parameters";
+            else if(parameters.size()==1)
+                std::cout << " with parameter:";
+            else
+                std::cout << " with parameters:";
+            for(ACMediaActionParameters::iterator parameter = parameters.begin();parameter != parameters.end();parameter++){
+                std::cout << " '" << parameter->getName() << "' (type: %" << (char)(parameter->getType()) << ")";
+                _message += " <" + parameter->getName() + " (%" + (char)(parameter->getType()) + ")>";
+            }
+            std::cout << std::endl;
+            if (osc_feedback) {
+                osc_feedback->messageBegin(_message.c_str());
+                osc_feedback->messageEnd();
+                osc_feedback->messageSend();
+            }
+        }
+        return 1;
+    }
     // BROWSER CONTROLS
-    if (tag.find("/browser", 0) != string::npos && this->media_cycle) {
+    else if (tag.find("/browser", 0) != string::npos && this->media_cycle) {
 
         if (!this->media_cycle->getBrowser())
             return 1;
@@ -723,26 +760,6 @@ int ACOscBrowser::process_mess(const char *path, const char *types, lo_arg **arg
         }
         if(verbose){
             std::cout << " (" << argc-1 << " arg(s)) ";
-            std::cout << std::endl;
-        }
-    }
-    else if (tag.find("/list_media_actions", 0) != string::npos || tag == "/who") {
-        std::cout << "ACOscBrowser: available media actions " << std::endl;
-        for(std::map<std::string,std::string>::iterator media_action = media_actions.begin();media_action!=media_actions.end();media_action++){
-            std::cout << "ACOscBrowser: media action " << media_action->second << std::endl;
-        }
-        std::cout << "ACOscBrowser: available media actions with parameters " << std::endl;
-        for(std::map<std::string,ACMediaActionParameters>::iterator action_parameters = actions_parameters.begin();action_parameters!=actions_parameters.end();action_parameters++){
-            std::cout << "ACOscBrowser: media action '" << action_parameters->first << "'";
-            ACMediaActionParameters parameters = action_parameters->second;
-            if(parameters.size()==0)
-                std::cout << " without parameters";
-            else if(parameters.size()==1)
-                std::cout << " with parameter:";
-            else
-                std::cout << " with parameters:";
-            for(ACMediaActionParameters::iterator parameter = parameters.begin();parameter != parameters.end();parameter++)
-                std::cout << " '" << parameter->getName() << "' (type: %" << (char)(parameter->getType()) << ")";
             std::cout << std::endl;
         }
     }

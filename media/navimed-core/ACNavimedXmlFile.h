@@ -38,7 +38,6 @@
 #include <string>
 
 #include <ACOpenCVInclude.h>
-#include <osgDB/ReadFile>
 
 std::string* ACNavimedXmlFileRead(std::string filePath);
 std::string ACNavimedLabelFileRead(std::string filePath);

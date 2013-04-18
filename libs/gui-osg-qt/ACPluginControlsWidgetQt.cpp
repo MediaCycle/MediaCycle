@@ -177,19 +177,19 @@ void ACPluginControlsWidgetQt::buildPluginList()
 
         // For plugin types with one active plugin at a time, the combox box is used to set the active plugin
         // For other types, we don't need to list plugins that don't have parameters
-        if(plugin->getParametersCount()>0
+        /*if(plugin->getParametersCount()>0 || availablePlugin.size == 1
                 || plugin->implementsPluginType(PLUGIN_TYPE_PREPROCESS)
                 || plugin->implementsPluginType(PLUGIN_TYPE_SEGMENTATION)
                 || plugin->implementsPluginType(PLUGIN_TYPE_CLUSTERS_METHOD)
                 || plugin->implementsPluginType(PLUGIN_TYPE_CLUSTERS_POSITIONS)
                 || plugin->implementsPluginType(PLUGIN_TYPE_NEIGHBORS_METHOD)
                 || plugin->implementsPluginType(PLUGIN_TYPE_NEIGHBORS_POSITIONS)
-                ){
+                ){*/
             comboBoxPlugins->addItem(plugin_name);
             count++;
             if(plugin_name.toStdString() == current_plugin_name)
                 index=count;
-        }
+        //}
 
         if(plugin_name.toStdString() == current_plugin_name && plugin->getParametersCount()>0){
 

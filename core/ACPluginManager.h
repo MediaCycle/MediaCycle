@@ -138,6 +138,7 @@ public:
     virtual ~ACPluginManager();
     void setMediaCycle(MediaCycle* _media_cycle);
     std::vector<std::string> addLibrary(std::string aPluginLibraryPath);
+    std::vector<std::string> addLibrary(ACPluginLibrary *acpl);
     int removeLibrary(std::string aPluginLibraryPath);
     bool removePluginFromLibrary(std::string _plugin_name, std::string _library_path);
     std::vector<std::string> getListOfPlugins();
