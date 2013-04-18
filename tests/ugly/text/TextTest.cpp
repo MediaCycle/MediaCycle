@@ -49,7 +49,10 @@
 
 #include <QtGui>
 using namespace std;
+
+#ifdef _CL_HAVE_NAMESPACES
 using namespace lucene::index;
+#endif
 
 #include "MediaCycle.h"
 /*

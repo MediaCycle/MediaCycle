@@ -1,6 +1,648 @@
-diff -urN clucene-orig/CMakeLists.txt clucene/CMakeLists.txt
+Binary files clucene-orig/.DS_Store and clucene-threaded/.DS_Store differ
+diff -urN clucene-orig/.git/HEAD clucene-threaded/.git/HEAD
+--- clucene-orig/.git/HEAD	2013-04-14 23:49:20.000000000 +0200
++++ clucene-threaded/.git/HEAD	1970-01-01 01:00:00.000000000 +0100
+@@ -1 +0,0 @@
+-ref: refs/heads/master
+diff -urN clucene-orig/.git/config clucene-threaded/.git/config
+--- clucene-orig/.git/config	2013-04-14 23:49:20.000000000 +0200
++++ clucene-threaded/.git/config	1970-01-01 01:00:00.000000000 +0100
+@@ -1,13 +0,0 @@
+-[core]
+-	repositoryformatversion = 0
+-	filemode = true
+-	bare = false
+-	logallrefupdates = true
+-	ignorecase = true
+-	precomposeunicode = false
+-[remote "origin"]
+-	url = git://clucene.git.sourceforge.net/gitroot/clucene/clucene
+-	fetch = +refs/heads/*:refs/remotes/origin/*
+-[branch "master"]
+-	remote = origin
+-	merge = refs/heads/master
+diff -urN clucene-orig/.git/description clucene-threaded/.git/description
+--- clucene-orig/.git/description	2013-04-14 23:48:15.000000000 +0200
++++ clucene-threaded/.git/description	1970-01-01 01:00:00.000000000 +0100
+@@ -1 +0,0 @@
+-Unnamed repository; edit this file 'description' to name the repository.
+diff -urN clucene-orig/.git/hooks/applypatch-msg.sample clucene-threaded/.git/hooks/applypatch-msg.sample
+--- clucene-orig/.git/hooks/applypatch-msg.sample	2013-04-14 23:48:15.000000000 +0200
++++ clucene-threaded/.git/hooks/applypatch-msg.sample	1970-01-01 01:00:00.000000000 +0100
+@@ -1,15 +0,0 @@
+-#!/bin/sh
+-#
+-# An example hook script to check the commit log message taken by
+-# applypatch from an e-mail message.
+-#
+-# The hook should exit with non-zero status after issuing an
+-# appropriate message if it wants to stop the commit.  The hook is
+-# allowed to edit the commit message file.
+-#
+-# To enable this hook, rename this file to "applypatch-msg".
+-
+-. git-sh-setup
+-test -x "$GIT_DIR/hooks/commit-msg" &&
+-	exec "$GIT_DIR/hooks/commit-msg" ${1+"$@"}
+-:
+diff -urN clucene-orig/.git/hooks/commit-msg.sample clucene-threaded/.git/hooks/commit-msg.sample
+--- clucene-orig/.git/hooks/commit-msg.sample	2013-04-14 23:48:15.000000000 +0200
++++ clucene-threaded/.git/hooks/commit-msg.sample	1970-01-01 01:00:00.000000000 +0100
+@@ -1,24 +0,0 @@
+-#!/bin/sh
+-#
+-# An example hook script to check the commit log message.
+-# Called by "git commit" with one argument, the name of the file
+-# that has the commit message.  The hook should exit with non-zero
+-# status after issuing an appropriate message if it wants to stop the
+-# commit.  The hook is allowed to edit the commit message file.
+-#
+-# To enable this hook, rename this file to "commit-msg".
+-
+-# Uncomment the below to add a Signed-off-by line to the message.
+-# Doing this in a hook is a bad idea in general, but the prepare-commit-msg
+-# hook is more suited to it.
+-#
+-# SOB=$(git var GIT_AUTHOR_IDENT | sed -n 's/^\(.*>\).*$/Signed-off-by: \1/p')
+-# grep -qs "^$SOB" "$1" || echo "$SOB" >> "$1"
+-
+-# This example catches duplicate Signed-off-by lines.
+-
+-test "" = "$(grep '^Signed-off-by: ' "$1" |
+-	 sort | uniq -c | sed -e '/^[ 	]*1[ 	]/d')" || {
+-	echo >&2 Duplicate Signed-off-by lines.
+-	exit 1
+-}
+diff -urN clucene-orig/.git/hooks/post-update.sample clucene-threaded/.git/hooks/post-update.sample
+--- clucene-orig/.git/hooks/post-update.sample	2013-04-14 23:48:15.000000000 +0200
++++ clucene-threaded/.git/hooks/post-update.sample	1970-01-01 01:00:00.000000000 +0100
+@@ -1,8 +0,0 @@
+-#!/bin/sh
+-#
+-# An example hook script to prepare a packed repository for use over
+-# dumb transports.
+-#
+-# To enable this hook, rename this file to "post-update".
+-
+-exec git update-server-info
+diff -urN clucene-orig/.git/hooks/pre-applypatch.sample clucene-threaded/.git/hooks/pre-applypatch.sample
+--- clucene-orig/.git/hooks/pre-applypatch.sample	2013-04-14 23:48:15.000000000 +0200
++++ clucene-threaded/.git/hooks/pre-applypatch.sample	1970-01-01 01:00:00.000000000 +0100
+@@ -1,14 +0,0 @@
+-#!/bin/sh
+-#
+-# An example hook script to verify what is about to be committed
+-# by applypatch from an e-mail message.
+-#
+-# The hook should exit with non-zero status after issuing an
+-# appropriate message if it wants to stop the commit.
+-#
+-# To enable this hook, rename this file to "pre-applypatch".
+-
+-. git-sh-setup
+-test -x "$GIT_DIR/hooks/pre-commit" &&
+-	exec "$GIT_DIR/hooks/pre-commit" ${1+"$@"}
+-:
+diff -urN clucene-orig/.git/hooks/pre-commit.sample clucene-threaded/.git/hooks/pre-commit.sample
+--- clucene-orig/.git/hooks/pre-commit.sample	2013-04-14 23:48:15.000000000 +0200
++++ clucene-threaded/.git/hooks/pre-commit.sample	1970-01-01 01:00:00.000000000 +0100
+@@ -1,50 +0,0 @@
+-#!/bin/sh
+-#
+-# An example hook script to verify what is about to be committed.
+-# Called by "git commit" with no arguments.  The hook should
+-# exit with non-zero status after issuing an appropriate message if
+-# it wants to stop the commit.
+-#
+-# To enable this hook, rename this file to "pre-commit".
+-
+-if git rev-parse --verify HEAD >/dev/null 2>&1
+-then
+-	against=HEAD
+-else
+-	# Initial commit: diff against an empty tree object
+-	against=4b825dc642cb6eb9a060e54bf8d69288fbee4904
+-fi
+-
+-# If you want to allow non-ascii filenames set this variable to true.
+-allownonascii=$(git config hooks.allownonascii)
+-
+-# Redirect output to stderr.
+-exec 1>&2
+-
+-# Cross platform projects tend to avoid non-ascii filenames; prevent
+-# them from being added to the repository. We exploit the fact that the
+-# printable range starts at the space character and ends with tilde.
+-if [ "$allownonascii" != "true" ] &&
+-	# Note that the use of brackets around a tr range is ok here, (it's
+-	# even required, for portability to Solaris 10's /usr/bin/tr), since
+-	# the square bracket bytes happen to fall in the designated range.
+-	test $(git diff --cached --name-only --diff-filter=A -z $against |
+-	  LC_ALL=C tr -d '[ -~]\0' | wc -c) != 0
+-then
+-	echo "Error: Attempt to add a non-ascii file name."
+-	echo
+-	echo "This can cause problems if you want to work"
+-	echo "with people on other platforms."
+-	echo
+-	echo "To be portable it is advisable to rename the file ..."
+-	echo
+-	echo "If you know what you are doing you can disable this"
+-	echo "check using:"
+-	echo
+-	echo "  git config hooks.allownonascii true"
+-	echo
+-	exit 1
+-fi
+-
+-# If there are whitespace errors, print the offending file names and fail.
+-exec git diff-index --check --cached $against --
+diff -urN clucene-orig/.git/hooks/pre-push.sample clucene-threaded/.git/hooks/pre-push.sample
+--- clucene-orig/.git/hooks/pre-push.sample	2013-04-14 23:48:15.000000000 +0200
++++ clucene-threaded/.git/hooks/pre-push.sample	1970-01-01 01:00:00.000000000 +0100
+@@ -1,53 +0,0 @@
+-#!/bin/sh
+-
+-# An example hook script to verify what is about to be pushed.  Called by "git
+-# push" after it has checked the remote status, but before anything has been
+-# pushed.  If this script exits with a non-zero status nothing will be pushed.
+-#
+-# This hook is called with the following parameters:
+-#
+-# $1 -- Name of the remote to which the push is being done
+-# $2 -- URL to which the push is being done
+-#
+-# If pushing without using a named remote those arguments will be equal.
+-#
+-# Information about the commits which are being pushed is supplied as lines to
+-# the standard input in the form:
+-#
+-#   <local ref> <local sha1> <remote ref> <remote sha1>
+-#
+-# This sample shows how to prevent push of commits where the log message starts
+-# with "WIP" (work in progress).
+-
+-remote="$1"
+-url="$2"
+-
+-z40=0000000000000000000000000000000000000000
+-
+-IFS=' '
+-while read local_ref local_sha remote_ref remote_sha
+-do
+-	if [ "$local_sha" = $z40 ]
+-	then
+-		# Handle delete
+-	else
+-		if [ "$remote_sha" = $z40 ]
+-		then
+-			# New branch, examine all commits
+-			range="$local_sha"
+-		else
+-			# Update to existing branch, examine new commits
+-			range="$remote_sha..$local_sha"
+-		fi
+-
+-		# Check for WIP commit
+-		commit=`git rev-list -n 1 --grep '^WIP' "$range"`
+-		if [ -n "$commit" ]
+-		then
+-			echo "Found WIP commit in $local_ref, not pushing"
+-			exit 1
+-		fi
+-	fi
+-done
+-
+-exit 0
+diff -urN clucene-orig/.git/hooks/pre-rebase.sample clucene-threaded/.git/hooks/pre-rebase.sample
+--- clucene-orig/.git/hooks/pre-rebase.sample	2013-04-14 23:48:15.000000000 +0200
++++ clucene-threaded/.git/hooks/pre-rebase.sample	1970-01-01 01:00:00.000000000 +0100
+@@ -1,169 +0,0 @@
+-#!/bin/sh
+-#
+-# Copyright (c) 2006, 2008 Junio C Hamano
+-#
+-# The "pre-rebase" hook is run just before "git rebase" starts doing
+-# its job, and can prevent the command from running by exiting with
+-# non-zero status.
+-#
+-# The hook is called with the following parameters:
+-#
+-# $1 -- the upstream the series was forked from.
+-# $2 -- the branch being rebased (or empty when rebasing the current branch).
+-#
+-# This sample shows how to prevent topic branches that are already
+-# merged to 'next' branch from getting rebased, because allowing it
+-# would result in rebasing already published history.
+-
+-publish=next
+-basebranch="$1"
+-if test "$#" = 2
+-then
+-	topic="refs/heads/$2"
+-else
+-	topic=`git symbolic-ref HEAD` ||
+-	exit 0 ;# we do not interrupt rebasing detached HEAD
+-fi
+-
+-case "$topic" in
+-refs/heads/??/*)
+-	;;
+-*)
+-	exit 0 ;# we do not interrupt others.
+-	;;
+-esac
+-
+-# Now we are dealing with a topic branch being rebased
+-# on top of master.  Is it OK to rebase it?
+-
+-# Does the topic really exist?
+-git show-ref -q "$topic" || {
+-	echo >&2 "No such branch $topic"
+-	exit 1
+-}
+-
+-# Is topic fully merged to master?
+-not_in_master=`git rev-list --pretty=oneline ^master "$topic"`
+-if test -z "$not_in_master"
+-then
+-	echo >&2 "$topic is fully merged to master; better remove it."
+-	exit 1 ;# we could allow it, but there is no point.
+-fi
+-
+-# Is topic ever merged to next?  If so you should not be rebasing it.
+-only_next_1=`git rev-list ^master "^$topic" ${publish} | sort`
+-only_next_2=`git rev-list ^master           ${publish} | sort`
+-if test "$only_next_1" = "$only_next_2"
+-then
+-	not_in_topic=`git rev-list "^$topic" master`
+-	if test -z "$not_in_topic"
+-	then
+-		echo >&2 "$topic is already up-to-date with master"
+-		exit 1 ;# we could allow it, but there is no point.
+-	else
+-		exit 0
+-	fi
+-else
+-	not_in_next=`git rev-list --pretty=oneline ^${publish} "$topic"`
+-	/opt/local/bin/perl5.12 -e '
+-		my $topic = $ARGV[0];
+-		my $msg = "* $topic has commits already merged to public branch:\n";
+-		my (%not_in_next) = map {
+-			/^([0-9a-f]+) /;
+-			($1 => 1);
+-		} split(/\n/, $ARGV[1]);
+-		for my $elem (map {
+-				/^([0-9a-f]+) (.*)$/;
+-				[$1 => $2];
+-			} split(/\n/, $ARGV[2])) {
+-			if (!exists $not_in_next{$elem->[0]}) {
+-				if ($msg) {
+-					print STDERR $msg;
+-					undef $msg;
+-				}
+-				print STDERR " $elem->[1]\n";
+-			}
+-		}
+-	' "$topic" "$not_in_next" "$not_in_master"
+-	exit 1
+-fi
+-
+-exit 0
+-
+-################################################################
+-
+-This sample hook safeguards topic branches that have been
+-published from being rewound.
+-
+-The workflow assumed here is:
+-
+- * Once a topic branch forks from "master", "master" is never
+-   merged into it again (either directly or indirectly).
+-
+- * Once a topic branch is fully cooked and merged into "master",
+-   it is deleted.  If you need to build on top of it to correct
+-   earlier mistakes, a new topic branch is created by forking at
+-   the tip of the "master".  This is not strictly necessary, but
+-   it makes it easier to keep your history simple.
+-
+- * Whenever you need to test or publish your changes to topic
+-   branches, merge them into "next" branch.
+-
+-The script, being an example, hardcodes the publish branch name
+-to be "next", but it is trivial to make it configurable via
+-$GIT_DIR/config mechanism.
+-
+-With this workflow, you would want to know:
+-
+-(1) ... if a topic branch has ever been merged to "next".  Young
+-    topic branches can have stupid mistakes you would rather
+-    clean up before publishing, and things that have not been
+-    merged into other branches can be easily rebased without
+-    affecting other people.  But once it is published, you would
+-    not want to rewind it.
+-
+-(2) ... if a topic branch has been fully merged to "master".
+-    Then you can delete it.  More importantly, you should not
+-    build on top of it -- other people may already want to
+-    change things related to the topic as patches against your
+-    "master", so if you need further changes, it is better to
+-    fork the topic (perhaps with the same name) afresh from the
+-    tip of "master".
+-
+-Let's look at this example:
+-
+-		   o---o---o---o---o---o---o---o---o---o "next"
+-		  /       /           /           /
+-		 /   a---a---b A     /           /
+-		/   /               /           /
+-	       /   /   c---c---c---c B         /
+-	      /   /   /             \         /
+-	     /   /   /   b---b C     \       /
+-	    /   /   /   /             \     /
+-    ---o---o---o---o---o---o---o---o---o---o---o "master"
+-
+-
+-A, B and C are topic branches.
+-
+- * A has one fix since it was merged up to "next".
+-
+- * B has finished.  It has been fully merged up to "master" and "next",
+-   and is ready to be deleted.
+-
+- * C has not merged to "next" at all.
+-
+-We would want to allow C to be rebased, refuse A, and encourage
+-B to be deleted.
+-
+-To compute (1):
+-
+-	git rev-list ^master ^topic next
+-	git rev-list ^master        next
+-
+-	if these match, topic has not merged in next at all.
+-
+-To compute (2):
+-
+-	git rev-list master..topic
+-
+-	if this is empty, it is fully merged to "master".
+diff -urN clucene-orig/.git/hooks/prepare-commit-msg.sample clucene-threaded/.git/hooks/prepare-commit-msg.sample
+--- clucene-orig/.git/hooks/prepare-commit-msg.sample	2013-04-14 23:48:15.000000000 +0200
++++ clucene-threaded/.git/hooks/prepare-commit-msg.sample	1970-01-01 01:00:00.000000000 +0100
+@@ -1,36 +0,0 @@
+-#!/bin/sh
+-#
+-# An example hook script to prepare the commit log message.
+-# Called by "git commit" with the name of the file that has the
+-# commit message, followed by the description of the commit
+-# message's source.  The hook's purpose is to edit the commit
+-# message file.  If the hook fails with a non-zero status,
+-# the commit is aborted.
+-#
+-# To enable this hook, rename this file to "prepare-commit-msg".
+-
+-# This hook includes three examples.  The first comments out the
+-# "Conflicts:" part of a merge commit.
+-#
+-# The second includes the output of "git diff --name-status -r"
+-# into the message, just before the "git status" output.  It is
+-# commented because it doesn't cope with --amend or with squashed
+-# commits.
+-#
+-# The third example adds a Signed-off-by line to the message, that can
+-# still be edited.  This is rarely a good idea.
+-
+-case "$2,$3" in
+-  merge,)
+-    /opt/local/bin/perl5.12 -i.bak -ne 's/^/# /, s/^# #/#/ if /^Conflicts/ .. /#/; print' "$1" ;;
+-
+-# ,|template,)
+-#   /opt/local/bin/perl5.12 -i.bak -pe '
+-#      print "\n" . `git diff --cached --name-status -r`
+-#	 if /^#/ && $first++ == 0' "$1" ;;
+-
+-  *) ;;
+-esac
+-
+-# SOB=$(git var GIT_AUTHOR_IDENT | sed -n 's/^\(.*>\).*$/Signed-off-by: \1/p')
+-# grep -qs "^$SOB" "$1" || echo "$SOB" >> "$1"
+diff -urN clucene-orig/.git/hooks/update.sample clucene-threaded/.git/hooks/update.sample
+--- clucene-orig/.git/hooks/update.sample	2013-04-14 23:48:15.000000000 +0200
++++ clucene-threaded/.git/hooks/update.sample	1970-01-01 01:00:00.000000000 +0100
+@@ -1,128 +0,0 @@
+-#!/bin/sh
+-#
+-# An example hook script to blocks unannotated tags from entering.
+-# Called by "git receive-pack" with arguments: refname sha1-old sha1-new
+-#
+-# To enable this hook, rename this file to "update".
+-#
+-# Config
+-# ------
+-# hooks.allowunannotated
+-#   This boolean sets whether unannotated tags will be allowed into the
+-#   repository.  By default they won't be.
+-# hooks.allowdeletetag
+-#   This boolean sets whether deleting tags will be allowed in the
+-#   repository.  By default they won't be.
+-# hooks.allowmodifytag
+-#   This boolean sets whether a tag may be modified after creation. By default
+-#   it won't be.
+-# hooks.allowdeletebranch
+-#   This boolean sets whether deleting branches will be allowed in the
+-#   repository.  By default they won't be.
+-# hooks.denycreatebranch
+-#   This boolean sets whether remotely creating branches will be denied
+-#   in the repository.  By default this is allowed.
+-#
+-
+-# --- Command line
+-refname="$1"
+-oldrev="$2"
+-newrev="$3"
+-
+-# --- Safety check
+-if [ -z "$GIT_DIR" ]; then
+-	echo "Don't run this script from the command line." >&2
+-	echo " (if you want, you could supply GIT_DIR then run" >&2
+-	echo "  $0 <ref> <oldrev> <newrev>)" >&2
+-	exit 1
+-fi
+-
+-if [ -z "$refname" -o -z "$oldrev" -o -z "$newrev" ]; then
+-	echo "usage: $0 <ref> <oldrev> <newrev>" >&2
+-	exit 1
+-fi
+-
+-# --- Config
+-allowunannotated=$(git config --bool hooks.allowunannotated)
+-allowdeletebranch=$(git config --bool hooks.allowdeletebranch)
+-denycreatebranch=$(git config --bool hooks.denycreatebranch)
+-allowdeletetag=$(git config --bool hooks.allowdeletetag)
+-allowmodifytag=$(git config --bool hooks.allowmodifytag)
+-
+-# check for no description
+-projectdesc=$(sed -e '1q' "$GIT_DIR/description")
+-case "$projectdesc" in
+-"Unnamed repository"* | "")
+-	echo "*** Project description file hasn't been set" >&2
+-	exit 1
+-	;;
+-esac
+-
+-# --- Check types
+-# if $newrev is 0000...0000, it's a commit to delete a ref.
+-zero="0000000000000000000000000000000000000000"
+-if [ "$newrev" = "$zero" ]; then
+-	newrev_type=delete
+-else
+-	newrev_type=$(git cat-file -t $newrev)
+-fi
+-
+-case "$refname","$newrev_type" in
+-	refs/tags/*,commit)
+-		# un-annotated tag
+-		short_refname=${refname##refs/tags/}
+-		if [ "$allowunannotated" != "true" ]; then
+-			echo "*** The un-annotated tag, $short_refname, is not allowed in this repository" >&2
+-			echo "*** Use 'git tag [ -a | -s ]' for tags you want to propagate." >&2
+-			exit 1
+-		fi
+-		;;
+-	refs/tags/*,delete)
+-		# delete tag
+-		if [ "$allowdeletetag" != "true" ]; then
+-			echo "*** Deleting a tag is not allowed in this repository" >&2
+-			exit 1
+-		fi
+-		;;
+-	refs/tags/*,tag)
+-		# annotated tag
+-		if [ "$allowmodifytag" != "true" ] && git rev-parse $refname > /dev/null 2>&1
+-		then
+-			echo "*** Tag '$refname' already exists." >&2
+-			echo "*** Modifying a tag is not allowed in this repository." >&2
+-			exit 1
+-		fi
+-		;;
+-	refs/heads/*,commit)
+-		# branch
+-		if [ "$oldrev" = "$zero" -a "$denycreatebranch" = "true" ]; then
+-			echo "*** Creating a branch is not allowed in this repository" >&2
+-			exit 1
+-		fi
+-		;;
+-	refs/heads/*,delete)
+-		# delete branch
+-		if [ "$allowdeletebranch" != "true" ]; then
+-			echo "*** Deleting a branch is not allowed in this repository" >&2
+-			exit 1
+-		fi
+-		;;
+-	refs/remotes/*,commit)
+-		# tracking branch
+-		;;
+-	refs/remotes/*,delete)
+-		# delete tracking branch
+-		if [ "$allowdeletebranch" != "true" ]; then
+-			echo "*** Deleting a tracking branch is not allowed in this repository" >&2
+-			exit 1
+-		fi
+-		;;
+-	*)
+-		# Anything else (is there anything else?)
+-		echo "*** Update hook: unknown type of update to ref $refname of type $newrev_type" >&2
+-		exit 1
+-		;;
+-esac
+-
+-# --- Finished
+-exit 0
+Binary files clucene-orig/.git/index and clucene-threaded/.git/index differ
+diff -urN clucene-orig/.git/info/exclude clucene-threaded/.git/info/exclude
+--- clucene-orig/.git/info/exclude	2013-04-14 23:48:15.000000000 +0200
++++ clucene-threaded/.git/info/exclude	1970-01-01 01:00:00.000000000 +0100
+@@ -1,6 +0,0 @@
+-# git ls-files --others --exclude-from=.git/info/exclude
+-# Lines that start with '#' are comments.
+-# For a project mostly in C, the following would be a good set of
+-# exclude patterns (uncomment them if you want to use them):
+-# *.[oa]
+-# *~
+diff -urN clucene-orig/.git/logs/HEAD clucene-threaded/.git/logs/HEAD
+--- clucene-orig/.git/logs/HEAD	2013-04-14 23:49:20.000000000 +0200
++++ clucene-threaded/.git/logs/HEAD	1970-01-01 01:00:00.000000000 +0100
+@@ -1 +0,0 @@
+-0000000000000000000000000000000000000000 4f62f2a90ecbea0d6d14e4bc0902056996144023 MediaCycle <mediacycle@server.mediacycle.private> 1365976160 +0200	clone: from git://clucene.git.sourceforge.net/gitroot/clucene/clucene
+diff -urN clucene-orig/.git/logs/refs/heads/master clucene-threaded/.git/logs/refs/heads/master
+--- clucene-orig/.git/logs/refs/heads/master	2013-04-14 23:49:20.000000000 +0200
++++ clucene-threaded/.git/logs/refs/heads/master	1970-01-01 01:00:00.000000000 +0100
+@@ -1 +0,0 @@
+-0000000000000000000000000000000000000000 4f62f2a90ecbea0d6d14e4bc0902056996144023 MediaCycle <mediacycle@server.mediacycle.private> 1365976160 +0200	clone: from git://clucene.git.sourceforge.net/gitroot/clucene/clucene
+diff -urN clucene-orig/.git/logs/refs/remotes/origin/HEAD clucene-threaded/.git/logs/refs/remotes/origin/HEAD
+--- clucene-orig/.git/logs/refs/remotes/origin/HEAD	2013-04-14 23:49:20.000000000 +0200
++++ clucene-threaded/.git/logs/refs/remotes/origin/HEAD	1970-01-01 01:00:00.000000000 +0100
+@@ -1 +0,0 @@
+-0000000000000000000000000000000000000000 4f62f2a90ecbea0d6d14e4bc0902056996144023 MediaCycle <mediacycle@server.mediacycle.private> 1365976160 +0200	clone: from git://clucene.git.sourceforge.net/gitroot/clucene/clucene
+Binary files clucene-orig/.git/objects/pack/pack-32b4087541d904afc93cb97e61e35c878fc51dc2.idx and clucene-threaded/.git/objects/pack/pack-32b4087541d904afc93cb97e61e35c878fc51dc2.idx differ
+Binary files clucene-orig/.git/objects/pack/pack-32b4087541d904afc93cb97e61e35c878fc51dc2.pack and clucene-threaded/.git/objects/pack/pack-32b4087541d904afc93cb97e61e35c878fc51dc2.pack differ
+diff -urN clucene-orig/.git/packed-refs clucene-threaded/.git/packed-refs
+--- clucene-orig/.git/packed-refs	2013-04-14 23:49:20.000000000 +0200
++++ clucene-threaded/.git/packed-refs	1970-01-01 01:00:00.000000000 +0100
+@@ -1,18 +0,0 @@
+-# pack-refs with: peeled fully-peeled 
+-1ab148a9f46cb857d45d39f29b95a8fc9ca887c9 refs/remotes/origin/ConstantScoreQuery_BugFix
+-17e53d7a23d8d3f94237392b73134febfc59945c refs/remotes/origin/OPTIMIZED_BITSET
+-06520ed665cadbdb75695d7dd0251c968a13c8c6 refs/remotes/origin/ben_directory-refactor
+-c250d9daeb3a199285b2d48c94427926a403da14 refs/remotes/origin/bs2_memoryleak_fix
+-04be818b89de0e334e1a408cdbff5cdd8e4cbba8 refs/remotes/origin/comparable-storage
+-3d023c7df184d77807fa1447e8013e9744d4055c refs/remotes/origin/highlighter
+-c488dbd6a5555d10d3d073afa609ba355d553aa7 refs/remotes/origin/isidor_comparable-storage
+-e1029728c80ba5a10de6d1f9aae45c74859030f2 refs/remotes/origin/isidor_mpi
+-a53667b1efb664352d86fa9e9f51c74f5a7d8623 refs/remotes/origin/itamar_working
+-4f62f2a90ecbea0d6d14e4bc0902056996144023 refs/remotes/origin/master
+-13d7d2c71904d4af9de448ea727ad1b8d9009267 refs/remotes/origin/smart_pointers
+-d4830ed4af597b9daa39420e33da40f7a3068195 refs/remotes/origin/tracker_3113462_fix
+-5868e79bb0e7414236ee86e89c6235c2d6262470 refs/remotes/origin/tracker_3119239_fix
+-fba2b1842c1136852716a769a39bd82615783061 refs/remotes/origin/tracker_3123294_fix
+-b3b610b0e3c4687781c77407c69d579c9e137105 refs/remotes/origin/tracker_3183890_fix
+-605a1f9fe69b76601329fe6b35f6c5d9ec952ba3 refs/remotes/origin/vc6-fixes-working
+-a834f87bad3543b2a0331cef7202c15ded4245be refs/tags/clucene-src-2.3.3.4
+diff -urN clucene-orig/.git/refs/heads/master clucene-threaded/.git/refs/heads/master
+--- clucene-orig/.git/refs/heads/master	2013-04-14 23:49:20.000000000 +0200
++++ clucene-threaded/.git/refs/heads/master	1970-01-01 01:00:00.000000000 +0100
+@@ -1 +0,0 @@
+-4f62f2a90ecbea0d6d14e4bc0902056996144023
+diff -urN clucene-orig/.git/refs/remotes/origin/HEAD clucene-threaded/.git/refs/remotes/origin/HEAD
+--- clucene-orig/.git/refs/remotes/origin/HEAD	2013-04-14 23:49:20.000000000 +0200
++++ clucene-threaded/.git/refs/remotes/origin/HEAD	1970-01-01 01:00:00.000000000 +0100
+@@ -1 +0,0 @@
+-ref: refs/remotes/origin/master
+diff -urN clucene-orig/.gitattributes clucene-threaded/.gitattributes
+--- clucene-orig/.gitattributes	2013-04-14 23:49:20.000000000 +0200
++++ clucene-threaded/.gitattributes	1970-01-01 01:00:00.000000000 +0100
+@@ -1 +0,0 @@
+-french_utf8.txt crlf=input
+diff -urN clucene-orig/.gitignore clucene-threaded/.gitignore
+--- clucene-orig/.gitignore	2013-04-14 23:49:20.000000000 +0200
++++ clucene-threaded/.gitignore	1970-01-01 01:00:00.000000000 +0100
+@@ -1,11 +0,0 @@
+-# git-ls-files --others --exclude-from=.git/info/exclude
+-# Lines that start with '#' are comments.
+-# For a project mostly in C, the following would be a good set of
+-# exclude patterns (uncomment them if you want to use them):
+-# *.[oa]
+-# *~
+-obj
+-bin
+-msvc
+-build
+-~$*
+\ No newline at end of file
+diff -urN clucene-orig/CMakeLists.txt clucene-threaded/CMakeLists.txt
 --- clucene-orig/CMakeLists.txt	2013-04-14 23:49:20.000000000 +0200
-+++ clucene/CMakeLists.txt	2013-04-15 16:17:45.000000000 +0200
++++ clucene-threaded/CMakeLists.txt	2013-04-17 19:02:28.000000000 +0200
 @@ -35,7 +35,9 @@
  #define options...
  
@@ -12,42 +654,22 @@ diff -urN clucene-orig/CMakeLists.txt clucene/CMakeLists.txt
  
  IF(NOT CMAKE_BUILD_TYPE)
      SET(CMAKE_BUILD_TYPE RelWithDebInfo CACHE STRING
-@@ -153,7 +155,7 @@
- INCLUDE_DIRECTORIES( ${_CL_BOOST_INCLUDE_PATH} )
- 
- #include the projects
--ADD_SUBDIRECTORY (src/ext)
-+#ADD_SUBDIRECTORY (src/ext)
- ADD_SUBDIRECTORY (src/shared)
- ADD_SUBDIRECTORY (src/core)
- ADD_SUBDIRECTORY (src/test)
-diff -urN clucene-orig/cmake/CLuceneBoost.cmake clucene/cmake/CLuceneBoost.cmake
---- clucene-orig/cmake/CLuceneBoost.cmake	2013-04-14 23:49:20.000000000 +0200
-+++ clucene/cmake/CLuceneBoost.cmake	2013-04-15 16:19:12.000000000 +0200
-@@ -2,7 +2,7 @@
- #See the site FAQ for more details.
- 
- MACRO (GET_BOOST_INCLUDE_PATH path)
--  #todo: allow this to fall back on a local distributed copy, so user doesn't have to d/l Boost seperately
-+  #todo: allow this to fall back on a local distributed copy, so user doesn't have to d/l Boost separately
-   SET(Boost_USE_MULTITHREAD ON)
-   FIND_PACKAGE( Boost )
-   
-@@ -15,8 +15,8 @@
-     ENDIF (NOT _boost_IN_CACHE)
-     SET(${path} ${Boost_INCLUDE_DIRS} )
-   ELSE()
--    MESSAGE( "Boost not found, using local: ${clucene_SOURCE_DIR}/src/ext" )
--    SET(${path} ${clucene_SOURCE_DIR}/src/ext )
-+    MESSAGE(FATAL_ERROR "Boost not found")#, using local: ${clucene_SOURCE_DIR}/src/ext" )
-+    #SET(${path} ${clucene_SOURCE_DIR}/src/ext )
-   ENDIF()
- ENDMACRO (GET_BOOST_INCLUDE_PATH path)
- 
-diff -urN clucene-orig/cmake/DefineOptions.cmake clucene/cmake/DefineOptions.cmake
+@@ -54,6 +56,11 @@
+ OPTION(DISABLE_MULTITHREADING
+   "disable multithreading - remove all locking code"
+   OFF)
++IF(WIN32)
++OPTION(FORCE_WIN32_THREADS
++  "force the use of win32 threads instead of pthread"
++  OFF)
++ENDIF(WIN32)
+ OPTION(ENABLE_DMALLOC
+   "enable dmalloc memory leak checker"
+   OFF)
+diff -urN clucene-orig/cmake/DefineOptions.cmake clucene-threaded/cmake/DefineOptions.cmake
 --- clucene-orig/cmake/DefineOptions.cmake	2013-04-14 23:49:20.000000000 +0200
-+++ clucene/cmake/DefineOptions.cmake	2013-04-15 14:23:33.000000000 +0200
-@@ -18,7 +18,8 @@
++++ clucene-threaded/cmake/DefineOptions.cmake	2013-04-17 16:48:26.000000000 +0200
+@@ -18,13 +18,15 @@
    ENDIF(ENABLE_DMALLOC)
  
    IF(DISABLE_MULTITHREADING)
@@ -57,31 +679,31 @@ diff -urN clucene-orig/cmake/DefineOptions.cmake clucene/cmake/DefineOptions.cma
    ELSE(DISABLE_MULTITHREADING)
      SET(${extraOptions} "${${extraOptions}} -D_REENTRANT")
    ENDIF(DISABLE_MULTITHREADING)
-Binary files clucene-orig/src/core/.DS_Store and clucene/src/core/.DS_Store differ
-Binary files clucene-orig/src/core/CLucene/.DS_Store and clucene/src/core/CLucene/.DS_Store differ
-diff -urN clucene-orig/src/core/CLucene/index/_DocumentsWriter.h clucene/src/core/CLucene/index/_DocumentsWriter.h
---- clucene-orig/src/core/CLucene/index/_DocumentsWriter.h	2013-04-14 23:49:20.000000000 +0200
-+++ clucene/src/core/CLucene/index/_DocumentsWriter.h	2013-04-15 11:32:53.000000000 +0200
-@@ -10,6 +10,7 @@
- #include "CLucene/store/IndexInput.h"
- #include "CLucene/config/_threads.h"
- #include "CLucene/util/Array.h"
-+#include "CLucene/util/Equators.h"
- #include "CLucene/store/_RAMDirectory.h"
- #include "_TermInfo.h"
  
-@@ -464,7 +465,7 @@
+   IF(ENABLE_ASCII_MODE)
+-    SET (${extraOptions} "${${extraOptions}} -D_ASCII")
++    SET ( _ASCII 1 )
++    #SET (${extraOptions} "${${extraOptions}} -D_ASCII")
+   ELSE(ENABLE_ASCII_MODE)
+     SET (${extraOptions} "${${extraOptions}} -D_UCS2")
+     SET (${extraOptions} "${${extraOptions}} -D_UNICODE")
+Binary files clucene-orig/src/core/.DS_Store and clucene-threaded/src/core/.DS_Store differ
+Binary files clucene-orig/src/core/CLucene/.DS_Store and clucene-threaded/src/core/CLucene/.DS_Store differ
+diff -urN clucene-orig/src/core/CLucene/index/_DocumentsWriter.h clucene-threaded/src/core/CLucene/index/_DocumentsWriter.h
+--- clucene-orig/src/core/CLucene/index/_DocumentsWriter.h	2013-04-14 23:49:20.000000000 +0200
++++ clucene-threaded/src/core/CLucene/index/_DocumentsWriter.h	2013-04-17 05:57:41.000000000 +0200
+@@ -464,7 +464,7 @@
  
  	    const char* getObjectName() const;
        static const char* getClassName();
 -      int32_t compareTo(lucene::util::NamedObject *);
-+      int32_t compareTo(NamedObject *);
++      int32_t compareTo(CL_NS(util)::NamedObject *);
        friend class ThreadState;
        friend class FieldMergeState;
      };
-diff -urN clucene-orig/src/core/CLucene/store/FSDirectory.cpp clucene/src/core/CLucene/store/FSDirectory.cpp
+diff -urN clucene-orig/src/core/CLucene/store/FSDirectory.cpp clucene-threaded/src/core/CLucene/store/FSDirectory.cpp
 --- clucene-orig/src/core/CLucene/store/FSDirectory.cpp	2013-04-14 23:49:20.000000000 +0200
-+++ clucene/src/core/CLucene/store/FSDirectory.cpp	2013-04-15 11:26:17.000000000 +0200
++++ clucene-threaded/src/core/CLucene/store/FSDirectory.cpp	2013-04-15 11:26:17.000000000 +0200
 @@ -582,7 +582,9 @@
    void FSDirectory::close(){
      SCOPED_LOCK_MUTEX(DIRECTORIES_LOCK)
@@ -103,51 +725,30 @@ diff -urN clucene-orig/src/core/CLucene/store/FSDirectory.cpp clucene/src/core/C
  	  }
     }
  
-diff -urN clucene-orig/src/core/CLucene/util/ThreadLocal.cpp clucene/src/core/CLucene/util/ThreadLocal.cpp
+diff -urN clucene-orig/src/core/CLucene/util/ThreadLocal.cpp clucene-threaded/src/core/CLucene/util/ThreadLocal.cpp
 --- clucene-orig/src/core/CLucene/util/ThreadLocal.cpp	2013-04-14 23:49:20.000000000 +0200
-+++ clucene/src/core/CLucene/util/ThreadLocal.cpp	2013-04-15 11:37:00.000000000 +0200
++++ clucene-threaded/src/core/CLucene/util/ThreadLocal.cpp	2013-04-17 19:13:20.000000000 +0200
 @@ -160,7 +160,9 @@
  	}
  	//make sure we have a threadlocal context (for cleanup)
  	bool ret;
-+#if !defined(_CL_DISABLE_MULTITHREADING)
++	#ifndef _CL_DISABLE_MULTITHREADING
  	INIT_THREAD(ret);
 +    #endif
  	assert(ret);
  
  	_LUCENE_THREADID_TYPE id = _LUCENE_CURRTHREADID;
-diff -urN clucene-orig/src/core/CMakeLists.txt clucene/src/core/CMakeLists.txt
+diff -urN clucene-orig/src/core/CLucene/util/_ThreadLocal.h clucene-threaded/src/core/CLucene/util/_ThreadLocal.h
+--- clucene-orig/src/core/CLucene/util/_ThreadLocal.h	2013-04-14 23:49:20.000000000 +0200
++++ clucene-threaded/src/core/CLucene/util/_ThreadLocal.h	2013-04-17 13:10:02.000000000 +0200
+@@ -1,3 +1,4 @@
++
+ /*------------------------------------------------------------------------------
+ * Copyright (C) 2003-2006 Ben van Klinken and the CLucene Team
+ *
+diff -urN clucene-orig/src/core/CMakeLists.txt clucene-threaded/src/core/CMakeLists.txt
 --- clucene-orig/src/core/CMakeLists.txt	2013-04-14 23:49:20.000000000 +0200
-+++ clucene/src/core/CMakeLists.txt	2013-04-15 17:20:26.000000000 +0200
-@@ -33,17 +33,17 @@
- 	./CLucene/util/MD5Digester.cpp
- 	./CLucene/util/StringIntern.cpp
- 	./CLucene/util/BitSet.cpp
--	./CLucene/queryParser/FastCharStream.cpp
--	./CLucene/queryParser/MultiFieldQueryParser.cpp
--	./CLucene/queryParser/QueryParser.cpp
--	./CLucene/queryParser/QueryParserTokenManager.cpp
--	./CLucene/queryParser/QueryToken.cpp
--	./CLucene/queryParser/legacy/Lexer.cpp
--	./CLucene/queryParser/legacy/MultiFieldQueryParser.cpp
--	./CLucene/queryParser/legacy/QueryParser.cpp
--	./CLucene/queryParser/legacy/QueryParserBase.cpp
--	./CLucene/queryParser/legacy/QueryToken.cpp
--	./CLucene/queryParser/legacy/TokenList.cpp
-+#	./CLucene/queryParser/FastCharStream.cpp
-+#	./CLucene/queryParser/MultiFieldQueryParser.cpp
-+#	./CLucene/queryParser/QueryParser.cpp
-+#	./CLucene/queryParser/QueryParserTokenManager.cpp
-+#	./CLucene/queryParser/QueryToken.cpp
-+#	./CLucene/queryParser/legacy/Lexer.cpp
-+#	./CLucene/queryParser/legacy/MultiFieldQueryParser.cpp
-+#	./CLucene/queryParser/legacy/QueryParser.cpp
-+#	./CLucene/queryParser/legacy/QueryParserBase.cpp
-+#	./CLucene/queryParser/legacy/QueryToken.cpp
-+#	./CLucene/queryParser/legacy/TokenList.cpp
- 	./CLucene/analysis/standard/StandardAnalyzer.cpp
- 	./CLucene/analysis/standard/StandardFilter.cpp
- 	./CLucene/analysis/standard/StandardTokenizer.cpp
++++ clucene-threaded/src/core/CMakeLists.txt	2013-04-17 19:17:28.000000000 +0200
 @@ -186,7 +186,7 @@
  #create the libraries
  INCLUDE_DIRECTORIES( ${clucene_SOURCE_DIR}/src/core )
@@ -157,32 +758,25 @@ diff -urN clucene-orig/src/core/CMakeLists.txt clucene/src/core/CMakeLists.txt
  	${clucene_core_Files} ${clucene_shared_Files} ${HEADERS}
  )
  
-@@ -202,24 +202,6 @@
-     TARGET_LINK_LIBRARIES(clucene-core clucene-shared ${EXTRA_LIBS})
+@@ -203,7 +203,7 @@
  ENDIF ( NOT USE_SHARED_OBJECT_FILES )
  
--
+ 
 -IF ( BUILD_STATIC_LIBRARIES )
--	add_library(clucene-core-static STATIC
--		${clucene_core_Files} ${clucene_shared_Files} ${HEADERS}
--	)
--	
--	SET_TARGET_PROPERTIES(clucene-core-static PROPERTIES
--	    VERSION ${CLUCENE_VERSION}
--	    SOVERSION ${CLUCENE_SOVERSION}
--	    COMPILE_DEFINITIONS_DEBUG _DEBUG
--	)
--	
--	#and install library
--	install(TARGETS clucene-core-static 
--	        DESTINATION ${LIB_DESTINATION} 
--	        COMPONENT runtime )
++IF ( BUILD_STATIC_LIBRARIES AND BUILD_SHARED_LIBS )
+ 	add_library(clucene-core-static STATIC
+ 		${clucene_core_Files} ${clucene_shared_Files} ${HEADERS}
+ 	)
+@@ -218,7 +218,7 @@
+ 	install(TARGETS clucene-core-static 
+ 	        DESTINATION ${LIB_DESTINATION} 
+ 	        COMPONENT runtime )
 -ENDIF ( BUILD_STATIC_LIBRARIES )
--
++ENDIF ( BUILD_STATIC_LIBRARIES AND BUILD_SHARED_LIBS  )
+ 
  #install public headers.
  FOREACH(file ${HEADERS})
- 	get_filename_component(apath ${file} PATH)
-@@ -255,11 +237,11 @@
+@@ -255,11 +255,11 @@
          DESTINATION ${LIB_DESTINATION}/CLuceneConfig.cmake)
  
  # install pkg-config file
@@ -196,9 +790,9 @@ diff -urN clucene-orig/src/core/CMakeLists.txt clucene/src/core/CMakeLists.txt
  
  
  #install non system-independent
-diff -urN clucene-orig/src/shared/CLucene/LuceneThreads.h clucene/src/shared/CLucene/LuceneThreads.h
+diff -urN clucene-orig/src/shared/CLucene/LuceneThreads.h clucene-threaded/src/shared/CLucene/LuceneThreads.h
 --- clucene-orig/src/shared/CLucene/LuceneThreads.h	2013-04-14 23:49:20.000000000 +0200
-+++ clucene/src/shared/CLucene/LuceneThreads.h	2013-04-15 13:52:02.000000000 +0200
++++ clucene-threaded/src/shared/CLucene/LuceneThreads.h	2013-04-17 07:18:36.000000000 +0200
 @@ -30,6 +30,8 @@
    #define _LUCENE_ATOMIC_INC(theInteger) (++(*theInteger))
    #define _LUCENE_ATOMIC_DEC(theInteger) (--(*theInteger))
@@ -208,114 +802,146 @@ diff -urN clucene-orig/src/shared/CLucene/LuceneThreads.h clucene/src/shared/CLu
  #else
  	#if defined(_LUCENE_DONTIMPLEMENT_THREADMUTEX)
  		//do nothing
-diff -urN clucene-orig/src/shared/CLucene/SharedHeader.cpp clucene/src/shared/CLucene/SharedHeader.cpp
+diff -urN clucene-orig/src/shared/CLucene/SharedHeader.cpp clucene-threaded/src/shared/CLucene/SharedHeader.cpp
 --- clucene-orig/src/shared/CLucene/SharedHeader.cpp	2013-04-14 23:49:20.000000000 +0200
-+++ clucene/src/shared/CLucene/SharedHeader.cpp	2013-04-15 11:24:31.000000000 +0200
-@@ -13,7 +13,7 @@
++++ clucene-threaded/src/shared/CLucene/SharedHeader.cpp	2013-04-17 16:42:07.000000000 +0200
+@@ -12,8 +12,11 @@
+ 	#include <sys/stat.h>
  #endif
  
- 
--const TCHAR* _LUCENE_BLANK_STRING=_T("");
+-
++#if defined(_ASCII)
+ const TCHAR* _LUCENE_BLANK_STRING=_T("");
++#else
 +const TCHAR* _LUCENE_BLANK_STRING=L"";
++#endif
  const char* _LUCENE_BLANK_ASTRING="";
  
  
-diff -urN clucene-orig/src/shared/CLucene/config/_threads.h clucene/src/shared/CLucene/config/_threads.h
+diff -urN clucene-orig/src/shared/CLucene/SharedHeader.h clucene-threaded/src/shared/CLucene/SharedHeader.h
+--- clucene-orig/src/shared/CLucene/SharedHeader.h	2013-04-14 23:49:20.000000000 +0200
++++ clucene-threaded/src/shared/CLucene/SharedHeader.h	2013-04-17 19:23:45.000000000 +0200
+@@ -114,7 +114,7 @@
+ ////////////////////////////////////////////////////////
+ // EXPORTS definition
+ ////////////////////////////////////////////////////////
+-#if defined(_WIN32) || defined(_WIN64)
++/*#if defined(_WIN32) || defined(_WIN64)
+ 	#define CLUCENE_EXPORT_DECL __declspec(dllexport)
+   #define CLUCENE_IMPORT_DECL __declspec(dllimport)
+   #define CLUCENE_LOCAL_DECL
+@@ -122,11 +122,11 @@
+ 	#define CLUCENE_EXPORT_DECL __attribute__ ((visibility("default")))
+ 	#define CLUCENE_LOCAL_DECL __attribute__ ((visibility("hidden")))
+ 	#define CLUCENE_IMPORT_DECL
+-#else
++#else*/ // MXE-specific: everything compiled as static
+ 	#define CLUCENE_EXPORT_DECL
+ 	#define CLUCENE_IMPORT_DECL
+ 	#define CLUCENE_LOCAL_DECL
+-#endif
++//#endif
+ 
+ //define for the libraries
+ #if defined(clucene_shared_EXPORTS)
+diff -urN clucene-orig/src/shared/CLucene/config/_threads.h clucene-threaded/src/shared/CLucene/config/_threads.h
 --- clucene-orig/src/shared/CLucene/config/_threads.h	2013-04-14 23:49:20.000000000 +0200
-+++ clucene/src/shared/CLucene/config/_threads.h	2013-04-15 03:53:31.000000000 +0200
-@@ -48,8 +48,7 @@
-             bool bInheritHandle;
-           }	SECURITY_ATTRIBUTES;
-            __declspec(dllimport) _cl_dword_t __stdcall WaitForSingleObject( void* hHandle, _cl_dword_t dwMilliseconds );
--    	  __declspec(dllimport) void* __stdcall CreateEventA(  SECURITY_ATTRIBUTES* lpEventAttributes,
--			  bool bManualReset, bool bInitialState, char* lpName );
-+    	  __declspec(dllimport) void* __stdcall CreateEventA(  SECURITY_ATTRIBUTES* lpEventAttributes, bool bManualReset, bool bInitialState, char* lpName );
- 		  __declspec(dllimport) bool __stdcall SetEvent(void* hEvent);
- 		  __declspec(dllimport) bool __stdcall CloseHandle(void* hObject);
- 		  void* _beginthread( void( __stdcall *start_address )( void * ), unsigned stack_size, void *arglist );
-@@ -99,7 +98,7 @@
-     		return t1 < t2;
-     	}
-     };
--	
-+	*/
- #endif //thread impl choice
++++ clucene-threaded/src/shared/CLucene/config/_threads.h	2013-04-17 07:23:25.000000000 +0200
+@@ -10,7 +10,7 @@
+ #ifndef _CL_DISABLE_MULTITHREADING
+ 	#if defined(_LUCENE_DONTIMPLEMENT_THREADMUTEX)
+ 		//do nothing
+-	#elif defined(_CL_HAVE_WIN32_THREADS)
++	#elif defined(_CL_HAVE_WIN32_THREADS) && ! defined(_CL_HAVE_PTHREAD)
+       //we have not explicity included windows.h and windows.h has
+       //not been included (check _WINBASE_), then we must define
+       //our own definitions to the thread locking functions:
+diff -urN clucene-orig/src/shared/CLucene/config/repl_wchar.h clucene-threaded/src/shared/CLucene/config/repl_wchar.h
+--- clucene-orig/src/shared/CLucene/config/repl_wchar.h	2013-04-14 23:49:20.000000000 +0200
++++ clucene-threaded/src/shared/CLucene/config/repl_wchar.h	2013-04-17 18:15:08.000000000 +0200
+@@ -16,7 +16,6 @@
+     #include <wchar.h>
+ #endif
  
+-
+ CLUCENE_SHARED_EXPORT int cl_tcscasefoldcmp(const TCHAR * dst, const TCHAR * src);
+ CLUCENE_SHARED_EXPORT TCHAR* cl_tcscasefold( TCHAR * str, int len=-1 );
  
-diff -urN clucene-orig/src/shared/CLucene/config/repl_tprintf.cpp clucene/src/shared/CLucene/config/repl_tprintf.cpp
---- clucene-orig/src/shared/CLucene/config/repl_tprintf.cpp	2013-04-14 23:49:20.000000000 +0200
-+++ clucene/src/shared/CLucene/config/repl_tprintf.cpp	2013-04-15 00:20:14.000000000 +0200
-@@ -47,7 +47,7 @@
- 					//print a string or null
- 					const TCHAR *wstr = va_arg(valist, TCHAR *);
- 					if ( !wstr )
--						wstr = _T("(null)");
-+						wstr = (TCHAR*)("(null)");
+@@ -65,7 +64,7 @@
+ #endif
  
- 					tmp->append(wstr);
- 					iter++;
-diff -urN clucene-orig/src/shared/CLucene/config/threads.cpp clucene/src/shared/CLucene/config/threads.cpp
+ //printf functions
+-#if (defined(_UCS2) && (!defined(_CL_HAVE_FUNCTION__SNWPRINTF)) || defined(_CL_HAVE_SNWPRINTF_BUG) )
++#if (defined(_UCS2) && (!defined(_CL_HAVE_FUNCTION__SNWPRINTF)) || (defined(_CL_HAVE_SNWPRINTF_BUG) && !defined(_ASCII) ) )
+     #undef _sntprintf
+     #define _sntprintf lucene_snwprintf
+     CLUCENE_SHARED_EXPORT int lucene_snwprintf(wchar_t* strbuf, size_t count, const wchar_t * format, ...);
+diff -urN clucene-orig/src/shared/CLucene/config/threads.cpp clucene-threaded/src/shared/CLucene/config/threads.cpp
 --- clucene-orig/src/shared/CLucene/config/threads.cpp	2013-04-14 23:49:20.000000000 +0200
-+++ clucene/src/shared/CLucene/config/threads.cpp	2013-04-15 01:27:49.000000000 +0200
-@@ -150,7 +150,7 @@
++++ clucene-threaded/src/shared/CLucene/config/threads.cpp	2013-04-17 07:10:57.000000000 +0200
+@@ -23,7 +23,7 @@
+ 
+ 
+ 
+-#elif defined(_CL_HAVE_WIN32_THREADS)
++#elif defined(_CL_HAVE_WIN32_THREADS) && ! defined(_CL_HAVE_PTHREAD)
+ 	struct mutex_thread::Internal{
+ 	    CRITICAL_SECTION mtx;
+ 	};
+@@ -150,7 +150,9 @@
  				_CLPTHREAD_CHECK(pthread_mutex_init(&_internal->mtx, 0), "mutex_thread(clone) constructor failed")
  			#endif
  			_internal->lockCount=0;
--			_internal->lockOwner=0;
-+			//_internal->lockOwner=0;
++			#ifndef _CL_HAVE_PTHREAD
+ 			_internal->lockOwner=0;
++			#endif
  		#endif
  	}
  	mutex_thread::mutex_thread():
-@@ -170,7 +170,7 @@
+@@ -170,8 +172,10 @@
  			_CLPTHREAD_CHECK(pthread_mutex_init(&_internal->mtx, 0), "mutex_thread(clone) constructor failed")
  		#endif
  		_internal->lockCount=0;
--		_internal->lockOwner=0;
-+		//_internal->lockOwner=0;
++		#ifndef _CL_HAVE_PTHREAD
+ 		_internal->lockOwner=0;
  		#endif
++		#endif
  	}
  
-@@ -234,7 +234,7 @@
+ 	mutex_thread::~mutex_thread()
+@@ -234,7 +238,9 @@
  		--_internal->lockCount;
  		if( _internal->lockCount == 0 )
  		{
--			_internal->lockOwner = 0;
-+			//_internal->lockOwner = 0;
++			#ifndef _CL_HAVE_PTHREAD
+ 			_internal->lockOwner = 0;
++			#endif
  			_CLPTHREAD_CHECK(pthread_mutex_unlock(&_internal->mtx), "mutex_thread::unlock")
  		}
  		#else
-diff -urN clucene-orig/src/shared/CLucene/util/Misc.cpp clucene/src/shared/CLucene/util/Misc.cpp
+diff -urN clucene-orig/src/shared/CLucene/util/Misc.cpp clucene-threaded/src/shared/CLucene/util/Misc.cpp
 --- clucene-orig/src/shared/CLucene/util/Misc.cpp	2013-04-14 23:49:20.000000000 +0200
-+++ clucene/src/shared/CLucene/util/Misc.cpp	2013-04-15 03:26:27.000000000 +0200
++++ clucene-threaded/src/shared/CLucene/util/Misc.cpp	2013-04-17 06:28:55.000000000 +0200
 @@ -466,6 +466,8 @@
  std::string Misc::toString(const bool value){
    return value ? "true" : "false";
  }
 +
-+#if !defined(_CL_DISABLE_MULTITHREADING)
++#ifndef _CL_DISABLE_MULTITHREADING
  std::string Misc::toString(_LUCENE_THREADID_TYPE value){
    static int32_t nextindex = 0;
    static std::map<_LUCENE_THREADID_TYPE, int32_t> ids;
-@@ -474,6 +476,8 @@
+@@ -474,6 +476,7 @@
    }
    return toString(ids[value]);
  }
 +#endif
-+
  std::string Misc::toString(const int32_t value){
    char buf[20];
    TCHAR tbuf[20];
-@@ -481,6 +485,7 @@
-   STRCPY_TtoA(buf,tbuf,20);
-   return buf;
- }
-+
- std::string Misc::toString(const int64_t value){
-   char buf[20];
-   TCHAR tbuf[20];
-diff -urN clucene-orig/src/shared/CLucene/util/Misc.h clucene/src/shared/CLucene/util/Misc.h
+diff -urN clucene-orig/src/shared/CLucene/util/Misc.h clucene-threaded/src/shared/CLucene/util/Misc.h
 --- clucene-orig/src/shared/CLucene/util/Misc.h	2013-04-14 23:49:20.000000000 +0200
-+++ clucene/src/shared/CLucene/util/Misc.h	2013-04-15 11:36:19.000000000 +0200
++++ clucene-threaded/src/shared/CLucene/util/Misc.h	2013-04-15 11:36:19.000000000 +0200
 @@ -65,7 +65,9 @@
  	static size_t longToBase( int64_t value, int32_t base, char* to ); //< length of to should be at least ((sizeof(unsigned long) << 3) + 1). returns actual length used
  	static int64_t base36ToLong( const char* value );
@@ -326,10 +952,10 @@ diff -urN clucene-orig/src/shared/CLucene/util/Misc.h clucene/src/shared/CLucene
    static std::string toString(const int64_t value);
    static std::string toString(const _LUCENE_THREADID_TYPE value);
    static std::string toString(const bool value);
-diff -urN clucene-orig/src/shared/CMakeLists.txt clucene/src/shared/CMakeLists.txt
+diff -urN clucene-orig/src/shared/CMakeLists.txt clucene-threaded/src/shared/CMakeLists.txt
 --- clucene-orig/src/shared/CMakeLists.txt	2013-04-14 23:49:20.000000000 +0200
-+++ clucene/src/shared/CMakeLists.txt	2013-04-15 17:20:07.000000000 +0200
-@@ -35,8 +35,10 @@
++++ clucene-threaded/src/shared/CMakeLists.txt	2013-04-17 19:18:06.000000000 +0200
+@@ -35,8 +35,12 @@
  INCLUDE (CheckSnprintf)
  INCLUDE (CheckStdCallFunctionExists)
  
@@ -337,12 +963,14 @@ diff -urN clucene-orig/src/shared/CMakeLists.txt clucene/src/shared/CMakeLists.t
 -INCLUDE (CheckPthread)
 +IF(NOT DISABLE_MULTITHREADING)
 +	find_package(Threads REQUIRED)
-+	INCLUDE (CheckPthread)
++	IF(NOT FORCE_WIN32_THREADS)
++		INCLUDE (CheckPthread)
++	ENDIF(NOT FORCE_WIN32_THREADS)
 +ENDIF()
  INCLUDE (CheckAtomicFunctions)
  
  find_package(ZLIB)
-@@ -210,19 +212,21 @@
+@@ -210,19 +214,25 @@
  # test for compiler capabilities.
  ########################################################################
  
@@ -360,24 +988,28 @@ diff -urN clucene-orig/src/shared/CMakeLists.txt clucene/src/shared/CMakeLists.t
 -#define if we have pthreads with recursive capabilities
 -CHECK_PTHREAD_RECURSIVE(_CL_HAVE_PTHREAD _CL_HAVE_PTHREAD_MUTEX_RECURSIVE)
 +IF(NOT DISABLE_MULTITHREADING)
-+	#check for pthreads
 +	IF ( CMAKE_USE_WIN32_THREADS_INIT )
 +    	SET ( _CL_HAVE_WIN32_THREADS 1 )
 +	ENDIF ( CMAKE_USE_WIN32_THREADS_INIT )
-+	IF ( CMAKE_USE_PTHREADS_INIT )
-+    	SET ( _CL_HAVE_PTHREAD 1 )
-+	ENDIF (CMAKE_USE_PTHREADS_INIT)
++	IF(NOT FORCE_WIN32_THREADS)
++		#check for pthreads
++		IF ( CMAKE_USE_PTHREADS_INIT )
++    		SET ( _CL_HAVE_PTHREAD 1 )
++		ENDIF (CMAKE_USE_PTHREADS_INIT)
++	ENDIF(NOT FORCE_WIN32_THREADS)
 +	IF ( CMAKE_USE_SPROC_INIT OR CMAKE_HP_PTHREADS_INIT )
 +    	MESSAGE(FATAL_ERROR "Threads library not implemented")
 +	ENDIF( CMAKE_USE_SPROC_INIT OR CMAKE_HP_PTHREADS_INIT )
 +
-+	#define if we have pthreads with recursive capabilities
-+	CHECK_PTHREAD_RECURSIVE(_CL_HAVE_PTHREAD _CL_HAVE_PTHREAD_MUTEX_RECURSIVE)
++	IF(NOT FORCE_WIN32_THREADS)
++		#define if we have pthreads with recursive capabilities
++		CHECK_PTHREAD_RECURSIVE(_CL_HAVE_PTHREAD _CL_HAVE_PTHREAD_MUTEX_RECURSIVE)
++	ENDIF(NOT FORCE_WIN32_THREADS)
 +ENDIF()
  
  CHECK_HAVE_GCC_ATOMIC_FUNCTIONS(_CL_HAVE_GCC_ATOMIC_FUNCTIONS)
  
-@@ -324,7 +328,7 @@
+@@ -324,7 +334,7 @@
  #find our headers
  file(GLOB_RECURSE HEADERS ${clucene-shared_SOURCE_DIR}/*.h)
  
@@ -386,23 +1018,18 @@ diff -urN clucene-orig/src/shared/CMakeLists.txt clucene/src/shared/CMakeLists.t
  	${clucene_shared_Files} ${HEADERS}
  )
  
-@@ -342,19 +346,3 @@
- install(TARGETS clucene-shared 
+@@ -343,7 +353,7 @@
          DESTINATION ${LIB_DESTINATION} 
          COMPONENT development )
--
+ 
 -IF ( BUILD_STATIC_LIBRARIES )
--	add_library(clucene-shared-static STATIC
--		${clucene_shared_Files} ${HEADERS}
--	)
--	
--	SET_TARGET_PROPERTIES(clucene-shared-static PROPERTIES
--	    VERSION ${CLUCENE_VERSION}
--	    SOVERSION ${CLUCENE_SOVERSION}
--	    COMPILE_DEFINITIONS_DEBUG _DEBUG
--	)
--  TARGET_LINK_LIBRARIES(clucene-shared-static ${CMAKE_THREAD_LIBS_INIT})
--	install(TARGETS clucene-shared-static 
--	        DESTINATION ${LIB_DESTINATION} 
--	        COMPONENT runtime )
++IF ( BUILD_STATIC_LIBRARIES AND BUILD_SHARED_LIBS )
+ 	add_library(clucene-shared-static STATIC
+ 		${clucene_shared_Files} ${HEADERS}
+ 	)
+@@ -357,4 +367,4 @@
+ 	install(TARGETS clucene-shared-static 
+ 	        DESTINATION ${LIB_DESTINATION} 
+ 	        COMPONENT runtime )
 -ENDIF ( BUILD_STATIC_LIBRARIES )
++ENDIF ( BUILD_STATIC_LIBRARIES AND BUILD_SHARED_LIBS )

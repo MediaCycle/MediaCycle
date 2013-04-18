@@ -99,8 +99,9 @@ string* textFileRead(string filePath){
 string labelFileRead(string filePath){
     string ext=fs::extension(filePath);
     //	if (ext==string(".txt")) {
-    size_t indTemp=filePath.find_last_of("/"),lastTemp=filePath.length();
-    return filePath.substr(indTemp,lastTemp-indTemp);
+    fs::path _path(filePath);
+    string _label = _path.stem().string();
+    return _label;
     /*	}
     else
         if (ext==string(".xml")){

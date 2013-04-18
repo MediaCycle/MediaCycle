@@ -39,11 +39,11 @@
 
 #include "ACOsgRendererPlugin.h"
 
-class ACTextOsgRendererPlugin : public ACOsgRendererPlugin
+class ACTextOsgRendererPlugin : virtual public ACOsgRendererPlugin
 {
 public:
     ACTextOsgRendererPlugin();
-    ~ACTextOsgRendererPlugin();
+    virtual ~ACTextOsgRendererPlugin();
     virtual std::map<std::string, ACMediaType> getSupportedExtensions(ACMediaType media_type = MEDIA_TYPE_ALL);
     virtual ACOsgMediaRenderer* createMediaRenderer(ACMediaType media_type);
     virtual ACOsgTrackRenderer* createTrackRenderer(ACMediaType media_type);

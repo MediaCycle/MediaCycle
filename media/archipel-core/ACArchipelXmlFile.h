@@ -39,8 +39,6 @@
 
 #include <ACOpenCVInclude.h>
 
-#include <osgDB/ReadFile>
-
 std::string* ACArchipelXmlFileRead(std::string filePath);
 std::string ACArchipelLabelFileRead(std::string filePath);
 IplImage*  ACArchipelThumbFileRead(std::string filePath);

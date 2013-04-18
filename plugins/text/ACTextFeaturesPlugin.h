@@ -34,6 +34,8 @@
 #ifndef _ACTEXTFEATURESPLUGIN_H
 #define	_ACTEXTFEATURESPLUGIN_H
 
+#include <CLucene/clucene-config.h>
+
 #include "ACTextFeatures.h"
 #include "MediaCycle.h"
 #include "ACMediaData.h"
@@ -44,7 +46,10 @@
 #include<iostream>
 
 using namespace std;
+
+#ifdef _CL_HAVE_NAMESPACES
 using namespace lucene::index;
+#endif
 
 class ACTextFeaturesPlugin : public ACFeaturesPlugin, public ACPreProcessPlugin {
 public:
@@ -76,8 +81,8 @@ protected:
     ACIndexModifier* mIndex;
     std::vector<TCHAR*> indexTerms;
     std::vector<float> indexIdf;
-    //	lucene::analysis::SimpleAnalyzer* an;
-    lucene::analysis::StopAnalyzer *an;//("/Users/ravet/Desktop/navimed/TMG_5.0R6/common_words - fr.txt");
+    //	CL_NS(analysis)::SimpleAnalyzer* an;
+    CL_NS(analysis)::StopAnalyzer *an;//("/Users/ravet/Desktop/navimed/TMG_5.0R6/common_words - fr.txt");
 
     string pathIndex;
 };

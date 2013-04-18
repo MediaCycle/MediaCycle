@@ -35,24 +35,31 @@
 #ifndef _ACINDEXMODIFIER_H
 #define	_ACINDEXMODIFIER_H
 
-#include "CLucene/index/IndexModifier.h" 
+
+#include "CLucene/index/IndexModifier.h"
 
 #if defined(_LUCENE_PRAGMA_ONCE)
 # pragma once
 #endif
+
 #include "CLucene/store/Directory.h"
 #include "CLucene/document/Document.h"
 #include "CLucene/analysis/AnalysisHeader.h"
+#include "CLucene/analysis/Analyzers.h"
 #include "CLucene/index/Term.h"
 #include "CLucene/index/IndexWriter.h"
 #include "CLucene/index/IndexReader.h"
 #include "CLucene/index/TermVector.h"
 
+#ifdef _CL_HAVE_NAMESPACES
 using namespace lucene::analysis;
 using namespace lucene::index;
 using namespace lucene::util;
 using namespace lucene::search;
+#endif
+
 using namespace std;
+
 CL_NS_DEF(index)
 
 class ACIndexModifier : public IndexModifier {

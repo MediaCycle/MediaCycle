@@ -61,12 +61,12 @@ bool ACTextSTLData::readData(std::string _fname){
         return false;
     }
     else {
-        cout << (*text_ptr)<< endl;
+        cout << "ACTextSTLData::readData: text: " << (*text_ptr)<< endl;
     }
     label= labelFileRead(_fname);
     if ((*text_ptr)==string(""))
         (*text_ptr)=label;
-    cout << label<< endl;
+    cout << "ACTextSTLData::readData: label: " << label<< endl;
 //	cout << (*text_ptr)<<"\n";
 
     ACTextSTLDataContainer* text_data = new ACTextSTLDataContainer();

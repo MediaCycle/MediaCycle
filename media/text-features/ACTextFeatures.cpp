@@ -42,187 +42,210 @@
 #include <utf8.h>
 
 using namespace std;
+
+#ifdef _CL_HAVE_NAMESPACES
 //using namespace lucene::analysis;
 using namespace lucene::index;
 //using namespace lucene::util;
 //using namespace lucene::search;
+#endif
+
 const static float seuil=0.8;
 
+void getFreqTerm(vector<int32_t> &ret,std::vector<TCHAR *> termsToFind, int32_t nTerms,TermFreqVector* termsFreqBase){
+    //int i=0;
+    //ret.length = nTerms;
+    //ret.values = _CL_NEWARRAY(int32_t,nTerms);
+    ret.clear();
+    int32_t test;
+    test=termsFreqBase->size();
 
-void getFreqTerm(vector<int32_t> &ret,std::vector<wchar_t *> termsToFind, int32_t nTerms,TermFreqVector* termsFreqBase){
-	//int i=0;
-	//ret.length = nTerms;
-	//ret.values = _CL_NEWARRAY(int32_t,nTerms);
-	ret.clear();
-	int32_t test;
-	test=termsFreqBase->size();
-	
 #ifdef OLD_CLUCENE
-	const Array<int32_t>* ptrFreq=termsFreqBase->getTermFrequencies(); 
+    const Array<int32_t>* ptrFreq=termsFreqBase->getTermFrequencies();
 #else
-    const lucene::util::ArrayBase<int32_t> * ptrFreq=termsFreqBase->getTermFrequencies();
+    const CL_NS(util)::ArrayBase<int32_t> * ptrFreq=termsFreqBase->getTermFrequencies();
 #endif
-	for (int i=0;i<termsToFind.size();i++){	
-		int tempCpt=termsFreqBase->indexOf(termsToFind[i]);
-		if (tempCpt==-1)
-			ret.push_back(0);
-		else {
-			int tfLoc=(*ptrFreq)[tempCpt];
-			ret.push_back(tfLoc);
-		}
+    for (int i=0;i<termsToFind.size();i++){
+        int tempCpt=termsFreqBase->indexOf(termsToFind[i]);
+        if (tempCpt==-1)
+            ret.push_back(0);
+        else {
+            int tfLoc=(*ptrFreq)[tempCpt];
+            ret.push_back(tfLoc);
+        }
 
 
-	}
-	/*
-	#ifdef OLD_CLUCENE
-		const Array< int32_t > * freqTargeted =termsFreqBase->getTermFrequencies ();
-		const wchar_t** 	termTargeted=termsFreqBase->getTerms ();
-	#else
-		const ArrayBase< int32_t > * 	freqTargeted=termsFreqBase->getTermFrequencies ();
-		const ArrayBase<const wchar_t*>* 	termTargeted=termsFreqBase->getTerms ();
-	#endif
-	int nTermFreq=termsFreqBase->getTermFrequencies()->length;
-	for (int j=0;j<nTermFreq;j++){
-		
-		Term tempTermToFind(_T("contents"),termsToFind[i]);
-		#ifdef OLD_CLUCENE
-			Term tempTermFreq(_T("contents"),termTargeted[j]);
+    }
+    /*
+    #ifdef OLD_CLUCENE
+        const Array< int32_t > * freqTargeted =termsFreqBase->getTermFrequencies ();
+        const wchar_t** 	termTargeted=termsFreqBase->getTerms ();
+    #else
+        const ArrayBase< int32_t > * 	freqTargeted=termsFreqBase->getTermFrequencies ();
+        const ArrayBase<const wchar_t*>* 	termTargeted=termsFreqBase->getTerms ();
+    #endif
+    int nTermFreq=termsFreqBase->getTermFrequencies()->length;
+    for (int j=0;j<nTermFreq;j++){
+
+        Term tempTermToFind(_T("contents"),termsToFind[i]);
+        #ifdef OLD_CLUCENE
+            Term tempTermFreq(_T("contents"),termTargeted[j]);
 #else
-			wprintf(termTargeted->values[j]);
-			wprintf(_T("\ttf:%d\n"),freqTargeted->values[j]);
-			Term tempTermFreq(_T("contents"),termTargeted->values[j]);
-		#endif
-		while (tempTermToFind.compareTo(&tempTermFreq)<0){
-			ret.values[i]=0;			
-			i++;
-			if (i==nTerms)
-				break;
-			tempTermToFind.set(_T("contents"),termsToFind[i]);
-		}		
-		if (i==nTerms)
-			break;
-		if (tempTermToFind.compareTo(&tempTermFreq)==0){
-			ret.values[i]=freqTargeted->values[j];			
-			
-			i++;
-			
-			if (i==nTerms)
-				break;					
-		}	
-		//int tempInd=termsFreqBase->indexOf(termsToFind[j]);
-		//float tempValue=freqTargeted->values[tempInd];
-		//ret.values[j]=tempValue;
+            wprintf(termTargeted->values[j]);
+            wprintf(_T("\ttf:%d\n"),freqTargeted->values[j]);
+            Term tempTermFreq(_T("contents"),termTargeted->values[j]);
+        #endif
+        while (tempTermToFind.compareTo(&tempTermFreq)<0){
+            ret.values[i]=0;
+            i++;
+            if (i==nTerms)
+                break;
+            tempTermToFind.set(_T("contents"),termsToFind[i]);
+        }
+        if (i==nTerms)
+            break;
+        if (tempTermToFind.compareTo(&tempTermFreq)==0){
+            ret.values[i]=freqTargeted->values[j];
+
+            i++;
+
+            if (i==nTerms)
+                break;
+        }
+        //int tempInd=termsFreqBase->indexOf(termsToFind[j]);
+        //float tempValue=freqTargeted->values[tempInd];
+        //ret.values[j]=tempValue;
 #ifdef OLD_CLUCENE
-		//delete termTargeted[j];
-		
+        //delete termTargeted[j];
+
 #else
-	
+
 #endif
-	}
+    }
 #ifdef OLD_CLUCENE
-	for (int j=0;j<nTermFreq;j++)
+    for (int j=0;j<nTermFreq;j++)
 //		delete termTargeted[j];
-	delete termTargeted;
-	
+    delete termTargeted;
+
 #else
-	
+
 #endif
-	for (i=i;i<nTerms;i++)
-		ret.values[i]=0;*/
-	
+    for (i=i;i<nTerms;i++)
+        ret.values[i]=0;*/
+
 }
 
-void extractIndexTerms(wchar_t**  &outTerms,int &nbOutTerms,ACIndexModifier* inputIndex){
-	TermEnum* te1 = inputIndex->terms();
-	int nterms;
-	
-	int nbDoc=inputIndex->docCount();
-	for (nterms = 0; te1->next() == true; nterms++) {		
-	} 	
-	TermEnum* te = inputIndex->terms();
-	outTerms=new TCHARPTR[nterms];
-	nterms=0;
-	int cptRejectedTerms=0;
-	for (int i = 0; te->next() == true; i++) {
-		
-		Term *tempTerm=te->term(false);
+void extractIndexTerms(TCHAR**  &outTerms,int &nbOutTerms,ACIndexModifier* inputIndex){
+    TermEnum* te1 = inputIndex->terms();
+    int nterms;
 
-		int tempInt=inputIndex->docFreq(tempTerm);
-		if ((nbDoc>4)&&((float)tempInt/nbDoc>seuil))
-		{
-			wchar_t *chartemp=new wchar_t[wcslen(tempTerm->text())+1];
-			wcsncpy(chartemp,tempTerm->text(),wcslen(tempTerm->text())+1);
-			delete chartemp;
-			cptRejectedTerms++;
-			continue;
-			nbDoc=nbDoc;
-		}
+    int nbDoc=inputIndex->docCount();
+    for (nterms = 0; te1->next() == true; nterms++) {
+    }
+    TermEnum* te = inputIndex->terms();
+    outTerms=new TCHARPTR[nterms];
+    nterms=0;
+    int cptRejectedTerms=0;
+    for (int i = 0; te->next() == true; i++) {
 
+        Term *tempTerm=te->term(false);
+
+        int tempInt=inputIndex->docFreq(tempTerm);
+        if ((nbDoc>4)&&((float)tempInt/nbDoc>seuil))
+        {
 #if defined(_ASCII)
-		char *chartemp=new char[strlen(te->term()->text())+1];
-		strcpy(chartemp,te->term()->text());		
+            TCHAR *chartemp=new TCHAR[strlen(tempTerm->text())+1];
+            strcpy(chartemp,tempTerm->text());
 #else
-		wchar_t *chartemp=new wchar_t[wcslen(tempTerm->text())+1];
-		wcsncpy(chartemp,tempTerm->text(),wcslen(tempTerm->text())+1);
-		chartemp[wcslen(tempTerm->text())]=0;
+            TCHAR *chartemp=new TCHAR[wcslen(tempTerm->text())+1];
+            wcsncpy(chartemp,tempTerm->text(),wcslen(tempTerm->text())+1);
 #endif
-		
-		outTerms[nterms]=chartemp;
-		chartemp=0;
-		//_CLDELETE(tempTerm);
+            delete chartemp;
+            cptRejectedTerms++;
+            continue;
+            nbDoc=nbDoc;
+        }
+
+        //CF to check here, why use te->term() if _ASCII, tempTerm otherwise?
+#if defined(_ASCII)
+        char *chartemp=new char[strlen(te->term()->text())+1];
+        strcpy(chartemp,te->term()->text());
+#else
+        wchar_t *chartemp=new wchar_t[wcslen(tempTerm->text())+1];
+        wcsncpy(chartemp,te->term()->text(),wcslen(tempTerm->text())+1);
+        chartemp[wcslen(tempTerm->text())]=0;
+#endif
+
+        outTerms[nterms]=chartemp;
+        chartemp=0;
+        //_CLDELETE(tempTerm);
 #ifdef OLD_CLUCENE //CF temporary patch to compile against CLucene 2.3.3.4
-		_tprintf(_T("%s\n"),te->term()->text());
+        _tprintf(_T("%s\n"),te->term()->text());
 #else
-       wprintf(_T("%s\n"),te->term()->text());
-#endif
-		/* empty */	
-		
-		nterms++;	
-	} 
-	cout<<"rejected terms:"<<cptRejectedTerms<<endl;
-	nbOutTerms=nterms;
-	_CLDELETE(te);
-	_CLDELETE(te1);	
-	
-}
-void extractLuceneFeature(std::vector<float> &output,int32_t docIndex,ACIndexModifier* inputIndex,std::vector<wchar_t*>  terms,int nbTerms){
-	vector<int32_t> tf;
-	const wchar_t* fieldName=_T("contents");	
-		
-	//bool test =inputIndex->isOptimized();
-//		_tprintf(_T("Doc n %d\n"),docIndex);		
-	TermFreqVector* testVect=inputIndex->getTermFreqVector(docIndex,fieldName);
-	if 	(testVect==0)
-	{
-		for (int i=0;i<nbTerms; i++) {
-			output.push_back(0.f);
-		}
-		return;
-		
-	}
-	getFreqTerm(tf,terms,  nbTerms,testVect);
-	int sum=0;
-	for (int i=0;i<nbTerms; i++) {
-		sum+=tf[i];
-		
-	}
-	for (int i=0;i<nbTerms; i++) {
-		output.push_back((float)tf[i]/sum);
-		char charTemp[1024];
-		mc_wcstoutf8(charTemp,terms[i],1024);
-		if (tf[i]!=0.f)
-		{	
-		//	cout << charTemp<<"\ttf:\t"<<tf[i]<<"\tdf:\t"<<inputIndex->docFreq(&Term(_T("contents"),terms[i]))<<"\n";
-			
-		}
-	}
 #if defined(_ASCII)
-//	printf("\n");
+        //_tprintf("%s\n",te->term()->text());
+        std::cout << te->term()->text() << std::endl;
 #else
-	wprintf(_T("\n"));	
+        wprintf(_T("%s\n"),te->term()->text());
 #endif
-	#ifdef OLD_CLUCENE
-		tf.clear();
-	#endif
-	_CLDELETE(testVect);
-	}
+
+#endif
+        /* empty */
+
+        nterms++;
+    }
+    cout<<"rejected terms:"<<cptRejectedTerms<<endl;
+    nbOutTerms=nterms;
+    _CLDELETE(te);
+    _CLDELETE(te1);
+
+}
+void extractLuceneFeature(std::vector<float> &output,int32_t docIndex,ACIndexModifier* inputIndex,std::vector<TCHAR*>  terms,int nbTerms){
+    vector<int32_t> tf;
+    const TCHAR* fieldName=_T("contents");
+
+    //bool test =inputIndex->isOptimized();
+    //		_tprintf(_T("Doc n %d\n"),docIndex);
+    TermFreqVector* testVect=inputIndex->getTermFreqVector(docIndex,fieldName);
+    if 	(testVect==0)
+    {
+        for (int i=0;i<nbTerms; i++) {
+            output.push_back(0.f);
+        }
+        return;
+
+    }
+    getFreqTerm(tf,terms,  nbTerms,testVect);
+    int sum=0;
+    for (int i=0;i<nbTerms; i++) {
+        sum+=tf[i];
+
+    }
+    for (int i=0;i<nbTerms; i++) {
+        output.push_back((float)tf[i]/sum);
+
+#if !defined(_ASCII)
+        char charTemp[1024];
+        mc_wcstoutf8(charTemp,terms[i],1024);
+#endif
+        if (tf[i]!=0.f)
+        {
+            #if defined(_ASCII)
+            //	cout << terms[i]<<"\ttf:\t"<<tf[i]<<"\tdf:\t"<<inputIndex->docFreq(&Term(_T("contents"),terms[i]))<<"\n";
+            //	cout << terms[i]<<"\ttf:\t"<<tf[i]<<"\tdf:\t"<<inputIndex->docFreq(&Term(_T("contents"),terms[i]))<<"\n";
+            #else
+            //	cout << charTemp<<"\ttf:\t"<<tf[i]<<"\tdf:\t"<<inputIndex->docFreq(&Term(_T("contents"),terms[i]))<<"\n";
+            //	cout << charTemp<<"\ttf:\t"<<tf[i]<<"\tdf:\t"<<inputIndex->docFreq(&Term(_T("contents"),terms[i]))<<"\n";
+            #endif
+        }
+    }
+#if defined(_ASCII)
+    //	printf("\n");
+#else
+    wprintf(_T("\n"));
+#endif
+#ifdef OLD_CLUCENE
+    tf.clear();
+#endif
+    _CLDELETE(testVect);
+}
