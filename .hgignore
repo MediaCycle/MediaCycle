@@ -8,7 +8,7 @@ syntax: glob
 Builds
 External
 CMakeCache.txt
-CMakeLists.txt.user
+*CMakeLists.txt.user*
 cmake.check_cache
 *nbproject*
 *nbbuild*
