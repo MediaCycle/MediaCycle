@@ -7,7 +7,7 @@
 //
 //
 
-#include "knn.h"
+#include "Knn.h"
 
 using namespace arma;
 

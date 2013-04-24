@@ -10,7 +10,7 @@
 #include "ClassificatorErrorMeasure.h"
 #include <time.h>
 
-#include "knn.h"
+#include "Knn.h"
 #include "Batch.h"
 
 using namespace arma;

@@ -1,7 +1,7 @@
 # From https://github.com/signal11/hidapi
 # Commit https://github.com/signal11/hidapi/commit/0d7c7ef066f589de73b1944eb5f9f816d2780fb9
 SET(TARGET_NAME "hidapi")
-#IF(APPLE)
+IF(NOT(UNIX AND NOT LIBUSB_FOUND))
         INCLUDE_DIRECTORIES(${CMAKE_CURRENT_SOURCE_DIR}/hidapi ${CMAKE_CURRENT_SOURCE_DIR}/src/include)
 
 	SET(${TARGET_NAME}_HDRS "${CMAKE_CURRENT_SOURCE_DIR}/hidapi/hidapi.h")
@@ -31,6 +31,6 @@ SET(TARGET_NAME "hidapi")
         ENDIF()
 
 	MESSAGE("[X] ${TARGET_NAME}")
-#ELSE()
-#	MESSAGE("[ ] ${TARGET_NAME}")
-#ENDIF()
+ELSE()
+	MESSAGE("[ ] ${TARGET_NAME}")
+ENDIF()

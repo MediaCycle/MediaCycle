@@ -36,7 +36,7 @@
 #include <Isomap.h>
 #include <Sne.h>
 
-#include "knn.h"
+#include "Knn.h"
 #include "ClassificatorErrorMeasure.h"
 //#include "Trustworthiness.h"
 
