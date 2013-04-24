@@ -4,12 +4,12 @@ IF(BUILD_MULTIMEDIACYCLE_APP AND USE_QT4 AND USE_OSG)
         # Media configurations that currently don't have specific apps
         INCLUDE (${CMAKE_SOURCE_DIR}/cmake/CreateDefaultConfig.cmake)
 	# 3DmodelCycle
-	IF(SUPPORT_3DMODEL)        
-	SET(DESCRIPTION "3DmodelCycle allows to organize 3D models by similarity.")
-        SET(MEDIA_TYPE "MEDIA_TYPE_3DMODEL")
-        SET(MC_PLUGINS "3Dmodel;file;pcapreprocess;visualisation")
-        SET(OSG_PLUGINS "osgdb_osg")
-        CREATE_DEFAULT_CONFIG("3DmodelCycle")
+	IF(SUPPORT_3DMODEL)
+        	SET(DESCRIPTION "3DmodelCycle allows to organize 3D models by similarity.")
+        	SET(MEDIA_TYPE "MEDIA_TYPE_3DMODEL")
+        	SET(MC_PLUGINS "3Dmodel;file;pcapreprocess;visualisation")
+        	SET(OSG_PLUGINS "osgdb_osg")
+        	CREATE_DEFAULT_CONFIG("3DmodelCycle")
 	ENDIF()
 	# MakamCycle
         IF(SUPPORT_AUDIO AND OCTAVE_FOUND AND USE_OCTAVE AND USE_MAKAM)
@@ -46,7 +46,7 @@ IF(BUILD_MULTIMEDIACYCLE_APP AND USE_QT4 AND USE_OSG)
 	
 	# Packaging
 	SET(PROGNAME "${TARGET_NAME}")
-	IF(NOT USE_DEBUG AND (APPLE OR UNIX))
+	IF(NOT USE_DEBUG)
 		INCLUDE (${CMAKE_SOURCE_DIR}/cmake/CreatePackage.cmake)
 	ENDIF()
 

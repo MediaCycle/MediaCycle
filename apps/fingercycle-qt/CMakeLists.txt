@@ -14,7 +14,7 @@ IF(USE_QT4 AND USE_OSC)
 
 		# Packaging
 		SET(PROGNAME "${TARGET_NAME}")
-		IF(NOT USE_DEBUG AND (APPLE OR UNIX))
+		IF(NOT USE_DEBUG)
 			INCLUDE (${CMAKE_SOURCE_DIR}/cmake/CreatePackage.cmake)
 		ENDIF()
 	ENDIF()
