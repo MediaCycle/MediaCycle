@@ -1,0 +1,46 @@
+# -*- coding: utf-8; mode: tcl; tab-width: 4; indent-tabs-mode: nil; c-basic-offset: 4 -*- vim:fenc=utf-8:ft=tcl:et:sw=4:ts=4:sts=4
+# $Id: Portfile 96206 2012-08-04 00:27:43Z ryandesign@macports.org $
+
+PortSystem          1.0
+PortGroup           github 1.0
+
+github.setup        piedar libfreenect a0e1e4112e
+version             0.1.2
+categories          graphics
+platforms           darwin
+maintainers         christian.frisson@gmail.com openmaintainer
+license             APACHE-2 and GPL-2
+supported_archs     i386 x86_64
+
+description         Drivers and libraries for the Xbox Kinect device
+
+long_description    libfreenect is the core library for accessing the Microsoft Kinect USB \
+                    camera. Currently, the library supports access to: \
+                    - RGB and Depth Images \
+                    - Motors \
+                    - Accelerometer \
+                    - LED \
+                    Audio is currently being worked on.
+
+checksums           rmd160  949d16341a0c6c0e196bb12e78b71da8fb126beb \
+                    sha256  977a44d3a89e054b8e56ac3b47bb62aa3b54e256ccfc61ed55944bf1ba52d368
+
+depends_build       port:cmake
+
+depends_lib         port:libusb \
+                    port:opencv
+
+pre-fetch {
+    if {${os.platform} == "darwin" && ${os.major} < 10} {
+        ui_error "${name} ${version} requires OS X 10.6 or greater."
+        return -code error "incompatible OS X version"
+    }
+}
+
+patchfiles          patch-wrappers-opencv-CMakeLists.txt.diff
+
+configure.cmd           cmake
+configure.pre_args      -DCMAKE_INSTALL_PREFIX=${prefix}
+configure.args          -DCMAKE_BUILD_TYPE=Release \
+                        -DCMAKE_INSTALL_NAME_DIR=${prefix}/lib \
+                        -DBUILD_CV=ON

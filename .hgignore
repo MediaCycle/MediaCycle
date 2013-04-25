@@ -77,5 +77,6 @@ demos/openFrameworks/numediart/*/*/build
 demos/*.pbxuser
 demos/*.perspectivev3
 demos/*.pbxproj
+doc/macports/ports/PortIndex*
 
 # switch to regexp syntax.

@@ -5,12 +5,11 @@ PortSystem                      1.0
 PortGroup                       cmake 1.0
 
 name                            opencv
-version                         2.4.3
-revision                        1
+version                         2.4.5
 categories                      graphics science
 license                         BSD
 platforms                       darwin
-maintainers                     stromnov openmaintainer
+maintainers                     christian.frisson openmaintainer
 
 description                     Intel(R) Open Source Computer Vision Library
 
@@ -24,11 +23,11 @@ long_description                opencv is a library that is mainly aimed at real
 
 homepage                        http://opencv.org/
 master_sites                    sourceforge:project/opencvlibrary/opencv-unix/${version}
-use_bzip2                       yes
-distname                        OpenCV-${version}
+#use_bzip2                       yes
+distname                        opencv-${version}
 
-checksums                       rmd160  b862ddd9e7fefd885d78835660a9f5c9320889c2 \
-                                sha256  f8fbe985978d4eae73e8c3b526ed40a37d4761d2029a5b035233f58146f6f59b
+checksums           rmd160  3b7dc9da2e0b616a19e50ed5999ca0dd65c45d5f \
+                    sha256  d30beecf4b57977fbd1635af54c5ab3fc00113e9e59a9d58081732260fe06292
 
 depends_build-append            port:pkgconfig
 

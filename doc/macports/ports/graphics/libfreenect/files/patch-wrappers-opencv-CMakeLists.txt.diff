@@ -1,0 +1,10 @@
+--- wrappers/opencv/CMakeLists.txt.orig	2013-04-04 01:51:45.000000000 +0200
++++ wrappers/opencv/CMakeLists.txt	2013-04-04 01:50:56.000000000 +0200
+@@ -1,6 +1,7 @@
+ ######################################################################################
+ # OpenCV Interface
+ ######################################################################################
++find_path(OpenCV_DIR NAMES opencv-config.cmake OpenCVConfig.cmake PATH_SUFFIXES lib/cmake lib)
+ find_package(OpenCV REQUIRED)
+ add_library (freenect_cv SHARED libfreenect_cv.c)
+ set_target_properties (freenect_cv PROPERTIES

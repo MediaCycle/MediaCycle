@@ -1,0 +1,58 @@
+# -*- coding: utf-8; mode: tcl; tab-width: 4; indent-tabs-mode: nil; c-basic-offset: 4 -*- vim:fenc=utf-8:ft=tcl:et:sw=4:ts=4:sts=4
+# $Id: Portfile 96206 2012-08-04 00:27:43Z ryandesign@macports.org $
+
+PortSystem          1.0
+#PortGroup           github 1.0
+
+name                nite2
+version             2.0.0.12
+categories          nonfree
+platforms           darwin
+maintainers         openmaintainer
+license             Proprietary
+supported_archs     i386 x86_64
+
+description         Middleware for natural interaction devices
+
+long_description    The PrimeSense NiTE is the most advance and robust 3D \
+                    computer vision middleware available today, boasting a \
+                    thin host, minimal CPU load, and multiplatform support.
+
+homepage            http://www.openni.org/files/nite/
+master_sites        http://www.openni.org/wp-content/uploads/2013/02/
+distfiles           NiTE-MacOS-x64-2.0.0.tar1.zip
+use_zip             yes
+
+checksums           rmd160  0fe8ca7ab1dd2b6cc44fa25bded7926ef34c67b3 \
+                    sha256  2d04a61bc2a652a145907988aa03b3f6ed6e10e693cbad65ca097ef9bb398096
+
+#depends_build       port:doxygen
+
+depends_lib         port:openni2-freenect
+
+conflicts	    port:openni
+
+pre-fetch {
+    if {${os.platform} == "darwin" && ${os.major} < 10} {
+        ui_error "${name} ${version} requires OS X 10.6 or greater."
+        return -code error "incompatible OS X version"
+    }
+}
+
+use_configure       no
+
+build {
+}
+
+destroot {
+	#system "mkdir ${workpath}/nite2-2.0.0.12"
+   	system "cd ${workpath} && tar xfvj NiTE-MacOS-x64-2.0.0.tar.bz2"
+   	system "cp -R ${workpath}/NiTE-2.0.0/Include/*.h ${destroot}${prefix}/include"
+   	system "cp -R ${workpath}/NiTE-2.0.0/Redist/* ${destroot}${prefix}/lib"
+   	system "cd ${destroot}${prefix} && rm -fr bin/.\_* && rm -fr lib/.\_* && rm -fr include/.\_*"
+	system "install_name_tool -id ${prefix}/lib/libNiTE2.dylib ${destroot}${prefix}/lib/libNiTE2.dylib"
+	system "install_name_tool -change libOpenNI2.dylib ${prefix}/lib/libOpenNI2.dylib ${destroot}${prefix}/lib/libNiTE2.dylib"
+}
+
+livecheck.url                  http://www.openni.org/files/nite/index.php
+livecheck.regex                Version:</strong>\[ \t\n\](\[0-9.\]+)
