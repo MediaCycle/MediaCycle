@@ -137,10 +137,12 @@ void ACAboutDialogQt::updateTeam(){
     html.append ("<li>Thierry Ravet</li>");
     html.append ("<li>Xavier Siebert</li>");
     html.append ("</ul><br/>Among past contributors:<ul>");
+    html.append ("<li>Julien Biral</li>");
     html.append ("<li>Julien Dubois</li>");
     html.append ("<li>Thomas Dubuisson</li>");
     html.append ("<li>Sidi Ahmed Mahmoudi</li>");
     html.append ("<li>C&eacute;cile Picard-Limpens</li>");
+    html.append ("<li>Fran&ccedil;ois Rocca</li>");
     html.append ("<li>Rapha&euml;l Sebbe</li>");
     html.append ("<li>Damien Tardieu</li>");
     html.append ("<li>J&eacute;r&ocirc;me Urbain</li>");
