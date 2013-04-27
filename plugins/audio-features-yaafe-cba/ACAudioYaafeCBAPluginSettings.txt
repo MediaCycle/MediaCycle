@@ -35,6 +35,6 @@ nFrameSum > nPeakDetection
 nSum := Sum
 nPeakDetection > nSum
 
-ContinuousFrequencyActivation := Output normalize="-1" version="v0.6" yaafedefinition="ContinuousFrequencyActivation blockSize=512 stepSize=256"
+ContinuousFrequencyActivation := Output normalize="-1" version="v0.6" yaafedefinition="ContinuousFrequencyActivation blockSize=512 stepSize=256" dimensions="1"
 nSum > ContinuousFrequencyActivation
 
