@@ -41,6 +41,7 @@
 #include <cmath>
 #include <QDesktopWidget>
 #include <ACOsgRendererFactory.h>
+#include <ACOsgReadAndShareImageCallback.h>
 
 #include "boost/filesystem.hpp"   // includes all needed Boost.Filesystem declarations
 #include "boost/filesystem/operations.hpp"
@@ -71,6 +72,10 @@ ACOsgCompositeViewQt::ACOsgCompositeViewQt( QWidget * parent, const char * name,
       discardMediaAction(0),resetSelectedMediaTagIdAction(0),transferClassToTagAction(0),cleanAllTagsAction(0),
       setting(AC_SETTING_NONE)
 {
+#ifdef UNIX
+    osg::setNotifyLevel(osg::DEBUG_INFO);
+#endif
+
     osg_view = new osgViewer::GraphicsWindowEmbedded(0,0,width(),height());
     setFocusPolicy(Qt::StrongFocus);// CF instead of ClickFocus
 
@@ -89,6 +94,10 @@ ACOsgCompositeViewQt::ACOsgCompositeViewQt( QWidget * parent, const char * name,
 
     connect(&_timer, SIGNAL(timeout()), this, SLOT(updateGL()));
     _timer.start(10);
+
+    // Share identical images between renderers
+    osgDB::Registry::instance()->setReadFileCallback( new ACOsgReadAndShareImageCallback);
+    osgDB::Registry::instance()->getOrCreateSharedStateManager();
 
     // Renderers
     browser_renderer = new ACOsgBrowserRenderer();
@@ -1192,6 +1201,11 @@ void ACOsgCompositeViewQt::prepareFromBrowser()
     hud_renderer->preparePointers(browser_view);
     hud_renderer->prepareLibrary(browser_view);
     browser_view->setSceneData(browser_renderer->getShapes());
+
+    osgDB::SharedStateManager* ssm = osgDB::Registry::instance()->getSharedStateManager();
+    if ( ssm )
+        ssm->share( browser_renderer->getShapes() );
+
     library_loaded = true;
     //addCamera(renderer_hud->getCamera());
 }
@@ -1230,6 +1244,11 @@ void ACOsgCompositeViewQt::prepareFromTimeline()
     //setMouseTracking(false); //CF necessary for the hover callback
     timeline_renderer->prepareTracks();
     timeline_view->setSceneData(timeline_renderer->getShapes());
+
+    osgDB::SharedStateManager* ssm = osgDB::Registry::instance()->getSharedStateManager();
+    if ( ssm )
+        ssm->share( timeline_renderer->getShapes() );
+
 }
 
 void ACOsgCompositeViewQt::updateTransformsFromTimeline( double frac)
