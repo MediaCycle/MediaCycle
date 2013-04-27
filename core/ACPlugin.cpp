@@ -111,24 +111,33 @@ void ACPlugin::setMediaCycle(MediaCycle* _media_cycle)
 }
 
 bool ACPlugin::hasNumberParameterNamed(std::string _name){
+    boost::to_lower(_name);
     for(std::vector<ACNumberParameter>::iterator NumberParameter = mNumberParameters.begin(); NumberParameter != mNumberParameters.end(); NumberParameter++ ){
-        if((*NumberParameter).name == _name)
+        std::string name = (*NumberParameter).name;
+        boost::to_lower(name);
+        if(name == _name)
             return true;
     }
     return false;
 }
 
 bool ACPlugin::hasStringParameterNamed(std::string _name){
+    boost::to_lower(_name);
     for(std::vector<ACStringParameter>::iterator StringParameter = mStringParameters.begin(); StringParameter != mStringParameters.end(); StringParameter++ ){
-        if((*StringParameter).name == _name)
+        std::string name = (*StringParameter).name;
+        boost::to_lower(name);
+        if(name == _name)
             return true;
     }
     return false;
 }
 
 bool ACPlugin::hasCallbackNamed(std::string _name){
+    boost::to_lower(_name);
     for(std::vector<ACCallback>::iterator Callback = mCallbacks.begin(); Callback != mCallbacks.end(); Callback++ ){
-        if((*Callback).name == _name)
+        std::string name = (*Callback).name;
+        boost::to_lower(name);
+        if(name == _name)
             return true;
     }
     return false;
@@ -140,8 +149,11 @@ void ACPlugin::addStringParameter(std::string _name, std::string _init, std::vec
 }
 
 void ACPlugin::updateStringParameter(std::string _name, std::string _init, std::vector<std::string> _values, std::string _desc, ACParameterCallback _callback){
+    boost::to_lower(_name);
     for(std::vector<ACStringParameter>::iterator StringParameter = mStringParameters.begin(); StringParameter != mStringParameters.end(); StringParameter++ ){
-        if((*StringParameter).name == _name){
+        std::string name = (*StringParameter).name;
+        boost::to_lower(name);
+        if(name == _name){
             (*StringParameter).values = _values;
             std::vector<std::string>::iterator value = std::find(_values.begin(),_values.end(),(*StringParameter).value);
             if(value == _values.end())
@@ -162,8 +174,11 @@ void ACPlugin::updateStringParameter(std::string _name, std::string _init, std::
 }
 
 void ACPlugin::updateStringParameterCallback(std::string _name, ACParameterCallback _callback){
+    boost::to_lower(_name);
     for(std::vector<ACStringParameter>::iterator StringParameter = mStringParameters.begin(); StringParameter != mStringParameters.end(); StringParameter++ ){
-        if((*StringParameter).name == _name){
+        std::string name = (*StringParameter).name;
+        boost::to_lower(name);
+        if(name == _name){
             (*StringParameter).callback = _callback;
             return;
         }
@@ -176,8 +191,11 @@ void ACPlugin::addNumberParameter(std::string _name, float _init, float _min, fl
 }
 
 void ACPlugin::updateNumberParameter(std::string _name, float _init, float _min, float _max, float _step, std::string _desc, ACParameterCallback _callback){
+    boost::to_lower(_name);
     for(std::vector<ACNumberParameter>::iterator NumberParameter = mNumberParameters.begin(); NumberParameter != mNumberParameters.end(); NumberParameter++ ){
-        if((*NumberParameter).name == _name){
+        std::string name = (*NumberParameter).name;
+        boost::to_lower(name);
+        if(name == _name){
             (*NumberParameter).init = _init;
             (*NumberParameter).min = _min;
             (*NumberParameter).max = _max;
@@ -205,8 +223,11 @@ void ACPlugin::addCallback(std::string _name, std::string _desc, ACParameterCall
 }
 
 void ACPlugin::updateCallback(std::string _name, std::string _desc, ACParameterCallback _callback){
+    boost::to_lower(_name);
     for(std::vector<ACCallback>::iterator Callback = mCallbacks.begin(); Callback != mCallbacks.end(); Callback++ ){
-        if((*Callback).name == _name){
+        std::string name = (*Callback).name;
+        boost::to_lower(name);
+        if(name == _name){
             if(_desc != "")
                 (*Callback).desc = _desc;
             if(_callback)
@@ -245,8 +266,11 @@ int ACPlugin::getParametersCount()
 }
 
 bool ACPlugin::setStringParameterValue(std::string _name, std::string _value){
+    boost::to_lower(_name);
     for(std::vector<ACStringParameter>::iterator StringParameter = mStringParameters.begin(); StringParameter != mStringParameters.end(); StringParameter++ ){
-        if((*StringParameter).name == _name){
+        std::string name = (*StringParameter).name;
+        boost::to_lower(name);
+        if(name == _name){
             (*StringParameter).value = _value;
 #ifdef USE_DEBUG
             std::cout << " ACPlugin::setStringParameterValue: plugin '" << mName << "', parameter '"<< _name << "', value '" << _value << "'" << std::endl;
@@ -260,8 +284,11 @@ bool ACPlugin::setStringParameterValue(std::string _name, std::string _value){
 }
 
 bool ACPlugin::setNumberParameterValue(std::string _name, float _value){
+    boost::to_lower(_name);
     for(std::vector<ACNumberParameter>::iterator NumberParameter = mNumberParameters.begin(); NumberParameter != mNumberParameters.end(); NumberParameter++ ){
-        if((*NumberParameter).name == _name){
+        std::string name = (*NumberParameter).name;
+        boost::to_lower(name);
+        if(name == _name){
             (*NumberParameter).value = _value;
 #ifdef USE_DEBUG
             std::cout << " ACPlugin::setNumberParameterValue: plugin '" << mName << "', parameter '"<< _name << "', value '" << _value << "'" << std::endl;
@@ -275,8 +302,11 @@ bool ACPlugin::setNumberParameterValue(std::string _name, float _value){
 }
 
 std::string ACPlugin::getStringParameterValue(std::string _name){
+    boost::to_lower(_name);
     for(std::vector<ACStringParameter>::iterator StringParameter = mStringParameters.begin(); StringParameter != mStringParameters.end(); StringParameter++ ){
-        if((*StringParameter).name == _name){
+        std::string name = (*StringParameter).name;
+        boost::to_lower(name);
+        if(name == _name){
             return (*StringParameter).value;
         }
     }
@@ -285,13 +315,18 @@ std::string ACPlugin::getStringParameterValue(std::string _name){
 }
 
 void ACPlugin::resetParameterValue(std::string _name){
+    boost::to_lower(_name);
     for(std::vector<ACNumberParameter>::iterator NumberParameter = mNumberParameters.begin(); NumberParameter != mNumberParameters.end(); NumberParameter++ ){
-        if((*NumberParameter).name == _name){
+        std::string name = (*NumberParameter).name;
+        boost::to_lower(name);
+        if(name == _name){
             (*NumberParameter).value = (*NumberParameter).init;
         }
     }
     for(std::vector<ACStringParameter>::iterator StringParameter = mStringParameters.begin(); StringParameter != mStringParameters.end(); StringParameter++ ){
-        if((*StringParameter).name == _name){
+        std::string name = (*StringParameter).name;
+        boost::to_lower(name);
+        if(name == _name){
             (*StringParameter).value = (*StringParameter).init;
         }
     }
@@ -299,8 +334,11 @@ void ACPlugin::resetParameterValue(std::string _name){
 
 int ACPlugin::getStringParameterValueIndex(std::string _name){
     int index = -1;
+    boost::to_lower(_name);
     for(std::vector<ACStringParameter>::iterator StringParameter = mStringParameters.begin(); StringParameter != mStringParameters.end(); StringParameter++ ){
-        if((*StringParameter).name == _name){
+        std::string name = (*StringParameter).name;
+        boost::to_lower(name);
+        if(name == _name){
             std::vector<std::string> values = getStringParameterValues(_name);
             std::vector<std::string>::iterator value = std::find(values.begin(),values.end(),(*StringParameter).value);
             if(value != values.end())
@@ -316,8 +354,11 @@ int ACPlugin::getStringParameterValueIndex(std::string _name){
 }
 
 float ACPlugin::getNumberParameterValue(std::string _name){
+    boost::to_lower(_name);
     for(std::vector<ACNumberParameter>::iterator NumberParameter = mNumberParameters.begin(); NumberParameter != mNumberParameters.end(); NumberParameter++ ){
-        if((*NumberParameter).name == _name){
+        std::string name = (*NumberParameter).name;
+        boost::to_lower(name);
+        if(name == _name){
             return (*NumberParameter).value;
         }
     }
@@ -326,8 +367,11 @@ float ACPlugin::getNumberParameterValue(std::string _name){
 }
 
 float ACPlugin::getNumberParameterMin(std::string _name){
+    boost::to_lower(_name);
     for(std::vector<ACNumberParameter>::iterator NumberParameter = mNumberParameters.begin(); NumberParameter != mNumberParameters.end(); NumberParameter++ ){
-        if((*NumberParameter).name == _name){
+        std::string name = (*NumberParameter).name;
+        boost::to_lower(name);
+        if(name == _name){
             return (*NumberParameter).min;
         }
     }
@@ -335,8 +379,11 @@ float ACPlugin::getNumberParameterMin(std::string _name){
 }
 
 float ACPlugin::getNumberParameterMax(std::string _name){
+    boost::to_lower(_name);
     for(std::vector<ACNumberParameter>::iterator NumberParameter = mNumberParameters.begin(); NumberParameter != mNumberParameters.end(); NumberParameter++ ){
-        if((*NumberParameter).name == _name){
+        std::string name = (*NumberParameter).name;
+        boost::to_lower(name);
+        if(name == _name){
             return (*NumberParameter).max;
         }
     }
@@ -344,8 +391,11 @@ float ACPlugin::getNumberParameterMax(std::string _name){
 }
 
 float ACPlugin::getNumberParameterStep(std::string _name){
+    boost::to_lower(_name);
     for(std::vector<ACNumberParameter>::iterator NumberParameter = mNumberParameters.begin(); NumberParameter != mNumberParameters.end(); NumberParameter++ ){
-        if((*NumberParameter).name == _name){
+        std::string name = (*NumberParameter).name;
+        boost::to_lower(name);
+        if(name == _name){
             return (*NumberParameter).step;
         }
     }
@@ -353,8 +403,11 @@ float ACPlugin::getNumberParameterStep(std::string _name){
 }
 
 float ACPlugin::getNumberParameterInit(std::string _name){
+    boost::to_lower(_name);
     for(std::vector<ACNumberParameter>::iterator NumberParameter = mNumberParameters.begin(); NumberParameter != mNumberParameters.end(); NumberParameter++ ){
-        if((*NumberParameter).name == _name){
+        std::string name = (*NumberParameter).name;
+        boost::to_lower(name);
+        if(name == _name){
             return (*NumberParameter).init;
         }
     }
@@ -362,8 +415,11 @@ float ACPlugin::getNumberParameterInit(std::string _name){
 }
 
 std::string ACPlugin::getNumberParameterDesc(std::string _name){
+    boost::to_lower(_name);
     for(std::vector<ACNumberParameter>::iterator NumberParameter = mNumberParameters.begin(); NumberParameter != mNumberParameters.end(); NumberParameter++ ){
-        if((*NumberParameter).name == _name){
+        std::string name = (*NumberParameter).name;
+        boost::to_lower(name);
+        if(name == _name){
             return (*NumberParameter).desc;
         }
     }
@@ -371,8 +427,11 @@ std::string ACPlugin::getNumberParameterDesc(std::string _name){
 }
 
 std::string ACPlugin::getStringParameterDesc(std::string _name){
+    boost::to_lower(_name);
     for(std::vector<ACStringParameter>::iterator StringParameter = mStringParameters.begin(); StringParameter != mStringParameters.end(); StringParameter++ ){
-        if((*StringParameter).name == _name){
+        std::string name = (*StringParameter).name;
+        boost::to_lower(name);
+        if(name == _name){
             return (*StringParameter).desc;
         }
     }
@@ -380,8 +439,11 @@ std::string ACPlugin::getStringParameterDesc(std::string _name){
 }
 
 std::string ACPlugin::getStringParameterInit(std::string _name){
+    boost::to_lower(_name);
     for(std::vector<ACStringParameter>::iterator StringParameter = mStringParameters.begin(); StringParameter != mStringParameters.end(); StringParameter++ ){
-        if((*StringParameter).name == _name){
+        std::string name = (*StringParameter).name;
+        boost::to_lower(name);
+        if(name == _name){
             return (*StringParameter).init;
         }
     }
@@ -390,8 +452,11 @@ std::string ACPlugin::getStringParameterInit(std::string _name){
 
 int ACPlugin::getStringParameterInitIndex(std::string _name){
     int index = -1;
+    boost::to_lower(_name);
     for(std::vector<ACStringParameter>::iterator StringParameter = mStringParameters.begin(); StringParameter != mStringParameters.end(); StringParameter++ ){
-        if((*StringParameter).name == _name){
+        std::string name = (*StringParameter).name;
+        boost::to_lower(name);
+        if(name == _name){
             std::vector<std::string> values = getStringParameterValues(_name);
             std::vector<std::string>::iterator value = std::find(values.begin(),values.end(),(*StringParameter).init);
             if(value != values.end())
@@ -407,8 +472,11 @@ int ACPlugin::getStringParameterInitIndex(std::string _name){
 }
 
 std::vector<std::string> ACPlugin::getStringParameterValues(std::string _name){
+    boost::to_lower(_name);
     for(std::vector<ACStringParameter>::iterator StringParameter = mStringParameters.begin(); StringParameter != mStringParameters.end(); StringParameter++ ){
-        if((*StringParameter).name == _name){
+        std::string name = (*StringParameter).name;
+        boost::to_lower(name);
+        if(name == _name){
             return (*StringParameter).values;
         }
     }
@@ -443,8 +511,11 @@ int ACPlugin::getCallbacksCount(){
 }
 
 std::string ACPlugin::getCallbackDesc(std::string _name){
+    boost::to_lower(_name);
     for(std::vector<ACCallback>::iterator Callback = mCallbacks.begin(); Callback != mCallbacks.end(); Callback++ ){
-        if((*Callback).name == _name){
+        std::string name = (*Callback).name;
+        boost::to_lower(name);
+        if(name == _name){
             return (*Callback).desc;
         }
     }
@@ -460,8 +531,11 @@ std::vector<std::string> ACPlugin::getCallbacksNames(){
 }
 
 bool ACPlugin::triggerCallback(std::string _name){
+    boost::to_lower(_name);
     for(std::vector<ACCallback>::iterator Callback = mCallbacks.begin(); Callback != mCallbacks.end(); Callback++ ){
-        if((*Callback).name == _name){
+        std::string name = (*Callback).name;
+        boost::to_lower(name);
+        if(name == _name){
 #ifdef USE_DEBUG
             std::cout << " ACPlugin::triggerCallback: plugin '" << mName << "', callback '"<< _name << "'" << std::endl;
 #endif
@@ -474,18 +548,25 @@ bool ACPlugin::triggerCallback(std::string _name){
 }
 
 ACParameter ACPlugin::getParameter(std::string _name){
+    boost::to_lower(_name);
     for(std::vector<ACNumberParameter>::iterator NumberParameter = mNumberParameters.begin(); NumberParameter != mNumberParameters.end(); NumberParameter++ ){
-        if((*NumberParameter).name == _name){
+        std::string name = (*NumberParameter).name;
+        boost::to_lower(name);
+        if(name == _name){
             return *NumberParameter;
         }
     }
     for(std::vector<ACStringParameter>::iterator StringParameter = mStringParameters.begin(); StringParameter != mStringParameters.end(); StringParameter++ ){
-        if((*StringParameter).name == _name){
+        std::string name = (*StringParameter).name;
+        boost::to_lower(name);
+        if(name == _name){
             return *StringParameter;
         }
     }
     for(std::vector<ACCallback>::iterator Callback = mCallbacks.begin(); Callback != mCallbacks.end(); Callback++ ){
-        if((*Callback).name == _name){
+        std::string name = (*Callback).name;
+        boost::to_lower(name);
+        if(name == _name){
             return *Callback;
         }
     }
