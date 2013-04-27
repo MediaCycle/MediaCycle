@@ -51,12 +51,14 @@ ACOsgImageRenderer::ACOsgImageRenderer()
     border_geode = 0;
     image_transform = 0;
     aura_geode=0;
+    node_size = 1.0f;
 }
 
 ACOsgImageRenderer::~ACOsgImageRenderer() {
     image_geode=0;
     border_geode=0;
     image_transform=0;
+    node_size = 1.0f;
 }
 
 void ACOsgImageRenderer::imageGeode(bool flip, float sizemul, float zoomin) {
@@ -662,14 +664,18 @@ void ACOsgImageRenderer::updateNodes(double ratio) {
 #ifdef AUTO_TRANSFORM
     media_node->setPosition(Vec3(x,y,z));
     media_node->setRotation(Quat(0.0, 0.0, 1.0, -media_cycle_angle));
-    media_node->setScale(Vec3(localscale/media_cycle_zoom,localscale/media_cycle_zoom,localscale/media_cycle_zoom));
+    media_node->setScale(Vec3(node_size*localscale/media_cycle_zoom,node_size*localscale/media_cycle_zoom,localscale/media_cycle_zoom));
 #else
 
     Matrix T;
     T.makeTranslate(Vec3(x, y, z)); // omr*p.z + ratio*p2.z));
     T =  Matrix::rotate(-media_cycle_angle,Vec3(0.0,0.0,1.0))
-            * Matrix::scale(localscale/media_cycle_zoom,localscale/media_cycle_zoom,localscale/media_cycle_zoom)
+            * Matrix::scale(node_size*localscale/media_cycle_zoom,node_size*localscale/media_cycle_zoom,localscale/media_cycle_zoom)
             * T;
     media_node->setMatrix(T);
 #endif //AUTO_TRANSFORM
+}
+
+void ACOsgImageRenderer::changeNodeSize(double _size){
+    this->node_size = _size;
 }

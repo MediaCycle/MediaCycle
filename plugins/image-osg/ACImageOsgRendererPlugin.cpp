@@ -56,6 +56,8 @@ ACImageOsgRendererPlugin::ACImageOsgRendererPlugin() : ACOsgRendererPlugin(){
     this->mName = "Image Renderer (OSG)";
     this->mDescription ="Plugin for rendering Image files with OpenSceneGraph";
     this->mMediaType = MEDIA_TYPE_IMAGE;
+
+    this->addNumberParameter("Browser node size",1.0,0.01,10.0,0.01,"Browser node size",boost::bind(&ACOsgRendererPlugin::changeBrowserNodeSize,this));
 }
 
 ACImageOsgRendererPlugin::~ACImageOsgRendererPlugin(){

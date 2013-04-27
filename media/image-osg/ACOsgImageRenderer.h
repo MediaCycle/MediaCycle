@@ -49,11 +49,13 @@ protected:
     void imageGeode(bool flip=false, float sizemul=1.0, float zoomin=1.0);
     void auraImageGeode(bool flip=false, float sizemul=1.0, float zoomin=1.0);
     void auraGeode();
+    double node_size;
 public:
     ACOsgImageRenderer();
     ~ACOsgImageRenderer();
     void prepareNodes();
     void updateNodes(double ratio=0.0);
     virtual osg::ref_ptr<osg::Geode> getMainGeode() { return image_geode;}
+    virtual void changeNodeSize(double _size);
 };
 #endif
