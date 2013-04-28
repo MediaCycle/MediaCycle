@@ -32,8 +32,8 @@
  *
  */
 
-#ifndef HEADER_ACBrowserControlsCompleteDockWidgetQt
-#define HEADER_ACBrowserControlsCompleteDockWidgetQt
+#ifndef HEADER_ACSimilarityControlsDockWidgetQt
+#define HEADER_ACSimilarityControlsDockWidgetQt
 
 #include <iostream>
 #include <string.h>
@@ -41,32 +41,31 @@
 #include "ACAbstractDockWidgetQt.h"
 #include "ACPluginControlsWidgetQt.h"
 
-#include "ui_ACBrowserControlsCompleteDockWidgetQt.h"
+#include "ui_ACSimilarityControlsDockWidgetQt.h"
 #include <MediaCycle.h>
 
-class ACBrowserControlsCompleteDockWidgetQt : public ACAbstractDockWidgetQt {
+class ACSimilarityControlsDockWidgetQt : public ACAbstractDockWidgetQt {
     Q_OBJECT
 
-protected slots:
-    // Browser controls
-    void on_pushButtonRecenter_clicked();
-    void on_pushButtonBack_clicked();
-    void on_pushButtonForward_clicked();
-
-    void on_tabWidgetModes_currentChanged(int index);
+public slots:
+    virtual void modifyListItem(QListWidgetItem *item);
+    void on_pushButtonAll_clicked();
+    void on_pushButtonNone_clicked();
 
 public:
-    ACBrowserControlsCompleteDockWidgetQt(QWidget *parent = 0);
-    virtual ~ACBrowserControlsCompleteDockWidgetQt(){}
+    ACSimilarityControlsDockWidgetQt(QWidget *parent = 0);
+    virtual ~ACSimilarityControlsDockWidgetQt(){}
     virtual bool canBeVisible(ACMediaType _media_type);
 
 protected:
-    Ui::ACBrowserControlsCompleteDockWidgetQt ui;
+    Ui::ACSimilarityControlsDockWidgetQt ui;
 
 signals:
+    void reconfigureCheckBoxes();
     void readjustHeight();
 
 public slots:
+    void configureCheckBoxes();
     void adjustHeight();
 
 public:
@@ -74,13 +73,10 @@ public:
     virtual void resetPluginsSettings();
     virtual void changeMediaType(ACMediaType _media_type);
 
+    void synchronizeFeaturesWeights();
+    void cleanCheckBoxes();
+
 protected:
     void resetMode();
-
-    ACPluginControlsWidgetQt* preProcessControls;
-    ACPluginControlsWidgetQt* clustersMethodControls;
-    ACPluginControlsWidgetQt* clustersPositionsControls;
-    ACPluginControlsWidgetQt* neighborsMethodControls;
-    ACPluginControlsWidgetQt* neighborsPositionsControls;
 };
 #endif

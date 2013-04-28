@@ -795,9 +795,30 @@ void ACMultiMediaCycleOsgQt::on_actionEdit_Input_Controls_triggered(bool checked
     }
 }
 
-bool ACMultiMediaCycleOsgQt::addControlDock(std::string dock_type)
+bool ACMultiMediaCycleOsgQt::addControlDock(std::string dock_type){
+    ACAbstractDockWidgetQt* dock = dockWidgetsManager->addControlDock(dock_type);
+    return this->addControlDock(dock);
+}
+
+bool ACMultiMediaCycleOsgQt::addControlDock(ACPluginType plugin_type){
+    ACAbstractDockWidgetQt* dock = dockWidgetsManager->addControlDock(plugin_type);
+    return this->addControlDock(dock);
+}
+
+bool ACMultiMediaCycleOsgQt::addControlDock(ACAbstractDockWidgetQt* dock)
 {
-    return dockWidgetsManager->addControlDock(dock_type);
+    if(dock){
+        QAction* dock_action = new QAction(this);
+        dock_action->setCheckable(true);
+        dock_action->setChecked(true);
+        dock_action->setText( dock->windowTitle() + QString(" Controls") );
+        connect(dock_action,SIGNAL(toggled(bool)),dock,SLOT(setVisible(bool)));
+        connect(dock,SIGNAL(visibilityChanged(bool)),dock_action,SLOT(setChecked(bool)));
+        ui.menuDisplay->addAction(dock_action);
+        this->addAction(dock_action);
+        return true;
+    }
+    return false;
 }
 
 void ACMultiMediaCycleOsgQt::on_actionToggle_Controls_triggered(bool controlsToEnable){
@@ -1154,11 +1175,14 @@ bool ACMultiMediaCycleOsgQt::loadDefaultConfig(ACAbstractDefaultConfig* _config)
         this->addControlDock("MCMediaDocumentOption");
     }
     #endif
+
+    this->addControlDock("MCSimilarityControls");
     if(_config->useNeighbors()){
         this->addControlDock("MCBrowserControlsComplete");
     }
-    else
+    else{
         this->addControlDock("MCBrowserControlsClusters");
+    }
 
     if(media_cycle->getAvailablePluginNames(PLUGIN_TYPE_MEDIARENDERER,_config->mediaType()).size()>0)
         this->addControlDock("MCMediaControls");
@@ -1167,7 +1191,7 @@ bool ACMultiMediaCycleOsgQt::loadDefaultConfig(ACAbstractDefaultConfig* _config)
     //    this->addControlDock("MCSegmentationControls");
 
     if(media_cycle->getAvailablePluginNames(PLUGIN_TYPE_CLIENT,_config->mediaType()).size()>0)
-        dockWidgetsManager->addControlDock(PLUGIN_TYPE_CLIENT);
+        this->addControlDock(PLUGIN_TYPE_CLIENT);
 
     // Update the plugin lists of the browser control dock through DockWidget
     dockWidgetsManager->changeMediaType(_config->mediaType());

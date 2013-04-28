@@ -37,8 +37,10 @@ ACPluginControlsDockWidgetQt::ACPluginControlsDockWidgetQt(ACPluginType pluginTy
     //ui.setupUi(this); // first thing to do if a *.ui file exists
     widget = new ACPluginControlsWidgetQt(pluginType);
     widget->setFixedWidth(250);
+    widget->setSizePolicy(QSizePolicy::Fixed,QSizePolicy::MinimumExpanding);
     this->setWidget(widget);
     this->setWindowTitle(QString(dockName.c_str()));
+    this->setSizePolicy(QSizePolicy::Fixed,QSizePolicy::MinimumExpanding);
     connect(widget,SIGNAL(readjustHeight()),this,SLOT(adjustHeight()));
     this->show();
 }

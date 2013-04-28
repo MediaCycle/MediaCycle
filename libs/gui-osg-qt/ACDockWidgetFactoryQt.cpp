@@ -44,6 +44,7 @@ ACAbstractDockWidgetQt* ACDockWidgetFactoryQt::createDockWidget(QWidget *parent,
 
     if (dock_type == "MCBrowserControlsComplete") {return new ACBrowserControlsCompleteDockWidgetQt(parent);}
     else if (dock_type == "MCBrowserControlsClusters") {return new ACBrowserControlsClustersDockWidgetQt(parent);}
+    else if (dock_type == "MCSimilarityControls") {return new ACSimilarityControlsDockWidgetQt(parent);}
     else if (dock_type == "MCMediaConfig") {return new ACMediaConfigDockWidgetQt(parent);}
     else if (dock_type == "MCMediaControls") {return new ACMediaControlsDockWidgetQt(parent);}
 #if defined (SUPPORT_MULTIMEDIA)
@@ -70,6 +71,6 @@ ACAbstractDockWidgetQt* ACDockWidgetFactoryQt::createDockWidget(QWidget *parent,
 ACAbstractDockWidgetQt* ACDockWidgetFactoryQt::createDockWidget(QWidget *parent,ACPluginType plugin_type){
     std::string name = "";
     if(plugin_type == PLUGIN_TYPE_CLIENT)
-        name = "Client";
-    return new ACPluginControlsDockWidgetQt(plugin_type,name + " plugins controls",parent);
+        name = "I/O";
+    return new ACPluginControlsDockWidgetQt(plugin_type,name,parent);
 }

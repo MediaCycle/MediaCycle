@@ -62,9 +62,6 @@ ACBrowserControlsCompleteDockWidgetQt::ACBrowserControlsCompleteDockWidgetQt(QWi
     ui.pushButtonBack->setEnabled(false);
     ui.pushButtonForward->setEnabled(false);
 
-    connect(ui.featuresListWidget, SIGNAL(itemClicked(QListWidgetItem*)),this, SLOT(modifyListItem(QListWidgetItem*)));
-    connect(this,SIGNAL(reconfigureCheckBoxes()),this,SLOT(configureCheckBoxes()));
-
     connect(this,SIGNAL(readjustHeight()),this,SLOT(adjustHeight()));
     connect(preProcessControls,SIGNAL(readjustHeight()),this,SLOT(adjustHeight()));
     connect(clustersMethodControls,SIGNAL(readjustHeight()),this,SLOT(adjustHeight()));
@@ -81,30 +78,6 @@ bool ACBrowserControlsCompleteDockWidgetQt::canBeVisible(ACMediaType _media_type
     return true;
 }
 
-void ACBrowserControlsCompleteDockWidgetQt::modifyListItem(QListWidgetItem *item)
-{
-    // XS check
-    //cout << item->text().toStdString() << endl; // isselected...
-    //cout << ui.featuresListWidget->currentRow() << endl;
-
-    // end XS check
-    cout<<"osg_view "<<osg_view<<endl;
-    if (osg_view && osg_view->isLibraryLoaded())
-    {
-        ui.featuresListWidget->setCurrentItem(item);
-        float w;
-        if (item->checkState() == Qt::Unchecked) w = 0.0;
-        else w = 1.0 ;
-        int f =  ui.featuresListWidget->currentRow(); // index of selected feature
-        //std::cout << "ACBrowserControlsCompleteDockWidgetQt::modifyListItem: currentRow " << f << std::endl;
-        media_cycle->setWeight(f,w);
-        media_cycle->updateDisplay(true);
-        //XS 250310 was: media_cycle->updateClusters(true);
-        // XS250310 removed mediacycle->setNeedsDisplay(true); // now in updateDisplay
-        osg_view->updateTransformsFromBrowser(0.0);
-    }
-}
-
 void ACBrowserControlsCompleteDockWidgetQt::on_pushButtonRecenter_clicked()
 {
     if (media_cycle==0) return;
@@ -115,16 +88,13 @@ void ACBrowserControlsCompleteDockWidgetQt::on_pushButtonBack_clicked()
 {
     if (media_cycle==0) return;
     this->media_cycle->goBack();
-    //this->synchronizeFeaturesWeights();
     //	ui.navigationLineEdit->setText(QString::number(media_cycle->getNavigationLevel()));
-
 }
 
 void ACBrowserControlsCompleteDockWidgetQt::on_pushButtonForward_clicked()
 {
     if (media_cycle==0) return;
     this->media_cycle->goForward();
-    //this->synchronizeFeaturesWeights();
     //	ui.navigationLineEdit->setText(QString::number(media_cycle->getNavigationLevel()));
 }
 
@@ -136,16 +106,12 @@ void ACBrowserControlsCompleteDockWidgetQt::on_tabWidgetModes_currentChanged(int
         //media_cycle->changeClustersMethodPlugin(ui.comboBoxClustersMethod->currentText().toStdString());
         //media_cycle->changeClustersPositionsPlugin(ui.comboBoxClustersPositions->currentText().toStdString());
         media_cycle->changeBrowserMode(AC_MODE_CLUSTERS);
-
-        ui.featuresListWidget->setEnabled(true); //CF until changing feature weights works in neighbors mode
     }
     else{
         //Neighbors
         //media_cycle->changeNeighborsMethodPlugin(ui.comboBoxNeighborsMethod->currentText().toStdString());
         //media_cycle->changeNeighborsPositionsPlugin(ui.comboBoxNeighborsPositions->currentText().toStdString());
         media_cycle->changeBrowserMode(AC_MODE_NEIGHBORS);
-
-        ui.featuresListWidget->setEnabled(false); //CF until changing feature weights works in neighbors mode
     }
 
     emit this->readjustHeight();
@@ -158,13 +124,11 @@ void ACBrowserControlsCompleteDockWidgetQt::resetMode(){
     case AC_MODE_CLUSTERS:
     {
         ui.tabWidgetModes->setCurrentIndex(0);
-        ui.featuresListWidget->setEnabled(true); //CF until changing feature weights works in neighbors mode
     }
         break;
     case AC_MODE_NEIGHBORS:
     {
         ui.tabWidgetModes->setCurrentIndex(1);
-        ui.featuresListWidget->setEnabled(false); //CF until changing feature weights works in neighbors mode
     }
         break;
     default:
@@ -175,8 +139,6 @@ void ACBrowserControlsCompleteDockWidgetQt::resetMode(){
 
 void ACBrowserControlsCompleteDockWidgetQt::updatePluginsSettings()
 {
-    emit this->reconfigureCheckBoxes();
-
     if(!media_cycle) return;
 
     this->resetMode();
@@ -203,8 +165,6 @@ void ACBrowserControlsCompleteDockWidgetQt::updatePluginsSettings()
 
 void ACBrowserControlsCompleteDockWidgetQt::resetPluginsSettings()
 {
-    this->cleanCheckBoxes();
-
     if(!media_cycle) return;
 
     this->resetMode();
@@ -245,99 +205,7 @@ void ACBrowserControlsCompleteDockWidgetQt::changeMediaType(ACMediaType _media_t
     emit this->readjustHeight();
 }
 
-// synchronize weights with what is loaded in mediacycle
-// note: here weights are 1 or 0 (checkbox).
-// conversion: 0 remains 0, and value > 0 becomes 1.
-void ACBrowserControlsCompleteDockWidgetQt::synchronizeFeaturesWeights()
-{
-    if (media_cycle == 0) return;
-    vector<float> w = media_cycle->getWeightVector();
-    int nw = w.size();
-    if (nw==0)
-    {
-        cout << "features not yet computed from plugins; setting all weights to 0" << endl;
-        for (int i=0; i< ui.featuresListWidget->count(); i++)
-        {
-            ui.featuresListWidget->item(i)->setCheckState (Qt::Unchecked);
-        }
-        return;
-    }
-    else if (ui.featuresListWidget->count() != nw)
-    {
-        cerr << "Warning: Checkboxes in GUI do not match Features in MediaCycle" << endl;
-        cerr << ui.featuresListWidget->count() << "!=" << nw << endl;
-        return;
-        //exit(1);
-    }
-    else
-    {
-        for (int i=0; i< nw; i++)
-        {
-            if (w[i]==0)
-                ui.featuresListWidget->item(i)->setCheckState (Qt::Unchecked);
-            else
-                ui.featuresListWidget->item(i)->setCheckState (Qt::Checked);
-        }
-    }
-    //emit this->readjustHeight();
-}
-
-void ACBrowserControlsCompleteDockWidgetQt::configureCheckBoxes()
-{
-    //std::cout << "ACBrowserControlsCompleteDockWidgetQt::configureCheckBoxes" << std::endl;
-
-    // dynamic config of checkboxes
-    // according to plugins actually used to compute the features
-    if (media_cycle == 0) return;
-
-    vector<string> plugins_list = this->media_cycle->getListOfActivePlugins();
-    vector<string> ::iterator list_iter;
-    this->cleanCheckBoxes();
-
-    for (list_iter = plugins_list.begin(); list_iter != plugins_list.end(); list_iter++)
-    {
-        QString s((*list_iter).c_str());
-        QListWidgetItem * item = new QListWidgetItem(s,ui.featuresListWidget);
-        item->setCheckState (Qt::Unchecked);
-    }
-
-    this->synchronizeFeaturesWeights();
-
-    connect(ui.featuresListWidget, SIGNAL(itemClicked(QListWidgetItem*)),
-            this, SLOT(modifyListItem(QListWidgetItem*)));
-
-    //emit this->readjustHeight();
-}
-
-void ACBrowserControlsCompleteDockWidgetQt::cleanCheckBoxes()
-{
-    //std::cout << "ACBrowserControlsCompleteDockWidgetQt::cleanCheckBoxes" << std::endl;
-
-    for(int i = 0; i < ui.featuresListWidget->count(); i++)
-        delete ui.featuresListWidget->takeItem(i);
-
-    ui.featuresListWidget->clear();
-    emit this->readjustHeight();
-}
-
 void ACBrowserControlsCompleteDockWidgetQt::adjustHeight(){
-    int line_heigth = 16;
-    int max_number_of_lines = 5;
-
-    int featureListHeight = line_heigth+8;
-    int groupBoxSimilarityHeight = featureListHeight + 32;
-    if (ui.featuresListWidget->count() >0){
-        // CF resize the feature list along the number of features with threshold
-        int current_number_of_lines = min(max_number_of_lines,ui.featuresListWidget->count())+1;
-        //int current_number_of_lines = ui.featuresListWidget->count(); // uncomment this to remove the threshold
-        featureListHeight = line_heigth*current_number_of_lines+8; // 8 px approx to avoid the scrollbar
-        groupBoxSimilarityHeight = featureListHeight + 32;
-    }
-    ui.featuresListWidget->setMinimumHeight(featureListHeight);
-    ui.featuresListWidget->setMaximumHeight(featureListHeight);
-    ui.groupBoxSimilarity->setMinimumHeight(groupBoxSimilarityHeight);
-    ui.groupBoxSimilarity->setMaximumHeight(groupBoxSimilarityHeight);
-
     ui.groupBoxPreProcess->setMinimumHeight( preProcessControls->minimumHeight());
     ui.groupBoxClustersMethod->setMinimumHeight( clustersMethodControls->minimumHeight());
     ui.groupBoxClustersPositions->setMinimumHeight( clustersPositionsControls->minimumHeight());
@@ -363,7 +231,6 @@ void ACBrowserControlsCompleteDockWidgetQt::adjustHeight(){
     }
 
     ui.dockWidgetContents->setMinimumHeight(
-                ui.groupBoxSimilarity->minimumHeight()
                 + ui.tabWidgetModes->minimumHeight()
                 + ui.groupBoxNavigation->minimumHeight()
                 + 64
@@ -373,8 +240,6 @@ void ACBrowserControlsCompleteDockWidgetQt::adjustHeight(){
     this->setMaximumHeight(ui.dockWidgetContents->minimumHeight() + 64);
 
     /*std::cout << "ACBrowserControlsCompleteDockWidgetQt::adjustHeight exiting" << std::endl;
-    std::cout << "  groupBoxNavigation min " << ui.groupBoxNavigation->minimumHeight() << " actual " << ui.groupBoxNavigation->height() << std::endl;
-    std::cout << "  groupBoxSimilarity min " << ui.groupBoxSimilarity->minimumHeight() << " actual " << ui.groupBoxSimilarity->height() << std::endl;
     std::cout << "  tabWidgetModes min " << ui.tabWidgetModes->minimumHeight() << " actual " << ui.tabWidgetModes->height() << std::endl;
     std::cout << "    ui.tabClusters min " << ui.tabClusters->minimumHeight() << " actual " << ui.tabClusters->height() << std::endl;
     //std::cout << "      clustersMethodBox min " << clustersMethodBox->minimumHeight() << " actual " << clustersMethodBox->height() << std::endl;

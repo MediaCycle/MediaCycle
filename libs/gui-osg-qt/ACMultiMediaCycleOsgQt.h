@@ -153,7 +153,9 @@ public:
     bool loadDefaultConfig(ACAbstractDefaultConfig* _config);
 
     // Controls
+    bool addControlDock(ACAbstractDockWidgetQt* dock);
     bool addControlDock(std::string dock_type);
+    bool addControlDock(ACPluginType plugin_type);
 
     bool addAboutDialog(ACAbstractAboutDialogQt* dock);
     bool addAboutDialog(std::string about_type);

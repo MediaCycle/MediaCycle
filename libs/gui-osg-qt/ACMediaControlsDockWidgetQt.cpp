@@ -41,7 +41,7 @@ ACMediaControlsDockWidgetQt::ACMediaControlsDockWidgetQt(QWidget *parent)
     widget = new ACPluginControlsWidgetQt(PLUGIN_TYPE_MEDIARENDERER);
     widget->setFixedWidth(250);
     this->setWidget(widget);
-    this->setWindowTitle("Media Controls");
+    this->setWindowTitle("Media");
     connect(widget,SIGNAL(readjustHeight()),this,SLOT(adjustHeight()));
     this->show();
 }

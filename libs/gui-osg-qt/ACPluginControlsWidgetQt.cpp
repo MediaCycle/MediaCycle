@@ -253,6 +253,7 @@ void ACPluginControlsWidgetQt::buildPluginList()
                 if(count->second > 1){
                     if(!tabWidget){
                         tabWidget = new QTabWidget();
+                        tabWidget->setSizePolicy(QSizePolicy::Fixed,QSizePolicy::MinimumExpanding);
                         tabWidget->setFont(font);
                         //connect(tabWidget,SIGNAL(currentChanged(int)),this,SLOT(adjustHeight()));
                     }

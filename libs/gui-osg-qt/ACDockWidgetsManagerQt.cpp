@@ -70,18 +70,18 @@ void ACDockWidgetsManagerQt::setOsgView(ACOsgCompositeViewQt* _osg_view)
     }
 }
 
-bool ACDockWidgetsManagerQt::addControlDock(ACAbstractDockWidgetQt* dock)
+ACAbstractDockWidgetQt* ACDockWidgetsManagerQt::addControlDock(ACAbstractDockWidgetQt* dock)
 {
     if (dock == 0){
         std::cerr << "Invalid dock widget" << std::endl;
-        return false;
+        return dock;
     }
 
     if (dock->getMediaType() == MEDIA_TYPE_NONE && dock->getClassName()==""){
         std::cerr << "Invalid dock widget type" << std::endl;
         delete dock;
         dock = 0;
-        return false;
+        return dock;
     }
 
     for (int d=0;d<dockWidgets.size();d++){
@@ -89,7 +89,7 @@ bool ACDockWidgetsManagerQt::addControlDock(ACAbstractDockWidgetQt* dock)
             std::cerr << "Dock widget type already added" << std::endl;
             delete dock;
             dock = 0;
-            return false;
+            return dock;
         }
     }
 
@@ -99,7 +99,7 @@ bool ACDockWidgetsManagerQt::addControlDock(ACAbstractDockWidgetQt* dock)
                 std::cerr << "Only one browser control dock widget for clusters and/or neighbors can be added." << std::endl;
                 delete dock;
                 dock = 0;
-                return false;
+                return dock;
             }
         }
     }
@@ -132,15 +132,15 @@ bool ACDockWidgetsManagerQt::addControlDock(ACAbstractDockWidgetQt* dock)
 #endif
     this->updateDockHeight();
 
-    return true;
+    return dock;
 }
 
-bool ACDockWidgetsManagerQt::addControlDock(std::string dock_type)
+ACAbstractDockWidgetQt* ACDockWidgetsManagerQt::addControlDock(std::string dock_type)
 {
     return this->addControlDock(dockWidgetFactory->createDockWidget(mainWindow,dock_type));
 }
 
-bool ACDockWidgetsManagerQt::addControlDock(ACPluginType plugin_type)
+ACAbstractDockWidgetQt* ACDockWidgetsManagerQt::addControlDock(ACPluginType plugin_type)
 {
     return this->addControlDock(dockWidgetFactory->createDockWidget(mainWindow,plugin_type));
 }

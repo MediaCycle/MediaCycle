@@ -58,9 +58,9 @@ public:
     void updateDocksVisibility(bool visibility);
     void updateDockHeight();
 
-    bool addControlDock(ACAbstractDockWidgetQt* dock);
-    bool addControlDock(std::string dock_type);
-    bool addControlDock(ACPluginType plugin_type);
+    ACAbstractDockWidgetQt* addControlDock(ACAbstractDockWidgetQt* dock);
+    ACAbstractDockWidgetQt* addControlDock(std::string dock_type);
+    ACAbstractDockWidgetQt* addControlDock(ACPluginType plugin_type);
 
     void changeMediaType(ACMediaType _media_type);
     void updatePluginsSettings();
