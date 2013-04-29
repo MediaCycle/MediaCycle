@@ -1,49 +1,42 @@
-/*
- *  ACBrowserControlsClustersNeighborsDockWidgetQt.cpp
- *  MediaCycle
- *
- *  @author Christian Frisson
- *  @date 8/01/11
- *  @copyright (c) 2011 – UMONS - Numediart
- *  
- *  MediaCycle of University of Mons – Numediart institute is 
- *  licensed under the GNU AFFERO GENERAL PUBLIC LICENSE Version 3 
- *  licence (the “License”); you may not use this file except in compliance 
- *  with the License.
- *  
- *  This program is free software: you can redistribute it and/or 
- *  it under the terms of the GNU Affero General Public License as
- *  published by the Free Software Foundation, either version 3 of the
- *  License, or (at your option) any later version.
- *  
- *  This program is distributed in the hope that it will be useful,
- *  but WITHOUT ANY WARRANTY; without even the implied warranty of
- *  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
- *  GNU Affero General Public License for more details.
- *  
- *  You should have received a copy of the GNU Affero General Public License
- *  along with this program.  If not, see <https://www.gnu.org/licenses/>.
- *  
- *  Each use of this software must be attributed to University of Mons – 
- *  Numediart Institute
- *  
- *  Any other additional authorizations may be asked to avre@umons.ac.be 
- *  <mailto:avre@umons.ac.be>
- *
+/**
+ * @brief A dock that provides a list of features whose weights can be changed by checkboxes
+ * @authors Xavier Siebert, Christian Frisson
+ * @date 8/01/2011
+ * @copyright (c) 2011 – UMONS - Numediart
+ * 
+ * MediaCycle of University of Mons – Numediart institute is 
+ * licensed under the GNU AFFERO GENERAL PUBLIC LICENSE Version 3 
+ * licence (the “License”); you may not use this file except in compliance 
+ * with the License.
+ * 
+ * This program is free software: you can redistribute it and/or 
+ * it under the terms of the GNU Affero General Public License as
+ * published by the Free Software Foundation, either version 3 of the
+ * License, or (at your option) any later version.
+ * 
+ * This program is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU Affero General Public License for more details.
+ * 
+ * You should have received a copy of the GNU Affero General Public License
+ * along with this program.  If not, see <https://www.gnu.org/licenses/>.
+ * 
+ * Each use of this software must be attributed to University of Mons – 
+ * Numediart Institute
+ * 
+ * Any other additional authorizations may be asked to avre@umons.ac.be 
+ * <mailto:avre@umons.ac.be>
  */
 
-#include "ACSimilarityControlsDockWidgetQt.h"
+#include "ACSimilarityCheckboxControlsDockWidgetQt.h"
 
-ACSimilarityControlsDockWidgetQt::ACSimilarityControlsDockWidgetQt(QWidget *parent)
-    : ACAbstractDockWidgetQt(parent, MEDIA_TYPE_ALL,"ACSimilarityControlsDockWidgetQt")
+ACSimilarityCheckboxControlsDockWidgetQt::ACSimilarityCheckboxControlsDockWidgetQt(QWidget *parent)
+    : ACAbstractDockWidgetQt(parent, MEDIA_TYPE_ALL,"ACSimilarityCheckboxControlsDockWidgetQt")
 {
     ui.setupUi(this); // first thing to do
-
-    int controlsWidth = 250; // default dock widget size
-
     connect(ui.featuresListWidget, SIGNAL(itemClicked(QListWidgetItem*)),this, SLOT(modifyListItem(QListWidgetItem*)));
     connect(this,SIGNAL(reconfigureCheckBoxes()),this,SLOT(configureCheckBoxes()));
-
     connect(this,SIGNAL(readjustHeight()),this,SLOT(adjustHeight()));
 
     emit this->readjustHeight();
@@ -51,11 +44,11 @@ ACSimilarityControlsDockWidgetQt::ACSimilarityControlsDockWidgetQt(QWidget *pare
     this->show();
 }
 
-bool ACSimilarityControlsDockWidgetQt::canBeVisible(ACMediaType _media_type){
+bool ACSimilarityCheckboxControlsDockWidgetQt::canBeVisible(ACMediaType _media_type){
     return true;
 }
 
-void ACSimilarityControlsDockWidgetQt::modifyListItem(QListWidgetItem *item)
+void ACSimilarityCheckboxControlsDockWidgetQt::modifyListItem(QListWidgetItem *item)
 {
     // XS check
     //cout << item->text().toStdString() << endl; // isselected...
@@ -70,7 +63,7 @@ void ACSimilarityControlsDockWidgetQt::modifyListItem(QListWidgetItem *item)
         if (item->checkState() == Qt::Unchecked) w = 0.0;
         else w = 1.0 ;
         int f =  ui.featuresListWidget->currentRow(); // index of selected feature
-        //std::cout << "ACSimilarityControlsDockWidgetQt::modifyListItem: currentRow " << f << std::endl;
+        //std::cout << "ACSimilarityCheckboxControlsDockWidgetQt::modifyListItem: currentRow " << f << std::endl;
         media_cycle->setWeight(f,w);
         media_cycle->updateDisplay(true);
         //XS 250310 was: media_cycle->updateClusters(true);
@@ -79,7 +72,7 @@ void ACSimilarityControlsDockWidgetQt::modifyListItem(QListWidgetItem *item)
     }
 }
 
-void ACSimilarityControlsDockWidgetQt::resetMode(){
+void ACSimilarityCheckboxControlsDockWidgetQt::resetMode(){
     if(!media_cycle) return;
 
     switch (media_cycle->getBrowserMode()){
@@ -98,8 +91,7 @@ void ACSimilarityControlsDockWidgetQt::resetMode(){
     }
 }
 
-
-void ACSimilarityControlsDockWidgetQt::updatePluginsSettings()
+void ACSimilarityCheckboxControlsDockWidgetQt::updatePluginsSettings()
 {
     emit this->reconfigureCheckBoxes();
 
@@ -110,7 +102,7 @@ void ACSimilarityControlsDockWidgetQt::updatePluginsSettings()
     emit this->readjustHeight();
 }
 
-void ACSimilarityControlsDockWidgetQt::resetPluginsSettings()
+void ACSimilarityCheckboxControlsDockWidgetQt::resetPluginsSettings()
 {
     this->cleanCheckBoxes();
 
@@ -121,7 +113,7 @@ void ACSimilarityControlsDockWidgetQt::resetPluginsSettings()
     emit this->readjustHeight();
 }
 
-void ACSimilarityControlsDockWidgetQt::changeMediaType(ACMediaType _media_type)
+void ACSimilarityCheckboxControlsDockWidgetQt::changeMediaType(ACMediaType _media_type)
 {
     if(!media_cycle) return;
 
@@ -133,7 +125,7 @@ void ACSimilarityControlsDockWidgetQt::changeMediaType(ACMediaType _media_type)
 // synchronize weights with what is loaded in mediacycle
 // note: here weights are 1 or 0 (checkbox).
 // conversion: 0 remains 0, and value > 0 becomes 1.
-void ACSimilarityControlsDockWidgetQt::synchronizeFeaturesWeights()
+void ACSimilarityCheckboxControlsDockWidgetQt::synchronizeFeaturesWeights()
 {
     if (media_cycle == 0) return;
     vector<float> w = media_cycle->getWeightVector();
@@ -152,7 +144,6 @@ void ACSimilarityControlsDockWidgetQt::synchronizeFeaturesWeights()
         cerr << "Warning: Checkboxes in GUI do not match Features in MediaCycle" << endl;
         cerr << ui.featuresListWidget->count() << "!=" << nw << endl;
         return;
-        //exit(1);
     }
     else
     {
@@ -167,9 +158,9 @@ void ACSimilarityControlsDockWidgetQt::synchronizeFeaturesWeights()
     //emit this->readjustHeight();
 }
 
-void ACSimilarityControlsDockWidgetQt::configureCheckBoxes()
+void ACSimilarityCheckboxControlsDockWidgetQt::configureCheckBoxes()
 {
-    //std::cout << "ACSimilarityControlsDockWidgetQt::configureCheckBoxes" << std::endl;
+    //std::cout << "ACSimilarityCheckboxControlsDockWidgetQt::configureCheckBoxes" << std::endl;
 
     // dynamic config of checkboxes
     // according to plugins actually used to compute the features
@@ -194,7 +185,17 @@ void ACSimilarityControlsDockWidgetQt::configureCheckBoxes()
     //emit this->readjustHeight();
 }
 
-void ACSimilarityControlsDockWidgetQt::on_pushButtonAll_clicked(){
+void ACSimilarityCheckboxControlsDockWidgetQt::cleanCheckBoxes()
+{
+    //std::cout << "ACSimilarityCheckboxControlsDockWidgetQt::cleanCheckBoxes" << std::endl;
+    for(int i = 0; i < ui.featuresListWidget->count(); i++)
+        delete ui.featuresListWidget->takeItem(i);
+
+    ui.featuresListWidget->clear();
+    emit this->readjustHeight();
+}
+
+void ACSimilarityCheckboxControlsDockWidgetQt::on_pushButtonAll_clicked(){
     for(int item = 0; item < ui.featuresListWidget->count(); item++){
         if(ui.featuresListWidget->item(item)){
             ui.featuresListWidget->item(item)->setCheckState (Qt::Checked);
@@ -205,7 +206,7 @@ void ACSimilarityControlsDockWidgetQt::on_pushButtonAll_clicked(){
     //osg_view->updateTransformsFromBrowser(0.0);
 }
 
-void ACSimilarityControlsDockWidgetQt::on_pushButtonNone_clicked(){
+void ACSimilarityCheckboxControlsDockWidgetQt::on_pushButtonNone_clicked(){
     for(int item = 0; item < ui.featuresListWidget->count(); item++){
         if(ui.featuresListWidget->item(item)){
             ui.featuresListWidget->item(item)->setCheckState (Qt::Unchecked);
@@ -216,15 +217,5 @@ void ACSimilarityControlsDockWidgetQt::on_pushButtonNone_clicked(){
     //osg_view->updateTransformsFromBrowser(0.0);
 }
 
-void ACSimilarityControlsDockWidgetQt::cleanCheckBoxes()
-{
-    //std::cout << "ACSimilarityControlsDockWidgetQt::cleanCheckBoxes" << std::endl;
-    for(int i = 0; i < ui.featuresListWidget->count(); i++)
-        delete ui.featuresListWidget->takeItem(i);
-
-    ui.featuresListWidget->clear();
-    emit this->readjustHeight();
-}
-
-void ACSimilarityControlsDockWidgetQt::adjustHeight(){
+void ACSimilarityCheckboxControlsDockWidgetQt::adjustHeight(){
 }

@@ -40,7 +40,8 @@
 
 #include "ACBrowserControlsCompleteDockWidgetQt.h"
 #include "ACBrowserControlsClustersDockWidgetQt.h"
-#include "ACSimilarityControlsDockWidgetQt.h"
+#include "ACSimilarityCheckboxControlsDockWidgetQt.h"
+#include "ACSimilaritySliderControlsDockWidgetQt.h"
 #include "ACMediaConfigDockWidgetQt.h"
 #include "ACMediaControlsDockWidgetQt.h"
 #if defined (SUPPORT_MULTIMEDIA)

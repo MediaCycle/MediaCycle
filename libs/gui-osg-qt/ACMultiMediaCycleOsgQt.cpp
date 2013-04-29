@@ -1176,11 +1176,13 @@ bool ACMultiMediaCycleOsgQt::loadDefaultConfig(ACAbstractDefaultConfig* _config)
     }
     #endif
 
-    this->addControlDock("MCSimilarityControls");
     if(_config->useNeighbors()){
+        //this->addControlDock("MCSimilaritySliderControls");
+        this->addControlDock("MCSimilarityCheckboxControls");
         this->addControlDock("MCBrowserControlsComplete");
     }
     else{
+        this->addControlDock("MCSimilarityCheckboxControls");
         this->addControlDock("MCBrowserControlsClusters");
     }
 

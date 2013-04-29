@@ -44,7 +44,8 @@ ACAbstractDockWidgetQt* ACDockWidgetFactoryQt::createDockWidget(QWidget *parent,
 
     if (dock_type == "MCBrowserControlsComplete") {return new ACBrowserControlsCompleteDockWidgetQt(parent);}
     else if (dock_type == "MCBrowserControlsClusters") {return new ACBrowserControlsClustersDockWidgetQt(parent);}
-    else if (dock_type == "MCSimilarityControls") {return new ACSimilarityControlsDockWidgetQt(parent);}
+    else if (dock_type == "MCSimilarityCheckboxControls") {return new ACSimilarityCheckboxControlsDockWidgetQt(parent);}
+    else if (dock_type == "MCSimilaritySliderControls") {return new ACSimilaritySliderControlsDockWidgetQt(parent);}
     else if (dock_type == "MCMediaConfig") {return new ACMediaConfigDockWidgetQt(parent);}
     else if (dock_type == "MCMediaControls") {return new ACMediaControlsDockWidgetQt(parent);}
 #if defined (SUPPORT_MULTIMEDIA)

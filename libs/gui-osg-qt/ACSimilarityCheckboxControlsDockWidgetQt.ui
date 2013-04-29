@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <ui version="4.0">
- <class>ACSimilarityControlsDockWidgetQt</class>
- <widget class="QDockWidget" name="ACSimilarityControlsDockWidgetQt">
+ <class>ACSimilarityCheckboxControlsDockWidgetQt</class>
+ <widget class="QDockWidget" name="ACSimilarityCheckboxControlsDockWidgetQt">
   <property name="geometry">
    <rect>
     <x>0</x>
