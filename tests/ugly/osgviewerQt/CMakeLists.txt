@@ -1,5 +1,5 @@
 SET(TARGET_NAME "osgviewerQt") # from the OSG examples
-IF(OSG_FOUND AND QT4_FOUND)
+IF(USE_OSG AND USE_QT4)
 	FILE(GLOB SRC *.cpp *.c)
 	FILE(GLOB HDR *.hpp *.h)
 
