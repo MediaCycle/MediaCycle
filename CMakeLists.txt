@@ -871,11 +871,10 @@ IF(BUILD_APPS OR USE_OSG)
 ENDIF()
 
 #OSG
-
-IF( APPLE_IOS_DEV OR APPLE_IOS_SIM)
-    SET(OSG_REQUIRED_VERSION "2.9.10")
+IF(SUPPORT_VIDEO)
+	SET(OSG_REQUIRED_VERSION "3.1.1") # for ImageStream::getCurrentTime necessary for video sync in the timeline
 ELSE()
-    SET(OSG_REQUIRED_VERSION "2.8.3")
+	SET(OSG_REQUIRED_VERSION "3.0.0")
 ENDIF()
 
 IF(BUILD_APPS OR USE_OSG)
@@ -1072,7 +1071,11 @@ IF(BUILD_APPS OR USE_OSG OR USE_3DMODEL)
 			ADD_LIB_LINKED_DIR(${OPENTHREADS_LIBRARY})
 		#ENDIF()
 	ELSE()
-		MESSAGE(FATAL_ERROR "OSG requested but not found")
+		IF(SUPPORT_VIDEO)
+			MESSAGE(FATAL_ERROR "OSG requested but not found, required version ${OSG_REQUIRED_VERSION}. Setting SUPPORT_VIDEO to OFF might help decrease the required version")
+		ELSE()
+			MESSAGE(FATAL_ERROR "OSG requested but not found, required version ${OSG_REQUIRED_VERSION}.")
+		ENDIF()
 	ENDIF()
 ENDIF()
 
