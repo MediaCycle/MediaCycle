@@ -44,6 +44,13 @@
 using namespace std;
 using namespace arma;
 
+class testStatic{
+private:
+    static int *wq;
+public:
+    static int *getWq(){return wq;};
+    static void setWq(int *param){wq=param;};
+};
 
 /*
  * 
@@ -53,6 +60,7 @@ int main(int argc, char** argv) {
    
     double test=1e39;
     double test2=1e40;
+    
     bool testb=1e35<test2;
     double aux_mem[100]={
         0  , 11.7898 ,  56.2228  , 39.4081  , 16.7929 ,  73.6614  , 20.5426 ,  92.2822 , 116.4388 ,  18.7883,
@@ -89,14 +97,14 @@ int main(int argc, char** argv) {
     
     
     cout<<"L:"<<L<<endl;
-//    Trustworthiness algo;
+   // Trustworthiness algo;
     
     ucolvec Ltemp=L.col(1);
-    
-//    algo.setFeatureMatrixHighDim(X);
-//    algo.setFeatureMatrixLowDim(X);
+    /*
+    algo.setFeatureMatrixHighDim(X);
+    algo.setFeatureMatrixLowDim(X);
     //algo.setDistanceMatrix(H);
-//    cout<<algo.compute(10)<<endl;
+    cout<<algo.compute(10)<<endl;*/
    // cout<<"result:"<<endl;
      //   cout<<result;}
     return (EXIT_SUCCESS);

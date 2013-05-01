@@ -1,8 +1,8 @@
 /**
  * @brief ACArmaVisPlugin.h
  * @author Thierry Ravet
- * @date 18/12/2012
- * @copyright (c) 2012 – UMONS - Numediart
+ * @date 01/05/2013
+ * @copyright (c) 2013 – UMONS - Numediart
  * 
  * MediaCycle of University of Mons – Numediart institute is 
  * licensed under the GNU AFFERO GENERAL PUBLIC LICENSE Version 3 
@@ -45,7 +45,7 @@ public:
   ~ACArmaVisPlugin();
 
   virtual void updateNextPositions(ACMediaBrowser* );
-    virtual void  dimensionReduction(arma::mat &posDisp_m,arma::mat desc_m,arma::urowvec tag)=0;
+    virtual void  dimensionReduction(arma::mat &posDisp_m,arma::mat desc_m,arma::umat tag)=0;
 
 protected:
     void extractDescMatrix(ACMediaBrowser* mediaBrowser, arma::mat& desc_m, std::vector<std::string> &featureNames,arma::urowvec& tag);

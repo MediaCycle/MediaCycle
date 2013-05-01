@@ -1,8 +1,8 @@
 /**
  * @brief ACNeighborhoodsPluginPareto.cpp
  * @author Thierry Ravet
- * @date 18/09/2012
- * @copyright (c) 2012 – UMONS - Numediart
+ * @date 01/05/2013
+ * @copyright (c) 2013 – UMONS - Numediart
  * 
  * MediaCycle of University of Mons – Numediart institute is 
  * licensed under the GNU AFFERO GENERAL PUBLIC LICENSE Version 3 
@@ -62,14 +62,15 @@ void ACNeighborhoodsPluginPareto::updateNeighborhoods(ACMediaBrowser* mediaBrows
     //CF changing neighbor number requires removing media nodes
     //nNeighbors=this->getNumberParameterValue("neighbors");
 
-  
+    
     //CF if the user log has just been (re)created
     if(mediaBrowser->getClickedNode() == -1)
         lastClickedNodeId = -1;
-
+    
     //CF if the user clicked twice on the same node OR if updateNeighborhoods is called again without newly-clicked node (changing parameters)
-    if ( (mediaBrowser->getClickedNode() >=0) ) {
+    if (mediaBrowser->getClickedNode() >=0) {
         int newClickedNodeId=mediaBrowser->getClickedNode();
+    
         lastClickedNodeId = newClickedNodeId;
         std::cout << "ACNeighborhoodsPluginPareto::updateNeighborhoods adding neighbors to node " << lastClickedNodeId << std::endl;
         ACMedia* mediaF = mediaBrowser->getLibrary()->getFirstMedia();

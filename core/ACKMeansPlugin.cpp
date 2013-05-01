@@ -136,6 +136,8 @@ void ACKMeansPlugin::updateClusters(ACMediaBrowser* mediaBrowser,bool needsClust
 
     // XS note: problem if all media don't have the same number of features
     //          but we suppose it is not going to happen
+    if (currId.size()==0) return;
+    if (library->getMedia(currId[0])==0) return;
     int feature_count = library->getMedia(currId[0])->getNumberOfPreProcFeaturesVectors();
 
     vector< int > 			cluster_counts;

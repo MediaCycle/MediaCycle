@@ -84,6 +84,9 @@ bool ACEventListener::stopped(){
 void ACEventListener::s_mediaImported(int n,int nTot,int mId){
     service.post(boost::bind(&ACEventListener::mediaImported, this,n,nTot,mId));
 };
+void ACEventListener::s_mediasImported(int n,int nTot,std::vector<int> mIds){
+    service.post(boost::bind(&ACEventListener::mediasImported, this,n,nTot,mIds));
+};
 void ACEventListener::s_pluginProgress(std::string plugin_name,int n,int nTot,int mId){
     service.post(boost::bind(&ACEventListener::pluginProgress, this,plugin_name,n,nTot,mId));
 }

@@ -207,7 +207,7 @@ void ACPositionsPluginNodeLinkTreeLayout::firstWalk(int n, int num, int depth) {
 
     bool expanded = mediaBrowser->getMediaNode(n)->isDisplayed(); //n.isExpanded();
 
-    if ( mediaBrowser->getChildCountAtNeighborNode(n) == 0 || !expanded ) // is leaf
+    if ( mediaBrowser->getChildCountAtNeighborNode(n) == 0 /*|| !expanded*/ ) // is leaf
     {
         int l = mediaBrowser->getPreviousSiblingFromNeighborNode(n);
         if ( l == -1 ) {
@@ -216,7 +216,7 @@ void ACPositionsPluginNodeLinkTreeLayout::firstWalk(int n, int num, int depth) {
             np->setPrelim( getParams(l)->getPrelim() + spacing(l,n,true));
         }
     }
-    else if ( expanded )
+    else /*if ( expanded )*/
     {
         int leftMost = mediaBrowser->getFirstChildFromNeighborNode(n);
         int rightMost = mediaBrowser->getLastChildFromNeighborNode(n);
@@ -352,7 +352,7 @@ void ACPositionsPluginNodeLinkTreeLayout::secondWalk(int n, int p, double m, int
     setBreadth(n, p, np->getPrelim() + m);
     setDepth(n, p, m_depths[depth]);
 
-    if ( mediaBrowser->getMediaNode(n)->isDisplayed() ) {
+    /*if ( mediaBrowser->getMediaNode(n)->isDisplayed() )*/ {
         depth += 1;
         for ( int c = mediaBrowser->getFirstChildFromNeighborNode(n);
               c != -1; c = mediaBrowser->getNextSiblingFromNeighborNode(c) )

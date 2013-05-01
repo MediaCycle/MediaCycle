@@ -52,8 +52,9 @@ class ACEventManager{
 protected:
 
     std::vector<ACEventListener *> listeners;
-
+    
     std::vector<boost::signals2::connection> connect_mediaImported;
+    std::vector<boost::signals2::connection> connect_mediasImported;
     std::vector<boost::signals2::connection> connect_pluginProgress;
     std::vector<boost::signals2::connection> connect_libraryCleaned;
     std::vector<boost::signals2::connection> connect_activeFeatChanged;
@@ -69,6 +70,7 @@ public:
 
 #ifndef Q_MOC_RUN
     boost::signals2::signal<void (int n,int nTot,int mId)> sig_mediaImported;
+    boost::signals2::signal<void (int n,int nTot,std::vector<int> mIds)> sig_mediasImported;
     boost::signals2::signal<void (std::string plugin_name,int n,int nTot,int mId)> sig_pluginProgress;
     boost::signals2::signal<void ()> sig_libraryCleaned;
     boost::signals2::signal<void ()> sig_activeFeatChanged;

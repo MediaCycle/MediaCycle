@@ -44,12 +44,18 @@ bool ACOsgBrowserEventHandler::handle(const osgGA::GUIEventAdapter& ea,osgGA::GU
 		{
 			//printf("event PUSH: aa=%x\n", &aa);
 			osgViewer::View* view = dynamic_cast<osgViewer::View*>(&aa);
-			if (view) pick(view,ea,false);
+			//if (view) pick(view,ea,false);
+			if (view) clickNode(view,ea,false);
+            
 			return false;
 		}
 		case(osgGA::GUIEventAdapter::RELEASE):
 		{
 			//printf("event RELEASE: aa=%x\n", &aa);
+            osgViewer::View* view = dynamic_cast<osgViewer::View*>(&aa);
+			if (view) pick(view,ea,false);
+            releaseClickedNode();
+			
 			return false;
 		}
 		case(osgGA::GUIEventAdapter::KEYDOWN):
@@ -148,6 +154,83 @@ bool ACOsgBrowserEventHandler::handle(const osgGA::GUIEventAdapter& ea,osgGA::GU
 			return false;
 		}
 	}
+}
+
+void ACOsgBrowserEventHandler::clickNode(osgViewer::View* view, const osgGA::GUIEventAdapter& ea, bool hover)
+{
+	if (media_cycle == 0) return;
+	osgUtil::LineSegmentIntersector::Intersections intersections;
+	//osgUtil::PolytopeIntersector::Intersections intersections;
+    
+	std::string gdlist="";
+	float x = ea.getX();
+	float y = ea.getY();
+    
+	float xx = ea.getXnormalized();
+	float yy = ea.getYnormalized();
+    
+	//printf("pick (%f, %f)\n", x, y);
+    
+	//printf ("MOUSE: %f %f\n", x, y);
+    
+	if(hover) {
+		// SD TODO - OSG computeIntersections seems to crash often - avoid doing it while howering
+		//CF should we loop on the hoverWithPointer for each pointer?
+		if (media_cycle->getPointerFromId(-1))
+			media_cycle->getPointerFromId(-1)->setCurrentPosition(xx,yy);
+        //		media_cycle->hoverWithPointerId(xx, yy, -1);//mouse//TR NEM2011 1! Mouse Constructor call (cf		void ACOsgCompositeViewQt::updateGL()
+		return;
+	}
+    
+	if (view->computeIntersections(x,y,intersections))
+	{
+		//printf("got intersections\n");
+        
+		for(osgUtil::LineSegmentIntersector::Intersections::iterator hitr = intersections.begin();
+		    hitr != intersections.end();
+		    ++hitr)
+		{
+			std::ostringstream os;
+			if (!hitr->nodePath.empty() /*&& !(hitr->nodePath.back()->getName().empty())*/)
+			{
+				// the geodes are identified by name.
+				//os<<"Object \""<<hitr->nodePath.back()->getName()<<"\""<<std::endl;
+                
+				if(hitr->nodePath.back()->getUserData())
+				{
+					ACRefId *rid = (ACRefId*)hitr->nodePath.back()->getUserData();
+                    
+					if(!hover)
+						media_cycle->setClickedNode(rid->object_id);
+					break ; // only pick the first one
+				}
+                
+				//printf("picked %s\n", hitr->nodePath.back()->getName().c_str());
+			}
+			else if (hitr->drawable.valid())
+			{
+				//os<<"Object \""<<hitr->drawable->className()<<"\""<<std::endl;
+			}
+            
+			/*os<<"        local coords vertex("<< hitr->getLocalIntersectPoint()<<")"<<"  normal("<<hitr->getLocalIntersectNormal()<<")"<<std::endl;
+			 os<<"        world coords vertex("<< hitr->getWorldIntersectPoint()<<")"<<"  normal("<<hitr->getWorldIntersectNormal()<<")"<<std::endl;*/
+			const osgUtil::LineSegmentIntersector::Intersection::IndexList& vil = hitr->indexList;
+			for(unsigned int i=0;i<vil.size();++i)
+			{
+				os<<"        vertex indices ["<<i<<"] = "<<vil[i]<<std::endl;
+			}
+            
+			gdlist += os.str();
+		}
+	}
+	//setLabel(gdlist);
+}
+
+void ACOsgBrowserEventHandler::releaseClickedNode(){
+	if (media_cycle == 0) return;
+    if (media_cycle->getClickedNode()>-1)
+        media_cycle->setClickedNode(-1);
+    
 }
 
 void ACOsgBrowserEventHandler::pick(osgViewer::View* view, const osgGA::GUIEventAdapter& ea, bool hover)

@@ -280,6 +280,7 @@ std::vector<ACMediaThumbnail*> ACAudioWaveformThumbnailerPlugin::summarize(ACMed
             int m = 0; // channel id
             for(std::map<std::string,ACAudioWaveformThumbnailSpecs>::iterator thumbnail_specs = thumbnails_specs.begin(); thumbnail_specs != thumbnails_specs.end(); ++ thumbnail_specs){
                 // Produce coordinates of a reached waveform point, using the waveform specs callback
+                if (thumbnail_specs->second.hop_samples)
                 if(s % thumbnail_specs->second.hop_samples == 0){
                     if(thumbnail_specs->second.callback){
                         thumbnail_specs->second.callback(thumbnail_specs->second);

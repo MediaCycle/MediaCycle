@@ -291,9 +291,10 @@ void ACMediaBrowser::forwardNextLevel() {
             // store first otherwise we store the next state
             this->storeNavigationState();
             this->incrementNavigationLevels(node);
+            this->setReferenceNode(node);
+            
         }
         // in neighbors mode, the node is already unwrapped with forward down and node clicked
-        this->setReferenceNode(node);
         this->updateDisplay(true);
     }
 }
@@ -301,13 +302,13 @@ void ACMediaBrowser::changeReferenceNode() {
     int node = this->getClickedNode();
     if (node >= 0) {
         this->setReferenceNode(node);
-        if (this->getMode() == AC_MODE_NEIGHBORS) {
+        /*if (this->getMode() == AC_MODE_NEIGHBORS) {
             for (ACMediaNodes::iterator node = mMediaNodes.begin(); node != mMediaNodes.end(); ++node){
-            node->second->setDisplayed(false);
-        }
+                node->second->setDisplayed(false);
+            }
             mNeighborsManager->setReferenceNode(this->getReferenceNode(), 0);
         }
-        this->updateDisplay(true);
+        this->updateDisplay(true);*/
     }
 }
 
@@ -1129,6 +1130,13 @@ void ACMediaBrowser::setReferenceNode(int index)
     // XS TODO (index >= -1 && index < objects.size());
 
     mReferenceNode = index;
+    if (this->getMode() == AC_MODE_NEIGHBORS) {
+        for (ACMediaNodes::iterator node = mMediaNodes.begin(); node != mMediaNodes.end(); ++node){
+            node->second->setDisplayed(false);
+        }
+        mNeighborsManager->setReferenceNode(this->getReferenceNode(), 0);
+    }
+    this->updateDisplay(true);
 }
 
 void ACMediaBrowser::setState(ACBrowserState state)

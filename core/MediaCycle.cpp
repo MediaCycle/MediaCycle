@@ -470,7 +470,7 @@ int MediaCycle::importDirectories(vector<string> directories, int recursive, boo
                 needsNormalizeAndCluster = 1;
                 prevLibrarySize = mediaLibrary->getSize();
             }
-            needsNormalizeAndCluster = 1;
+            //needsNormalizeAndCluster = 1;
             normalizeFeatures(needsNormalizeAndCluster); // exclusively medialibrary
             //mediaBrowser->setNeedsNavigationUpdateLock(1);
             for (vector<int>::iterator media_id=media_ids.begin();media_id!=media_ids.end();media_id++)
@@ -872,7 +872,7 @@ void MediaCycle::dumpPluginsList(){this->pluginManager->dump();}
 // == Media
 ACMediaNode* MediaCycle::getMediaNode(int i) { return (mediaBrowser->getMediaNode(i)); }
 ACMediaNode* MediaCycle::getNodeFromMedia(ACMedia* _media) { return (mediaBrowser->getNodeFromMedia(_media)); }
-string MediaCycle::getMediaFileName(int i) { return mediaLibrary->getMedia(i)->getFileName(); }
+string MediaCycle::getMediaFileName(int i) { return (mediaLibrary->getMedia(i) ? mediaLibrary->getMedia(i)->getFileName():string("")); }
 ACMediaType MediaCycle::getMediaType(int i) { return mediaLibrary->getMedia(i)->getType(); }
 bool MediaCycle::mediaIsTagged(int i) { return (mediaLibrary->getMedia(i)?mediaLibrary->getMedia(i)->isTagged():false); }
 void MediaCycle::setMediaType(ACMediaType mt) {mediaLibrary->setMediaType(mt); }
@@ -1351,9 +1351,12 @@ int MediaCycle::readXMLConfigFileCore(TiXmlHandle _rootHandle) {
         libraryContentChanged(needsNormalizeAndCluster); // exclusively mediabrowser, thus updateAfterFileImport and importDirectories can't be move to ACMediaLibrary
         //mediaBrowser->setNeedsNavigationUpdateLock(0);
         //std::cout<<"MediaCycle::readXMLConfigFileCore:"<<this->mediaLibrary->getNumberOfFilesProcessed()<<"/"<<this->mediaLibrary->getNumberOfFilesToImport()<<"("<<media_id<<")"<<std::endl;
+    vector<int> locIds;
     for (int newId=beginIndex+1;newId<=lastIndex;newId++){
-        eventManager->sig_mediaImported(this->mediaLibrary->getNumberOfFilesProcessed(),this->mediaLibrary->getNumberOfFilesToImport(),newId);
+        locIds.push_back( newId);
+//        eventManager->sig_mediaImported(this->mediaLibrary->getNumberOfFilesProcessed(),this->mediaLibrary->getNumberOfFilesToImport(),newId);
     }
+    eventManager->sig_mediasImported(this->mediaLibrary->getNumberOfFilesProcessed(),this->mediaLibrary->getNumberOfFilesToImport(),locIds);
 
     n = this->mediaLibrary->getSize(); // segmentation might have increased the number of medias in the library
     eventManager->sig_mediaImported(n,n,-1);

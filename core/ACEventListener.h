@@ -74,6 +74,9 @@ public:
     virtual void mediaImported(int n,int nTot,int mId){
         std::cout<<"ACEventListener::mediaImported"<<std::endl;
     };
+    virtual void mediasImported(int n,int nTot,std::vector<int> mIds){
+        std::cout<<"ACEventListener::mediasImported"<<std::endl;
+    };
     virtual void pluginProgress(std::string plugin_name,int n,int nTot,int mId){
         std::cout << "ACEventListener::pluginProgress: plugin '" << plugin_name << "' "<< n << "/" << nTot << " for media of id: " << mId << std::endl;
     }
@@ -82,8 +85,9 @@ public:
     virtual void browserModeChanged(ACBrowserMode mode){};
     virtual void updateDisplayNeeded(){};
     virtual void pluginLoaded(std::string plugin_name){};
-
+    
     void s_mediaImported(int n,int nTot,int mId);
+    void s_mediasImported(int n,int nTot,std::vector<int> mIds);
     void s_pluginProgress(std::string plugin_name,int n,int nTot,int mId);
     void s_libraryCleaned();
     void s_activeFeatChanged();

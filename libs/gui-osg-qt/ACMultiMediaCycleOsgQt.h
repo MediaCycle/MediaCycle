@@ -220,7 +220,7 @@ private:
     bool hasMediaCycle();
     void changeMediaType(ACMediaType _mt);
 
-    void importDirectoriesThreaded(std::vector<std::string> directories);
+//    void importDirectoriesThreaded(std::vector<std::string> directories);
 
     QDockWidget* osgViewDock;
     QWidget* osgViewDockWidget;
@@ -239,6 +239,8 @@ protected:
     ACOsgCompositeViewQt* compositeOsgView;
     MediaCycle *media_cycle;
     ACSettingType setting;
+protected slots:
+    void importDirectoriesThreaded(std::vector<std::string> directories,bool askToSegment=true);
 
 };
 #endif

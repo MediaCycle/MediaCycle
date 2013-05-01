@@ -54,7 +54,9 @@ public:
 	void setMediaCycle(MediaCycle *_media_cycle) { this->media_cycle = _media_cycle; };
 
 	bool handle(const osgGA::GUIEventAdapter& ea,osgGA::GUIActionAdapter& aa);
-
+    
+    void clickNode(osgViewer::View* view, const osgGA::GUIEventAdapter& ea, bool hover);
+    void releaseClickedNode();
 	void pick(osgViewer::View* view, const osgGA::GUIEventAdapter& ea, bool hover);
 
 protected:

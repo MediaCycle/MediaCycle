@@ -1,8 +1,8 @@
 /**
  * @brief ACArmaVisPlugin.cpp
  * @author Thierry Ravet
- * @date 18/12/2012
- * @copyright (c) 2012 – UMONS - Numediart
+ * @date 01/05/2013
+ * @copyright (c) 2013 – UMONS - Numediart
  * 
  * MediaCycle of University of Mons – Numediart institute is 
  * licensed under the GNU AFFERO GENERAL PUBLIC LICENSE Version 3 
@@ -36,10 +36,14 @@
 
 using namespace arma;
 using namespace std;
+#include "Batch.h"
 
 #ifdef Knn_Validation
 #include "ClassificatorErrorMeasure.h"
 #include "dimensionReductionQuality.h"
+#include "Knn.h"
+
+#include "CrossSpaceClassificatorErrorMeasure.h"
 #endif
 
 
@@ -56,12 +60,12 @@ ACArmaVisPlugin::ACArmaVisPlugin() : ACClusterPositionsPlugin()
 #ifdef Knn_Validation
     knn_K=5;
     this->addNumberParameter("KNN Validation parameter",knn_K,1,20,1,"Number processed neighboor in KNN algorithm",boost::bind(&ACArmaVisPlugin::knnValueChanged,this));
-    batchSize=0.1;
+    batchSize=1.00;
     this->addNumberParameter("knn batch size",batchSize,0.01,1,0.01,"batch size in procent",boost::bind(&ACArmaVisPlugin::batchSizeValueChanged,this));
     batchNb=100;
     this->addNumberParameter("Number of batches",batchNb,10,1000,10,"number of batches",boost::bind(&ACArmaVisPlugin::batchNbValueChanged,this));
-    tw_K=100;
-    this->addNumberParameter("evaluation neighbor size",tw_K,10,500,10,"number of elements considered in neighborhood for Trustworthiness and continuity computation",boost::bind(&ACArmaVisPlugin::twkValueChanged,this));
+    tw_K=1000;
+    this->addNumberParameter("evaluation neighbor size",tw_K,10,1000,10,"number of elements considered in neighborhood for Trustworthiness and continuity computation",boost::bind(&ACArmaVisPlugin::twkValueChanged,this));
 #endif
 
     //local vars
@@ -82,9 +86,9 @@ void ACArmaVisPlugin::updateNextPositions(ACMediaBrowser* mediaBrowser){
     int nbActiveFeatures;
     mat desc_m, descD_m;
     mat posDisp_m;
-    urowvec tag;
+    urowvec _tag;
     nbActiveFeatures = 9;
-    extractDescMatrix(mediaBrowser, desc_m, featureNames,tag);
+    extractDescMatrix(mediaBrowser, desc_m, featureNames,_tag);
     descD_m=desc_m;
     if (desc_m.n_cols < 2){
         ACPoint p;
@@ -101,39 +105,113 @@ void ACArmaVisPlugin::updateNextPositions(ACMediaBrowser* mediaBrowser){
 //    mat descN_m = zscore(desc_m);
 //    mat coeff;
 //    mat score;
-//    princomp(coeff, posDisp_m, descN_m);
+    //    princomp(coeff, posDisp_m, descN_m);
+    string fileName=this->mName;
+#ifndef Knn_Validation
+    //umat tag(_tag.n_cols,2);
+    //tag.col(0)=linspace<ucolvec>(0, _tag.n_cols-1,_tag.n_cols);
+    //tag.col(1)=_tag.t();
     
-    dimensionReduction(posDisp_m,desc_m,tag);
+#ifdef USE_DEBUG
+    desc_m.save(fileName+string("_desc.txt"),arma_ascii);
+#endif
+    //float batchSize=0.2;
+    //Batch batchAlgo;
+    //batchAlgo.setTagVector((ucolvec)(_tag.t()));
+    //umat tag=batchAlgo.select(batchSize*1);
+    dimensionReduction(posDisp_m,desc_m,_tag.t());
+#ifdef USE_DEBUG
+    _tag.save(fileName+string("_tag.txt"),arma_ascii);
+    cout<<"LD max: "<<(max(posDisp_m))<<", min: "<<(min(posDisp_m))<<endl;
+    
+    cout<<"LD mean: "<<(mean(posDisp_m))<<", std: "<<(stddev(posDisp_m))<<endl;
+#endif
    // for (int i=0; i<featureNames.size(); i++)
    //     std::cout << "featureNames : " << featureNames[i] << std::endl;
+#else
     
-#ifdef Knn_Validation
+//#ifdef Knn_Validation
+    /*//for (int j=3;j<=10;j++)
+    {int j=1;
+        cout<<"Rate:"<<batchSize*j<<endl;
+    Batch batchAlgo;
+    batchAlgo.setTagVector((ucolvec)(_tag.t()));
+    umat tag=batchAlgo.select(batchSize*j);
+    dimensionReduction(posDisp_m,desc_m,tag);
+    knn algoKnn;
+    algoKnn.setFeatureMatrix(posDisp_m, tag);
+    ucolvec res=algoKnn.compute(knn_K);
+    cout<<"LD knn error with tagged data rate"<<endl;
+    cout<<batchSize*j<<"\t"<<(float)sum(res!=_tag.t())/res.n_elem<<endl;
+*/    
+    umat tag(_tag.n_cols,2);
+    
+    tag.col(0)=linspace<ucolvec>(0, _tag.n_cols-1,_tag.n_cols);
+    tag.col(1)=_tag.t();
+    dimensionReduction(posDisp_m,desc_m,tag);
+    posDisp_m.save(fileName+string("_posDisp.txt"),arma_ascii);
+    desc_m.save(fileName+string("_desc.txt"),arma_ascii);
+    tag.save(fileName+string("_tag.txt"),arma_ascii);
+    
     ClassificatorErrorMeasure algo;
-    algo.setTagVector(tag.t(), batchNb, batchSize, knn_K);
-    cout<<"knn classification error with high dimensionnal data"<<endl;
-    algo.errorKnnMeasure(descD_m);
-    cout<<"knn classification error with  dimensionnaly reduced data with "<<this->mName<<endl;
-    algo.errorKnnMeasure(posDisp_m);
+//    CrossSpaceClassificatorErrorMeasure algo4;
+    std::vector<double> HDKnnErrorMean(10),LDKnnErrorMean(10),HDLDKnnErrorMean(10);
+    std::vector<double> HDKnnErrorStd(10),LDKnnErrorStd(10),HDLDKnnErrorStd(10);
+    for (int i=1;i<=10;i++)
+    {
+        //int i=1;
+        cout<<"ClassificatorErrorMeasure sizebatch:"<< (double)i*batchSize/10.0<<endl;
+        algo.setTagVector(_tag.t(), batchNb, (double)i*batchSize/10.0, knn_K);
+  //      algo4.setTagVector(_tag.t(), batchNb, (double)i*batchSize/10.0, knn_K);
+        cout<<"HD:"<<algo.errorKnnMeasure(descD_m,HDKnnErrorMean[i-1],HDKnnErrorStd[i-1])<<endl;
+        cout<<"LD:"<<algo.errorKnnMeasure(posDisp_m,LDKnnErrorMean[i-1],LDKnnErrorStd[i-1])<<endl;
+  //      cout<<"LD&HD:"<<algo4.errorKnnMeasure(desc_m,posDisp_m,HDLDKnnErrorMean[i-1],HDLDKnnErrorStd[i-1])<<endl;
+        
+    }
+    cout<<"knn classification error with high dimensionnal data with "<<this->mName<<" (sizebatch errorMean errorStd)"<<endl;
+    for (int i=1;i<=10;i++){
+        cout<<(double)i*batchSize/10.0<<"\t"<<HDKnnErrorMean[i-1]<<"\t"<<HDKnnErrorStd[i-1]<<endl;
+    }
+    cout<<"knn classification error with  dimensionnaly reduced data with "<<this->mName<<" (sizebatch error)"<<endl;
+    for (int i=1;i<=10;i++){
+        cout<<(double)i*batchSize/10.0<<"\t"<<LDKnnErrorMean[i-1]<<"\t"<<LDKnnErrorStd[i-1]<<endl;
+    }
+//    cout<<"knn classification error HD&LD with  dimensionnaly reduced data with "<<this->mName<<" (sizebatch error)"<<endl;
+  //  for (int i=1;i<=10;i++){
+ //       cout<<(double)i*batchSize/10.0<<"\t"<<HDLDKnnErrorMean[i-1]<<"\t"<<HDLDKnnErrorStd[i-1]<<endl;
+   // }
+    
     dimensionReductionQuality algo2;
     algo2.setFeatureMatrixHighDim(desc_m);
     algo2.setFeatureMatrixLowDim(posDisp_m);
     std::vector<double> trustCont,continuityCont;
-    for (int k=10;k<=tw_K;k+=10){
+    int k=(int)((double)tw_K/100);
+    for (int kInc=1;kInc<=20;kInc++){
+        cout<<"dimensionReductionQuality it:"<<k<<"/"<<tw_K<<endl;
         double trust,continuity;
         algo2.compute(k,trust,continuity);
         trustCont.push_back(trust);
         continuityCont.push_back(continuity);
+         k=(int)((double)kInc*(double)tw_K/20);
     }
     int icpt=0;
-    for (int k=10;k<=tw_K;k+=10){
-        cout<<"Trustworthiness of dimension reduction \t"<<this->mName<<" for "<<k<<" neighboors :\t"<<trustCont[icpt]<<endl;
+    cout<<"Trustworthiness of dimension reduction \t"<<this->mName<<endl;
+     k=(int)((double)tw_K/100);
+    for (int kInc=1;kInc<=20;kInc++){
+        cout<<k<<"\t"<<trustCont[icpt]<<endl;
+        k=(int)((double)kInc*(double)tw_K/20);
         icpt++;
     }
     icpt=0;
-    for (int k=10;k<=tw_K;k+=10){
-        cout<<"Continuity of dimension reduction \t\t"<<this->mName<<" for "<<k<<" neighboors :\t"<<continuityCont[icpt]<<endl;
+    cout<<"Continuity of dimension reduction \t\t"<<this->mName<<endl;
+     k=(int)((double)tw_K/100);
+    for (int kInc=1;kInc<=20;kInc++){
+        cout<<k<<"\t"<<continuityCont[icpt]<<endl;
+        k=(int)((double)kInc*(double)tw_K/20);
         icpt++;
     }
+    
+
 #endif
 #ifdef USE_DEBUG
     posDisp_m.save("posDispDef.txt", arma_ascii);
@@ -147,17 +225,30 @@ void ACArmaVisPlugin::updateNextPositions(ACMediaBrowser* mediaBrowser){
 
     mediaBrowser->setNumberOfDisplayedNodes(desc_m.n_rows);
     ////////////////////////////////////////////////////////////////////////////////////
-
     
-    ACPoint p;
     int cpt=0;
-    float mx1=abs(min(posDisp_m.row(0)));
-    float mx2=max(posDisp_m.row(0));
-    float my1=abs(min(posDisp_m.row(1)));
-    float my2=max(posDisp_m.row(1));
+    int locRefNode=-1;
+    
+    for (int i=0; i<ids.size(); i++){
+        if (mediaBrowser->getMediaNode(ids[i])->isDisplayed()&&cpt<desc_m.n_rows){
+            if (mediaBrowser->getReferenceNode()==ids[i])
+                locRefNode=cpt;
+            cpt++;
+        }
+    }
+    if (locRefNode>-1&&locRefNode<posDisp_m.n_rows){
+        posDisp_m=posDisp_m-ones(posDisp_m.n_rows,1)*posDisp_m.row(locRefNode);
+    }
+    ACPoint p;
+    cpt=0;
+    float mx1=abs(min(posDisp_m.col(0)));
+    float mx2=max(posDisp_m.col(0));
+    float my1=abs(min(posDisp_m.col(1)));
+    float my2=max(posDisp_m.col(1));
     float mTot=2*max(max(mx1,my1),max(mx2,my2));
     if (mTot==0)
         mTot=1;
+   // mTot=1;
     for (int i=0; i<ids.size(); i++){
         if (mediaBrowser->getMediaNode(ids[i])->isDisplayed()&&cpt<desc_m.n_rows){
             //mediaBrowser->setMediaNodeDisplayed(ids[i], true);

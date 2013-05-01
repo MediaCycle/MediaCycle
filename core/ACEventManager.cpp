@@ -44,6 +44,7 @@ ACEventManager::~ACEventManager(){
 void ACEventManager::addListener(ACEventListener* eventListener){
     listeners.push_back(eventListener);
     connect_mediaImported.push_back(sig_mediaImported.connect(boost::bind(&ACEventListener::s_mediaImported, eventListener,_1, _2,_3))) ;
+    connect_mediasImported.push_back(sig_mediasImported.connect(boost::bind(&ACEventListener::s_mediasImported, eventListener,_1, _2,_3))) ;
     connect_pluginProgress.push_back(sig_pluginProgress.connect(boost::bind(&ACEventListener::s_pluginProgress, eventListener, _1, _2, _3, _4)));
     connect_libraryCleaned.push_back(sig_libraryCleaned.connect(boost::bind(&ACEventListener::s_libraryCleaned, eventListener))) ;
     connect_activeFeatChanged.push_back(sig_activeFeatChanged.connect(boost::bind(&ACEventListener::s_activeFeatChanged, eventListener))) ;

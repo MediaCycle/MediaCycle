@@ -201,6 +201,8 @@ ACMultiMediaCycleOsgQt::ACMultiMediaCycleOsgQt(QWidget *parent) : QMainWindow(pa
     compositeOsgView = new ACOsgCompositeViewQt();
     compositeOsgView->setSizePolicy ( QSizePolicy::MinimumExpanding, QSizePolicy::MinimumExpanding );
     osgViewDockLayout->addWidget(compositeOsgView);
+    connect( compositeOsgView, SIGNAL( importDirectoriesThreaded(std::vector<std::string>,bool ) ),
+            this, SLOT(importDirectoriesThreaded(std::vector<std::string>,bool) ) );
 
     progressBar = new ACQProgressBar(); //QProgressBar();
     osgViewDockLayout->addWidget(progressBar);
@@ -713,9 +715,11 @@ void ACMultiMediaCycleOsgQt::on_actionLoad_Media_Files_triggered(bool checked){
 // import (threaded or not) moved here instead of in MediaCycle
 // because of problems with Qt and threads
 // e.g., QCoreApplication::sendPostedEvents: Cannot send posted events for objects in another thread
-void ACMultiMediaCycleOsgQt::importDirectoriesThreaded(vector<string> directories) {
+void ACMultiMediaCycleOsgQt::importDirectoriesThreaded(vector<string> directories,bool askToSegment) {
     // check if the user wants segments
-    bool do_segments = this->doSegments();
+    bool do_segments=false;
+    if (askToSegment)
+        do_segments= this->doSegments();
     bool forward_order = true; // only make it false for AudioGarden where media have been presegmented and segments have special names
     int recursive = 1;
 
@@ -987,7 +991,10 @@ void ACMultiMediaCycleOsgQt::updateLibrary(){
     // XS TODO updateLibrary()
     media_cycle->libraryContentChanged();
 
-    media_cycle->setReferenceNode(0);
+    int refNode=media_cycle->getReferenceNode();
+    if (refNode<0||refNode>=media_cycle->getLibrarySize())
+        media_cycle->setReferenceNode(0);
+        
     // XS TODO this is sooo ugly:
     // XS TODO updateBrowser()
     media_cycle->getBrowser()->setState(AC_CHANGING);

@@ -159,9 +159,96 @@ ACOsgCompositeViewQt::ACOsgCompositeViewQt( QWidget * parent, const char * name,
 
     osg::setNotifyLevel(osg::WARN);//remove the NaN CullVisitor messages
     this->initInputActions();
-
+    
+    setAcceptDrops(true);
     //setRunFrameScheme( osgViewer::Viewer::ON_DEMAND );
+    dragFlag=false;
 }
+
+void ACOsgCompositeViewQt::dragEnterEvent(QDragEnterEvent *event)
+{
+    if (event->mimeData()->hasUrls())
+    {
+        event->acceptProposedAction();
+    }
+}
+void ACOsgCompositeViewQt::dropEvent(QDropEvent *event)
+{
+    if (event->mimeData()->hasUrls()&&dragFlag==false)
+    {
+        qDebug()<<event->mimeData()->urls().size();
+        qDebug()<<event->mimeData()->urls()[0].toString();
+        
+        std::vector<string> directories;
+        for (unsigned int i=0;i<event->mimeData()->urls().size();i++){
+            QFileInfo filename(event->mimeData()->urls()[i].toLocalFile());
+            qDebug()<<filename.fileName();
+            if (filename.exists()&&filename.suffix().size()>0){
+                std::vector<std::string> mediaExt = media_cycle->getExtensionsFromMediaType( media_cycle->getLibrary()->getMediaType() );
+                
+                if(mediaExt.size()==0){
+                    qDebug()<<"ACOsgCompositeViewQt::dropEvent No file extensions supported for this media type. Please check the media factory. Can't import media files.";
+                    continue;
+                }
+                
+                QString mediaExts = "Supported Extensions (";
+                std::vector<std::string>::iterator mediaIter = mediaExt.begin();
+                for(;mediaIter!=mediaExt.end();++mediaIter){
+                    if (mediaIter != mediaExt.begin())
+                        mediaExts.append(" ");
+                    mediaExts.append("*");
+                    mediaExts.append(QString((*mediaIter).c_str()));
+                }
+                mediaExts.append(")");
+                
+                qDebug()<<mediaExts;
+                if (mediaExts.contains(filename.suffix()))
+                {
+                    qDebug()<<filename.path();
+                    qDebug()<<filename.baseName();
+                    qDebug()<<filename.suffix();
+                    directories.push_back(filename.absoluteFilePath().toStdString());
+                }
+                
+            }
+        }
+        if (!(directories.empty())){
+            emit (importDirectoriesThreaded(directories,false));
+            for (std::vector<string>::reverse_iterator iter=directories.rbegin(); iter!=directories.rend();iter++){
+                int locId;
+                
+                locId=media_cycle->getLibrary()->getMediaIndex(*iter);
+                
+                if (locId>=0){
+                        media_cycle->setReferenceNode(locId);
+                    break;
+                
+                }
+                
+                
+                    
+            }
+            directories.empty();
+        }
+        
+    }
+    else{
+        dragFlag=false;
+        int button = 1;
+        QEvent *tempEvent=new QEvent(QEvent::MouseButtonRelease);
+        this->propagateEventToActions(tempEvent);
+        delete tempEvent;
+        osg_view->getEventQueue()->mouseButtonRelease(event->pos().x(), event->pos().y(), button);
+        std::cout << "ACOsgCompositeViewQt::mouseReleaseEvent clicked node " << media_cycle->getClickedNode() << std::endl;
+        if (media_cycle == 0) return;
+        if (media_cycle->getClickedNode()>-1)
+            media_cycle->setClickedNode(-1);
+        mousedown = 0;
+        borderdown = 0;
+        media_cycle->setNeedsDisplay(true);
+    }
+}
+
 
 void ACOsgCompositeViewQt::updateBrowserView(int _width, int _height){
     if (browser_view){
@@ -357,6 +444,8 @@ void ACOsgCompositeViewQt::paintGL()
 // called according to timer
 void ACOsgCompositeViewQt::updateGL()
 {
+    browser_renderer->mutexLock();
+    timeline_renderer->mutexLock();
     double frac = 0.0;
    
     if (media_cycle == 0) return;
@@ -419,6 +508,8 @@ void ACOsgCompositeViewQt::updateGL()
  */
     QGLWidget::updateGL();
     media_cycle->setNeedsDisplay(false);
+    browser_renderer->mutexLock();
+    timeline_renderer->mutexLock();
 }
 
 void ACOsgCompositeViewQt::addInputAction(ACInputActionQt* _action)
@@ -1052,11 +1143,46 @@ void ACOsgCompositeViewQt::mousePressEvent( QMouseEvent* event )
         borderdown = 1;
         refsepy = sepy;
     }
+    
+    if (event->button() == Qt::LeftButton)
+        dragStartPosition = event->pos();
     media_cycle->setNeedsDisplay(true);
 }
 
 void ACOsgCompositeViewQt::mouseMoveEvent( QMouseEvent* event )
 {
+    if (media_cycle&&event->buttons() ){
+        
+        if (media_cycle->getClickedNode()>-1){//DRAG (click on a node and move)
+            dragFlag=true;
+            cout<<(event->pos() - dragStartPosition).manhattanLength();
+            cout<<QApplication::startDragDistance();
+            if ((event->pos() - dragStartPosition).manhattanLength()
+                < QApplication::startDragDistance())
+                return;
+            
+            QDrag *drag = new QDrag(this);
+            QMimeData *mimeData = new QMimeData;
+            QList<QUrl> data;
+            QUrl locUrl;
+            locUrl.setPath(QString::fromStdString( media_cycle->getMediaFileName(media_cycle->getClickedNode())));
+            locUrl.setScheme(QString("file"));
+            data.push_back(locUrl);
+            mimeData->setUrls( data);
+            drag->setMimeData(mimeData);
+            std::string thumbName= media_cycle->getLibrary()->getMedia(media_cycle->getClickedNode())->getThumbnailFileName();
+            if ( thumbName.size()>0){
+                QImageReader *img=new QImageReader(QString::fromStdString(thumbName));
+            
+                drag->setPixmap(QPixmap::fromImageReader(img));
+                delete img;
+            }
+            Qt::DropAction dropAction = drag->exec(Qt::CopyAction);
+            
+            return;
+        }
+    }
+    
     int button = 0;
     switch(event->button())
     {
@@ -1096,6 +1222,7 @@ void ACOsgCompositeViewQt::mouseMoveEvent( QMouseEvent* event )
 
 void ACOsgCompositeViewQt::mouseReleaseEvent( QMouseEvent* event )
 {
+    dragFlag=false;
     int button = 0;
     switch(event->button())
     {
@@ -1109,8 +1236,9 @@ void ACOsgCompositeViewQt::mouseReleaseEvent( QMouseEvent* event )
     osg_view->getEventQueue()->mouseButtonRelease(event->x(), event->y(), button);
     //std::cout << "ACOsgCompositeViewQt::mouseReleaseEvent clicked node " << media_cycle->getClickedNode() << std::endl;
     if (media_cycle == 0) return;
-    media_cycle->setClickedNode(-1);
-    //std::cout << "ACOsgCompositeViewQt::mouseReleaseEvent clicked node erased " << std::endl;
+    if (media_cycle->getClickedNode()>-1)
+        media_cycle->setClickedNode(-1);
+    std::cout << "mouseReleaseEvent clicked node erased " << std::endl;
     mousedown = 0;
     borderdown = 0;
     media_cycle->setNeedsDisplay(true);

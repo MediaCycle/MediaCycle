@@ -211,6 +211,45 @@ void ACOsgBrowserRenderer::mediaImported(int n, int nTot,int mId){
     activity_update_mutex.unlock();
 #endif
 }
+void ACOsgBrowserRenderer::mediasImported(int n, int nTot,vector<int> mIds){
+    
+    if(!media_cycle){
+        std::cerr << "ACOsgBrowserRenderer::mediasImported: no media cycle set" << std::endl;
+        return;
+    }
+    
+    
+    //pthread_mutex_lock(&activity_update_mutex);
+#ifndef __MINGW32__
+    activity_update_mutex.lock();
+#endif
+    /* if(media_cycle->getMediaType() == media_cycle->getLibrary()->getMedia(mId)->getType())*/{
+        
+        for (int id=0;id<mIds.size();id++){
+            if(media_cycle->getLibrary()->getMedia(id) == 0){
+                std::cerr << "ACOsgBrowserRenderer::mediasImported: media id " << id << " ("<< n << "/" << nTot << ") not accessible" << std::endl;
+                return;
+            }
+            std::cout << "ACOsgBrowserRenderer::mediasImported adding to " << node_renderers.size() << " renderers the renderer for media id " << id << " ("<< n << "/" << nTot << ") " << std::endl;
+            for (int i=0;i<100;i++){
+                if (media_cycle->getMediaNode(id)!=0)
+                    break;
+                usleep(1);
+            }
+            
+            if(this->addNode(id)){
+                this->addLink(id);
+                nodes_prepared = 1;
+            }
+            
+        }
+    }
+    //    pthread_mutex_unlock(&activity_update_mutex);
+    
+#ifndef __MINGW32__
+    activity_update_mutex.unlock();
+#endif
+}
 
 void ACOsgBrowserRenderer::libraryCleaned(){
     std::cout << "ACOsgBrowserRenderer::libraryCleaned" << std::endl;
@@ -459,7 +498,7 @@ int ACOsgBrowserRenderer::computeScreenCoordinates(osgViewer::View* view, double
 
             ACMediaNode* attribute = media_cycle->getMediaNode(i);
 
-            if(node_renderer->second){
+            if(node_renderer->second&&attribute){
                 if (attribute->getChanged()) {
                     if (node_renderer->second->getInitialized()) {
                         node_renderer->second->setCurrentPos(node_renderer->second->getViewPos());
@@ -578,6 +617,8 @@ int ACOsgBrowserRenderer::computeScreenCoordinates(osgViewer::View* view, double
     }
     */
             if (attribute==0)
+                continue;
+            if (attribute->isDisplayed()==false)
                 continue;
             //ACOsgMediaRenderers::iterator node_renderer = node_renderers.find(i);
             if(node_renderer != node_renderers.end()){
@@ -888,6 +929,7 @@ void ACOsgBrowserRenderer::changeNodeColor(int _node, osg::Vec4 _color)
 void ACOsgBrowserRenderer::resetNodeColor(int _node)
 {
     activity_update_mutex.lock();
+    if (node_renderers[_node])
     node_renderers[_node]->resetNodeColor();
     activity_update_mutex.unlock();
 }

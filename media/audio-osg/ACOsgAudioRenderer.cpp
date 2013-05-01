@@ -228,6 +228,7 @@ void ACOsgAudioRenderer::auraGeode()
     aura_geode->addDrawable(new osg::ShapeDrawable(new osg::Cylinder(osg::Vec3(0.0f,0.0f,0.0f),localsize*1.5, 0.0f), hints)); // draws a disc
     //aura_geode->addDrawable(new osg::ShapeDrawable(new osg::Capsule(osg::Vec3(0.0f,0.0f,0.0f),0.01, 0.005f), hints)); // draws a sphere
 #endif
+     ((ShapeDrawable*)aura_geode->getDrawable(0))->setColor(osg::Vec4(0,0,0,1));
     aura_geode->setUserData(new ACRefId(node_index));
 }
 
@@ -284,6 +285,8 @@ void ACOsgAudioRenderer::updateNodes(double ratio) {
     unsigned int mask = (unsigned int)-1;
 
     const ACMediaNode* attribute = media_cycle->getMediaNode(node_index);
+    if (attribute==0)
+        return;
     if (!attribute->isDisplayed()){
         media_node->removeChild(waveform_transform);
         media_node->removeChild(metadata_geode);

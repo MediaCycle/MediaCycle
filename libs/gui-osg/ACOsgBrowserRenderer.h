@@ -57,6 +57,7 @@ public:
 
     //Callbacks
     void mediaImported(int n,int nTot,int mId);
+    void mediasImported(int n, int nTot,vector<int> mIds);
     void libraryCleaned();
 
     ACOsgMediaRenderers getMediaRenderers(){return node_renderers;}

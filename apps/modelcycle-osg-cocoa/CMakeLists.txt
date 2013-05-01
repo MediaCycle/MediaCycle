@@ -8,6 +8,7 @@ IF(SUPPORT_3DMODEL AND APPLE AND USE_COCOA AND USE_OSC)
 	ADD_DEPENDENCIES(modelcycle-osg-cocoa mediacycle-io-osc)
 	ADD_DEPENDENCIES(modelcycle-osg-cocoa mediacycle-osg-cocoa)
 	ADD_DEPENDENCIES(modelcycle-osg-cocoa mc_visualisation)
+	ADD_DEPENDENCIES(modelcycle-osg-cocoa mc_armaVisualisation)
 	ADD_DEPENDENCIES(modelcycle-osg-cocoa mc_3Dmodel)
 	set_target_properties(modelcycle-osg-cocoa PROPERTIES MACOSX_BUNDLE_INFO_PLIST ${CMAKE_SOURCE_DIR}/apps/modelcycle-osg-cocoa/Info.plist)
 	set_source_files_properties(MainMenu.nib PROPERTIES MACOSX_PACKAGE_LOCATION Resources) # doesn't seem to work if compiling outside XCode

@@ -112,6 +112,8 @@ public:
     virtual void paintGL();
 
 protected:
+    void dragEnterEvent(QDragEnterEvent *event);
+    void dropEvent(QDropEvent *event);
     virtual void initFont();
     virtual void initializeGL();
     virtual void resizeGL( int width, int height );
@@ -199,6 +201,8 @@ private:
     int screen_width;
     bool library_loaded;
     bool mouseover;
+    QPoint dragStartPosition;
+    bool dragFlag;
 
     //MediaBlender specific members:
 private:
@@ -209,5 +213,7 @@ protected:
     ACSettingType setting;
 public:
     void changeSetting(ACSettingType _setting);
+signals:
+    void importDirectoriesThreaded(std::vector<std::string> directories,bool flag);
 };
 #endif

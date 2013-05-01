@@ -1,5 +1,0 @@
-SET(PLUGIN_NAME "visualisation-advanced")
-SET(MC_LIBS "armadillo-isomap;visualisation")
-INCLUDE (${CMAKE_SOURCE_DIR}/cmake/AddMediaCyclePlugin.cmake)
-ADD_MC_PLUGIN_LIBRARY(${PLUGIN_NAME})
-MESSAGE("[X] ${TARGET_NAME}")

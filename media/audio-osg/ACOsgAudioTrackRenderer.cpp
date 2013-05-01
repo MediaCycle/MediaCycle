@@ -223,7 +223,8 @@ void ACOsgAudioTrackRenderer::segmentsGeode() {
         segments_group->addChild(segments_geodes[s]);
     }
     if(segments_n>0){
-        segments_transform->addChild(segments_group);
+        if (segments_transform)
+            segments_transform->addChild(segments_group);
     }
 }
 
@@ -312,7 +313,8 @@ void ACOsgAudioTrackRenderer::updateTracks(double ratio) {
                 //if (frame_n != floor(width/frame_min_width)){
                 //double segments_start = getTime();
                 std::cout << "Generating segments... ";
-                segments_transform->removeChild(segments_group);
+                if (segments_transform)
+                    segments_transform->removeChild(segments_group);
                 segmentsGeode();
                 //std::cout << getTime()-segments_start << " sec." << std::endl;
                 segments_number = media->getNumberOfSegments();

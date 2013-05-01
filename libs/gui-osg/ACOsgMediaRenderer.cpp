@@ -52,11 +52,16 @@ ACOsgMediaRenderer::ACOsgMediaRenderer() : ACOsgBaseRenderer() {
     media_node = new MatrixTransform();
 #endif
     node_color = Vec4(1,1,0.5,1); //CF seminal yellow
-    cluster_colors.push_back(osg::Vec4(1,1,0.5,1));
-    cluster_colors.push_back(osg::Vec4(1,0.5,1,1));
-    cluster_colors.push_back(osg::Vec4(0.5,1,0.5,1));
+    cluster_colors.push_back(osg::Vec4(1,1,0.5,1));//yello<
+    cluster_colors.push_back(osg::Vec4(1,0.5,1,1));//
+    //cluster_colors.push_back(osg::Vec4(0.5,1,0.5,1));//green
+    cluster_colors.push_back(osg::Vec4(0.1,0.8,0.4,1));//green
     cluster_colors.push_back(osg::Vec4(0.5,1,1,1));
-    cluster_colors.push_back(osg::Vec4(1,0.5,0.5,1));
+    cluster_colors.push_back(osg::Vec4(1,0.5,0.5,1));//red
+    cluster_colors.push_back(osg::Vec4(0.8,0.5,0.1,1));
+    cluster_colors.push_back(osg::Vec4(0.5,0.1,0.8,1));
+    cluster_colors.push_back(osg::Vec4(0.7,0.7,0.7,1));
+    cluster_colors.push_back(osg::Vec4(0.1,0.1,0.1,1));
     neighbor_color = Vec4(1,1,1,1);
     user_defined_color = false;
 
@@ -134,7 +139,9 @@ void ACOsgMediaNodeCallback::operator()( osg::Node* node, osg::NodeVisitor* nv )
 
 void ACOsgMediaRenderer::metadataGeode() {
 
-    osg::Vec4 textColor(0.9f,0.9f,0.9f,1.0f);
+//    osg::Vec4 textColor(0.9f,0.9f,0.9f,1.0f);
+    osg::Vec4 textColor(1.0f,1.0f,1.0f,1.0f);
+
     float textCharacterSize = 20.0f;
     if(this->setting == AC_SETTING_INSTALLATION)
         textCharacterSize = 46.0f;

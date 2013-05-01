@@ -141,7 +141,9 @@ void ACOsgHUDRenderer::preparePointers(osgViewer::View* view) {
         for (unsigned int i=n;i<pointer_renderer.size();i++) {
             //pointer_group->removeChild(i, 1);
             pointer_group->removeChild(pointer_renderer[i]->getNode());
-            delete pointer_renderer[i];
+            if (pointer_renderer[i])
+                delete pointer_renderer[i];
+            pointer_renderer[i]=0;
         }
         pointer_renderer.resize(n);
     }

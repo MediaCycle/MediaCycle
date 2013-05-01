@@ -76,21 +76,21 @@ void ACOsgBaseRenderer::setFilename(std::string media_cycle_filename) {
 osg::ref_ptr<osg::Geometry> ACOsgBaseRenderer::thumbnailGeometry(std::string _thumbnail_name) {
     //osg::ref_ptr<osg::Geode> geode = 0;
     if(_thumbnail_name=="" || _thumbnail_name=="None"){
-        std::cout << "ACOsgBaseRenderer::thumbnailGeometry: no thumbnails name specified" << std::endl;
+        //std::cout << "ACOsgBaseRenderer::thumbnailGeometry: no thumbnails name specified" << std::endl;
         return 0;
     }
     if(!this->media){
-        std::cout << "ACOsgBaseRenderer::thumbnailGeometry: can't access thumbnails, media not set" << std::endl;
+        //std::cout << "ACOsgBaseRenderer::thumbnailGeometry: can't access thumbnails, media not set" << std::endl;
         return 0;
     }
     std::string thumbnail_filename = media->getThumbnailFileName(_thumbnail_name);
     if(thumbnail_filename==""){
-        std::cout << "ACOsgBaseRenderer::thumbnailGeometry: can't access thumbnail" << std::endl;
+        //std::cout << "ACOsgBaseRenderer::thumbnailGeometry: can't access thumbnail" << std::endl;
         return 0;
     }
     ACMediaThumbnail* media_thumbnail = media->getThumbnail(_thumbnail_name);
     if(!media_thumbnail){
-        std::cout << "ACOsgBaseRenderer::thumbnailGeometry: can't access media thumbnail" << std::endl;
+        //std::cout << "ACOsgBaseRenderer::thumbnailGeometry: can't access media thumbnail" << std::endl;
         return 0;
     }
     std::string extension = boost::filesystem::extension(thumbnail_filename).substr(1);
@@ -100,16 +100,16 @@ osg::ref_ptr<osg::Geometry> ACOsgBaseRenderer::thumbnailGeometry(std::string _th
 
     osg::ref_ptr<osgDB::ReaderWriter> readerWriter = osgDB::Registry::instance()->getReaderWriterForExtension(extension);
     if (!readerWriter){
-        cerr << "ACOsgBaseRenderer::thumbnailGeometry: can't find an OSG plugin to read file '" << thumbnail_filename << "'" << endl;
+       // cerr << "ACOsgBaseRenderer::thumbnailGeometry: can't find an OSG plugin to read file '" << thumbnail_filename << "'" << endl;
         return 0;
     }
     else{
-        cout <<"ACOsgBaseRenderer::thumbnailGeometry: using OSG plugin: "<< readerWriter->className() <<std::endl;
+       // cout <<"ACOsgBaseRenderer::thumbnailGeometry: using OSG plugin: "<< readerWriter->className() <<std::endl;
     }
 
     osg::ref_ptr<osg::Image> thumbnail_image = osgDB::readImageFile(thumbnail_filename);
     if (!thumbnail_image){
-        cerr << "<ACOsgBaseRenderer::thumbnailGeometry: problem loading thumbnail" << endl;
+        //cerr << "<ACOsgBaseRenderer::thumbnailGeometry: problem loading thumbnail" << endl;
         return 0;
     }
     osg::ref_ptr<osg::Texture2D> thumbnail_texture = new osg::Texture2D;
@@ -121,7 +121,7 @@ osg::ref_ptr<osg::Geometry> ACOsgBaseRenderer::thumbnailGeometry(std::string _th
 
     int width = media->getThumbnail(_thumbnail_name)->getWidth();
     int height = media->getThumbnail(_thumbnail_name)->getHeight();
-    std::cout << "ACOsgBaseRenderer::thumbnailGeometry: geode with (thumbnail) width " <<  width << " and height " << height << std::endl;
+    //std::cout << "ACOsgBaseRenderer::thumbnailGeometry: geode with (thumbnail) width " <<  width << " and height " << height << std::endl;
 
     // image vertices
     float zpos = 0;// 0.02;
