@@ -68,17 +68,11 @@ QT_END_NAMESPACE
 
 class ACSettingsDialogQt; // forward declaration; NB: SettingsDialog member has to be a pointer
 
-class ACDetachedMediaBrowserOsgQt : public QMainWindow {
-    Q_OBJECT
-public:
-    ACDetachedMediaBrowserOsgQt(QWidget *parent = 0): QMainWindow(parent){}
-};
-
 class ACQProgressBar : public QProgressBar {
     Q_OBJECT
 public:
     ACQProgressBar(QWidget *parent = 0);
-    ~ACQProgressBar(){};
+    ~ACQProgressBar(){}
 
 public slots:
     void loading_started();
@@ -108,7 +102,6 @@ public slots:
     void on_actionLoad_Media_Files_triggered(bool checked);
     void on_actionClean_triggered(bool checked);
     void on_actionHelpAbout_triggered(bool checked);
-    void on_actionDetachBrowser_triggered(bool checked);
     void on_actionFullscreen_triggered(bool checked);
     void on_actionToggle_Controls_triggered(bool checked);
     void on_actionEdit_Library_Metadata_triggered(bool checked);
@@ -204,7 +197,6 @@ private:
     ACAbstractAboutDialogQt* aboutDialog;
     ACInputControlsDialogQt* controlsDialog;
     ACSegmentationControlsDialogQt* segmentationDialog;
-    QMainWindow* detachedBrowser;
 
     // methods
     bool readQSettings();
@@ -225,9 +217,6 @@ private:
     QDockWidget* osgViewDock;
     QWidget* osgViewDockWidget;
     QVBoxLayout *osgViewDockLayout;
-    QWidget* osgViewDockTitleBar;
-    QRect osgViewDockNormalSize;
-    //QProgressBar* progressBar;
     ACQProgressBar* progressBar;
 
     bool use_segmentation_current,use_segmentation_default,use_feature_extraction,use_visualization_plugins;

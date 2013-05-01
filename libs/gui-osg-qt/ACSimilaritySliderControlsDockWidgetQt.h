@@ -53,6 +53,7 @@ public:
     ACSimilaritySliderControlsDockWidgetQt(QWidget *parent = 0);
     virtual ~ACSimilaritySliderControlsDockWidgetQt(){}
     virtual bool canBeVisible(ACMediaType _media_type);
+    virtual Qt::DockWidgetArea favoriteArea(){return Qt::LeftDockWidgetArea;}
 
 protected:
     Ui::ACSimilaritySliderControlsDockWidgetQt ui;

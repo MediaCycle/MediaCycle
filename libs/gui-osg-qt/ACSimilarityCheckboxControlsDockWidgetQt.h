@@ -53,6 +53,7 @@ public:
     ACSimilarityCheckboxControlsDockWidgetQt(QWidget *parent = 0);
     virtual ~ACSimilarityCheckboxControlsDockWidgetQt(){}
     virtual bool canBeVisible(ACMediaType _media_type);
+    virtual Qt::DockWidgetArea favoriteArea(){return Qt::LeftDockWidgetArea;}
 
 protected:
     Ui::ACSimilarityCheckboxControlsDockWidgetQt ui;

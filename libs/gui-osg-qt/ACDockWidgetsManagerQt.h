@@ -45,6 +45,8 @@ Q_OBJECT
 
 public slots:
     void syncControlToggleWithDocks();
+    void anchorDocks(bool anchor);
+    void updateDocksVisibility(bool visibility);
 signals:
     void toggleControls(bool);
     void mediaConfigChanged(ACMediaType);
@@ -55,7 +57,6 @@ public:
 
     virtual void setMediaCycle(MediaCycle* _media_cycle);
     virtual void setOsgView(ACOsgCompositeViewQt* _osg_view);
-    void updateDocksVisibility(bool visibility);
     void updateDockHeight();
 
     ACAbstractDockWidgetQt* addControlDock(ACAbstractDockWidgetQt* dock);

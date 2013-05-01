@@ -40,7 +40,7 @@
    </font>
   </property>
   <property name="features">
-   <set>QDockWidget::DockWidgetClosable</set>
+   <set>QDockWidget::DockWidgetClosable|QDockWidget::DockWidgetFloatable</set>
   </property>
   <property name="allowedAreas">
    <set>Qt::LeftDockWidgetArea</set>

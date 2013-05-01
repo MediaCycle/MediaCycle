@@ -59,6 +59,7 @@ public:
     ACBrowserControlsCompleteDockWidgetQt(QWidget *parent = 0);
     virtual ~ACBrowserControlsCompleteDockWidgetQt(){}
     virtual bool canBeVisible(ACMediaType _media_type);
+    virtual Qt::DockWidgetArea favoriteArea(){return Qt::LeftDockWidgetArea;}
 
 protected:
     Ui::ACBrowserControlsCompleteDockWidgetQt ui;

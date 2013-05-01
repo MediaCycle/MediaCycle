@@ -141,7 +141,11 @@ void ACMultiMediaCycleOsgQt::pluginLoaded(std::string plugin_name){
 
 // ----------- 
 
-ACMultiMediaCycleOsgQt::ACMultiMediaCycleOsgQt(QWidget *parent) : QMainWindow(parent),ACEventListener(),features_known(false),detachedBrowser(0),	aboutDialog(0),controlsDialog(0),compositeOsgView(0),osgViewDock(0),osgViewDockWidget(0),osgViewDockLayout(0),osgViewDockTitleBar(0),progressBar(0),metadataWindow(0),userProfileWindow(0),segmentationDialog(0)
+ACMultiMediaCycleOsgQt::ACMultiMediaCycleOsgQt(QWidget *parent)
+    : QMainWindow(parent),ACEventListener(),features_known(false),
+      aboutDialog(0),controlsDialog(0),compositeOsgView(0),
+      osgViewDockWidget(0),osgViewDockLayout(0),progressBar(0),metadataWindow(0),
+      userProfileWindow(0),segmentationDialog(0)
 {
     ui.setupUi(this); // first thing to do
     this->media_type = MEDIA_TYPE_NONE;
@@ -168,10 +172,13 @@ ACMultiMediaCycleOsgQt::ACMultiMediaCycleOsgQt(QWidget *parent) : QMainWindow(pa
 #endif
 
     dockWidgetsManager = new ACDockWidgetsManagerQt(this);
-    connect( dockWidgetsManager, SIGNAL( toggleControls(bool) ),
-             ui.actionToggle_Controls, SLOT(setChecked(bool) ) );
+    connect( dockWidgetsManager, SIGNAL( toggleControls(bool)), ui.actionToggle_Controls, SLOT(setChecked(bool)));
     aboutDialogFactory = new ACAboutDialogFactoryQt();
     settingsDialog = new ACSettingsDialogQt(this);
+
+    //connect( ui.actionAnchor_Controls, SIGNAL(triggered(bool)), dockWidgetsManager, SLOT(updateDocksVisibility(bool)));
+    //connect( dockWidgetsManager, SIGNAL( toggleControls(bool)), ui.actionAnchor_Controls, SLOT(setChecked(bool)));
+    connect( ui.actionAnchor_Controls, SIGNAL(triggered(bool)), dockWidgetsManager, SLOT(anchorDocks(bool)));
 
     // This is required to populate the available file extensions list at startup
     // until we clean mediacycle instead of deleting/creating it at every media type change.
@@ -179,24 +186,11 @@ ACMultiMediaCycleOsgQt::ACMultiMediaCycleOsgQt(QWidget *parent) : QMainWindow(pa
     ACMediaFactory::getInstance().useRendering(true);
     // Since it is time consuming, we might want to add a splash screen with progress bar at startup?
 
-    // Docked osg browser
-    ui.centralwidget->hide();
-
     osgViewDockWidget = new QWidget; // it seems this intermediary widget is required to set a layout to a dock widget
     osgViewDockLayout = new QVBoxLayout;
     osgViewDockLayout->setSpacing(0); // no blank space between the progress bar and the osg view
     osgViewDockLayout->setContentsMargins(0,0,0,0);// no unnecessary corners in the osg view dock widget (this supersedes the OS theme defaults)
     osgViewDockWidget->setLayout(osgViewDockLayout);
-
-    osgViewDock = new QDockWidget(this);
-    osgViewDock->setSizePolicy ( QSizePolicy::MinimumExpanding, QSizePolicy::MinimumExpanding );
-    osgViewDock->setWidget(osgViewDockWidget);
-    osgViewDock->setAllowedAreas(Qt::RightDockWidgetArea);
-    osgViewDock->setFeatures(QDockWidget::DockWidgetFloatable);
-    osgViewDock->setWindowTitle("Browser");
-    this->addDockWidget(Qt::RightDockWidgetArea,osgViewDock);
-    osgViewDockTitleBar = osgViewDock->titleBarWidget();
-    osgViewDockNormalSize = QRect();
 
     compositeOsgView = new ACOsgCompositeViewQt();
     compositeOsgView->setSizePolicy ( QSizePolicy::MinimumExpanding, QSizePolicy::MinimumExpanding );
@@ -206,6 +200,12 @@ ACMultiMediaCycleOsgQt::ACMultiMediaCycleOsgQt(QWidget *parent) : QMainWindow(pa
 
     progressBar = new ACQProgressBar(); //QProgressBar();
     osgViewDockLayout->addWidget(progressBar);
+    //this->setCentralWidget(osgViewDockWidget);
+
+    QWidget* container = new QWidget;
+    container->setLayout(osgViewDockLayout);
+    this->setCentralWidget(container);
+
 
     // to make window appear on top of others.
     this->activateWindow();
@@ -267,13 +267,10 @@ ACMultiMediaCycleOsgQt::~ACMultiMediaCycleOsgQt(){
     delete dockWidgetsManager;
     if (aboutDialog) delete aboutDialog;
     if (controlsDialog) delete controlsDialog;
-    if (detachedBrowser) delete detachedBrowser;
     if (compositeOsgView) delete compositeOsgView;
     if (progressBar) delete progressBar;
     if (osgViewDockLayout) delete osgViewDockLayout;
     if (osgViewDockWidget) delete osgViewDockWidget;
-    if (osgViewDockTitleBar) delete osgViewDockTitleBar;
-    if (osgViewDock) delete osgViewDock;
     this->destroyMediaCycle();
     if (metadataWindow) delete metadataWindow;
     if (userProfileWindow) delete userProfileWindow;
@@ -363,7 +360,7 @@ void ACMultiMediaCycleOsgQt::on_actionLoad_XML_triggered(bool checked){
 bool ACMultiMediaCycleOsgQt::readXMLConfig(string _filename){
     if (_filename==""){
         QString fileName;
-        QFileDialog dialog(osgViewDock,"Open XML Library File(s)");
+        QFileDialog dialog(this,"Open XML Library File(s)");
         dialog.setDefaultSuffix ("xml");
         dialog.setNameFilter("Library Files (*.xml)");
         dialog.setFileMode(QFileDialog::ExistingFile); 	// change to ExistingFiles for multiple file handling
@@ -504,7 +501,7 @@ bool ACMultiMediaCycleOsgQt::readXMLConfig(string _filename){
 
         // 4) load the media elements (features and segments already pre-computed)
         media_cycle->readXMLConfigFileCore(rootHandle);
-     
+
 
         // XS TODO check this.
         // should be overwritten if dimensions do not match
@@ -550,15 +547,15 @@ void ACMultiMediaCycleOsgQt::writeXMLConfig(string _filename){
             QString filter=QString("MediaCycle XML Library (*.xml)");
             try{
                 //CF condensed version that crashes on OSX 10.8+ when selecting the folder from the drop-down menu
-                //fileName = QFileDialog::getSaveFileName(osgViewDock, tr("Save Config as XML Library"),"",filter));
+                //fileName = QFileDialog::getSaveFileName(this, tr("Save Config as XML Library"),"",filter));
 
                 //CF alternative with multiple file formats
-                //fileName = QFileDialog::getSaveFileName(osgViewDock, tr("Save Config as XML Library"),"",filters,&filter);
+                //fileName = QFileDialog::getSaveFileName(this, tr("Save Config as XML Library"),"",filters,&filter);
 
                 //CF non-native alternative: ugly and won't provide the user-bookmarked locations
-                //fileName = QFileDialog::getSaveFileName(osgViewDock, tr("Save Config as XML Library"),"",filter,0,QFileDialog::DontUseNativeDialog);
+                //fileName = QFileDialog::getSaveFileName(this, tr("Save Config as XML Library"),"",filter,0,QFileDialog::DontUseNativeDialog);
 
-                QFileDialog dialog(osgViewDock,"Save Config as XML Library");
+                QFileDialog dialog(this,"Save Config as XML Library");
                 dialog.setDefaultSuffix("xml");
 #ifndef __APPLE__
                 dialog.setNameFilter("MediaCycle XML Library (*.xml)"); // CF this makes the dialog crash when selecting the folder from the drop-down menu
@@ -608,7 +605,7 @@ void ACMultiMediaCycleOsgQt::on_actionLoad_Media_Directory_triggered(bool checke
 
     QString select_dir = QFileDialog::getExistingDirectory
             (
-                osgViewDock,
+                this,
                 tr("Open Directory"),
                 "",
                 QFileDialog::ShowDirsOnly | QFileDialog::DontResolveSymlinks
@@ -643,12 +640,12 @@ void ACMultiMediaCycleOsgQt::on_actionLoad_Media_Directory_triggered(bool checke
   this->updateLibrary();
  }
  else if (res==0) {
-  warn_button = QMessageBox::warning(osgViewDock, "Warning",
+  warn_button = QMessageBox::warning(this, "Warning",
               "Empty Directory"); //, <#const QString button0Text#>, <#const QString button1Text#>, <#const QString button2Text#>, <#int defaultButtonNumber#>, <#int escapeButtonNumber#>);
 
  }
  else  {
-  warn_button = QMessageBox::warning(osgViewDock, "Error",
+  warn_button = QMessageBox::warning(this, "Error",
               "Problem Importing Directory"); //, <#const QString button0Text#>, <#const QString button1Text#>, <#const QString button2Text#>, <#int defaultButtonNumber#>, <#int escapeButtonNumber#>);
  }
  statusBar()->clearMessage();
@@ -668,7 +665,7 @@ void ACMultiMediaCycleOsgQt::on_actionLoad_Media_Files_triggered(bool checked){
     if (! hasMediaCycle()) return;
 
     QString fileName;
-    QFileDialog dialog(osgViewDock,"Open MediaCycle Media File(s)");
+    QFileDialog dialog(this,"Open MediaCycle Media File(s)");
 
     //CF generating supported file extensions from used media I/O libraries and current media type:
     std::vector<std::string> mediaExt = media_cycle->getExtensionsFromMediaType( media_cycle->getLibrary()->getMediaType() );
@@ -862,74 +859,27 @@ void ACMultiMediaCycleOsgQt::on_actionEdit_Profile_triggered(bool checked) {
         userProfileWindow->show();
 }
 
-void ACMultiMediaCycleOsgQt::on_actionDetachBrowser_triggered(bool checked) {
-    if (osgViewDock->isFloating()){
-        osgViewDock->setFloating(false);
-    }
-    else{
-        osgViewDock->setFloating(true);
-    }
-    compositeOsgView->setFocus();
-}
-
 void ACMultiMediaCycleOsgQt::on_actionFullscreen_triggered(bool checked) {
-    if (compositeOsgView->isFullScreen() || osgViewDock->isFullScreen() || this->isFullScreen()){
+    if (compositeOsgView->isFullScreen() || this->isFullScreen()){
         std::cout << "Not fullscreen" << std::endl;
-        osgViewDock->setTitleBarWidget(osgViewDockTitleBar);
-        if (!osgViewDock->isFloating()){
-            this->showNormal();
-            compositeOsgView->showNormal();
-            ui.actionToggle_Controls->setChecked(true);
-            this->on_actionToggle_Controls_triggered(true);
-            ui.menubar->show();
-            ui.statusbar->show();
-            ui.toolbar->show();
-        }
-        else{
-            if (osgViewDockNormalSize != QRect())
-                osgViewDock->setGeometry(osgViewDockNormalSize);
-        }
-        osgViewDock->showNormal();
+        this->readQSettings();
+        this->showNormal();
+        compositeOsgView->showNormal();
+        ui.actionToggle_Controls->setChecked(true);
+        this->on_actionToggle_Controls_triggered(true);
+        ui.menubar->show();
+        ui.statusbar->show();
+        ui.toolbar->show();
     }
     else{
-
-        if (!osgViewDock->isFloating()){
-            ui.actionToggle_Controls->setChecked(false);
-            this->on_actionToggle_Controls_triggered(false);
-            ui.menubar->hide();
-            ui.statusbar->hide();
-            ui.toolbar->hide();
-
-            QWidget* lTitleBar = osgViewDock->titleBarWidget();
-            QWidget* lEmptyWidget = new QWidget();
-            osgViewDock->setTitleBarWidget(lEmptyWidget);
-            delete lTitleBar;
-
-            compositeOsgView->showFullScreen();
-            this->showFullScreen();
-            //this->setFocusPolicy(Qt::StrongFocus);
-            //compositeOsgView->showFullScreen();
-        }
-        else{
-            osgViewDockNormalSize = osgViewDock->geometry();
-
-            std::cout << QApplication::desktop()->screenCount() << " screen(s)"<< std::endl;
-
-            std::cout << "Primary screen " << QApplication::desktop()->primaryScreen()<< std::endl;
-            //QApplication::desktop()->screenGeometry ( int screen = -1 )<< std::endl;
-            QRect geo = QApplication::desktop()->screenGeometry(osgViewDock);
-            std::cout << "Browser in screen of size " << geo.width() <<" "<<geo.height()<< std::endl;
-            std::cout << "Browser in screen number " << QApplication::desktop()->screenNumber(osgViewDock)<< std::endl;
-
-            QWidget* lTitleBar = osgViewDock->titleBarWidget();
-            QWidget* lEmptyWidget = new QWidget();
-            osgViewDock->setTitleBarWidget(lEmptyWidget);
-            delete lTitleBar;
-
-            osgViewDock->setGeometry(geo);
-            compositeOsgView->showFullScreen();
-            osgViewDock->showFullScreen();
-        }
+        this->writeQSettings();
+        ui.actionToggle_Controls->setChecked(false);
+        this->on_actionToggle_Controls_triggered(false);
+        ui.menubar->hide();
+        ui.statusbar->hide();
+        ui.toolbar->hide();
+        compositeOsgView->showFullScreen();
+        this->showFullScreen();
 
         std::cout << "Fullscreen" << std::endl;
     }
@@ -1174,14 +1124,14 @@ bool ACMultiMediaCycleOsgQt::loadDefaultConfig(ACAbstractDefaultConfig* _config)
     //    this->addControlDock("MCOSC");
     if(media_cycle->getDefaultConfigsNumber()>1)
         this->addControlDock("MCMediaConfig");
-    #ifdef SUPPORT_MULTIMEDIA
+#ifdef SUPPORT_MULTIMEDIA
     if(_config->mediaType() == MEDIA_TYPE_MIXED){
         if(_config->mediaReaderPlugin() != "")
             media_cycle->setMediaReaderPlugin(_config->mediaReaderPlugin());
         media_cycle->setActiveMediaType(_config->activeMediaType());
         this->addControlDock("MCMediaDocumentOption");
     }
-    #endif
+#endif
 
     if(_config->useNeighbors()){
         //this->addControlDock("MCSimilaritySliderControls");
@@ -1299,7 +1249,7 @@ void ACMultiMediaCycleOsgQt::showError(std::string s){
     int warn_button;
     const QString qs = QString::fromStdString(s);
     if(this->setting != AC_SETTING_INSTALLATION)
-        warn_button = QMessageBox::warning(osgViewDock, "Error", qs);
+        warn_button = QMessageBox::warning(this, "Error", qs);
     cerr << s << endl;
 }
 
@@ -1352,7 +1302,6 @@ void ACMultiMediaCycleOsgQt::closeEvent(QCloseEvent *event) {
         break;
     }
     if (really_quit) {
-        if(detachedBrowser) delete detachedBrowser;
         QMainWindow::closeEvent(event);
         qDebug("closed application window properly");
     }

@@ -9,8 +9,8 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>466</width>
-    <height>325</height>
+    <width>550</width>
+    <height>566</height>
    </rect>
   </property>
   <property name="sizePolicy">
@@ -21,7 +21,7 @@
   </property>
   <property name="minimumSize">
    <size>
-    <width>466</width>
+    <width>550</width>
     <height>325</height>
    </size>
   </property>
@@ -52,7 +52,7 @@
     <rect>
      <x>0</x>
      <y>0</y>
-     <width>466</width>
+     <width>550</width>
      <height>22</height>
     </rect>
    </property>
@@ -88,8 +88,9 @@
      <string>Display</string>
     </property>
     <addaction name="actionFullscreen"/>
-    <addaction name="actionDetachBrowser"/>
+    <addaction name="actionAnchor_Controls"/>
     <addaction name="actionToggle_Controls"/>
+    <addaction name="separator"/>
    </widget>
    <addaction name="menuFile"/>
    <addaction name="menuConfig"/>
@@ -172,7 +173,7 @@
     <bool>true</bool>
    </property>
    <property name="text">
-    <string>Controls</string>
+    <string>Toggle Controls</string>
    </property>
    <property name="toolTip">
     <string>Toggle Dock Panel Controls</string>
@@ -236,9 +237,18 @@
     <string>Ctrl+F</string>
    </property>
   </action>
-  <action name="actionDetachBrowser">
+  <action name="actionAnchor_Controls">
+   <property name="checkable">
+    <bool>true</bool>
+   </property>
+   <property name="checked">
+    <bool>true</bool>
+   </property>
    <property name="text">
-    <string>Detach Browser</string>
+    <string>Anchor Controls</string>
+   </property>
+   <property name="toolTip">
+    <string>Anchor Controls</string>
    </property>
    <property name="shortcut">
     <string>Ctrl+D</string>

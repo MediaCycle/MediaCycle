@@ -113,7 +113,7 @@ ACAbstractDockWidgetQt* ACDockWidgetsManagerQt::addControlDock(ACAbstractDockWid
         //if( dock->getMediaType() == MEDIA_TYPE_ALL || dock->getMediaType() == media_type || dock->getMediaType() == MEDIA_TYPE_MIXED ){
         if( dock->canBeVisible(media_type) ){
             lastDocksVisibilities.insert(std::pair<std::string,int>( dock->getClassName(),1));
-            mainWindow->addDockWidget(Qt::LeftDockWidgetArea,dockWidgets.back());
+            mainWindow->addDockWidget(dockWidgets.back()->favoriteArea(),dockWidgets.back());
             dockWidgets.back()->setVisible(true);
             connect(dockWidgets.back(), SIGNAL(visibilityChanged(bool)), this , SLOT(syncControlToggleWithDocks()));
         }
@@ -226,6 +226,21 @@ void ACDockWidgetsManagerQt::updateDockHeight()
     //std::cout << "window height " << mainWindow->minimumHeight() << " or " << windowHeight << " / availHeight " << availHeight << std::endl;
 }
 
+void ACDockWidgetsManagerQt::anchorDocks(bool anchor){
+    for (int d=0;d<dockWidgets.size();d++){
+        if( dockWidgets[d]){
+            if(anchor){
+                if(dockWidgets[d]->isFloating())
+                    dockWidgets[d]->setFloating(false);
+            }
+            else{
+                if(dockWidgets[d]->isFloating() == false)
+                    dockWidgets[d]->setFloating(true);
+            }
+        }
+    }
+}
+
 void ACDockWidgetsManagerQt::syncControlToggleWithDocks(){
     int docksVisibilitiesSum = 0;
 
@@ -286,7 +301,7 @@ void ACDockWidgetsManagerQt::changeMediaType(ACMediaType _media_type){
         //if (dockWidgets[d]->getMediaType() == MEDIA_TYPE_ALL || dockWidgets[d]->getMediaType() == _media_type || dockWidgets[d]->getMediaType() == MEDIA_TYPE_MIXED){
         if( dockWidgets[d]->canBeVisible(_media_type) ){
             if (mainWindow->dockWidgetArea(dockWidgets[d]) == Qt::NoDockWidgetArea){
-                mainWindow->addDockWidget(Qt::LeftDockWidgetArea,dockWidgets[d]);
+                mainWindow->addDockWidget(dockWidgets[d]->favoriteArea(),dockWidgets[d]);
                 dockWidgets[d]->show();
                 lastDocksVisibilities[ dockWidgets[d]->getClassName() ]=1;
                 connect(dockWidgets[d], SIGNAL(visibilityChanged(bool)), this, SLOT(syncControlToggleWithDocks()));
@@ -294,7 +309,7 @@ void ACDockWidgetsManagerQt::changeMediaType(ACMediaType _media_type){
         }
         else {
             disconnect(dockWidgets[d], SIGNAL(visibilityChanged(bool)), this, SLOT(syncControlToggleWithDocks()));
-            if (mainWindow->dockWidgetArea(dockWidgets[d]) == Qt::LeftDockWidgetArea){
+            if (mainWindow->dockWidgetArea(dockWidgets[d]) == dockWidgets[d]->favoriteArea()){
                 mainWindow->removeDockWidget(dockWidgets[d]);
             }
             lastDocksVisibilities[ dockWidgets[d]->getClassName() ]=0;

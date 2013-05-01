@@ -55,11 +55,12 @@ public:
     ACAbstractDockWidgetQt(QWidget *parent = 0, ACMediaType _media_type = MEDIA_TYPE_NONE, std::string _class_name = "")
         : QDockWidget(parent), ACAbstractWidgetQt(), media_type(_media_type),class_name(_class_name)
     {
-        this->setFeatures(QDockWidget::DockWidgetClosable);
-        this->setAllowedAreas(Qt::LeftDockWidgetArea);
+        this->setFeatures(QDockWidget::DockWidgetClosable | QDockWidget::DockWidgetFloatable);
+        this->setAllowedAreas(Qt::LeftDockWidgetArea | Qt::RightDockWidgetArea);
     }
     virtual ~ACAbstractDockWidgetQt(){}
     virtual bool canBeVisible(ACMediaType _media_type) = 0;
+    virtual Qt::DockWidgetArea favoriteArea(){return Qt::RightDockWidgetArea;}
 
     ACMediaType getMediaType(){return this->media_type;}
     void setClassName(std::string _class_name){this->class_name=_class_name;}
