@@ -5,7 +5,7 @@ PortSystem          1.0
 PortGroup           qt4 1.0
 
 name                qt4-creator-mac
-version             2.6.0
+version             2.7.0
 revision            1
 categories          devel aqua
 platforms           darwin
@@ -20,8 +20,8 @@ master_sites        http://releases.qt-project.org/qtcreator/${version}
 # remove this with next release to use smaller .tar.gz
 #use_zip yes
 
-checksums           rmd160  3f4b88956e77359bbcd733f3c29cc847adaf9427 \
-                    sha256  80eee368b4dbd6fb8b647fa770f1105314272a2e096ceef365a7508329de33ed
+checksums           rmd160  d39bde35e81c43acc655ddaa4a42f9bb8c7373b6 \
+                    sha256  c8d05b65661639809df7815837e8c7d42980028dff1e21dc518049d837b3d6fa
 
 # fix up QMake build files to remove debug and release building;
 # specify that here instead.

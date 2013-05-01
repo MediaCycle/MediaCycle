@@ -34,7 +34,8 @@ IF ( MINGW )
 ENDIF ( MINGW )
 
 # ACClusterPositionsPropellerPlugin.cpp makes boost (1.52+?) clash with boost/mpl/aux_/preprocessed/gcc/bind.hpp if -ftemplate-depth is at 30 by default
-set(CMAKE_CXX_FLAGS_DEBUG "-DDEBUG -ftemplate-depth-60 -g2" CACHE STRING "CXX DEBUG FLAGS" FORCE)
+# ACFeaturesType.h makes boost (1.52) clash with #include <boost/numeric/ublas/vector_sparse.hpp> if -ftemplate-depth is at 60 (OSX 10.8.3 Xcode 4.6.2)
+set(CMAKE_CXX_FLAGS_DEBUG "-DDEBUG -ftemplate-depth-90 -g2" CACHE STRING "CXX DEBUG FLAGS" FORCE)
 TARGET_LINK_LIBRARIES(mediacycle ${Boost_SYSTEM_LIBRARY} ${Boost_FILESYSTEM_LIBRARY} ${Boost_GRAPH_LIBRARY} ${Boost_THREAD_LIBRARY})
 
 # this might require some path adaptation for Windows
