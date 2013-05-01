@@ -2,9 +2,6 @@
 
 MESSAGE("\nApplications:")
 
-# Add multimediacycle-osg-qt first to make it the first target (in XCode)
-ADD_SUBDIRECTORY(multimediacycle-osg-qt)
-
 FILE(GLOB DIRLIST * )
 SET(FOLDERNAME "apps")
 
@@ -42,3 +39,6 @@ FOREACH(APPDIR ${DIRLIST})
 	ENDIF ()
     ENDIF()
 ENDFOREACH()
+
+# Add multimediacycle-osg-qt at the end to get configs from other apps before
+ADD_SUBDIRECTORY(multimediacycle-osg-qt)
