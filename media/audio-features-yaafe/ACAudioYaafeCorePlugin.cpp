@@ -250,7 +250,12 @@ void ACAudioYaafeCorePlugin::loadDataflow(){
         return;
     }
     boost::filesystem::path b_path( library_path );
+#ifdef XCODE
+    // Xcode adds Debug folders to each target
+    dataflow_file = source_path.parent_path().parent_path().parent_path().string() + "/" + b_path.parent_path().parent_path().stem().string() + "/" + b_path.parent_path().stem().string() + "/" + this->dataflowFilename();
+#else
     dataflow_file = source_path.parent_path().parent_path().parent_path().string() + "/" + b_path.parent_path().stem().string() + "/" + b_path.stem().string() + "/" + this->dataflowFilename();
+#endif
     
     string slash = "/";
 #ifdef __WIN32__
