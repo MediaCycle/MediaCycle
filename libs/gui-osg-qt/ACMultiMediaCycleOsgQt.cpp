@@ -196,7 +196,7 @@ ACMultiMediaCycleOsgQt::ACMultiMediaCycleOsgQt(QWidget *parent)
     compositeOsgView->setSizePolicy ( QSizePolicy::MinimumExpanding, QSizePolicy::MinimumExpanding );
     osgViewDockLayout->addWidget(compositeOsgView);
     connect( compositeOsgView, SIGNAL( importDirectoriesThreaded(std::vector<std::string>,bool ) ),
-            this, SLOT(importDirectoriesThreaded(std::vector<std::string>,bool) ) );
+             this, SLOT(importDirectoriesThreaded(std::vector<std::string>,bool) ) );
 
     progressBar = new ACQProgressBar(); //QProgressBar();
     osgViewDockLayout->addWidget(progressBar);
@@ -862,7 +862,6 @@ void ACMultiMediaCycleOsgQt::on_actionEdit_Profile_triggered(bool checked) {
 void ACMultiMediaCycleOsgQt::on_actionFullscreen_triggered(bool checked) {
     if (compositeOsgView->isFullScreen() || this->isFullScreen()){
         std::cout << "Not fullscreen" << std::endl;
-        this->readQSettings();
         this->showNormal();
         compositeOsgView->showNormal();
         ui.actionToggle_Controls->setChecked(true);
@@ -870,6 +869,7 @@ void ACMultiMediaCycleOsgQt::on_actionFullscreen_triggered(bool checked) {
         ui.menubar->show();
         ui.statusbar->show();
         ui.toolbar->show();
+        this->readQSettings();
     }
     else{
         this->writeQSettings();
@@ -944,7 +944,7 @@ void ACMultiMediaCycleOsgQt::updateLibrary(){
     int refNode=media_cycle->getReferenceNode();
     if (refNode<0||refNode>=media_cycle->getLibrarySize())
         media_cycle->setReferenceNode(0);
-        
+
     // XS TODO this is sooo ugly:
     // XS TODO updateBrowser()
     media_cycle->getBrowser()->setState(AC_CHANGING);
@@ -1067,12 +1067,31 @@ bool ACMultiMediaCycleOsgQt::loadDefaultConfig(ACAbstractDefaultConfig* _config)
     if(_osg_config){
         std::vector<std::string> osg_plugins = _osg_config->osgPlugins();
         for(std::vector<std::string>::iterator plugin = osg_plugins.begin();plugin != osg_plugins.end();++plugin){
-            QString basename(plugin->c_str());
+            QString basename(plugin->c_str()),filename(plugin->c_str());
             basename = basename.remove("osgdb_");
+#if defined (__MINGW32__) || defined (WIN32)
+            filename.prepend("lib");
+#endif
+#ifdef OSG_LIBRARY_STATIC
+            filename.append(".a");
+#else
+#if defined (__MINGW32__) || defined (WIN32)
+            filename.append(".dll");
+#else
+            filename.append(".so");
+#endif
+#endif
             osg::ref_ptr<osgDB::ReaderWriter> readerWriter = osgDB::Registry::instance()->getReaderWriterForExtension(basename.toStdString());
             if(!readerWriter){
-                this->showError("OSG plugin '" + *plugin + "' is required but not accessible. Can't use config.");
-                return false;
+                // Sometimes plugins are not named along file extensions, like for instance osgdb_imageio
+                osgDB::Registry::LoadStatus status = osgDB::Registry::instance()->loadLibrary(filename.toStdString());
+                if(status == osgDB::Registry::NOT_LOADED){
+                    this->showError("OSG plugin '" + *plugin + "' is required but not accessible. Can't use config.");
+                    return false;
+                }
+                else /*if(status == osgDB::Registry::LOADED)*/{ // last case could be osgDB::Registry::PREVIOUSLY_LOADED
+                    osgDB::Registry::instance()->closeLibrary(filename.toStdString());
+                }
             }
         }
     }
