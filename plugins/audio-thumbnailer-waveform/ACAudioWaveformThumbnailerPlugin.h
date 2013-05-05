@@ -57,7 +57,7 @@ struct ACAudioWaveformThumbnailSpecs{
     ACAudioWaveformBufferCallback callback;
     ACAudioWaveformThumbnailSpecs(std::string _name="", std::string _media_filename="", float _width=0.0f, float _height=0.0f, float _length=0.0f, int _hop_samples=0, bool _circular=false, ACAudioWaveformBufferCallback _callback = 0):
         name(_name), filename(""),
-        hop_samples(_hop_samples),width(_width),height(_height),length(_length),
+        width(_width),height(_height),length(_length),
         circular(_circular),
         top_v(0.0f),down_v(0.0f),
         scale_x(_width/2.0f), scale_y(_height/2.0f),offset_x(_width/2.0f), offset_y(_height/2.0f),
@@ -67,22 +67,10 @@ struct ACAudioWaveformThumbnailSpecs{
         callback(_callback),
         index(0)
     {
-        /*std::stringstream thumbnail_path;
-        boost::filesystem::path media_path(_media_filename.c_str());
-        std::string thumbnail_suffix(_name);
-        boost::to_lower(thumbnail_suffix);
-        boost::replace_all(thumbnail_suffix," ","_");
-        //std::cout << name << " converted to " << thumbnail_suffix << std::endl;
-        std::string slash = "/";
-#ifdef WIN32
-        slash = "\\";
-#endif
-#ifdef __APPLE__
-        thumbnail_path << media_path.parent_path().string() << slash << media_path.stem().string() << "_" << thumbnail_suffix << ".svg";
-#else // this seems required on ubuntu to compile...
-        thumbnail_path << media_path.parent_path() << slash << media_path.stem() << "_" << thumbnail_suffix << ".svg";
-#endif
-        filename = thumbnail_path.str();*/
+        if((int)(_hop_samples)<1)
+            hop_samples = 1;
+        else
+            hop_samples= _hop_samples;
         filename = generateThumbnailName(_media_filename,_name,".svg");
         dimensions = svg::Dimensions(_width,_height);
     }

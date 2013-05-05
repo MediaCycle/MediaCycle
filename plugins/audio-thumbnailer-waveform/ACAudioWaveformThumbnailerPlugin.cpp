@@ -187,11 +187,11 @@ std::vector<ACMediaThumbnail*> ACAudioWaveformThumbnailerPlugin::summarize(ACMed
     int browser_waveform_min_length = 200;
     int browser_waveform_length = (float)(last_frame-current_frame) / (float)(sample_rate) / hop;
     browser_waveform_length--;
-    if (browser_waveform_length < browser_waveform_min_length){
+    /*if (browser_waveform_length < browser_waveform_min_length){
         browser_waveform_length = browser_waveform_min_length;
         hop =  (float)(media->getEnd()-media->getStart()) / (float)(browser_waveform_length);
-    }
-    browser_waveform_length *= 2;
+    }*/
+    //browser_waveform_length *= 2;
 
     float* buffer = 0;//float buffer [channels * bufsize];
     int k(0), m(0), readcount(0);
@@ -201,8 +201,8 @@ std::vector<ACMediaThumbnail*> ACAudioWaveformThumbnailerPlugin::summarize(ACMed
     this->thumbnails_specs["Classic browser waveform"] = ACAudioWaveformThumbnailSpecs(
                 "Classic browser waveform" /*name*/,
                 filename, /*media filename*/
-                200 /*width*/,
-                200 /*height*/,
+                browser_waveform_min_length /*width*/,
+                browser_waveform_min_length /*height*/,
                 browser_waveform_length /*length*/,
                 hop * sample_rate /*hop samples*/,
                 false, /*circular*/
@@ -279,8 +279,7 @@ std::vector<ACMediaThumbnail*> ACAudioWaveformThumbnailerPlugin::summarize(ACMed
         {
             int m = 0; // channel id
             for(std::map<std::string,ACAudioWaveformThumbnailSpecs>::iterator thumbnail_specs = thumbnails_specs.begin(); thumbnail_specs != thumbnails_specs.end(); ++ thumbnail_specs){
-                // Produce coordinates of a reached waveform point, using the waveform specs callback
-                if (thumbnail_specs->second.hop_samples)
+                // Produce coordinates of a reached waveform point, using the waveform specs callback               
                 if(s % thumbnail_specs->second.hop_samples == 0){
                     if(thumbnail_specs->second.callback){
                         thumbnail_specs->second.callback(thumbnail_specs->second);
@@ -330,8 +329,11 @@ std::vector<ACMediaThumbnail*> ACAudioWaveformThumbnailerPlugin::summarize(ACMed
             doc << circle;
         }*/
 
+        //doc << thumbnail_specs->second.top_p;
+        //doc << thumbnail_specs->second.down_p;
+        thumbnail_specs->second.top_p.addPoints( thumbnail_specs->second.down_p.getPoints() );
         doc << thumbnail_specs->second.top_p;
-        doc << thumbnail_specs->second.down_p;
+
         bool saved = doc.save();
         if(!saved)
             std::cerr << "ACAudioWaveformThumbnailerPlugin::summarize: couldn't save thumbnail " << thumbnail_specs->second.filename << std::endl;
