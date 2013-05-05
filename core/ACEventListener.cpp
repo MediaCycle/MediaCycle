@@ -38,7 +38,7 @@
 
 ACEventListener::ACEventListener(){
     t=new boost::thread(boost::bind(&ACEventListener::loop,this));
-};
+}
 
 ACEventListener::ACEventListener(MediaCycle* core){
 
@@ -49,7 +49,7 @@ ACEventListener::ACEventListener(MediaCycle* core){
     service.post(boost::bind(&ACEventListener::mediaImported, this,3,5,-1));
 
 
-};
+}
 ACEventListener::~ACEventListener(){
     service.stop();
 
@@ -60,17 +60,17 @@ ACEventListener::~ACEventListener(){
 #endif
     delete t;
 
-};
+}
 void ACEventListener::testService(){
 
     cout << "service ran perfectly";
-};
+}
 
 void ACEventListener::loop(){
     boost::asio::io_service::work work (service);
     service.run(); // processes the tasks
     cout << "event thread loop finished"<<endl;
-};
+}
 
 bool ACEventListener::stopped(){
 #if BOOST_VERSION <104700
@@ -78,30 +78,32 @@ bool ACEventListener::stopped(){
 #else
     return service.stopped(); // processes the tasks
 #endif
-};
-
+}
 
 void ACEventListener::s_mediaImported(int n,int nTot,int mId){
     service.post(boost::bind(&ACEventListener::mediaImported, this,n,nTot,mId));
-};
+}
 void ACEventListener::s_mediasImported(int n,int nTot,std::vector<int> mIds){
     service.post(boost::bind(&ACEventListener::mediasImported, this,n,nTot,mIds));
-};
+}
 void ACEventListener::s_pluginProgress(std::string plugin_name,int n,int nTot,int mId){
     service.post(boost::bind(&ACEventListener::pluginProgress, this,plugin_name,n,nTot,mId));
 }
 void ACEventListener::s_libraryCleaned(){
     service.post(boost::bind(&ACEventListener::libraryCleaned, this));
-};
+}
 void ACEventListener::s_activeFeatChanged(){
     service.post(boost::bind(&ACEventListener::activeFeatChanged, this));
-};
+}
 void ACEventListener::s_browserModeChanged(ACBrowserMode mode){
     service.post(boost::bind(&ACEventListener::browserModeChanged, this,mode));
-};
+}
 void ACEventListener::s_updateDisplayNeeded(){
     service.post(boost::bind(&ACEventListener::updateDisplayNeeded, this));
-};
+}
 void ACEventListener::s_pluginLoaded(std::string plugin_name){
     service.post(boost::bind(&ACEventListener::pluginLoaded, this,plugin_name));
-};
+}
+void ACEventListener::s_mediaActionPerformed(std::string action, long int mediaId, std::vector<boost::any> arguments){
+    service.post(boost::bind(&ACEventListener::mediaActionPerformed, this, action, mediaId, arguments));
+}

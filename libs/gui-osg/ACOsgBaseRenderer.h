@@ -64,7 +64,7 @@ protected:
     std::string shared_thumbnail;
     osg::ref_ptr<osgText::Font> font;
 public:
-    void setMediaCycle(MediaCycle *_media_cycle) { this->media_cycle = _media_cycle;}
+    virtual void setMediaCycle(MediaCycle *_media_cycle) { this->media_cycle = _media_cycle;}
     ACMediaType getMediaType(){return media_type;}
     osg::ref_ptr<osg::Geometry> thumbnailGeometry(std::string _thumbnail_name);
     osg::ref_ptr<osg::Geometry> imageGeometry(std::string _file_name);

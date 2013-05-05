@@ -132,6 +132,8 @@ StkFloat FileLoop :: tick( unsigned int channel )
   }
 #endif
 
+  if ( finished_ ) return 0.0; //CF
+
   // Check limits of time address ... if necessary, recalculate modulo
   // fileSize.
   StkFloat fileSize = file_.fileSize();

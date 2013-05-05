@@ -34,7 +34,7 @@
 using namespace stk;
 
 ACAudioStkGranulate :: ACAudioStkGranulate( void )
-    : stk::Granulate()
+    : stk::Granulate(),finished_(true)
 {
 }
 
@@ -45,6 +45,7 @@ ACAudioStkGranulate :: ACAudioStkGranulate( unsigned int nVoices, std::string fi
 
 ACAudioStkGranulate :: ~ACAudioStkGranulate( void )
 {
+    this->closeFile();
 }
 
 unsigned int ACAudioStkGranulate :: getStretch()
@@ -110,4 +111,32 @@ stk::StkFloat ACAudioStkGranulate :: getRandomFactor()
 unsigned int ACAudioStkGranulate :: getVoices( )
 {
     return grains_.size();
+}
+
+void ACAudioStkGranulate :: openFile( std::string fileName, bool typeRaw )
+{
+    // Call close() in case another file is already open.
+    this->closeFile();
+
+    // Attempt to load the soundfile data.
+    file_.open( fileName, typeRaw );
+    data_.resize( file_.fileSize(), file_.channels() );
+    file_.read( data_ );
+    lastFrame_.resize( 1, file_.channels(), 0.0 );
+    finished_ = false;
+    this->reset();
+
+#if defined(_STK_DEBUG_)
+    std::ostringstream message;
+    message << "Granulate::openFile: file = " << fileName << ", file frames = " << file_.fileSize() << '.';
+    handleError( message.str(), StkError::DEBUG_PRINT );
+#endif
+
+}
+
+void ACAudioStkGranulate :: closeFile( void )
+{
+  if ( file_.isOpen() ) file_.close();
+  finished_ = true;
+  lastFrame_.resize( 0, 0 );
 }

@@ -225,7 +225,8 @@ void ACOsgBrowserRenderer::mediasImported(int n, int nTot,vector<int> mIds){
 #endif
     /* if(media_cycle->getMediaType() == media_cycle->getLibrary()->getMedia(mId)->getType())*/{
         
-        for (int id=0;id<mIds.size();id++){
+        for (int idCpt=0;idCpt<mIds.size();idCpt++){
+            int id=mIds[idCpt];
             if(media_cycle->getLibrary()->getMedia(id) == 0){
                 std::cerr << "ACOsgBrowserRenderer::mediasImported: media id " << id << " ("<< n << "/" << nTot << ") not accessible" << std::endl;
                 return;

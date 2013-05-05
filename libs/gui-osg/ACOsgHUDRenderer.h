@@ -43,6 +43,7 @@
 #include "ACOsgNodeLinkRenderer.h"
 #include "ACOsgPointerRenderer.h"
 #include "ACOsgLibraryRenderer.h"
+#include "ACOsgMediaActionsRenderer.h"
 
 #include <osgViewer/Viewer>
 
@@ -58,6 +59,7 @@ protected:
     osg::ref_ptr<osg::Group> pointer_group;
     std::vector<ACOsgPointerRenderer*> pointer_renderer;
     ACOsgLibraryRenderer* library_renderer;
+    ACOsgMediaActionsRenderer* media_actions_renderer;
     ACSettingType setting;
     osg::ref_ptr<osgText::Font> font;
 
@@ -70,6 +72,7 @@ public:
     void clean();
     void cleanPointers();
     void cleanLibrary();
+    void cleanMediaActions();
 
     double getTime();
 
@@ -80,10 +83,12 @@ public:
 
     void preparePointers(osgViewer::View* view = 0);
     void prepareLibrary(osgViewer::View* view = 0);
+     void prepareMediaActions(osgViewer::View* view = 0);
 
     void updatePointers(osgViewer::Viewer* viewer);//Cocoa - simple OSG viewer
     void updatePointers(osgViewer::View* viewer);//Qt - composite OSG viewer
     void updateLibrary(osgViewer::View* viewer);
+    void updateMediaActions(osgViewer::View* viewer);
 
     void changeSetting(ACSettingType _setting);
 

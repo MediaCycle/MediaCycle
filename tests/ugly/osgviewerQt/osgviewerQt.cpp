@@ -1,7 +1,7 @@
 /**
  * @brief osgviewerQt.cpp
  * @author Christian Frisson
- * @date 29/04/2013
+ * @date 05/05/2013
  * @copyright (c) 2013 – UMONS - Numediart
  * 
  * MediaCycle of University of Mons – Numediart institute is 
@@ -32,6 +32,7 @@
 #include <QtCore/QTimer>
 #include <QtGui/QApplication>
 #include <QtGui/QGridLayout>
+#include <QtGui>
 
 #include <osgViewer/CompositeViewer>
 #include <osgViewer/ViewerEventHandlers>
@@ -52,18 +53,23 @@ public:
         setThreadingModel(threadingModel);
 
         QWidget* widget1 = addViewWidget( createCamera(0,0,100,100), osgDB::readNodeFile("cow.osg") );
-        QWidget* widget2 = addViewWidget( createCamera(0,0,100,100), osgDB::readNodeFile("glider.osg") );
-        QWidget* widget3 = addViewWidget( createCamera(0,0,100,100), osgDB::readNodeFile("axes.osg") );
-        QWidget* widget4 = addViewWidget( createCamera(0,0,100,100), osgDB::readNodeFile("fountain.osg") );
-        QWidget* popupWidget = addViewWidget( createCamera(900,100,320,240,"Popup window",true),osgDB::readNodeFile("dumptruck.osg") );
-        popupWidget->show();
+        //QWidget* widget2 = addViewWidget( createCamera(0,0,100,100), osgDB::readNodeFile("glider.osg") );
+        //QWidget* widget3 = addViewWidget( createCamera(0,0,100,100), osgDB::readNodeFile("axes.osg") );
+        //QWidget* widget4 = addViewWidget( createCamera(0,0,100,100), osgDB::readNodeFile("fountain.osg") );
+        //QWidget* popupWidget = addViewWidget( createCamera(900,100,320,240,"Popup window",true),osgDB::readNodeFile("dumptruck.osg") );
+        //popupWidget->show();
 
         QGridLayout* grid = new QGridLayout;
         grid->addWidget( widget1, 0, 0 );
-        grid->addWidget( widget2, 0, 1 );
-        grid->addWidget( widget3, 1, 0 );
-        grid->addWidget( widget4, 1, 1 );
+        //grid->addWidget( widget2, 0, 1 );
+        //grid->addWidget( widget3, 1, 0 );
+        //grid->addWidget( widget4, 1, 1 );
+
+        grid->addWidget(new QLabel("Label"));
+
         setLayout( grid );
+
+
 
         connect( &_timer, SIGNAL(timeout()), this, SLOT(update()) );
         _timer.start( 10 );

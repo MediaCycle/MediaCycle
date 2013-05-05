@@ -61,7 +61,7 @@ using namespace std;
 ACAudioOsgRendererPlugin::ACAudioOsgRendererPlugin() : ACOsgRendererPlugin(){
     this->mName = "Audio Renderer (OSG and libsndfile)";
     this->mDescription ="Plugin for rendering audio files with OpenSceneGraph";
-    this->mMediaType = MEDIA_TYPE_AUDIO;
+    this->mMediaType = MEDIA_TYPE_AUDIO | MEDIA_TYPE_MIXED;
 
     browser_node_thumbnails.push_back("None");
     browser_node_thumbnails.push_back("Circular browser waveform");

@@ -691,6 +691,11 @@ int MediaCycle::addPluginLibrary(string aPluginLibraryPath) {
 }
 
 int MediaCycle::addPluginLibrary(ACPluginLibrary* library) {
+    if(!library){
+        std::cerr << "MediaCycle::addPluginLibrary: empty library" << std::endl;
+        return 0;
+    }
+    library->setLibraryPath( this->getPluginPathFromBaseName( library->getName() ) );
     std::vector<std::string> plugins_names = this->pluginManager->addLibrary(library);
     for(std::vector<std::string>::iterator plugin_name = plugins_names.begin();plugin_name!=plugins_names.end();plugin_name++){
         eventManager->sig_pluginLoaded(*plugin_name);
@@ -1135,6 +1140,9 @@ bool MediaCycle::performActionOnMedia(std::string action, long int mediaId, std:
         std::cerr << "MediaCycle::performActionOnMedia: plugin manager not set" << std::endl;
         return false;
     }
+    if(this->eventManager)
+        eventManager->sig_mediaActionPerformed(action, mediaId, arguments);
+
     bool renderers_passed = true;
     std::vector<std::string> renderer_plugins = pluginManager->getAvailablePluginsNames(PLUGIN_TYPE_MEDIARENDERER, this->getMediaType());
     for(std::vector<std::string>::iterator renderer_plugin = renderer_plugins.begin();renderer_plugin!=renderer_plugins.end();renderer_plugin++){

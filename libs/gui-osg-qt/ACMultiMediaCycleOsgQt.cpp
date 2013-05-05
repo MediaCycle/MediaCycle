@@ -508,7 +508,7 @@ bool ACMultiMediaCycleOsgQt::readXMLConfig(string _filename){
         media_cycle->setWeightVector(fw);
 
         // XML features are not normalized, so we force normalization here
-        media_cycle->normalizeFeatures(1);
+       // media_cycle->normalizeFeatures(1);
 
         // only after loading all XML files:
         //this->updateLibrary();//TR update will be done in the mediaImported(int n,int nTot,int mId) with n==nTot and mId==-1

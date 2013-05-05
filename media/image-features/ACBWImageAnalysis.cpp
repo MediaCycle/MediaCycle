@@ -294,7 +294,7 @@ void ACBWImageAnalysis::computeHuMoments(int thresh){
 	raw_moments.push_back (modifiedLog(local_raw_moments.m12)) ;
 	raw_moments.push_back (modifiedLog(local_raw_moments.m03)) ;
 
-	for (int i=0; i<7 ; i++){
+	for (int i=0; i<4 ; i++){//XS: last three momets are not precise enough (1E-12)
 		hu_moments.push_back (modifiedLog(local_Hu_moments[i])) ;
 	}
     delete[] local_Hu_moments;

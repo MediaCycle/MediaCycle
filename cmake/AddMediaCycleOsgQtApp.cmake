@@ -160,7 +160,7 @@ int main(int argc, char *argv[])
 	try {
 	#endif
 		window.setWindowTitle(\"${TARGET_NAME}\");
-		window.show();
+                //window.show();
 ")
 
 SET(ACTION "load")

@@ -278,10 +278,10 @@ void ACOsgLibraryRenderer::updateNodes(double ratio) {
         }
 
         //CF be careful with positionning, overlapping text geodes explode CPU usage
-        library_title.y = 3*line_sep-max_side_size/2;
-        library_author.y = 2*line_sep-max_side_size/2;
-        library_publisher.y = 1*line_sep-max_side_size/2;
-        library_medias_number.y = 0*line_sep-max_side_size/2;
+        library_title.y = 4*line_sep-max_side_size/2;
+        library_author.y = 3*line_sep-max_side_size/2;
+        library_publisher.y = 2*line_sep-max_side_size/2;
+        library_medias_number.y = 1*line_sep-max_side_size/2;
 
         this->updateTextRenderer(library_title,media_cycle->getLibrary()->getTitle(),library_node);
         this->updateTextRenderer(library_author,media_cycle->getLibrary()->getAuthor(),library_node);

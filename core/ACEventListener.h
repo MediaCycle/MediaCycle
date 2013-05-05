@@ -80,11 +80,12 @@ public:
     virtual void pluginProgress(std::string plugin_name,int n,int nTot,int mId){
         std::cout << "ACEventListener::pluginProgress: plugin '" << plugin_name << "' "<< n << "/" << nTot << " for media of id: " << mId << std::endl;
     }
-    virtual void libraryCleaned(){std::cout<<"ACEventListener::libraryCleaned"<< std::endl;};
-    virtual void activeFeatChanged(){};
-    virtual void browserModeChanged(ACBrowserMode mode){};
-    virtual void updateDisplayNeeded(){};
-    virtual void pluginLoaded(std::string plugin_name){};
+    virtual void libraryCleaned(){std::cout<<"ACEventListener::libraryCleaned"<< std::endl;}
+    virtual void activeFeatChanged(){}
+    virtual void browserModeChanged(ACBrowserMode mode){}
+    virtual void updateDisplayNeeded(){}
+    virtual void pluginLoaded(std::string plugin_name){}
+    virtual void mediaActionPerformed(std::string action, long int mediaId, std::vector<boost::any> arguments=std::vector<boost::any>()){}
     
     void s_mediaImported(int n,int nTot,int mId);
     void s_mediasImported(int n,int nTot,std::vector<int> mIds);
@@ -94,6 +95,7 @@ public:
     void s_browserModeChanged(ACBrowserMode mode);
     void s_updateDisplayNeeded();
     void s_pluginLoaded(std::string plugin_name);
+    void s_mediaActionPerformed(std::string action, long int mediaId, std::vector<boost::any> arguments=std::vector<boost::any>());
 
 };
 

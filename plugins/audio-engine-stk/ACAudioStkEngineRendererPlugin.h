@@ -45,7 +45,16 @@
 #include <ACAudioStkFileLoop.h>
 #include <ACAudioStkGranulate.h>
 
-#include "FreeVerb.h"
+#include "ACAudioStkFreeVerb.h"
+#include "RtMidi.h"
+
+#include <pthread.h>
+
+typedef unsigned int ACAudioStkPlaybackType;
+const ACAudioStkPlaybackType PLAYBACK_MUTE = 0x0000;
+const ACAudioStkPlaybackType PLAYBACK_PLAY = 0x0001;
+const ACAudioStkPlaybackType PLAYBACK_LOOP = 0x0002;
+const ACAudioStkPlaybackType PLAYBACK_GRANULATE = 0x0004;
 
 class ACAudioStkEngineRendererPlugin : public QObject, public ACPluginQt, public ACMediaRendererPlugin
 {
@@ -85,6 +94,10 @@ public:
 
     void updatePlaybackVolume();
 
+    void updateActiveTarget();
+
+    void updateFaderEffect(int fader);
+
     void muteMedia(int mediaId);
 
 public:
@@ -92,17 +105,26 @@ public:
     std::map< long int, ACAudioStkFileWvIn*> inputs;
     std::map< long int, ACAudioStkFileLoop*> loops;
     std::map< long int, ACAudioStkGranulate*> grains;
+    std::map< long int, ACAudioStkPlaybackType> playback_type;
     std::map< long int, int> current_frames;
-    std::map< long int, stk::FreeVerb*> frevs;
-    stk::FreeVerb* master_frev;
+    std::map< long int, ACAudioStkFreeVerb*> frevs;
+    ACAudioStkFreeVerb* master_frev;
     std::map< long int, stk::StkFloat> gains;
     stk::StkFloat master_volume;
     std::map< long int, stk::StkFloat> pans;
     void justReadFrames(long int mediaId, int nFrames);
-    void removeInput(long int mediaId);
-    void removeLoop(long int mediaId);
+    void stopSource(long int mediaId);
+    void deleteSource(long int mediaId);
     std::map< long int, stk::StkFrames*> frames;
     int outputChannels();
+
+    RtMidiIn* midi_in;
+    RtMidiOut* midi_out;
+
+    std::vector<std::string> fader_effect;
+
+    pthread_mutex_t delete_mutex;
+    pthread_mutexattr_t delete_mutex_attr;
 
 public:
     virtual std::vector<ACInputActionQt*> providesInputActions();
@@ -112,14 +134,20 @@ public slots:
     void loopClickedNode();
     void granulateClickedNode();
     void muteAllNodes();
+    void triggerClickedNode();
 
 protected:
     ACInputActionQt* playClickedNodeAction;
     ACInputActionQt* loopClickedNodeAction;
     ACInputActionQt* granulateClickedNodeAction;
     ACInputActionQt* muteAllNodesAction;
+    ACInputActionQt* triggerClickedNodeAction;
 
     std::map<std::string,ACMediaActionParameters> action_parameters;
+    std::vector<std::string> active_targets;
+    std::string active_target;
+    std::vector<std::string> midi_in_ports,midi_out_ports;
+    long int current_closest_node;
 };
 
 #endif

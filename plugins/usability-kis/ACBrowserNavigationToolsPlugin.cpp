@@ -299,14 +299,17 @@ void ACBrowserNavigationToolsPlugin::discardNearestNodes(int mediaId){
             //visual_distance++; // the first distance is the identity of the node
             std::vector<ACMediaFeatures*> features_vectors = media->getAllPreProcFeaturesVectors();
             std::cout << "Nearest visual neighbors are media ids: ";
+            float max_signal_distance = 0.0f;
             while(k <= visual_threshold && k < visual_distances.size() && visual_distance!=visual_distances.end()){
                 std::cout << visual_distance->second << " ";
                 std::cout << " (vd2=" << visual_distance->first;
                 //neighbors_ids.push_back(visual_distance->second);
                 if(media_cycle->getLibrary()->getMedia(visual_distance->second)){
                     float sd = compute_distance(media_cycle->getLibrary()->getMedia(visual_distance->second)->getAllPreProcFeaturesVectors(), features_vectors, featureWeights, false);
-                    if(sd < signal_threshold)
+                    //if(sd < signal_threshold)
                         signal_distances[ sd ] = visual_distance->second;
+                        if(sd>max_signal_distance)
+                            max_signal_distance = sd;
                     std::cout << " sd2=" << sd;
                 }
                 else
@@ -315,11 +318,11 @@ void ACBrowserNavigationToolsPlugin::discardNearestNodes(int mediaId){
                 visual_distance++;
                 k++;
             }
-            std::cout << std::endl;
+            std::cout << "Max signal distance: " << max_signal_distance << std::endl;
 
             for(std::map<float,int,map_float_compare>::iterator signal_distance = signal_distances.begin();signal_distance!=signal_distances.end();signal_distance++){
                 ACMedia* _media = media_cycle->getLibrary()->getMedia(signal_distance->second);
-                if(_media){
+                if(_media && signal_distance->first > max_signal_distance*signal_threshold/100.0f){
                     _media->setDiscarded(true);
                 }
                 else

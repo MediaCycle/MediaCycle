@@ -167,7 +167,13 @@ void ACMediaBrowser::clean(){
         //mNeighborsManager->dump();
         mNeighborsManager->clean();
     }
-    this->resetPointers();
+    if (this->hasMousePointer()){
+        this->resetPointers();
+        this->addMousePointer();
+    }
+    else
+        this->resetPointers();
+    
 }
 
 int ACMediaBrowser::getLabelSize() {

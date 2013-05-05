@@ -61,6 +61,7 @@ protected:
     std::vector<boost::signals2::connection> connect_browserModeChanged;
     std::vector<boost::signals2::connection> connect_updateDisplayNeeded;
     std::vector<boost::signals2::connection> connect_pluginLoaded;
+    std::vector<boost::signals2::connection> connect_mediaActionPerformed;
 
 #endif
 
@@ -77,6 +78,7 @@ public:
     boost::signals2::signal<void (ACBrowserMode mode)> sig_browserModeChanged;
     boost::signals2::signal<void ()> sig_updateDisplayNeeded;
     boost::signals2::signal<void (std::string plugin_name)> sig_pluginLoaded;
+    boost::signals2::signal<void (std::string action, long int mediaId, std::vector<boost::any> arguments)> sig_mediaActionPerformed;
 #endif
     void clean(void);
     void addListener(ACEventListener*);//we add this new output in output and we connect all the signals to these slot.

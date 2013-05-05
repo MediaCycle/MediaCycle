@@ -35,11 +35,11 @@
 #include "ACEventManager.h"
 ACEventManager::ACEventManager(){
 
-};
+}
 
 ACEventManager::~ACEventManager(){
     this->clean();
-};
+}
 
 void ACEventManager::addListener(ACEventListener* eventListener){
     listeners.push_back(eventListener);
@@ -51,7 +51,8 @@ void ACEventManager::addListener(ACEventListener* eventListener){
     connect_browserModeChanged.push_back(sig_browserModeChanged.connect(boost::bind(&ACEventListener::s_browserModeChanged, eventListener, _1))) ;
     connect_updateDisplayNeeded.push_back(sig_updateDisplayNeeded.connect(boost::bind(&ACEventListener::s_updateDisplayNeeded, eventListener)));
     connect_pluginLoaded.push_back(sig_pluginLoaded.connect(boost::bind(&ACEventListener::s_pluginLoaded, eventListener, _1)));
-};
+    connect_mediaActionPerformed.push_back(sig_mediaActionPerformed.connect(boost::bind(&ACEventListener::s_mediaActionPerformed, eventListener, _1, _2, _3)));
+}
 
 void ACEventManager::clean(void){
     for (unsigned int i=0;i<connect_mediaImported.size();i++)
@@ -74,8 +75,11 @@ void ACEventManager::clean(void){
     connect_updateDisplayNeeded.clear();
     for (unsigned int i=0;i<connect_pluginLoaded.size();i++)
         connect_pluginLoaded[i].disconnect();
-    connect_updateDisplayNeeded.clear();
+    connect_pluginLoaded.clear();
+    for (unsigned int i=0;i<connect_mediaActionPerformed.size();i++)
+        connect_mediaActionPerformed[i].disconnect();
+    connect_mediaActionPerformed.clear();
     for (unsigned int i=0;i<listeners.size();i++)
         listeners[i]=0;
     listeners.clear();
-};
+}

@@ -224,9 +224,6 @@ void ACOsgCompositeViewQt::dropEvent(QDropEvent *event)
                     break;
                 
                 }
-                
-                
-                    
             }
             directories.empty();
         }
@@ -454,19 +451,19 @@ void ACOsgCompositeViewQt::updateGL()
     {
         // Automatically remove the mouse pointer if installation setting, adding it otherwise
         // Moved to ACOsgCompositeViewQt::changeSetting
-        /*
+
         // Automatically erase the mouse pointer if outside the view for installations, keep it for other settings
         if(setting == AC_SETTING_INSTALLATION){
             if(mouseover!=this->underMouse()){
-                if(this->underMouse())//Qt
+                if(this->underMouse())// && media_cycle->hasBrowser() && media_cycle->getBrowser()->hasMousePointer() == false)//Qt
                     media_cycle->getBrowser()->addMousePointer();
-                else {
+                else { //if(this->underMouse() == false && media_cycle->hasBrowser() && media_cycle->getBrowser()->hasMousePointer() == true){
                     media_cycle->getBrowser()->removeMousePointer();
                 }
                 //std::cout << "Mouse " << this->underMouse() << std::endl;
                 mouseover=this->underMouse();
             }
-        }*/
+        }
 
         media_cycle->updateState();
         frac = media_cycle->getFrac();
@@ -1328,6 +1325,7 @@ void ACOsgCompositeViewQt::prepareFromBrowser()
     browser_renderer->prepareLabels();
     hud_renderer->preparePointers(browser_view);
     hud_renderer->prepareLibrary(browser_view);
+    hud_renderer->prepareMediaActions(browser_view);
     browser_view->setSceneData(browser_renderer->getShapes());
 
     osgDB::SharedStateManager* ssm = osgDB::Registry::instance()->getSharedStateManager();
@@ -1348,6 +1346,7 @@ void ACOsgCompositeViewQt::updateTransformsFromBrowser( double frac)
     browser_renderer->prepareLabels();
     hud_renderer->preparePointers();
     hud_renderer->prepareLibrary();
+    hud_renderer->prepareMediaActions();
 
     // get screen coordinates
     //int closest_node;//CF to deprecate
@@ -1361,6 +1360,7 @@ void ACOsgCompositeViewQt::updateTransformsFromBrowser( double frac)
 
     hud_renderer->updatePointers(browser_view);
     hud_renderer->updateLibrary(browser_view);
+    hud_renderer->updateMediaActions(browser_view);
     /*osgViewer::ViewerBase::Views views;
  bool have_views;
  view->getViews(views,have_views);

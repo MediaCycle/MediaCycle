@@ -1197,7 +1197,7 @@ void ACMediaLibrary::normalizeFeatures(int needsNormalize) {
     if (mPreProcessPlugin!=NULL){
         for(ACMedias::iterator it=start; it!=media_library.end(); it++){
             ACMedia* item = it->second;
-            if (item->getMediaType() == this->media_type){
+            //if (item->getMediaType() == this->media_type){
                 item->cleanPreProcFeaturesVector();
                 std::vector<ACMediaFeatures*> tempFeatVect;
 #ifdef SUPPORT_MULTIMEDIA
@@ -1209,13 +1209,13 @@ void ACMediaLibrary::normalizeFeatures(int needsNormalize) {
                 for (int k=0;k<tempFeatVect.size();k++)
                     item->getAllPreProcFeaturesVectors().push_back(tempFeatVect[k]);
                 tempFeatVect.clear();
-            }
+            //}
         }
     }
     else {
         for(ACMedias::iterator it=start; it!=media_library.end(); it++){
             ACMedia* item = it->second;
-            if (item->getMediaType() == this->media_type){ //CF
+            //if (item->getMediaType() == this->media_type){ //CF
                 for(j=0; j<mean_features.size(); j++) {
                     feature = item->getFeaturesVector(j);
                     featureDest=item->getPreProcFeaturesVector(j);
@@ -1233,7 +1233,7 @@ void ACMediaLibrary::normalizeFeatures(int needsNormalize) {
                     }
 
                 }
-            }
+            //}
         }
     }
     if (media_library.end()!=media_library.begin())

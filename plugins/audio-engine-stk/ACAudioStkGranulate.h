@@ -33,6 +33,7 @@
 #define ACAudioStkACAudioStkGranulate_H
 
 #include <Granulate.h>
+#include <FileRead.h>
 
 class ACAudioStkGranulate: public stk::Granulate
 {
@@ -45,6 +46,22 @@ class ACAudioStkGranulate: public stk::Granulate
 
   //! Class destructor.
   virtual ~ACAudioStkGranulate( void );
+
+  //! Load a monophonic soundfile to be "granulated".
+  /*!
+    An StkError will be thrown if the file is not found, its format
+    is unknown or unsupported, or the file has more than one channel.
+  */
+  void openFile( std::string fileName, bool typeRaw = false );
+
+  //! Close a file if one is open.
+  virtual void closeFile( void );
+
+  //! Query whether a file is open.
+  bool isOpen( void ) { return file_.isOpen(); };
+
+  //! Query whether reading is complete.
+  bool isFinished( void ) const { return finished_; };
 
   //! Get the number of simultaneous grain "voices" to use.
   /*!
@@ -99,6 +116,10 @@ class ACAudioStkGranulate: public stk::Granulate
     +30 or -30 milliseconds).
    */
   stk::StkFloat getRandomFactor();
+
+protected:
+  stk::FileRead file_;
+  bool finished_;
 
 };
 

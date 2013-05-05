@@ -64,6 +64,9 @@ ACOsgHUDRenderer::ACOsgHUDRenderer()
     camera->addChild(group);
 
     library_renderer = 0;
+
+    media_actions_renderer = 0;
+
     setting = AC_SETTING_NONE;
 }
 
@@ -72,11 +75,15 @@ ACOsgHUDRenderer::~ACOsgHUDRenderer()
     if(library_renderer)
         delete library_renderer;
     library_renderer = 0;
+    if(media_actions_renderer)
+        delete media_actions_renderer;
+    media_actions_renderer = 0;
 }
 
 void ACOsgHUDRenderer::clean(){
     this->cleanPointers();
     this->cleanLibrary();
+    this->cleanMediaActions();
 }
 
 //TR NEM2011
@@ -95,6 +102,14 @@ void ACOsgHUDRenderer::cleanLibrary(){
         camera->removeChild(library_renderer->getNode());
         delete library_renderer;
         library_renderer = 0;
+    }
+}
+
+void ACOsgHUDRenderer::cleanMediaActions(){
+    if(media_actions_renderer){
+        camera->removeChild(media_actions_renderer->getNode());
+        delete media_actions_renderer;
+        media_actions_renderer = 0;
     }
 }
 
@@ -225,6 +240,30 @@ void ACOsgHUDRenderer::updateLibrary(osgViewer::View* view) {
     }
 }
 
+void ACOsgHUDRenderer::prepareMediaActions(osgViewer::View* view) {
+    if(!media_actions_renderer){
+        media_actions_renderer = new ACOsgMediaActionsRenderer();
+        media_actions_renderer->setMediaCycle(media_cycle);
+        media_actions_renderer->changeSetting(this->setting);
+        media_actions_renderer->setFont(font);
+    }
+}
+
+void ACOsgHUDRenderer::updateMediaActions(osgViewer::View* view) {
+    if(media_actions_renderer){
+        camera->removeChild(media_actions_renderer->getNode());
+        int w, h;
+        h = 1; w = 1;
+        if (view->getViewerBase()->isRealized()) {
+            w = view->getCamera()->getViewport()->width();
+            h = view->getCamera()->getViewport()->height();
+        }
+        this->media_actions_renderer->updateSize(w,h);
+        this->media_actions_renderer->updateNodes();
+        camera->addChild(media_actions_renderer->getNode());
+    }
+}
+
 //Common
 void ACOsgHUDRenderer::updatePointers(int w, int h) {
 
@@ -271,4 +310,7 @@ void ACOsgHUDRenderer::changeSetting(ACSettingType _setting)
 
     if(library_renderer)
         library_renderer->changeSetting(this->setting);
+
+    if(media_actions_renderer)
+        media_actions_renderer->changeSetting(this->setting);
 }

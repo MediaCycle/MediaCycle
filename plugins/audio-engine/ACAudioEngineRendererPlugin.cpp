@@ -40,7 +40,7 @@ using namespace std;
 ACAudioEngineRendererPlugin::ACAudioEngineRendererPlugin() : QObject(), ACPluginQt(), ACMediaRendererPlugin(){
     this->mName = "Audio Engine";
     this->mDescription ="Plugin for playing audio files with OpenAL or PortAudio";
-    this->mMediaType = MEDIA_TYPE_AUDIO;
+    this->mMediaType = MEDIA_TYPE_AUDIO | MEDIA_TYPE_MIXED;
 
     audio_engine = 0;
 
