@@ -50,10 +50,10 @@ ACOscPlugin::ACOscPlugin() : ACClientPlugin(){
     this->browser_port = 3333;
     this->feedback_port = 3334;
 
-    this->addStringParameter("Browser IP","localhost",std::vector<std::string>(),"Browser IP",boost::bind(&ACOscPlugin::changeBrowserIP,this));
-    this->addNumberParameter("Browser Port",3333,1,65555,1,"Browser Port",boost::bind(&ACOscPlugin::changeBrowserPort,this));
-    this->addStringParameter("Feedback IP","localhost",std::vector<std::string>(),"Feedback IP",boost::bind(&ACOscPlugin::changeFeedbackIP,this));
-    this->addNumberParameter("Feedback Port",3334,1,65555,1,"Feedback Port",boost::bind(&ACOscPlugin::changeFeedbackPort,this));
+    this->addStringParameter("Browser IP",browser_ip,std::vector<std::string>(),"Browser IP",boost::bind(&ACOscPlugin::changeBrowserIP,this));
+    this->addNumberParameter("Browser Port",browser_port,1,65555,1,"Browser Port",boost::bind(&ACOscPlugin::changeBrowserPort,this));
+    this->addStringParameter("Feedback IP",feedback_ip,std::vector<std::string>(),"Feedback IP",boost::bind(&ACOscPlugin::changeFeedbackIP,this));
+    this->addNumberParameter("Feedback Port",feedback_port,1,65555,1,"Feedback Port",boost::bind(&ACOscPlugin::changeFeedbackPort,this));
     this->addNumberParameter("Browser Status",0,0,1,1,"Toggle Browser",boost::bind(&ACOscPlugin::toggleBrowser,this));
     this->addNumberParameter("Feedback Status",0,0,1,1,"Toggle Feedback",boost::bind(&ACOscPlugin::toggleFeedback,this));
 }
@@ -61,42 +61,61 @@ ACOscPlugin::ACOscPlugin() : ACClientPlugin(){
 void ACOscPlugin::changeBrowserIP(){
     std::cout << "ACOscPlugin::changeBrowserIP" << std::endl;
     std::string _ip = this->getStringParameterValue("Browser IP");
+    if(osc_browser->isActive()){
+        this->toggleBrowser(); // off
+        this->toggleBrowser(); // on
+    }
 }
 
 void ACOscPlugin::changeBrowserPort(){
     std::cout << "ACOscPlugin::changeBrowserPort" << std::endl;
     int _port = this->getNumberParameterValue("Browser Port");
+    if(osc_browser->isActive()){
+        this->toggleBrowser(); // off
+        this->toggleBrowser(); // on
+    }
 }
 
 void ACOscPlugin::changeFeedbackIP(){
     std::cout << "ACOscPlugin::changeFeedbackIP" << std::endl;
     std::string _ip = this->getStringParameterValue("Feedback IP");
+    if(osc_feedback->isActive()){
+        this->toggleFeedback(); // off
+        this->toggleFeedback(); // on
+    }
 }
 
 void ACOscPlugin::changeFeedbackPort(){
     std::cout << "ACOscPlugin::changeFeedbackPort" << std::endl;
     int _port = this->getNumberParameterValue("Feedback Port");
+    if(osc_feedback->isActive()){
+        this->toggleFeedback(); // off
+        this->toggleFeedback(); // on
+    }
 }
 
 void ACOscPlugin::toggleBrowser(){
-    std::cout << "ACOscPlugin::toggleBrowser" << std::endl;
     if(!osc_browser->isActive()){
         std::string _ip = this->getStringParameterValue("Browser IP");
         int _port = this->getNumberParameterValue("Browser Port");
         osc_browser->create(_ip.c_str(),_port);
         osc_browser->setMediaCycle(media_cycle);
         osc_browser->start();
+        //this->setNumberParameterValue("Browser Status",1);
+        std::cout << "ACOscPlugin::toggleBrowser: on" << std::endl;
     }
     else{
         osc_browser->stop();
         osc_browser->release();
+        //this->setNumberParameterValue("Browser Status",0);
+        std::cout << "ACOscPlugin::toggleBrowser: off" << std::endl;
     }
 
 
 }
 
 void ACOscPlugin::toggleFeedback(){
-    std::cout << "ACOscPlugin::toggleFeedback" << std::endl;
+
     if(!osc_feedback->isActive()){
         std::string _ip = this->getStringParameterValue("Feedback IP");
         int _port = this->getNumberParameterValue("Feedback Port");
@@ -105,9 +124,13 @@ void ACOscPlugin::toggleFeedback(){
         osc_feedback->messageBegin("test mc send osc");
         std::cout << "sending test messages to "<< _ip << " on port " << _port << endl;
         osc_feedback->messageSend();
+        //this->setNumberParameterValue("Feedback Status",1);
+        std::cout << "ACOscPlugin::toggleFeedback: on" << std::endl;
     }
     else{
         osc_feedback->release();
+        //this->setNumberParameterValue("Feedback Status",0);
+        std::cout << "ACOscPlugin::toggleFeedback: off" << std::endl;
     }
 }
 
@@ -138,16 +161,12 @@ void ACOscPlugin::mediaCycleSet(){
         return;
     if(media_cycle->getCurrentConfig()->connectOSC()){
         if(!osc_browser->isActive()){
-            osc_browser->create(browser_ip.c_str(),browser_port);
-            osc_browser->setMediaCycle(media_cycle);
-            osc_browser->start();
+            //this->toggleBrowser(); // on
+            this->setNumberParameterValue("Browser Status",1);
         }
         if(!osc_feedback->isActive()){
-            osc_feedback->create(feedback_ip.c_str(),feedback_port);
-            osc_browser->setFeedback(osc_feedback);
-            osc_feedback->messageBegin("test mc send osc");
-            std::cout << "sending test messages to localhost on port 12346" << endl;
-            osc_feedback->messageSend();
+            //this->toggleFeedback(); // on
+            this->setNumberParameterValue("Feedback Status",1);
         }
     }
 

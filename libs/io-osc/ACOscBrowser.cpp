@@ -155,7 +155,7 @@ int ACOscBrowser::process_mess(const char *path, const char *types, lo_arg **arg
     if (tag.find("/list_media_actions", 0) != string::npos || tag == "/who") {
         std::cout << "ACOscBrowser: available media actions " << std::endl;
         for(std::map<std::string,std::string>::iterator media_action = media_actions.begin();media_action!=media_actions.end();media_action++){
-            std::string _message = "/mediacycle/pointer/<id>/" + media_action->second;
+            std::string _message = "/mediacycle/pointer/<id>/" + media_action->first;
             std::cout << "ACOscBrowser: media action "<< _message << std::endl;
             /*if (osc_feedback) {
                 osc_feedback->messageBegin(_message.c_str());
