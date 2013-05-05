@@ -1,5 +1,6 @@
-SET(MC_LIBS "visualisation")
 SET(PLUGIN_NAME "visualisation")
+SET(MC_LIBS "armadillo-visualisation;visualisation")
 INCLUDE (${CMAKE_SOURCE_DIR}/cmake/AddMediaCyclePlugin.cmake)
 ADD_MC_PLUGIN_LIBRARY(${PLUGIN_NAME})
+SET_TARGET_PROPERTIES(${TARGET_NAME} PROPERTIES FOLDER "${FOLDERNAME}")
 MESSAGE("[X] ${TARGET_NAME}")

@@ -1,7 +1,7 @@
 /**
  * @brief ACVisPlugin2Desc.cpp
  * @author Christian Frisson
- * @date 11/03/2013
+ * @date 05/05/2013
  * @copyright (c) 2013 – UMONS - Numediart
  * 
  * MediaCycle of University of Mons – Numediart institute is 
@@ -255,7 +255,7 @@ void ACVisPlugin2Desc::extractDescMatrix(ACMediaBrowser* mediaBrowser, mat& desc
         desc_m(i,0) = 0;
         desc_m(i,1) = 0;
 
-        if(library_type == media->second->getMediaType() ) {
+        /*if(library_type == media->second->getMediaType() ) {
             current = media->second;
         }
         else {
@@ -269,7 +269,8 @@ void ACVisPlugin2Desc::extractDescMatrix(ACMediaBrowser* mediaBrowser, mat& desc
             else{
                 std::cerr << "ACVisPlugin2Desc::extractDescMatrix: media of id " << media->first << " has no parent id" << std::endl;
             }
-        }
+        }*/
+        current = media->second; //CF test media documents
 
         if(current){
             ACMediaFeatures* x_feat = current->getPreProcFeaturesVector(x);
