@@ -32,7 +32,7 @@
 //
 
 #include <iostream>
-#include "smds.h"
+#include "sMds.h"
 #include "mds.h"
 #include "limits.h"
 

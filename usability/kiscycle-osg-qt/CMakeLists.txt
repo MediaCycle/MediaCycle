@@ -5,7 +5,7 @@ IF ( SUPPORT_AUDIO AND USE_QT4 AND USE_OSG AND ( OPENAL_FOUND OR PORTAUDIO_FOUND
 	SET(WITH_OSC OFF)
 
 	SET(MEDIA_TYPE "MEDIA_TYPE_AUDIO")
-        SET(MC_PLUGINS "usability-kis;audio-engine;audio-features-yaafe;audio-osg;audio-reader-sndfile;audio-thumbnailer-waveform;media-thumbnailer-feature-mapper;file;visualisation")#;visualisation-advanced
+        SET(MC_PLUGINS "usability-kis;audio-engine;audio-features-yaafe;audio-osg;audio-reader-sndfile;audio-thumbnailer-waveform;file;visualisation")#;visualisation-advanced;media-thumbnailer-feature-mapper
         SET(OSG_PLUGINS "osgdb_svg") #required by audio-thumbnailer-waveform
         SET(DESCRIPTION "AudioCycle allows to organize audio files by similarity.")
 
