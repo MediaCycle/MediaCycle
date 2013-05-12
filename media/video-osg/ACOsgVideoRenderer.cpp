@@ -52,14 +52,26 @@ ACOsgVideoRenderer::ACOsgVideoRenderer()
     video_transform = 0;
     aura_geode=0;
     video_stream = 0;
+    node_thumbnail = "";
+    thumbnail_transform = 0;
+    thumbnail_geometry = 0;
+    thumbnail_geode = 0;
+    node_size = 1.0f;
 }
 
 ACOsgVideoRenderer::~ACOsgVideoRenderer() {
+    media_node->removeChildren(0,media_node->getNumChildren());
+    thumbnail_geode = 0;
     if (video_stream)
         video_stream->quit();
+    video_stream=0;
     video_geode=0;
+    aura_geode=0;
     border_geode=0;
+    ground_geode=0;
     video_transform=0;
+    thumbnail_geometry = 0;
+    thumbnail_transform = 0;
 }
 
 void ACOsgVideoRenderer::videoGeode(bool flip, float sizemul, float zoomin) {
@@ -412,6 +424,13 @@ void ACOsgVideoRenderer::auraVideoGeode(bool flip, float sizemul, float zoomin) 
 
 void ACOsgVideoRenderer::prepareNodes() {
 
+    if(media_node->containsNode(thumbnail_transform))
+        media_node->removeChild(thumbnail_transform);
+    thumbnail_transform = 0;
+
+    thumbnail_geometry = 0;
+    thumbnail_geode = 0;
+
     if (!video_geode) {
         videoGeode(true, 2.0, 1.0); // true is for flip -- necessary for video
         media_node->addChild(video_transform);
@@ -434,6 +453,8 @@ void ACOsgVideoRenderer::prepareNodes() {
     video_stream->play();
 
     video_stream->seek(this->media->getStart()); // to start with the correct frame, especially for segments
+
+    //this->changeThumbnail(node_thumbnail);
 }
 
 void ACOsgVideoRenderer::updateNodes(double ratio) {
@@ -455,7 +476,7 @@ void ACOsgVideoRenderer::updateNodes(double ratio) {
     double omr = 1.0-ratio;
 
     //if (media_index!=prev_media_index) {
-    if (media_changed) {
+    /*if (media_changed) {
         if(media_node->getNumChildren() == 1) {
             media_node->removeChild(0, 1);
         }
@@ -464,7 +485,7 @@ void ACOsgVideoRenderer::updateNodes(double ratio) {
         media_node->addChild(video_transform);
         //prev_media_index = media_index;
         media_changed = false;
-    }
+    }*/
 
     unsigned int mask = (unsigned int)-1;
     if(attribute->getNavigationLevel() >= media_cycle->getNavigationLevel()) {
@@ -553,16 +574,27 @@ void ACOsgVideoRenderer::updateNodes(double ratio) {
         z += zpos;
     }
 
+    float magic_number = 0.0001; // since we're not using an ortho2D projection
+#ifdef AUTO_TRANSFORM
+    if(thumbnail_transform)
+        thumbnail_transform->setScale(magic_number*node_size,magic_number*node_size,1.0);
+#else
+    Matrix magic_numbers;
+    magic_numbers.makeScale(magic_number*node_size,magic_number*node_size,1.0);
+    if(thumbnail_transform)
+        thumbnail_transform->setMatrix(magic_numbers);
+#endif
+
 #ifdef AUTO_TRANSFORM
     media_node->setPosition(Vec3(x,y,z));
     media_node->setRotation(Quat(0.0, 0.0, 1.0, -media_cycle_angle));
-    media_node->setScale(Vec3(localscale/media_cycle_zoom,localscale/media_cycle_zoom,localscale/media_cycle_zoom));
+    media_node->setScale(Vec3(node_size*localscale/media_cycle_zoom,localscale/media_cycle_zoom,localscale/media_cycle_zoom));
 #else
 
     Matrix T;
     T.makeTranslate(Vec3(x, y, z)); // omr*p.z + ratio*p2.z));
     T =  Matrix::rotate(-media_cycle_angle,Vec3(0.0,0.0,1.0))
-            * Matrix::scale(localscale/media_cycle_zoom,localscale/media_cycle_zoom,localscale/media_cycle_zoom)
+            * Matrix::scale(node_size*localscale/media_cycle_zoom,localscale/media_cycle_zoom,localscale/media_cycle_zoom)
             * T;
     media_node->setMatrix(T);
 #endif //AUTO_TRANSFORM
@@ -605,4 +637,52 @@ void ACOsgVideoRenderer::updateNodes(double ratio) {
     default:
         break;
     }
+
+    media_changed = false;
+}
+
+void ACOsgVideoRenderer::changeThumbnail(std::string thumbnail){
+    this->node_thumbnail = thumbnail;
+
+    if(!media)
+        return;
+
+    if(media_cycle->getNodeFromMedia(media)==0)
+        return;
+
+    if(media_node->containsNode(video_transform))
+        media_node->removeChild(video_transform);
+
+    if(media_node->containsNode(thumbnail_transform))
+        media_node->removeChild(thumbnail_transform);
+
+    thumbnail_transform=0;
+#ifdef AUTO_TRANSFORM
+    thumbnail_transform = new AutoTransform();
+#else
+    thumbnail_transform = new MatrixTransform();
+#endif
+
+    thumbnail_geode = 0;
+    thumbnail_geode = new Geode();
+
+    thumbnail_geometry = 0;
+    thumbnail_geometry = this->thumbnailGeometry(node_thumbnail);
+    if(thumbnail_geometry){
+        thumbnail_geode->addDrawable(thumbnail_geometry);
+        thumbnail_geode->setUserData(new ACRefId(node_index));
+        thumbnail_geode->getOrCreateStateSet()->setRenderingHint(osg::StateSet::TRANSPARENT_BIN );
+        thumbnail_transform->addChild(thumbnail_geode);
+        media_node->addChild(thumbnail_transform);
+    }
+    else{
+        if(!video_geode)
+            videoGeode();
+        media_node->addChild(video_transform);
+    }
+
+}
+
+void ACOsgVideoRenderer::changeNodeSize(double _size){
+    this->node_size = _size;
 }

@@ -48,16 +48,30 @@ protected:
     osg::ref_ptr<osg::Geode> ground_geode;
     osg::ref_ptr<osg::MatrixTransform> video_transform;
     osg::ref_ptr<osg::ImageStream> video_stream;
+#ifdef AUTO_TRANSFORM
+    osg::ref_ptr<osg::AutoTransform> thumbnail_transform;
+#else
+    osg::ref_ptr<osg::MatrixTransform> thumbnail_transform;
+#endif
+    osg::ref_ptr<osg::Geometry> thumbnail_geometry;
+    osg::ref_ptr<osg::Geode> thumbnail_geode;
 
     void videoGeode(bool flip=false, float sizemul=1.0, float zoomin=1.0);
     void auraVideoGeode(bool flip=false, float sizemul=1.0, float zoomin=1.0);
     void auraGeode();
+
+    std::string node_thumbnail;
+    double node_size;
+
 public:
     ACOsgVideoRenderer();
     ~ACOsgVideoRenderer();
     void prepareNodes();
     void updateNodes(double ratio=0.0);
     virtual osg::ref_ptr<osg::Geode> getMainGeode() { return video_geode;}
+
+    virtual void changeThumbnail(std::string thumbnail);
+    virtual void changeNodeSize(double _size);
 };
 
 #endif

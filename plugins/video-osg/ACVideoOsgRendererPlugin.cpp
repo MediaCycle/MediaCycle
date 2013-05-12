@@ -60,6 +60,11 @@ ACVideoOsgRendererPlugin::ACVideoOsgRendererPlugin() : ACOsgRendererPlugin(){
 
     this->addCallback("Timeline playback","Timeline playback",boost::bind(&ACOsgRendererPlugin::changeTimelinePlaybackThumbnail,this));
 
+    browser_node_thumbnails.push_back("None");
+    browser_node_thumbnails.push_back("Slit-scan");
+    browser_node_thumbnails.push_back("Circular slit-scan");
+    this->addStringParameter("Browser node", browser_node_thumbnails.front(), browser_node_thumbnails, "Browser node",boost::bind(&ACOsgRendererPlugin::changeBrowserThumbnail,this));
+
     timeline_selection_thumbnails.push_back("None");
     timeline_selection_thumbnails.push_back("Keyframes");
     this->addStringParameter("Timeline selection",timeline_selection_thumbnails.front(),timeline_selection_thumbnails,"Timeline selection",boost::bind(&ACOsgRendererPlugin::changeTimelineSelectionThumbnail,this));

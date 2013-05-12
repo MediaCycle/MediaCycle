@@ -319,6 +319,7 @@ std::vector<ACMediaThumbnail*> ACVideoOpenCVSlitScanThumbnailerPlugin::computeSl
     _thumbnail->setHeight(height);
     _thumbnail->setLength(total_frames);
     thumbnails.push_back(_thumbnail);
+    std::cout << "ACVideoOpenCVSlitScanThumbnailerPlugin::computeSlitScans: saved " << _thumbnail_filename << " with width " << total_frames << " height " << height << " length " << total_frames << std::endl;
 
     std::string circular_name("Circular slit-scan");
     std::string circular_thumbnail_filename = this->createFileName(_filename, circular_name, thumbnail_extensions[circular_name]);
@@ -337,8 +338,10 @@ std::vector<ACMediaThumbnail*> ACVideoOpenCVSlitScanThumbnailerPlugin::computeSl
     circ_thumbnail->setName(circular_name);
     circ_thumbnail->setWidth(2*height);
     circ_thumbnail->setHeight(2*height);
-    circ_thumbnail->setLength(2*height);
+    circ_thumbnail->setLength(total_frames);
+    circ_thumbnail->setCircular(true);
     thumbnails.push_back(circ_thumbnail);
+    std::cout << "ACVideoOpenCVSlitScanThumbnailerPlugin::computeSlitScans: saved " << circular_thumbnail_filename << " with width " << 2*height << " height " << 2*height << " length " << total_frames << std::endl;
 
     capture->release();
 
