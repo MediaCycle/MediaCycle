@@ -1,4 +1,4 @@
-SET(PLUGIN_NAME "armaVisualisation")
+SET(PLUGIN_NAME "visualisation-advanced")
 SET(MC_LIBS "armadillo-visualisation;visualisation") 
 INCLUDE (${CMAKE_SOURCE_DIR}/cmake/AddMediaCyclePlugin.cmake)
 ADD_MC_PLUGIN_LIBRARY(${PLUGIN_NAME})

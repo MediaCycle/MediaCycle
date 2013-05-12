@@ -2,7 +2,7 @@ SET(TARGET_NAME "ImageCycle")
 IF ( BUILD_IMAGECYCLE_APP AND SUPPORT_IMAGE AND USE_QT4 AND USE_OSG AND USE_OSC )
 
 	SET(MEDIA_TYPE "MEDIA_TYPE_IMAGE")
-	SET(MC_PLUGINS "file;image;image-osg;pcapreprocess;visualisation;armaVisualisation")
+	SET(MC_PLUGINS "file;image;image-osg;pcapreprocess;visualisation;visualisation-advanced")
         IF(APPLE)
             SET(OSG_PLUGINS "osgdb_imageio")
         ELSE()

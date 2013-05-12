@@ -2,7 +2,7 @@ SET(TARGET_NAME "NavimedCycle")
 IF ( SUPPORT_NAVIMED AND SUPPORT_MULTIMEDIA AND SUPPORT_IMAGE AND SUPPORT_TEXT AND USE_QT4 AND USE_OSG )
 
 	SET(MEDIA_TYPE "MEDIA_TYPE_MIXED")
-	SET(MC_PLUGINS "file;image;image-osg;segmentation;sensor;sensor-osg;text;text-osg;video;video-osg;visualisation;armaVisualisation;navimed") # load navimed after text plugin which also reads .xml
+	SET(MC_PLUGINS "file;image;image-osg;segmentation;sensor;sensor-osg;text;text-osg;video;video-osg;visualisation;visualisation-advanced;navimed") # load navimed after text plugin which also reads .xml
 	SET(OSG_PLUGINS "osgdb_ffmpeg")
 	SET(MEDIA_READER "Navimed Reader")
 	SET(ACTIVE_MEDIA "text")
