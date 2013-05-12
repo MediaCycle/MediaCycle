@@ -228,7 +228,7 @@ void ACOsgAudioRenderer::auraGeode()
     aura_geode->addDrawable(new osg::ShapeDrawable(new osg::Cylinder(osg::Vec3(0.0f,0.0f,0.0f),localsize*1.5, 0.0f), hints)); // draws a disc
     //aura_geode->addDrawable(new osg::ShapeDrawable(new osg::Capsule(osg::Vec3(0.0f,0.0f,0.0f),0.01, 0.005f), hints)); // draws a sphere
 #endif
-     ((ShapeDrawable*)aura_geode->getDrawable(0))->setColor(osg::Vec4(0,0,0,1));
+    ((ShapeDrawable*)aura_geode->getDrawable(0))->setColor(osg::Vec4(0,0,0,1));
     aura_geode->setUserData(new ACRefId(node_index));
 }
 
@@ -248,7 +248,7 @@ void ACOsgAudioRenderer::prepareNodes() {
     node_shape_drawable = 0;
 
     // This waveform must be initialized before the renderer node is added to the browser renderer scenegraph, otherwise it gets visual noise
-    waveform_geometry = thumbnailGeometry(waveform_thumbnail);
+    /*waveform_geometry = thumbnailGeometry(waveform_thumbnail);
     waveform_geode = new Geode();
     waveform_geode->addDrawable(waveform_geometry);
     waveform_geode->setUserData(new ACRefId(node_index));
@@ -258,7 +258,7 @@ void ACOsgAudioRenderer::prepareNodes() {
 #else
     waveform_transform = new MatrixTransform();
 #endif
-    waveform_transform->addChild(waveform_geode);
+    waveform_transform->addChild(waveform_geode);*/
 
     //if  (media_cycle->getMediaNode(node_index)->isDisplayed()){
     if (media && media_cycle->getNodeFromMedia(media)==0){
@@ -326,6 +326,21 @@ void ACOsgAudioRenderer::updateNodes(double ratio) {
             if (metadata_geode == 0) {
                 metadataGeode();
             }
+
+            if (waveform_geometry == 0) {
+                waveform_geometry = thumbnailGeometry(waveform_thumbnail);
+                waveform_geode = new Geode();
+                waveform_geode->addDrawable(waveform_geometry);
+                waveform_geode->setUserData(new ACRefId(node_index));
+                waveform_geode->getOrCreateStateSet()->setRenderingHint(osg::StateSet::TRANSPARENT_BIN );
+#ifdef AUTO_TRANSFORM
+                waveform_transform = new AutoTransform();
+#else
+                waveform_transform = new MatrixTransform();
+#endif
+                waveform_transform->addChild(waveform_geode);
+            }
+
         }
         
         if(waveform_type != AC_BROWSER_AUDIO_WAVEFORM_NONE){
