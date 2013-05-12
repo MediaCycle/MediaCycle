@@ -1,7 +1,7 @@
 /**
  * @brief ACVisPlugin2Desc.cpp
  * @author Christian Frisson
- * @date 05/05/2013
+ * @date 12/05/2013
  * @copyright (c) 2013 – UMONS - Numediart
  * 
  * MediaCycle of University of Mons – Numediart institute is 
@@ -86,13 +86,14 @@ bool ACVisPlugin2Desc::updateAvailableFeatures(){
                         //std::cout << "ACVisPlugin2Desc: feature: " << featdim->first << " of dim " << featdim->second << std::endl;
                         if(featdim->second == 1)
                             feature_names.push_back(featdim->first);
-                        else if(featdim->second > 1){
+                        // Disabling from the drop-down list all features with dimensions different than 1 for now (waiting for dimension reduction solutions)`
+                        /*else if(featdim->second > 1){
                             for(int f=0;f<featdim->second;f++){
                                 std::stringstream name;
                                 name << featdim->first << " (dim " << f << ")";
                                 feature_names.push_back(name.str());
                             }
-                        }
+                        }*/
                     }
                 }
             }
