@@ -393,7 +393,8 @@ std::vector<int> ACMediaLibrary::importFile(std::string _filename, ACPluginManag
     //media->saveXML(_medias);
 
     // deleting the data that have been used for analysis, keep media small.
-    //CF media->deleteData();
+    if(media->getMediaData())
+        media->getMediaData()->closeFile();
 
     if(files_processed == files_to_import){
         files_processed = files_to_import = 0;
