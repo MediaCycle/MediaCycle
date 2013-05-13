@@ -9,7 +9,7 @@ IF ( BUILD_TEXTCYCLE_APP AND SUPPORT_TEXT AND USE_QT4 AND USE_OSG )
         ENDIF()
 
 	SET(MEDIA_TYPE "MEDIA_TYPE_TEXT")
-	SET(MC_PLUGINS "file;pcapreprocess;text;text-osg;visualisation")
+	SET(MC_PLUGINS "file;pcapreprocess;text;text-osg;visualisation;visualisation-advanced;visualisation-tagging")
         SET(PREPROCESS "Text Features")
 	SET(OSG_PLUGINS "")
         SET(DESCRIPTION "TextCycle allows to organize text files by similarity.")

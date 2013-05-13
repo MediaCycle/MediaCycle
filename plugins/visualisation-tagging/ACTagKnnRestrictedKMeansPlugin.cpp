@@ -36,8 +36,8 @@
 
 ACTagKnnRestrictedKMeansPlugin::ACTagKnnRestrictedKMeansPlugin()
 : ACKnnRestrictedKMeansPlugin() {
-    this->mName = "MediaCycle KMeans & Tag(restricted to Knn neighbors)";
-    this->mDescription = "Plugin for KMeans Clustering  with tag media information exploitation";
+    this->mName = "MediaCycle KMeans & Tag (restricted to Knn neighbors)";
+    this->mDescription = "Plugin for KMeans Clustering with tag media information exploitation";
 }
 
 ACTagKnnRestrictedKMeansPlugin::~ACTagKnnRestrictedKMeansPlugin() {
