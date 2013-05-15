@@ -51,6 +51,17 @@
 #include <vector>
 #include "ACMediaFeatures.h"
 
+typedef		unsigned int ACStatType;
+const ACStatType	STAT_TYPE_NONE		=	0x0000;
+const ACStatType	STAT_TYPE_MIN		=	0x0001;
+const ACStatType	STAT_TYPE_MEAN		=	0x0002;
+const ACStatType	STAT_TYPE_MAX		=	0x0004;
+const ACStatType	STAT_TYPE_STDDEV	=	0x0008;
+const ACStatType	STAT_TYPE_CENTROID	=	0x0010;
+const ACStatType	STAT_TYPE_SPREAD	=	0x0020;
+const ACStatType	STAT_TYPE_SKEWNESS	=	0x0040;
+const ACStatType	STAT_TYPE_KURTOSIS	=	0x0080;
+
 class ACMediaTimedFeature {
 	// Class describing feature that are time stamped
 	
@@ -82,14 +93,14 @@ public:
 	void setValue(arma::fmat);
     void setTimeAndValueForIndex(long iIndex, double iTime, arma::frowvec iVal_v);
 	void setTimeAndValueForIndex(long iIndex, double iTime, std::vector<float> iVal);
-	std::string getName(){return name;};
-    const std::vector<std::string> &getNames(){return names;};
+    std::string getName(){return name;}
+    const std::vector<std::string> &getNames(){return names;}
     std::vector<std::string> getDistinctNames();
 	void setName(std::string name);
 	size_t getLength();
 	size_t getDim();
         bool isConsistent();
-	void setSegments(std::vector<float> iSeg_v){seg_v=iSeg_v;};
+    void setSegments(std::vector<float> iSeg_v){seg_v=iSeg_v;}
 	std::vector<float> getSegments();
 	float getSegments(int index);
 	

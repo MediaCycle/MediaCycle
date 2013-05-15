@@ -126,14 +126,6 @@ ACAudioYaafeCorePlugin::ACAudioYaafeCorePlugin() : ACTimedFeaturesPlugin() {
     dataflowLoaded = false;
     factoriesRegistered = false;
 
-    with_min = false;
-    with_mean = false;
-    with_max = false;
-    with_centroid = true;
-    with_spread = true;
-    with_skewness = true;
-    with_kurtosis = true;
-
     //DataBlock::setPreferedBlockSize(1024);
 
     m_default_resample_rate = 20050;
@@ -319,8 +311,7 @@ void ACAudioYaafeCorePlugin::loadDataflow(){
     if(!factoriesRegistered)
         this->registerFactories();
     if(!factoriesRegistered)
-        return;
-
+        return;    
 }
 
 ACFeatureDimensions ACAudioYaafeCorePlugin::getFeaturesDimensions(){
@@ -385,20 +376,42 @@ ACFeatureDimensions ACAudioYaafeCorePlugin::getFeaturesDimensions(){
         //std::cout << "ACAudioYaafeCorePlugin: adding descriptor: '" << name << "'" << std::endl;
         //std::cout << "ACAudioYaafeCorePlugin: feature " << *output << " has a dimension of " << dim << std::endl;
 
-        if(with_min)
+
+        std::string statistics = outputparams["statistics"];
+        if(statistics == ""){
+            std::cerr << "ACAudioYaafeCorePlugin::loadDataflow: dataflow malformed, feature " << name << " statistics are not set " << std::endl;
+            featdims.clear();
+            return featdims;
+        }
+
+        if(statistics.find("min")!=std::string::npos){
+            featuresStats[name] |= STAT_TYPE_MIN;
             featdims[name+": Min"] = dim;
-        if(with_mean)
+        }
+        if(statistics.find("mean")!=std::string::npos){
+            featuresStats[name] |= STAT_TYPE_MEAN;
             featdims[name+": Mean"] = dim;
-        if(with_max)
+        }
+        if(statistics.find("max")!=std::string::npos){
+            featuresStats[name] |= STAT_TYPE_MAX;
             featdims[name+": Max"] = dim;
-        if(with_centroid)
+        }
+        if(statistics.find("centroid")!=std::string::npos){
+            featuresStats[name] |= STAT_TYPE_CENTROID;
             featdims[name+": Centroid"] = dim;
-        if(with_spread)
+        }
+        if(statistics.find("spread")!=std::string::npos){
+            featuresStats[name] |= STAT_TYPE_SPREAD;
             featdims[name+": Spread"] = dim;
-        if(with_skewness)
+        }
+        if(statistics.find("skewness")!=std::string::npos){
+            featuresStats[name] |= STAT_TYPE_SKEWNESS;
             featdims[name+": Skewness"] = dim;
-        if(with_kurtosis)
+        }
+        if(statistics.find("kurtosis")!=std::string::npos){
+            featuresStats[name] |= STAT_TYPE_KURTOSIS;
             featdims[name+": Kurtosis"] = dim;
+        }
 
         /*std::string fname = (*output);
         size_t funderscore = 0;
@@ -740,24 +753,20 @@ std::vector<ACMediaFeatures*> ACAudioYaafeCorePlugin::calculate(ACMedia* theMedi
         }*/
     // the feature named "Energy" does not need to be normalized
     for(mf=descmf.begin();mf!=descmf.end();mf++){
-        if(with_min)
+        ACStatType mfstats = featuresStats[(*mf).second->getName()];
+        if(mfstats&STAT_TYPE_MIN)
             desc.push_back((*mf).second->min());
-        if(with_mean)
+        if(mfstats&STAT_TYPE_MEAN)
             desc.push_back((*mf).second->mean());
-        if(with_max)
+        if(mfstats&STAT_TYPE_MAX)
             desc.push_back((*mf).second->max());
-        // CPL, statistics using boost library
-        if(with_centroid)
+        if(mfstats&STAT_TYPE_CENTROID)
             desc.push_back((*mf).second->centroid());
-        if(with_spread)
+        if(mfstats&STAT_TYPE_SPREAD)
             desc.push_back((*mf).second->spread());
-        //std::map<std::string,ACMediaTimedFeature*>::iterator mf2;
-        //for(mf2=descmf.begin();mf2!=descmf.end();mf2++){
-        //    desc.push_back((*mf).second->cov(mf2->second));
-        //}
-        if(with_skewness)
+        if(mfstats&STAT_TYPE_SKEWNESS)
             desc.push_back((*mf).second->skew());
-        if(with_kurtosis)
+        if(mfstats&STAT_TYPE_KURTOSIS)
             desc.push_back((*mf).second->kurto());
 
         //std::cout << "descmf " << (*mf).second->getName() << " of length " << (*mf).second->getLength() << " and dim " << (*mf).second->getDim() << " gives mean of size " << (*mf).second->mean()->getSize() << std::endl;
