@@ -7,7 +7,7 @@ PortGroup       cmake 1.0
 name            OpenSceneGraph-devel
 conflicts       OpenSceneGraph
 set my_name     OpenSceneGraph
-version         3.1.4
+version         3.1.6
 platforms       darwin
 categories      graphics
 maintainers     nomaintainer
@@ -24,12 +24,11 @@ master_sites    ${homepage}downloads/developer_releases/
 distname        ${my_name}-${version}
 use_zip         yes
 
-checksums           md5     2b31ab4e365779028a0e0aca26fef418 \
-                    sha1    1a395f113862ce2724748a4f7ef6d46138e2dd53 \
-                    rmd160  aeb640dcf4bb319dc0e84e76677200a2e66c590e
+checksums           md5     5b2afc6948669c6dc0c4c0dbec9d500e \
+                    sha1    f2d3707b033932cd7b916d425559572d0d3dfc69 \
+                    rmd160  3ab89102856f2d93afc3be9859cf8161246e3722
 
 patchfiles              patch-CMakeModules-FindQuicktime.cmake.diff \
-                        patch-ffmpeg.diff \
                         patch-src-osgViewer-CMakeLists.txt.diff \
                         patch-CMakeModules-FindAVFoundation.cmake.diff
 
@@ -38,6 +37,7 @@ post-patch {
 }
 
 depends_lib \
+    port:wxWidgets-devel \
     port:curl \
     path:lib/libavcodec.dylib:ffmpeg \
     port:freetype \
