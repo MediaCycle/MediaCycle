@@ -186,12 +186,15 @@ void ACPluginControlsWidgetQt::buildPluginList()
                 || plugin->implementsPluginType(PLUGIN_TYPE_NEIGHBORS_POSITIONS)
                 ){*/
             comboBoxPlugins->addItem(plugin_name);
+            comboBoxPlugins->setItemData(comboBoxPlugins->count()-1, QString( plugin->getDescription().c_str() ), Qt::ToolTipRole);
             count++;
             if(plugin_name.toStdString() == current_plugin_name)
                 index=count;
         //}
 
         if(plugin_name.toStdString() == current_plugin_name && plugin->getParametersCount()>0){
+
+            comboBoxPlugins->setToolTip( QString( plugin->getDescription().c_str() ));
 
             if(!parametersContainer)
                 parametersContainer = new QWidget(this);
@@ -201,6 +204,7 @@ void ACPluginControlsWidgetQt::buildPluginList()
             layout->setVerticalSpacing(5);
             int minHeight = 0;
             QPushButton* pushbutton = new QPushButton("Reset");
+            pushbutton->setToolTip("Reset all parameters to their default value");
             pushbutton->setFont(font);
 
             int paramIdx = 0;
@@ -276,6 +280,7 @@ void ACPluginControlsWidgetQt::buildPluginList()
 
                 QPushButton* callbackButton = new QPushButton(name);
                 callbackButton->setFont(font);
+                callbackButton->setToolTip(desc);
 
                 if(tabWidget && word_count[parameter_word[*callbackName]] > 1){
                     dynamic_cast<QGridLayout*>(tabWidget->widget(tab_index[parameter_word[*callbackName]])->layout())->addWidget(callbackButton,widget_count[parameter_word[*callbackName]],0);
@@ -301,6 +306,7 @@ void ACPluginControlsWidgetQt::buildPluginList()
 
                 QLabel* label = new QLabel(name);
                 label->setFont(font);
+                label->setToolTip(desc);
 
                 ACPluginParameterQt* stringParameter = new ACPluginParameterQt(plugin,name);
 
@@ -311,7 +317,7 @@ void ACPluginControlsWidgetQt::buildPluginList()
                     }
                     combobox->setCurrentIndex( plugin->getStringParameterValueIndex(*strParamName) );
                     combobox->setFont(font);
-
+                    combobox->setToolTip(desc);
 
                     if(tabWidget && word_count[parameter_word[*strParamName]] > 1){
                         dynamic_cast<QGridLayout*>(tabWidget->widget(tab_index[parameter_word[*strParamName]])->layout())->addWidget(label,widget_count[parameter_word[*strParamName]],0);
@@ -334,6 +340,7 @@ void ACPluginControlsWidgetQt::buildPluginList()
                     QLineEdit* lineedit = new QLineEdit();
                     lineedit->setText( QString( plugin->getStringParameterInit(*strParamName).c_str()) );
                     lineedit->setFont(font);
+                    lineedit->setToolTip(desc);
 
                     if(tabWidget && word_count[parameter_word[*strParamName]] > 1){
                         dynamic_cast<QGridLayout*>(tabWidget->widget(tab_index[parameter_word[*strParamName]])->layout())->addWidget(label,widget_count[parameter_word[*strParamName]],0);
@@ -371,9 +378,11 @@ void ACPluginControlsWidgetQt::buildPluginList()
 
                     QLabel* label = new QLabel(name);
                     label->setFont(font);
+                    label->setToolTip(desc);
 
                     QCheckBox* checkbox = new QCheckBox("");
                     checkbox->setChecked((bool)init);
+                    checkbox->setToolTip(desc);
 
                     if(tabWidget && word_count[parameter_word[*numParamName]] > 1){
                         dynamic_cast<QGridLayout*>(tabWidget->widget(tab_index[parameter_word[*numParamName]])->layout())->addWidget(label,widget_count[parameter_word[*numParamName]],0);
@@ -407,6 +416,7 @@ void ACPluginControlsWidgetQt::buildPluginList()
 
                     QLabel* label = new QLabel(name);
                     label->setFont(font);
+                    label->setToolTip(desc);
 
                     QwtSlider* slider = new QwtSlider(0);
 #if QWT_VERSION >= 0x060100
