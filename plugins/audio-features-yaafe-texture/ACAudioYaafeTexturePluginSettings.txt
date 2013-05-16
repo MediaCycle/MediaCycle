@@ -1,0 +1,34 @@
+audio := Input Resample="yes" SampleRate="22050"
+nAudioIn := FrameTokenizer blockSize="512" stepSize="256"
+audio > nAudioIn
+
+nFFT := FFT FFTLength="512" FFTWindow="Hanning"
+nAudioIn > nFFT
+
+nFFTAbs := Abs
+nFFT > nFFTAbs
+
+nMelFilterBankText := MelFilterBank MelMaxFreq="10000.0" MelMinFreq="30.0" MelNbFilters="18"
+nFFTAbs > nMelFilterBankText
+
+MelFilterBankAbs := Output normalize="-1" version="v0.6" yaafedefinition="MelFilterBankAbs blockSize=512 stepSize=256" dimensions="18" statistics="corr,modulation,logcentroid,logspread,logskewness,logkurtosis"
+nMelFilterBankText > MelFilterBankAbs
+
+nMelFilterBank := MelFilterBank MelMaxFreq="10000.0" MelMinFreq="30.0" MelNbFilters="20"
+nFFTAbs > nMelFilterBank
+
+nCepstrum := Cepstrum CepsIgnoreFirstCoeff="0" CepsNbCoeffs="20"
+nMelFilterBank > nCepstrum
+
+MFCC := Output normalize="-1" version="v0.6" yaafedefinition="MFCC blockSize=512 stepSize=256" dimensions="13" statistics="centroid,cov"
+nCepstrum > MFCC
+
+nDMFCC := Derivate DO1Len="4" DO2Len="1" DOrder="1"
+Delta_MFCC := Output normalize="-1" version="v0.6" yaafedefinition="MFCC blockSize=512 stepSize=256 > Derivate DOrder=1" dimensions="13" statistics="centroid,cov"
+nCepstrum > nDMFCC
+nDMFCC > Delta_MFCC
+
+nDDMFCC := Derivate DO1Len="4" DO2Len="1" DOrder="2"
+Delta_Delta_MFCC := Output normalize="-1" version="v0.6" yaafedefinition="MFCC blockSize=512 stepSize=256 > Derivate DOrder=2" dimensions="13" statistics="centroid,cov"
+nCepstrum > nDDMFCC
+nDDMFCC > Delta_Delta_MFCC
