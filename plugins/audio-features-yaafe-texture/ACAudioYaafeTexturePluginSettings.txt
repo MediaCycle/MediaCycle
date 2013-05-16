@@ -11,7 +11,7 @@ nFFT > nFFTAbs
 nMelFilterBankText := MelFilterBank MelMaxFreq="10000.0" MelMinFreq="30.0" MelNbFilters="18"
 nFFTAbs > nMelFilterBankText
 
-MelFilterBankAbs := Output normalize="-1" version="v0.6" yaafedefinition="MelFilterBankAbs blockSize=512 stepSize=256" dimensions="18" statistics="corr,modulation,logcentroid,logspread,logskewness,logkurtosis"
+MelFilterBankAbs := Output normalize="-1" version="v0.6" yaafedefinition="MelFilterBankAbs blockSize=512 stepSize=256" dimensions="18" statistics="corr,modulation,logcentr,logspr,logskew,logkurt"
 nMelFilterBankText > MelFilterBankAbs
 
 nMelFilterBank := MelFilterBank MelMaxFreq="10000.0" MelMinFreq="30.0" MelNbFilters="20"
