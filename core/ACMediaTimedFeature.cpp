@@ -454,7 +454,7 @@ ACMediaFeatures* ACMediaTimedFeature::centroid(){
 	}
 	string nameLoc = ": Centroid";
     centroid_mf->setName(this->getName()+nameLoc);
-    centroid_mf->setNeedsNormalization(0);
+    centroid_mf->setNeedsNormalization(1);
 	return centroid_mf;
 }
 
@@ -480,7 +480,7 @@ ACMediaFeatures* ACMediaTimedFeature::spread(){
 	
     string nameLoc = ": Spread";
     spread_mf->setName(this->getName()+nameLoc);
-    spread_mf->setNeedsNormalization(0);
+    spread_mf->setNeedsNormalization(1);
 	
 	return spread_mf;
 }
@@ -522,7 +522,7 @@ ACMediaFeatures* ACMediaTimedFeature::skew(){
 	
 	string nameLoc = ": Skewness";
     skew_mf->setName(this->getName()+nameLoc);
-    skew_mf->setNeedsNormalization(0);
+    skew_mf->setNeedsNormalization(1);
 	
 	return skew_mf;
 }
@@ -564,7 +564,7 @@ ACMediaFeatures* ACMediaTimedFeature::kurto(){
 	
 	string nameLoc = ": Kurtosis";
     kurt_mf->setName(this->getName()+nameLoc);
-    kurt_mf->setNeedsNormalization(0);
+    kurt_mf->setNeedsNormalization(1);
 	
 	return kurt_mf;
 }
@@ -614,18 +614,278 @@ ACMediaFeatures* ACMediaTimedFeature::std(){
 }
 
 
-ACMediaFeatures* ACMediaTimedFeature::cov(ACMediaTimedFeature* mtf2){
+/*Begin of McDermott sound texture test*/
+
+ACMediaFeatures* ACMediaTimedFeature::cov(int nbDiag){
 	ACMediaFeatures* cov_mf = new ACMediaFeatures();
    // mat test1=arma::ones<mat>(mtf2->value_m.n_rows,1)*arma::mean(mtf2->value_m);
-    arma::fmat locCov=((this->value_m-arma::ones<fmat>(this->value_m.n_rows,1)*arma::mean(this->value_m))).t()*(mtf2->value_m-(arma::ones<fmat>(mtf2->value_m.n_rows,1)*arma::mean(mtf2->value_m)))/this->value_m.n_rows;
+    arma::fmat locCov=arma::cov(this->getValue());
 	//each columns contains this->value_m.n_cols elements ( each of the this->value_m features)
-    for (uword i=0; i < locCov.n_elem; i++)
-        cov_mf->addFeatureElement(locCov[i]);
-    string nameLoc = ": Cov with ";
-    cov_mf->setName(this->getName()+nameLoc+mtf2->getName());
-    cov_mf->setNeedsNormalization(0);
+    for (int i=0;i<(nbDiag<locCov.n_cols?nbDiag:locCov.n_cols);i++){
+        for (uword j=0; j < locCov.n_cols-i; j++)
+            cov_mf->addFeatureElement(locCov(j+i,j));
+    }
+    string nameLoc = ": Cov";
+    cov_mf->setName(this->getName()+nameLoc);
+    cov_mf->setNeedsNormalization(1);
     return cov_mf;
 }
+
+ACMediaFeatures* ACMediaTimedFeature::cor(int nbDiag){
+	ACMediaFeatures* cor_mf = new ACMediaFeatures();
+    // mat test1=arma::ones<mat>(mtf2->value_m.n_rows,1)*arma::mean(mtf2->value_m);
+    arma::fmat locCor=arma::cor(this->getValue());
+	//each columns contains this->value_m.n_cols elements ( each of the this->value_m features)
+    for (int i=0;i<(nbDiag<locCor.n_cols?nbDiag:locCor.n_cols);i++){
+        for (uword j=0; j < locCor.n_cols-i; j++)
+            cor_mf->addFeatureElement(locCor(j+i,j));
+    }
+    string nameLoc = ": Cor";
+    cor_mf->setName(this->getName()+nameLoc);
+    cor_mf->setNeedsNormalization(1);
+    return cor_mf;
+}
+
+ACMediaFeatures* ACMediaTimedFeature::modulation(){
+	ACMediaFeatures* modulation_mf = new ACMediaFeatures();
+    
+    arma::fmat locData=this->getValue();
+    
+    locData.save("dataTest.dat", raw_ascii);
+    fcolvec locTime=this->getTime();
+    //cout<<locTime(0)<<"\t"<<locTime(1)<<"\t"<<locTime(2)<<endl;
+    double fs=1.0/(locTime(2)-locTime(1));
+    int nfft=256;
+    int fftstep=nfft/2;
+    int nbSpec;
+    if (locData.n_rows<(256+128))
+        nbSpec=1;
+    else
+        nbSpec=(locData.n_rows-256)/128;
+    /*int nfft=pow(2,floor(log2((float)locData.n_rows)));
+    if (nfft<256)
+        nfft=256;*/
+    arma::fmat octBins(nfft,locData.n_cols);
+    octBins.zeros();
+    for (int k=0;k<nbSpec;k++){
+        int locIndexEndRow=(k*fftstep+nfft-1)<(locData.n_rows-1)?(k*fftstep+nfft-1):(locData.n_rows-1);
+        octBins+=arma::abs(arma::fft(locData.submat(k*fftstep,0,locIndexEndRow,locData.n_cols-1),nfft));
+    }
+    octBins/=nbSpec;
+    octBins.save("fftTest.dat", raw_ascii);
+    arma::colvec freqIndex(7);
+    freqIndex(0)=ceil(0.5*octBins.n_rows/fs);
+    if (freqIndex(0)==0)
+        freqIndex(0)=1;
+    freqIndex(1)=ceil(1.0*octBins.n_rows/fs);
+    freqIndex(2)=ceil(2.0*octBins.n_rows/fs);
+    freqIndex(3)=ceil(4.0*octBins.n_rows/fs);
+    freqIndex(4)=ceil(8.0*octBins.n_rows/fs);
+    freqIndex(5)=ceil(16.0*octBins.n_rows/fs);
+    freqIndex(6)=floor(octBins.n_rows/2);//(floor(octBins.n_rows/2)<ceil(32.0*octBins.n_rows/fs))?floor(octBins.n_rows/2): (ceil(32.0*octBins.n_rows/fs));
+    if (freqIndex(6)<=freqIndex(5)){
+        cerr<<"frame sample must be over 64Hz";
+        return 0;
+    }
+    arma::fmat energyMod(6,octBins.n_cols);
+    arma::fmat testMat=octBins.submat(0,0,10,10);
+    for (int i=0;i<6;i++){
+        //
+        //cout<<freqIndex(i)<<" "<<freqIndex(i+1)<<endl;
+        if (freqIndex(i+1)-1>freqIndex(i)){
+        arma::fmat tempMat=(octBins.submat(freqIndex(i),0,freqIndex(i+1)-1,octBins.n_cols-1));
+        arma::fmat tempMat2=sum(tempMat);
+            energyMod.row(i)=tempMat2;}
+        else
+            energyMod.row(i)=octBins.row(freqIndex(i));
+    
+    
+    }
+    //arma::frowvec sumMod=sum(octBins);//sum(octBins.submat(0,0,freqIndex(6)-1,octBins.n_cols-1));
+    for (int i=0;i<6;i++){
+        for (int j=0;j<energyMod.n_cols;j++){
+            //energyMod(i,j)=energyMod(i,j)/sumMod(j);
+            modulation_mf->addFeatureElement(energyMod(i,j));
+        }
+    }
+    /*for (int j=0;j<energyMod.n_cols;j++)
+        cout<<sum(energyMod.col(j))<<"\t";
+    cout<<endl;
+    for (int j=0;j<energyMod.n_cols;j++)
+        cout<<sumMod(j)<<"\t";
+    cout<<endl;*/
+	string nameLoc = ": modulation";
+    modulation_mf->setName(this->getName()+nameLoc);
+    modulation_mf->setNeedsNormalization(1);
+    return modulation_mf;
+}
+
+//CPL: using Boost
+//Centroid (arithmetic mean)
+ACMediaFeatures* ACMediaTimedFeature::logCentroid(){
+	using namespace boost::accumulators;
+	ACMediaFeatures* centroid_mf = new ACMediaFeatures();
+	
+    arma::fmat locData=this->getValue();
+    fcolvec locTime=this->getTime();
+    locData=20*arma::log10(arma::abs(locData));
+    frowvec maxLog=arma::max(locData,0);
+    
+	double moments[4] = { 0.0,0.0,0.0,0.0 };
+	for (int i=0; i<this->getDim(); i++){
+		//cout << "boost centroid" << endl;
+		double output = 0.0;
+		accumulator_set<double, stats<tag::moment<1> > > acc;
+		for (int j=0; j<this->getLength(); j++){
+            
+            if ((is_finite(locData(j,i)))&&( maxLog(i)-locData(j,i)<40)){
+                acc(locData(j,i));
+            }
+		}
+		moments[0] = accumulators::moment<1>(acc);
+		output = moments[0];
+		centroid_mf->addFeatureElement(output);
+	}
+	string nameLoc = ": log Centroid";
+    centroid_mf->setName(this->getName()+nameLoc);
+    centroid_mf->setNeedsNormalization(1);
+	return centroid_mf;
+}
+
+//Spread
+ACMediaFeatures* ACMediaTimedFeature::logSpread(){
+	using namespace boost::accumulators;
+	ACMediaFeatures* spread_mf = new ACMediaFeatures();
+	
+    arma::fmat locData=this->getValue();
+    fcolvec locTime=this->getTime();
+    locData=20*arma::log10(arma::abs(locData));
+    frowvec maxLog=arma::max(locData,0);
+	double moments[4] = { 0.0,0.0,0.0,0.0 };
+	for (int i=0; i<this->getDim(); i++){
+		//cout << "boost spread" << endl;
+		double output = 0.0;
+		accumulator_set<double, stats<tag::moment<1>, tag::moment<2> > > acc;
+		for (int j=0; j<this->getLength(); j++){
+           
+            if ((is_finite(locData(j,i)))&&( maxLog(i)-locData(j,i)<40)){
+                acc(locData(j,i));
+            }
+		}
+		moments[0] = accumulators::moment<1>(acc);
+		moments[1] = accumulators::moment<2>(acc);
+		output = sqrt(moments[1] - pow(moments[0],2));
+		spread_mf->addFeatureElement(output);
+		//std::cout << "mom1 " << moments[0] << " / mom2 " << moments[1] << " / mom3 " << moments[2] << " / mom4 " << moments[3] << " // kurtosis: " << output << "\n";
+	}
+	
+    string nameLoc = ": log Spread";
+    spread_mf->setName(this->getName()+nameLoc);
+    spread_mf->setNeedsNormalization(1);
+	
+	return spread_mf;
+}
+
+
+//Skewness
+ACMediaFeatures* ACMediaTimedFeature::logSkew(){
+	using namespace boost::accumulators;
+	ACMediaFeatures* skew_mf = new ACMediaFeatures();
+	
+    arma::fmat locData=this->getValue();
+    fcolvec locTime=this->getTime();
+    locData=20*arma::log10(arma::abs(locData));
+    frowvec maxLog=arma::max(locData,0);
+	double moments[4] = { 0.0,0.0,0.0,0.0 };
+	for (int i=0; i<this->getDim(); i++){
+		//cout << "boost skewness" << endl;
+		double output_tmp = 0.0;
+		double output_tmp2 = 0.0;
+		double output = 0.0;
+		accumulator_set<double, stats<tag::moment<1>, tag::moment<2>, tag::moment<3> > > acc;
+		
+		
+		for (int j=0; j<this->getLength(); j++){
+            
+            if ((is_finite(locData(j,i)))&&( maxLog(i)-locData(j,i)<40)){
+                acc(locData(j,i));
+            }
+		}
+		
+		moments[0] = accumulators::moment<1>(acc);
+		moments[1] = accumulators::moment<2>(acc);
+		moments[2] = accumulators::moment<3>(acc);
+        
+		if (moments[0]!=0 && moments[1]!=0) {
+			
+			output_tmp = sqrt(moments[1] - pow(moments[0],2));
+			output_tmp2 = sqrt(moments[1]);
+			//output = (2 * pow(moments[0],3) - 3 * moments[0]* moments[1] + moments[2]) / pow(output_tmp,3);
+			output = moments[2]/pow(output_tmp2,3);
+            
+		}
+		
+		skew_mf->addFeatureElement(output);
+	}
+	
+	string nameLoc = ": log Skewness";
+    skew_mf->setName(this->getName()+nameLoc);
+    skew_mf->setNeedsNormalization(1);
+	
+	return skew_mf;
+}
+
+//Kurtosis
+ACMediaFeatures* ACMediaTimedFeature::logKurto(){
+	using namespace boost::accumulators;
+	ACMediaFeatures* kurt_mf = new ACMediaFeatures();
+	
+    arma::fmat locData=this->getValue();
+    fcolvec locTime=this->getTime();
+    locData=20*arma::log10(arma::abs(locData));
+    frowvec maxLog=arma::max(locData,0);
+	double moments[4] = { 0.0,0.0,0.0,0.0 };
+	for (int i=0; i<this->getDim(); i++){
+		//cout << "boost kurtosis" << endl;
+		double output_tmp = 0.0;
+		double output_tmp2 = 0.0;
+		double output = 0.0;
+		accumulator_set<double, stats<tag::moment<1>, tag::moment<2>, tag::moment<3>, tag::moment<4> > > acc;
+		
+		
+		for (int j=0; j<this->getLength(); j++){
+            
+            if ((is_finite(locData(j,i)))&&( maxLog(i)-locData(j,i)<40)){
+                acc(locData(j,i));
+            }
+		}
+		
+		moments[0] = accumulators::moment<1>(acc);
+		moments[1] = accumulators::moment<2>(acc);
+		moments[2] = accumulators::moment<3>(acc);
+		moments[3] = accumulators::moment<4>(acc);
+		
+		if (moments[0]!=0 && moments[1]!=0) {
+			
+			output_tmp = sqrt(moments[1] - pow(moments[0],2));
+			output_tmp2 = moments[1];
+			//output = (-3 * pow(moments[0],4) + 6 * moments[0]* moments[1] - 4 * moments[0] * moments[2] + moments[3])/ pow(output_tmp,4) - 3;
+			output = (moments[3])/ pow(moments[1],2) - 3;
+		}
+		
+		kurt_mf->addFeatureElement(output);
+		//std::cout << "mom1 " << moments[0] << " / mom2 " << moments[1] << " / mom3 " << moments[2] << " / mom4 " << moments[3] << " // kurtosis: " << output << "\n";
+	}
+	
+	string nameLoc = ": log Kurtosis";
+    kurt_mf->setName(this->getName()+nameLoc);
+    kurt_mf->setNeedsNormalization(1);
+	
+	return kurt_mf;
+}
+
+
+/*End of McDermott sound texture test*/
 
 ACMediaFeatures* ACMediaTimedFeature::toMediaFeatures(){
 	if (this->getDim() > 1){

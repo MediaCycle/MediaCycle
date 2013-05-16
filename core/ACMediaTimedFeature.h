@@ -61,6 +61,13 @@ const ACStatType	STAT_TYPE_CENTROID	=	0x0010;
 const ACStatType	STAT_TYPE_SPREAD	=	0x0020;
 const ACStatType	STAT_TYPE_SKEWNESS	=	0x0040;
 const ACStatType	STAT_TYPE_KURTOSIS	=	0x0080;
+const ACStatType	STAT_TYPE_COV       =	0x0100;
+const ACStatType	STAT_TYPE_CORR      =	0x0200;
+const ACStatType	STAT_TYPE_MODULATION    =	0x0400;
+const ACStatType	STAT_TYPE_LOG_CENTROID	=	0x0800;
+const ACStatType	STAT_TYPE_LOG_SPREAD	=	0x1000;
+const ACStatType	STAT_TYPE_LOG_SKEWNESS	=	0x2000;
+const ACStatType	STAT_TYPE_LOG_KURTOSIS	=	0x4000;
 
 class ACMediaTimedFeature {
 	// Class describing feature that are time stamped
@@ -125,7 +132,17 @@ public:
 	ACMediaFeatures* centroid();
 	ACMediaFeatures* spread();
 	ACMediaFeatures* skew();
-	ACMediaFeatures* kurto(); 
+	ACMediaFeatures* kurto();
+    ACMediaFeatures* cov(int nbDiag);
+    ACMediaFeatures* cor(int nbDiag);
+    
+    //TR: test texture sound. It will be implemented clearly if it works.
+    ACMediaFeatures* modulation();
+	ACMediaFeatures* logCentroid();
+	ACMediaFeatures* logSpread();
+	ACMediaFeatures* logSkew();
+	ACMediaFeatures* logKurto();
+    
 
 	
 	ACMediaFeatures* toMediaFeatures(); // only for one dim features

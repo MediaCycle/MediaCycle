@@ -412,6 +412,34 @@ ACFeatureDimensions ACAudioYaafeCorePlugin::getFeaturesDimensions(){
             featuresStats[name] |= STAT_TYPE_KURTOSIS;
             featdims[name+": Kurtosis"] = dim;
         }
+        if(statistics.find("cov")!=std::string::npos){
+            featuresStats[name] |= STAT_TYPE_COV;
+            featdims[name+": Covariance"] = dim;
+        }
+        if(statistics.find("corr")!=std::string::npos){
+            featuresStats[name] |= STAT_TYPE_CORR;
+            featdims[name+": Corr"] = dim;
+        }
+        if(statistics.find("modulation")!=std::string::npos){
+            featuresStats[name] |= STAT_TYPE_MODULATION;
+            featdims[name+": Modulation"] = dim;
+        }
+        if(statistics.find("logcentr")!=std::string::npos){
+            featuresStats[name] |= STAT_TYPE_LOG_CENTROID;
+            featdims[name+": log Centroid"] = dim;
+        }
+        if(statistics.find("logspr")!=std::string::npos){
+            featuresStats[name] |= STAT_TYPE_LOG_SPREAD;
+            featdims[name+": log Spread"] = dim;
+        }
+        if(statistics.find("logskew")!=std::string::npos){
+            featuresStats[name] |= STAT_TYPE_LOG_SKEWNESS;
+            featdims[name+": log Skewness"] = dim;
+        }
+        if(statistics.find("logkurto")!=std::string::npos){
+            featuresStats[name] |= STAT_TYPE_LOG_KURTOSIS;
+            featdims[name+": log Kurtosis"] = dim;
+        }
 
         /*std::string fname = (*output);
         size_t funderscore = 0;
@@ -768,6 +796,20 @@ std::vector<ACMediaFeatures*> ACAudioYaafeCorePlugin::calculate(ACMedia* theMedi
             desc.push_back((*mf).second->skew());
         if(mfstats&STAT_TYPE_KURTOSIS)
             desc.push_back((*mf).second->kurto());
+        if(mfstats&STAT_TYPE_COV)
+            desc.push_back((*mf).second->cov(6));
+        if(mfstats&STAT_TYPE_CORR)
+            desc.push_back((*mf).second->cor(12));
+        if(mfstats&STAT_TYPE_MODULATION)
+            desc.push_back((*mf).second->modulation());
+        if(mfstats&STAT_TYPE_LOG_CENTROID)
+            desc.push_back((*mf).second->logCentroid());
+        if(mfstats&STAT_TYPE_LOG_SPREAD)
+            desc.push_back((*mf).second->logSpread());
+        if(mfstats&STAT_TYPE_LOG_SKEWNESS)
+            desc.push_back((*mf).second->logSkew());
+        if(mfstats&STAT_TYPE_LOG_KURTOSIS)
+            desc.push_back((*mf).second->logKurto());
 
         //std::cout << "descmf " << (*mf).second->getName() << " of length " << (*mf).second->getLength() << " and dim " << (*mf).second->getDim() << " gives mean of size " << (*mf).second->mean()->getSize() << std::endl;
         /*if (i==nrgIdx){
