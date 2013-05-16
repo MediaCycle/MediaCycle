@@ -1259,7 +1259,7 @@ IF(SUPPORT_AUDIO AND USE_PORTAUDIO)
 ENDIF()
 
 # Armadillo
-FIND_PACKAGE ( Armadillo 0.9.6 REQUIRED ) 
+FIND_PACKAGE ( Armadillo 3.810 REQUIRED ) 
 # lowest version tested in April 2011: 0.9.8 (ubuntu maverick 10.10)
 # with no major improvements over 0.9.6 that provides join_rows()/join_cols(), find() and STL-style iterators, that we use extensively
 IF (ARMADILLO_FOUND)
@@ -1299,7 +1299,7 @@ IF (ARMADILLO_FOUND)
 		MESSAGE("HDF5 HL library ${HDF5_HL_LIBRARY}")
 		list(APPEND ARMADILLO_LIBRARIES ${HDF5_LIBRARY} ${HDF5_HL_LIBRARY})
 	ENDIF()
-	MESSAGE("Armadillo libraries ${ARMADILLO_LIBRARIES}")
+	MESSAGE("Found Armadillo version ${ARMADILLO_VERSION} libraries ${ARMADILLO_LIBRARIES}")
 	MESSAGE("Lapack libraries ${LAPACK_LIBRARIES}")
 	INCLUDE_DIRECTORIES(${ARMADILLO_INCLUDE_DIR})
 	ADD_LIB_LINKED_DIR(${ARMADILLO_LIBRARY})
