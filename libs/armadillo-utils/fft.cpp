@@ -1,8 +1,8 @@
 /**
  * @brief fft.cpp
- * @author Xavier Siebert
- * @date 31/01/2011
- * @copyright (c) 2011 – UMONS - Numediart
+ * @author Thierry Ravet
+ * @date 16/05/2013
+ * @copyright (c) 2013 – UMONS - Numediart
  * 
  * MediaCycle of University of Mons – Numediart institute is 
  * licensed under the GNU AFFERO GENERAL PUBLIC LICENSE Version 3 
@@ -31,6 +31,7 @@
 
 #include "fft.h"
 using namespace arma;
+#if (ARMA_VERSION_MAJOR<3||(ARMA_VERSION_MAJOR==3&&ARMA_VERSION_MINOR<810))
 
 cx_mat fft(mat x_m, int n){
 	//  std::cout << "Calling fft for mat" << std::endl;
@@ -51,4 +52,5 @@ cx_mat fft(mat x_m, int n){
   }
   return y_m;
 }
+#endif
 
