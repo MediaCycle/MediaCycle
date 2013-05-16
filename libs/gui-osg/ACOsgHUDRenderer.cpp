@@ -106,11 +106,11 @@ void ACOsgHUDRenderer::cleanLibrary(){
 }
 
 void ACOsgHUDRenderer::cleanMediaActions(){
-    if(media_actions_renderer){
+    /*if(media_actions_renderer){
         camera->removeChild(media_actions_renderer->getNode());
         delete media_actions_renderer;
         media_actions_renderer = 0;
-    }
+    }*/
 }
 
 double ACOsgHUDRenderer::getTime() {
