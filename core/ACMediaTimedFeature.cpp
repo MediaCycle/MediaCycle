@@ -669,7 +669,7 @@ ACMediaFeatures* ACMediaTimedFeature::modulation(){
     octBins.zeros();
     for (int k=0;k<nbSpec;k++){
         int locIndexEndRow=(k*fftstep+nfft-1)<(locData.n_rows-1)?(k*fftstep+nfft-1):(locData.n_rows-1);
-        octBins+=arma::abs(arma::fft(locData.submat(k*fftstep,0,locIndexEndRow,locData.n_cols-1),nfft));
+        octBins+=arma::abs(fft(locData.submat(k*fftstep,0,locIndexEndRow,locData.n_cols-1),nfft));
     }
     octBins/=nbSpec;
     octBins.save("fftTest.dat", raw_ascii);
