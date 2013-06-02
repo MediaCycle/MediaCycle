@@ -1,14 +1,15 @@
 # stk 4.4.4 from https://ccrma.stanford.edu/software/stk/download.html
+# extracted RtAudio, RtError and RtMidi from the stk distribution as MC 3rdparties
 SET(TARGET_NAME "stk")
 IF(SUPPORT_AUDIO AND NOT STK_FOUND AND ( ALSA_FOUND OR (APPLE AND COREAUDIO_FOUND AND COREFOUNDATION_FOUND)))
 
-        INCLUDE_DIRECTORIES(${CMAKE_CURRENT_SOURCE_DIR}/include ${CMAKE_CURRENT_SOURCE_DIR}/src ${CMAKE_CURRENT_SOURCE_DIR}/src/include)
+        INCLUDE_DIRECTORIES(${CMAKE_CURRENT_SOURCE_DIR}/include ${CMAKE_CURRENT_SOURCE_DIR}/src ${CMAKE_SOURCE_DIR}/3rdparty/RtAudio ${CMAKE_SOURCE_DIR}/3rdparty/RtAudio/include ${CMAKE_SOURCE_DIR}/3rdparty/RtError ${CMAKE_SOURCE_DIR}/3rdparty/RtMidi)
 
         FILE(GLOB ${TARGET_NAME}_SRCS src/*.cpp)
         FILE(GLOB ${TARGET_NAME}_HDRS include/*.h)
 
         ADD_LIBRARY(${TARGET_NAME} ${${TARGET_NAME}_SRCS} ${${TARGET_NAME}_HDRS})
-        #TARGET_LINK_LIBRARIES(${TARGET_NAME})
+        TARGET_LINK_LIBRARIES(${TARGET_NAME} RtAudio RtMidi)
 
 	IF(APPLE)
 		ADD_DEFINITIONS("-DHAVE_GETTIMEOFDAY -D__MACOSX_CORE__ -D__LITTLE_ENDIAN__")
