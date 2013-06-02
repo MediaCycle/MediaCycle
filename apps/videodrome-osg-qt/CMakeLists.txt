@@ -7,7 +7,9 @@ IF ( BUILD_VIDEOCYCLE_APP AND SUPPORT_VIDEO AND USE_QT4 AND USE_OSG AND USE_OSC 
 
 	SET(MEDIA_TYPE "MEDIA_TYPE_VIDEO")
         SET(MC_PLUGINS "file;video-reader-opencv;video-osg;video-thumbnailer-resize;video-thumbnailer-slitscan-opencv;visualisation")
+        SET(MC_PLUGINS_STATIC ON)
         SET(OSG_PLUGINS "osgdb_ffmpeg")
+        SET(CLUSTERS_POSITIONS "MediaCycle ScatterPlot")
         SET(DESCRIPTION "Videodrome allows to browse video files quickly and compute their slit-scans.")
 
         INCLUDE (${CMAKE_SOURCE_DIR}/cmake/CreateDefaultConfig.cmake)
