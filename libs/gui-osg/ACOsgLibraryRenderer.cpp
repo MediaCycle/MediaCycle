@@ -273,14 +273,14 @@ void ACOsgLibraryRenderer::updateNodes(double ratio) {
 
         this->updateImageRenderer(library_cover,media_cycle->getLibrary()->getCover(),library_node);
 
-        if(this->library_cover.file!=""){
-            library_title.x = library_author.x = library_year.x = library_publisher.x = library_license.x = library_website.x = library_medias_number.x = max_side_size/2;
-        }
+        //if(this->library_cover.file!=""){
+            library_title.x = library_author.x = library_year.x = library_publisher.x = library_license.x = library_website.x = library_medias_number.x = max_side_size/2 + font_size;
+        //}
 
         //CF be careful with positionning, overlapping text geodes explode CPU usage
-        library_title.y = 4*line_sep-max_side_size/2;
-        library_author.y = 3*line_sep-max_side_size/2;
-        library_publisher.y = 2*line_sep-max_side_size/2;
+        library_title.y = 3*line_sep-max_side_size/2;
+        library_author.y = 2*line_sep-max_side_size/2;
+        //library_publisher.y = 2*line_sep-max_side_size/2;
         library_medias_number.y = 1*line_sep-max_side_size/2;
 
         this->updateTextRenderer(library_title,media_cycle->getLibrary()->getTitle(),library_node);
@@ -290,7 +290,7 @@ void ACOsgLibraryRenderer::updateNodes(double ratio) {
         //this->updateTextRenderer(library_license,media_cycle->getLibrary()->getLicense(),library_node);
         //this->updateTextRenderer(library_website,media_cycle->getLibrary()->getWebsite(),library_node);
 
-std:stringstream library_medias_number_info;
+        std:stringstream library_medias_number_info;
         if(media_cycle->getBrowserMode() == AC_MODE_NEIGHBORS)
             library_medias_number_info << media_cycle->getNumberOfMediaNodes() << "/";
         library_medias_number_info << media_cycle->getLibrarySize();
@@ -309,9 +309,9 @@ std:stringstream library_medias_number_info;
         // cout<<"test:"<<library_medias_number.text->getFont()->getFileName()<<"\t"<<library_medias_number.text->getText().createUTF8EncodedString ()<<endl;
         this->updateImageRenderer(curator_picture,media_cycle->getLibrary()->getCuratorPicture(),curator_node);
 
-        if(this->library_cover.file!=""){
-            curator_name.x = curator_email.x = curator_website.x = curator_location.x = max_side_size/2;
-        }
+        //if(this->library_cover.file!=""){
+            curator_name.x = curator_email.x = curator_website.x = curator_location.x = max_side_size/2+font_size;
+        //}
 
         //CF be careful with positionning, overlapping text geodes explode CPU usage
         curator_name.y = 3*line_sep-max_side_size/2;
@@ -332,7 +332,7 @@ std:stringstream library_medias_number_info;
 
     float curator_x,curator_y,curator_z;
     if(setting==AC_SETTING_INSTALLATION)
-        curator_x = 2.0f*width/4.0f; //CF should check the max text length of curator/library lines instead
+        curator_x = 2.5f*width/4.0f; //CF should check the max text length of curator/library lines instead
     else
         curator_x = 3.0f*width/4.0f;
     curator_y = max_side_size/2+line_sep;
