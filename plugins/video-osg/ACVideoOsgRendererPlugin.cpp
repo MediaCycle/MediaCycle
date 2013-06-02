@@ -67,11 +67,11 @@ ACVideoOsgRendererPlugin::ACVideoOsgRendererPlugin() : ACOsgRendererPlugin(){
 
     timeline_selection_thumbnails.push_back("None");
     timeline_selection_thumbnails.push_back("Keyframes");
-    this->addStringParameter("Timeline selection",timeline_selection_thumbnails.front(),timeline_selection_thumbnails,"Timeline selection",boost::bind(&ACOsgRendererPlugin::changeTimelineSelectionThumbnail,this));
+    this->addStringParameter("Timeline selection",timeline_selection_thumbnails.back(),timeline_selection_thumbnails,"Timeline selection",boost::bind(&ACOsgRendererPlugin::changeTimelineSelectionThumbnail,this));
 
     timeline_summary_thumbnails.push_back("None");
     timeline_summary_thumbnails.push_back("Keyframes");
-    this->addStringParameter("Timeline summary",timeline_summary_thumbnails.front(),timeline_summary_thumbnails,"Timeline summary",boost::bind(&ACOsgRendererPlugin::changeTimelineSummaryThumbnail,this));
+    this->addStringParameter("Timeline summary",timeline_summary_thumbnails.back(),timeline_summary_thumbnails,"Timeline summary",boost::bind(&ACOsgRendererPlugin::changeTimelineSummaryThumbnail,this));
 }
 
 ACVideoOsgRendererPlugin::~ACVideoOsgRendererPlugin(){
