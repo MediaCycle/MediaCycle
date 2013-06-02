@@ -685,7 +685,7 @@ bool ACMediaBrowser::initializeNode(long mediaId, ACBrowserMode _mode) { // defa
     return true;
 }
 
-// sets first feature weight to 1, others to 0
+// sets feature weights to 1
 // can be changed afterwards, e.g. when reading XML file with config and descriptors
 // assumes all media have the same number of features (as the first one)
 void ACMediaBrowser::initializeFeatureWeights(){
@@ -698,9 +698,8 @@ void ACMediaBrowser::initializeFeatureWeights(){
             mFeatureWeights.resize(fc);
             printf("setting first feature weights to 1.0 (count=%d), others to 0.0 \n", (int) mFeatureWeights.size());
             for(int i=0; i<fc; i++) {
-                mFeatureWeights[i] = 0.0;
+                mFeatureWeights[i] = 1.0;
             }
-            mFeatureWeights[0] = 1.0;
         }
     }
     else {
