@@ -1,8 +1,7 @@
-/*
- * File:   main.cpp
- * Author: Alexis Moinet
- *
- * @date 15 juillet 2009
+/**
+ * @brief Process to query Dancers! video through MediaCycle commandline interfaces (CLI)
+ * @author Alexis Moinet, Christian Frisson
+ * @date 15/07/2009
  * @copyright (c) 2009 – UMONS - Numediart
  * 
  * MediaCycle of University of Mons – Numediart institute is 
@@ -32,23 +31,25 @@
 
 #include <stdlib.h>
 
-#include "MediaCycle.h"
+#include<ACDancersCycleCLI.h>
 
-#include <string>
-#include <cstring>
-#include <vector>
-#include <iostream>
-#include <iomanip>
-#include <sstream>
+//#include "MediaCycle.h"
 
-#include <signal.h>
-#include <math.h>
-#include "Armadillo-utils.h"
-//#include "fftsg_h.c"
-#include <time.h>
+//#include <string>
+//#include <cstring>
+//#include <vector>
+//#include <iostream>
+//#include <iomanip>
+//#include <sstream>
 
-#include <armadillo> // for sort(rand())
-#include <ctime> // for timing with clock()
+//#include <signal.h>
+//#include <math.h>
+//#include "Armadillo-utils.h"
+////#include "fftsg_h.c"
+//#include <time.h>
+
+//#include <armadillo> // for sort(rand())
+//#include <ctime> // for timing with clock()
 
 //sleep()
 #include <iostream>
@@ -59,6 +60,14 @@
 
 using namespace std;
 using namespace arma;
+
+ACDancersCycleCLI::ACDancersCycleCLI(MediaCycle* _media_cycle)
+    : ACAbstractProcessCLI(_media_cycle)
+{
+}
+
+ACDancersCycleCLI::~ACDancersCycleCLI(){
+}
 
 static void dancers_tcp_callback(char *buffer, int l, char **buffer_send, int *l_send, void *userData); 
 int processTcpMessageFromInstallation(MediaCycle *that, char *buffer, int l, char **buffer_send, int *l_send); 
@@ -74,7 +83,8 @@ string fillOutputBuffer(ACMediaLibrary* media_library, ACMediaBrowser* media_bro
 string dirpath = "./";
 string xmlpath = dirpath+"dancers-all.xml";
 
-int main(int argc, char** argv) {
+void ACDancersCycleCLI::run(int argc, char *argv[]){
+
 	string configFilename = dirpath+"config.txt";
 	ifstream configIF(configFilename.c_str());
 	cout << "MediaCycle - Dancers - v4" << endl;
@@ -88,39 +98,41 @@ int main(int argc, char** argv) {
 	configIF.close();
 	
 	cout<<"new MediaCycle"<<endl;
-	MediaCycle* mediacycle;
-	mediacycle = new MediaCycle(MEDIA_TYPE_VIDEO);
-	if (mediacycle->addPluginLibrary (visPluginFilename) < 0){
-		cerr << "<MediaCycle-Dancers main> could not add Plugin: " << visPluginFilename << endl;
-		return EXIT_FAILURE;
-	}
-    mediacycle->changeActivePlugin(PLUGIN_TYPE_CLUSTERS_POSITIONS,"MediaCycle DANCERS!");
-	if (mediacycle->importACLLibrary(libraryFilename) == 0) {
+//CF this is now done by ACAbstractProcessCLI
+//    MediaCycle* media_cycle;
+//    media_cycle = new MediaCycle(MEDIA_TYPE_VIDEO);
+//	if (media_cycle->addPluginLibrary (visPluginFilename) < 0){
+//		cerr << "<MediaCycle-Dancers main> could not add Plugin: " << visPluginFilename << endl;
+//		return;
+//	}
+
+    media_cycle->changeActivePlugin(PLUGIN_TYPE_CLUSTERS_POSITIONS,"MediaCycle DANCERS!");
+
+    if (media_cycle->importACLLibrary(libraryFilename) == 0) {
 		cerr << "<MediaCycle-Dancers main> empty library: " << libraryFilename << endl;
-		return EXIT_FAILURE;
+        return;
 	}
-	mediacycle->libraryContentChanged();
-	// saveLibraryAsXml(mediacycle, xmlpath);	
+    media_cycle->libraryContentChanged();
+    // saveLibraryAsXml(media_cycle, xmlpath);
 	
-	mediacycle->getBrowser()->randomizeNodePositions();
-//	mediacycle->getBrowser()->setClusterNumber(1);
+    media_cycle->getBrowser()->randomizeNodePositions();
+//	media_cycle->getBrowser()->setClusterNumber(1);
 	// XSCF251003 added this
-	//mediacycle->updateClusters(true);
-	//mediacycle->setNeedsDisplay(true);
+    //media_cycle->updateClusters(true);
+    //media_cycle->setNeedsDisplay(true);
 	
-	if (mediacycle->startTcpServer(12345,5,dancers_tcp_callback) < 0){
+    if (media_cycle->startTcpServer(12345,5,dancers_tcp_callback) < 0){
 		cerr << "<MediaCycle-Dancers main> could not start tcp server" << endl;
-		return EXIT_FAILURE;
+        return;
 	}
-//	//readLibraryXml(mediacycle, "/Users/dtardieu/Desktop/dancers-exemple.xml");
+//	//readLibraryXml(media_cycle, "/Users/dtardieu/Desktop/dancers-exemple.xml");
 //	
 	while(1) {
 		sleep(30);
 	}
 //	
-//	mediacycle->saveAsLibrary(mypath+"dancers-ex-2.acl");
-	delete mediacycle;	
-	return (EXIT_SUCCESS);
+//	media_cycle->saveAsLibrary(mypath+"dancers-ex-2.acl");
+    delete media_cycle;
 }
 
 static void dancers_tcp_callback(char *buffer, int l, char **buffer_send, int *l_send, void *userData) {

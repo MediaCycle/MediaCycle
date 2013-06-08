@@ -5,8 +5,8 @@
 export DISPLAY=:0 #needed if you are running a simple gui app
 export DYLD_LIBRARY_PATH=$(dirname "$0")
 
-process=mediacycle-dancers
-makerun=$(dirname "$0")/mediacycle-dancers
+process=DancersCycleCLI
+makerun=$(dirname "$0")/DancersCycleCLI.app/Contents/MacOS/DancersCycleCLI
 
 if ps ax | grep -v grep | grep $process > /dev/null
         then
