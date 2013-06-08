@@ -263,7 +263,7 @@ ENDIF()
 IF(NOT USE_DEBUG) # release mode
 	# For now we want only multimediacycle-osg-qt with limited features
 	# Synchronize libs/gui-osg-qt/ACMediaConfigDockWidgetQt.cpp in consequence
-	SET(BUILD_CLIS OFF)
+	SET(BUILD_CLIS ON)
 	SET(BUILD_DOCUMENTATION OFF)
 	SET(BUILD_TESTS OFF)
 	SET(SUPPORT_ALL OFF)

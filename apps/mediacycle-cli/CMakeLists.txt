@@ -1,4 +1,4 @@
-SET(TARGET_NAME "mediacycle-cli")
+SET(TARGET_NAME "MediaCycleCLI")
 IF (BUILD_CLIS)
 
 	FILE(GLOB SRC *.cpp *.c)
