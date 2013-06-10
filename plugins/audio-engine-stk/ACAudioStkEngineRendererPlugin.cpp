@@ -39,70 +39,6 @@
 using namespace std;
 using namespace stk;
 
-/*bool done;
-static void finish(int ignore)
-{
-    done = true;
-}*/
-
-void midi_inCallback( double timeStamp, std::vector<unsigned char> *message, void *userData){
-    /*std::cout << "Time " << timeStamp;//<< std::endl;
-    for(std::vector<unsigned char>::iterator word = message->begin(); word != message->end(); word++){
-        std::cout << " '" << (int)(*word) << "'";
-    }
-    std::cout << std::endl;*/
-    if(!message)
-        return;
-    if(message->size()!=3)
-        return;
-
-    int typechan = (int)((*message)[0]);
-    int number = (int)((*message)[1]);
-    int value = (int)((*message)[2]);
-    std::string type("");
-    int chan = 0;
-
-    if(typechan >= 176 && typechan < 192){
-        type = "control change";
-        chan = typechan - 176;
-    }
-
-    std::cout << "ACAudioStkEngineRendererPlugin midi in @ " << timeStamp << " type " << type << /*" typechan " << typechan <<*/ " channel " << chan << " number " << number << " value " << value << std::endl;
-
-    ACAudioStkEngineRendererPlugin* plugin = ((ACAudioStkEngineRendererPlugin *) userData);
-    if(!plugin){
-        std::cerr << "ACAudioStkEngineRendererPlugin: midi in: can't access plugin data" << std::endl;
-        return;
-    }
-    std::vector<std::string> fader_effect = ((ACAudioStkEngineRendererPlugin *) userData)->fader_effect;
-    MediaCycle* media_cycle = ((ACAudioStkEngineRendererPlugin *) userData)->getMediaCycle();
-    if(!media_cycle){
-        std::cerr << "ACAudioStkEngineRendererPlugin: midi in: can't access media cycle" << std::endl;
-        return;
-    }
-    int mediaId = media_cycle->getClosestNode(); // warning, mono-pointer
-
-    // The following is specific to the BFC2000
-    if(fader_effect.size()!=8){
-        std::cerr << "ACAudioStkEngineRendererPlugin: wrong BFC2000 mapping, size doesn't match" << std::endl;
-        return;
-    }
-    if(number >= 81 && number <= 88){
-        int fader = number - 81;
-        std::string parameter = fader_effect[fader];
-        float min(0.0f), max(1.0f);
-        /*if(parameter == "master volume"){
-            value = plugin->master_volume;
-        }
-        else{*/
-        min = plugin->getNumberParameterMin(parameter);
-        max = plugin->getNumberParameterMax(parameter);
-        //}
-        std::cout << "ACAudioStkEngineRendererPlugin::midi_inCallback: " << parameter << " on media Id " << mediaId << " value " << min + (float)(value)/127.0f * (max-min) << std::endl;
-        media_cycle->performActionOnMedia(parameter,mediaId,min + (float)(value)/127.0f * (max-min)); // through media cycle for logging
-    }
-}
-
 ACAudioStkEngineRendererPlugin::ACAudioStkEngineRendererPlugin() : QObject(), ACPluginQt(), ACMediaRendererPlugin(){
     this->mName = "Audio Engine (STK)";
     this->mDescription ="Plugin for playing audio files with The Synthesis ToolKit in C++ (STK)";
@@ -110,53 +46,6 @@ ACAudioStkEngineRendererPlugin::ACAudioStkEngineRendererPlugin() : QObject(), AC
     this->master_frev = 0;
 
     current_closest_node = -1;
-
-    fader_effect.push_back("reverb mix");
-    fader_effect.push_back("reverb room size");
-    fader_effect.push_back("reverb damping");
-    fader_effect.push_back("grain voices");
-    fader_effect.push_back("playback speed");
-    fader_effect.push_back("playback pan");
-    fader_effect.push_back("playback volume");
-    fader_effect.push_back("master volume");
-
-    this->midi_in = new RtMidiIn();
-    int in_port_count = this->midi_in->getPortCount();
-    bool in_port_found = false;
-    midi_in_ports.push_back("None");
-    for (int port = 0; port < in_port_count; port++){
-        std::cout << "ACAudioStkEngineRendererPlugin::ACAudioStkEngineRendererPlugin(): midi in port " << port << " name " << this->midi_in->getPortName(port) << " is available " << std::endl;
-        midi_in_ports.push_back(midi_in->getPortName(port));
-        if(midi_in->getPortName(port) == "BCF2000 Port 1"){
-            midi_in->openPort(port);
-            midi_in->setCallback(&midi_inCallback,(void*) this);
-            in_port_found = true;
-        }
-    }
-    if(!in_port_found){
-        delete midi_in;
-        midi_in = 0;
-    }
-
-    this->midi_out = new RtMidiOut();
-    int out_port_count = this->midi_out->getPortCount();
-    bool out_port_found = false;
-    midi_out_ports.push_back("None");
-    for (int port = 0; port < out_port_count; port++){
-        std::cout << "ACAudioStkEngineRendererPlugin::ACAudioStkEngineRendererPlugin(): midi out port " << port << " name " << this->midi_out->getPortName(port) << " is available " << std::endl;
-        midi_out_ports.push_back(midi_out->getPortName(port));
-        if(midi_out->getPortName(port) == "BCF2000 Port 1"){
-            midi_out->openPort(port);
-            out_port_found = true;
-        }
-    }
-    if(!out_port_found){
-        delete midi_out;
-        midi_out = 0;
-    }
-
-    //midi_in->openVirtualPort("MashtaCycle In");
-    //midi_out->openVirtualPort("MashtaCycle Out");
 
     // Set the global sample rate before creating class instances.
     Stk::setSampleRate( (StkFloat) 44100 );
@@ -245,6 +134,53 @@ ACAudioStkEngineRendererPlugin::ACAudioStkEngineRendererPlugin() : QObject(), AC
     //if(!master_frev)
     //this->action_parameters["reverb pan"] = ACMediaActionParameters(1,ACMediaActionParameter(AC_TYPE_FLOAT,this->getParameter("Reverb Pan")));
 
+    fader_effect.push_back("reverb mix");
+    fader_effect.push_back("reverb room size");
+    fader_effect.push_back("reverb damping");
+    fader_effect.push_back("grain voices");
+    fader_effect.push_back("playback speed");
+    fader_effect.push_back("playback pan");
+    fader_effect.push_back("playback volume");
+    fader_effect.push_back("master volume");
+
+    this->midi_in = new RtMidiIn();
+    int in_port_count = this->midi_in->getPortCount();
+    bool in_port_found = false;
+    midi_in_ports.push_back("None");
+    for (int port = 0; port < in_port_count; port++){
+        std::cout << "ACAudioStkEngineRendererPlugin::ACAudioStkEngineRendererPlugin(): midi in port " << port << " name " << this->midi_in->getPortName(port) << " is available " << std::endl;
+        midi_in_ports.push_back(midi_in->getPortName(port));
+        if(midi_in->getPortName(port) == "BCF2000 Port 1"){
+            midi_in->openPort(port);
+            midi_in->setCallback(&ACAudioStkEngineRendererPlugin::midiInCallbackWrapper,this);
+            in_port_found = true;
+        }
+    }
+    if(!in_port_found){
+        delete midi_in;
+        midi_in = 0;
+    }
+
+    this->midi_out = new RtMidiOut();
+    int out_port_count = this->midi_out->getPortCount();
+    bool out_port_found = false;
+    midi_out_ports.push_back("None");
+    for (int port = 0; port < out_port_count; port++){
+        std::cout << "ACAudioStkEngineRendererPlugin::ACAudioStkEngineRendererPlugin(): midi out port " << port << " name " << this->midi_out->getPortName(port) << " is available " << std::endl;
+        midi_out_ports.push_back(midi_out->getPortName(port));
+        if(midi_out->getPortName(port) == "BCF2000 Port 1"){
+            midi_out->openPort(port);
+            out_port_found = true;
+        }
+    }
+    if(!out_port_found){
+        delete midi_out;
+        midi_out = 0;
+    }
+
+    //midi_in->openVirtualPort("MashtaCycle In");
+    //midi_out->openVirtualPort("MashtaCycle Out");
+
     loopClickedNodeAction = new ACInputActionQt(tr("Loop clicked node"), this);
     loopClickedNodeAction->setShortcut(Qt::Key_L);
     loopClickedNodeAction->setKeyEventType(QEvent::KeyPress);
@@ -297,6 +233,8 @@ ACAudioStkEngineRendererPlugin::ACAudioStkEngineRendererPlugin() : QObject(), AC
     pthread_mutexattr_init(&delete_mutex_attr);
     pthread_mutex_init(&delete_mutex, &delete_mutex_attr);
     pthread_mutexattr_destroy(&delete_mutex_attr);
+
+    muting = false;
 }
 
 ACAudioStkEngineRendererPlugin::~ACAudioStkEngineRendererPlugin(){
@@ -340,14 +278,14 @@ void ACAudioStkEngineRendererPlugin::justReadFrames(long int mediaId, int nFrame
     if(media_cycle){
         std::map< long int, ACAudioStkFileLoop*>::iterator loop = loops.find(mediaId);
         if( loop != loops.end()){
-            current_frames[mediaId] += nFrames * loop->second->channelsOut();
+            current_frames[mediaId] += nFrames /* * loop->second->channelsOut()*/;
             //std::cout << "ACAudioStkEngineRendererPlugin: looping, current frame " << current_frames[mediaId] << " of media " << mediaId << std::endl;
-            if(current_frames[mediaId] > loop->second->getSize() * loop->second->channelsOut())
-                current_frames[mediaId] -= loop->second->getSize() * loop->second->channelsOut();
+            if(current_frames[mediaId] > loop->second->getSize() /* * loop->second->channelsOut()*/)
+                current_frames[mediaId] -= loop->second->getSize() /* * loop->second->channelsOut()*/;
             if(current_frames[mediaId] < 0)
-                current_frames[mediaId] += loop->second->getSize() * loop->second->channelsOut();
+                current_frames[mediaId] += loop->second->getSize() /* * loop->second->channelsOut()*/;
             media_cycle->setCurrentFrame(mediaId, current_frames[mediaId]);
-            std::cout << "ACAudioStkEngineRendererPlugin::justReadFrames " << mediaId << " " << current_frames[mediaId] << "(" << loop->second->channelsOut() <<" channels)"<< std::endl;
+            //std::cout << "ACAudioStkEngineRendererPlugin::justReadFrames " << mediaId << " " << current_frames[mediaId] << "(" << loop->second->channelsOut() <<" channels)"<< std::endl;
         }
 
         //else
@@ -356,6 +294,12 @@ void ACAudioStkEngineRendererPlugin::justReadFrames(long int mediaId, int nFrame
 }
 
 void ACAudioStkEngineRendererPlugin::stopSource(long int mediaId){
+    if(gains.find(mediaId) != gains.end()){
+        gains[mediaId] = 0.0f;
+    }
+    if(playback_types.find(mediaId) != playback_types.end()){
+        playback_types[mediaId] = PLAYBACK_MUTE;
+    }
     if(inputs.find(mediaId) != inputs.end()){
         if(inputs[mediaId]){
             //if(inputs[mediaId]->isOpen())
@@ -383,6 +327,9 @@ void ACAudioStkEngineRendererPlugin::stopSource(long int mediaId){
 }
 
 void ACAudioStkEngineRendererPlugin::deleteSource(long int mediaId){
+    if(playback_types.find(mediaId) != playback_types.end()){
+        playback_types[mediaId] = PLAYBACK_OFF;
+    }
     if(inputs.find(mediaId) != inputs.end()){
         if(inputs[mediaId]){
             //if(inputs[mediaId]->isOpen())
@@ -436,20 +383,15 @@ void ACAudioStkEngineRendererPlugin::deleteSource(long int mediaId){
     }
 }
 
-
-int tick( void *outputBuffer, void *inputBuffer, unsigned int nBufferFrames,
-          double streamTime, RtAudioStreamStatus status, void *userData )
+int ACAudioStkEngineRendererPlugin::tick( void *outputBuffer, void *inputBuffer, unsigned int nBufferFrames,
+                                          double streamTime, RtAudioStreamStatus status )
 {
-    pthread_mutex_lock(&(((ACAudioStkEngineRendererPlugin *) userData)->delete_mutex));
+    if(status == RTAUDIO_INPUT_OVERFLOW)
+        std::cerr << "ACAudioStkEngineRendererPlugin:tick input overflow" << std::endl;
+    if(status == RTAUDIO_OUTPUT_UNDERFLOW)
+        std::cerr << "ACAudioStkEngineRendererPlugin:tick output underflow" << std::endl;
 
-    std::map <long int, ACAudioStkFileWvIn*> inputs = ((ACAudioStkEngineRendererPlugin *) userData)->inputs;
-    std::map <long int, ACAudioStkFileLoop*> loops = ((ACAudioStkEngineRendererPlugin *) userData)->loops;
-    std::map <long int, ACAudioStkGranulate*> grains = ((ACAudioStkEngineRendererPlugin *) userData)->grains;
-    std::map <long int, ACAudioStkFreeVerb*> frevs = ((ACAudioStkEngineRendererPlugin *) userData)->frevs;
-    ACAudioStkFreeVerb* master_frev = ((ACAudioStkEngineRendererPlugin *) userData)->master_frev;
-    std::map< long int, stk::StkFloat> gains = ((ACAudioStkEngineRendererPlugin *) userData)->gains;
-    std::map< long int, stk::StkFloat> pans = ((ACAudioStkEngineRendererPlugin *) userData)->pans;
-    StkFloat master_volume = ((ACAudioStkEngineRendererPlugin *) userData)->master_volume;
+    //pthread_mutex_lock(&(this->delete_mutex));
 
     register StkFloat *samples = (StkFloat *) outputBuffer;
     //if(outputBuffer == 0){
@@ -459,31 +401,42 @@ int tick( void *outputBuffer, void *inputBuffer, unsigned int nBufferFrames,
 
     if(inputs.size()==0 && loops.size()==0 && grains.size()==0){
         *samples++ = 0;
-        pthread_mutex_unlock(&(((ACAudioStkEngineRendererPlugin *) userData)->delete_mutex));
+        pthread_mutex_unlock(&(this->delete_mutex));
         return 1;
     }
 
     double rate = 1.0;
-    rate = (float)((ACAudioStkEngineRendererPlugin *) userData)->getNumberParameterValue("Playback Speed");
-    int outputChannels = ((ACAudioStkEngineRendererPlugin *) userData)->outputChannels();
+    rate = (float)this->getNumberParameterValue("Playback Speed");
+    int outputChannels = this->outputChannels();
 
     for(std::map <long int, ACAudioStkFileWvIn*>::iterator input = inputs.begin(); input != inputs.end(); input++){
         if(input->second){
-            if (((ACAudioStkEngineRendererPlugin *) userData)->frames[input->first]){
-                input->second->tick( *(((ACAudioStkEngineRendererPlugin *) userData)->frames[input->first]) );
-                ((ACAudioStkEngineRendererPlugin *) userData)->justReadFrames(input->first, (int)(rate * input->second->channelsOut() * nBufferFrames));
+            if (this->frames[input->first]){
+                input->second->tick( *(this->frames[input->first]) );
+                this->justReadFrames(input->first, (int)(rate * input->second->channelsOut() * nBufferFrames));
             }
             else{
-                ((ACAudioStkEngineRendererPlugin *) userData)->stopSource(input->first);
+                this->stopSource(input->first);
             }
         }
     }
 
+    std::cout << "ACAudioStkEngineRenderer: number of mapped loops "<< loops.size() << std::endl;
+
     for(std::map <long int, ACAudioStkFileLoop*>::iterator loop = loops.begin(); loop != loops.end(); loop++){
-        if(loop->second && (((ACAudioStkEngineRendererPlugin *) userData)->frames[loop->first])){
-            loop->second->tick( *(((ACAudioStkEngineRendererPlugin *) userData)->frames[loop->first]) );
-            ((ACAudioStkEngineRendererPlugin *) userData)->justReadFrames(loop->first, (int)(rate * loop->second->channelsOut() * nBufferFrames));
+        if(loop->second){
+            if(this->frames[loop->first]){
+                loop->second->tick( *(this->frames[loop->first]) );
+                this->justReadFrames(loop->first, (int)(rate * loop->second->channelsOut() * nBufferFrames));
+            }
+            else if(loop->second->isFinished()){
+                this->deleteSource(loop->first);
+            }
         }
+        else{
+            this->deleteSource(loop->first);
+        }
+
     }
 
     std::map <long int, const StkFrames*> lastFrames;
@@ -493,11 +446,11 @@ int tick( void *outputBuffer, void *inputBuffer, unsigned int nBufferFrames,
         }
     }
 
-    if( ((ACAudioStkEngineRendererPlugin *) userData)->frames.size()>0 || grains.size()>0 ){
+    if( this->frames.size()>0 || grains.size()>0 ){
         //        std::cout << "Frames /" << nBufferFrames <<":";
         //        int in = 0;
         //        for(std::map <long int, FileWvIn*>::iterator input = inputs.begin(); input != inputs.end(); input++){
-        //            std::cout << " " << in++ << " " <<  ((ACAudioStkEngineRendererPlugin *) userData)->frames[input->first]->size();
+        //            std::cout << " " << in++ << " " <<  this->frames[input->first]->size();
         //        }
         //        std::cout << std::endl;
         for ( unsigned int i=0; i<nBufferFrames; i++ ){
@@ -532,40 +485,40 @@ int tick( void *outputBuffer, void *inputBuffer, unsigned int nBufferFrames,
             }
 
             for(std::map <long int, ACAudioStkFileWvIn*>::iterator input = inputs.begin(); input != inputs.end(); input++){
-                if( ((ACAudioStkEngineRendererPlugin *) userData)->frames[input->first]!=0 && ((ACAudioStkEngineRendererPlugin *) userData)->frames[input->first]->size()>i){
+                if( this->frames[input->first]!=0 && this->frames[input->first]->size()>i){
                     int fileChannels = input->second->channelsOut();
                     if(frevs.find(input->first) != frevs.end()){
                         for ( unsigned int c=0; c<outputChannels; c++ ){
                             StkFloat pan = 0.5f*(1 + (c==0?-1:1)* pans[input->first]);
                             if(fileChannels!=0)
-                                frame[c] += frevs[input->first]->tick( (*((ACAudioStkEngineRendererPlugin *) userData)->frames[input->first])[i*fileChannels+(c%fileChannels)] ) * gains[input->first] * pan;
+                                frame[c] += frevs[input->first]->tick( (*this->frames[input->first])[i*fileChannels+(c%fileChannels)] ) * gains[input->first] * pan;
                         }
                     }
                     else{
                         for ( unsigned int c=0; c<outputChannels; c++ ){
                             StkFloat pan = 0.5f*(1 + (c==0?-1:1)* pans[input->first]);
                             if(fileChannels!=0)
-                                frame[c] += (*((ACAudioStkEngineRendererPlugin *) userData)->frames[input->first])[i*fileChannels+(c%fileChannels)] * gains[input->first] * pan;
+                                frame[c] += (*this->frames[input->first])[i*fileChannels+(c%fileChannels)] * gains[input->first] * pan;
                         }
                     }
                     count++;
                 }
             }
             for(std::map <long int, ACAudioStkFileLoop*>::iterator loop = loops.begin(); loop != loops.end(); loop++){
-                if( ((ACAudioStkEngineRendererPlugin *) userData)->frames[loop->first]!=0 && ((ACAudioStkEngineRendererPlugin *) userData)->frames[loop->first]->size()>i){
+                if( this->frames[loop->first]!=0 && this->frames[loop->first]->size()>i){
                     int fileChannels = loop->second->channelsOut();
                     if(frevs.find(loop->first) != frevs.end()){
                         for ( unsigned int c=0; c<outputChannels; c++ ){
                             StkFloat pan = 0.5f*(1 + (c==0?-1:1)* pans[loop->first]);
                             if(fileChannels!=0)
-                                frame[c] += frevs[loop->first]->tick( (*((ACAudioStkEngineRendererPlugin *) userData)->frames[loop->first])[i*fileChannels+(c%fileChannels)] ) * gains[loop->first] * pan;
+                                frame[c] += frevs[loop->first]->tick( (*this->frames[loop->first])[i*fileChannels+(c%fileChannels)] ) * gains[loop->first] * pan;
                         }
                     }
                     else{
                         for ( unsigned int c=0; c<outputChannels; c++ ){
                             StkFloat pan = 0.5f*(1 + (c==0?-1:1)* pans[loop->first]);
                             if(fileChannels!=0)
-                                frame[c] += (*((ACAudioStkEngineRendererPlugin *) userData)->frames[loop->first])[i*fileChannels+(c%fileChannels)] * gains[loop->first] * pan;
+                                frame[c] += (*this->frames[loop->first])[i*fileChannels+(c%fileChannels)] * gains[loop->first] * pan;
                         }
                     }
 
@@ -585,130 +538,197 @@ int tick( void *outputBuffer, void *inputBuffer, unsigned int nBufferFrames,
         }
     }
 
-    bool finished = true;
-    for(std::map <long int, ACAudioStkFileWvIn*>::iterator input = inputs.begin(); input != inputs.end(); input++){
+    /*bool finished = true;
+    for(std::map<long int, ACAudioStkFileWvIn*>::iterator input = inputs.begin(); input != inputs.end(); input++){
         finished = (input->second->isFinished()) && finished;
         if(input->second->isFinished()){
-            ((ACAudioStkEngineRendererPlugin *) userData)->deleteSource(input->first);
+            this->deleteSource(input->first);
         }
 
     }
-    for(std::map <long int, ACAudioStkGranulate*>::iterator grain = grains.begin(); grain != grains.end(); grain++){
+    for(std::map<long int, ACAudioStkGranulate*>::iterator grain = grains.begin(); grain != grains.end(); grain++){
         finished = (grain->second->isFinished()) && finished;
         if(grain->second->isFinished()){
-            ((ACAudioStkEngineRendererPlugin *) userData)->deleteSource(grain->first);
+            this->deleteSource(grain->first);
         }
     }
-    for(std::map <long int, ACAudioStkFileLoop*>::iterator loop = loops.begin(); loop != loops.end(); loop++){
+
+    for(std::map<long int, ACAudioStkFileLoop*>::iterator loop = loops.begin(); loop != loops.end(); loop++){
         finished = (loop->second->isFinished()) && finished;
         if(loop->second->isFinished()){
-            ((ACAudioStkEngineRendererPlugin *) userData)->deleteSource(loop->first);
+            this->deleteSource(loop->first);
+            std::cout << "ACAudioStkEngineRendererPlugin::tick: deleted source " << loop->first << std::endl;
         }
-    }
+    }*/
 
-    //if ( input->isFinished() ) {
-    /*if ( finished ) {
-    done = true;
-
-    return 1;
-  }
-  else*/
-
-    pthread_mutex_unlock(&(((ACAudioStkEngineRendererPlugin *) userData)->delete_mutex));
+    //pthread_mutex_unlock(&(this->delete_mutex));
     return 0;
 }
 
-void ACAudioStkEngineRendererPlugin::muteAll(){
-    //done = true;
+int ACAudioStkEngineRendererPlugin::tickWrapper(void *outputBuffer, void *inputBuffer,
+                                                unsigned int nFrames, double streamTime,
+                                                RtAudioStreamStatus status, void *userData)
+{
+    return static_cast<ACAudioStkEngineRendererPlugin*>(userData)->tick(outputBuffer,inputBuffer,
+                                                                        nFrames,
+                                                                        streamTime, status);
+}
 
+void ACAudioStkEngineRendererPlugin::midiInCallback( double timeStamp, std::vector<unsigned char> *message){
+    /*std::cout << "Time " << timeStamp;//<< std::endl;
+    for(std::vector<unsigned char>::iterator word = message->begin(); word != message->end(); word++){
+        std::cout << " '" << (int)(*word) << "'";
+    }
+    std::cout << std::endl;*/
+    if(!message)
+        return;
+    if(message->size()!=3)
+        return;
+
+    int typechan = (int)((*message)[0]);
+    int number = (int)((*message)[1]);
+    int value = (int)((*message)[2]);
+    std::string type("");
+    int chan = 0;
+
+    if(typechan >= 176 && typechan < 192){
+        type = "control change";
+        chan = typechan - 176;
+    }
+
+    std::cout << "ACAudioStkEngineRendererPlugin midi in @ " << timeStamp << " type " << type << /*" typechan " << typechan <<*/ " channel " << chan << " number " << number << " value " << value << std::endl;
+
+    //std::vector<std::string> fader_effect = this->fader_effect;
+    //MediaCycle* media_cycle = this->getMediaCycle();
+    if(!media_cycle){
+        std::cerr << "ACAudioStkEngineRendererPlugin: midi in: can't access media cycle" << std::endl;
+        return;
+    }
+    int mediaId = media_cycle->getClosestNode(); // warning, mono-pointer
+
+    // The following is specific to the BFC2000
+    if(fader_effect.size()!=8){
+        std::cerr << "ACAudioStkEngineRendererPlugin: wrong BFC2000 mapping, size doesn't match" << std::endl;
+        return;
+    }
+    if(number >= 81 && number <= 88){
+        int fader = number - 81;
+        std::string parameter = fader_effect[fader];
+        float min(0.0f), max(1.0f);
+        /*if(parameter == "master volume"){
+            value = this->master_volume;
+        }
+        else{*/
+        min = this->getNumberParameterMin(parameter);
+        max = this->getNumberParameterMax(parameter);
+        //}
+        std::cout << "ACAudioStkEngineRendererPlugin::midiInCallback: " << parameter << " on media Id " << mediaId << " value " << min + (float)(value)/127.0f * (max-min) << std::endl;
+        media_cycle->performActionOnMedia(parameter,mediaId,min + (float)(value)/127.0f * (max-min)); // through media cycle for logging
+    }
+}
+
+void ACAudioStkEngineRendererPlugin::midiInCallbackWrapper( double timeStamp, std::vector<unsigned char> *message, void *userData){
+    return static_cast<ACAudioStkEngineRendererPlugin*>(userData)->midiInCallback( timeStamp, message);
+}
+
+void ACAudioStkEngineRendererPlugin::muteAll(){
     //pthread_mutex_lock(&delete_mutex);
 
-    if(dac.isStreamRunning())
-        try {
-        dac.abortStream();
-    }
-    catch ( RtError &error ) {
-        error.printMessage();
-        //return false;
-    }
-    if(dac.isStreamOpen()){
-        try {
-            dac.closeStream();
+    if(!muting){
+        muting = true;
+
+        if(dac.isStreamRunning())
+            try {
+            dac.abortStream();
         }
         catch ( RtError &error ) {
             error.printMessage();
             //return false;
         }
-    }
-
-    for(std::map <long int, ACAudioStkFileWvIn*>::iterator input = inputs.begin(); input != inputs.end(); input++){
-        long int mediaId = input->first;
-        if(inputs[mediaId]){
-            //if(inputs[mediaId]->isOpen())
-            inputs[mediaId]->closeFile();
-            delete inputs[mediaId];
+        if(dac.isStreamOpen()){
+            try {
+                dac.closeStream();
+            }
+            catch ( RtError &error ) {
+                error.printMessage();
+                //return false;
+            }
         }
-        inputs.erase(mediaId);
-        current_frames[mediaId] = 0;
-        //if(frames[mediaId])
-        //    delete frames[mediaId];
-        //frames.erase(mediaId);
-        std::cout << "ACAudioStkEngineRendererPlugin::muteAll: stop playing media " << mediaId << std::endl;
-        if(media_cycle)
-            media_cycle->getBrowser()->toggleSourceActivity(mediaId,0);
-    }
-    inputs.clear();
 
-    for(std::map <long int, ACAudioStkFileLoop*>::iterator loop = loops.begin(); loop != loops.end(); loop++){
-        long int mediaId = loop->first;
-        if(loops[mediaId]){
-            //if(loops[mediaId]->isOpen())
-            loops[mediaId]->closeFile();
-            delete loops[mediaId];
+        for(std::map< long int, ACAudioStkPlaybackType>::iterator playback_type = playback_types.begin(); playback_type != playback_types.end(); playback_type++){
+            playback_type->second = PLAYBACK_OFF;
         }
-        loops.erase(mediaId);
-        current_frames[mediaId] = 0;
-        //if(frames[mediaId])
-        //    delete frames[mediaId];
-        //frames.erase(mediaId);
-        std::cout << "ACAudioStkEngineRendererPlugin::muteAll: stop looping media " << mediaId << std::endl;
-        if(media_cycle)
-            media_cycle->getBrowser()->toggleSourceActivity(mediaId,0);
 
-    }
-    loops.clear();
-
-    for(std::map <long int, ACAudioStkGranulate*>::iterator grain = grains.begin(); grain != grains.end(); grain++){
-        long int mediaId = grain->first;
-        if(grains[mediaId]){
-            //if(grains[mediaId]->isOpen())
-            grains[mediaId]->closeFile();
-            delete grains[mediaId];
+        for(std::map <long int, ACAudioStkFileWvIn*>::iterator input = inputs.begin(); input != inputs.end(); input++){
+            long int mediaId = input->first;
+            if(input->second){
+                //if(inputs[mediaId]->isOpen())
+                //input->second->closeFile();
+                //CF crash: delete input->second;
+            }
+            inputs.erase(mediaId);
+            current_frames[mediaId] = 0;
+            //if(frames[mediaId])
+            //    delete frames[mediaId];
+            //frames.erase(mediaId);
+            std::cout << "ACAudioStkEngineRendererPlugin::muteAll: stop playing media " << mediaId << std::endl;
+            if(media_cycle)
+                media_cycle->getBrowser()->toggleSourceActivity(mediaId,0);
         }
-        grains.erase(mediaId);
-        std::cout << "ACAudioStkEngineRendererPlugin::muteAll: stop granularizing media " << mediaId << std::endl;
-        if(media_cycle)
-            media_cycle->getBrowser()->toggleSourceActivity(mediaId,0);
+        inputs.clear();
 
+        for(std::map <long int, ACAudioStkFileLoop*>::iterator loop = loops.begin(); loop != loops.end(); loop++){
+            long int mediaId = loop->first;
+            if(loop->second){
+                //if(loops[mediaId]->isOpen())
+                loop->second->closeFile();
+                //CF crash: delete loop->second;
+            }
+            loops.erase(mediaId);
+            current_frames[mediaId] = 0;
+            //if(frames[mediaId])
+            //    delete frames[mediaId];
+            //frames.erase(mediaId);
+            std::cout << "ACAudioStkEngineRendererPlugin::muteAll: stop looping media " << mediaId << std::endl;
+            if(media_cycle)
+                media_cycle->getBrowser()->toggleSourceActivity(mediaId,0);
+
+        }
+        loops.clear();
+
+        for(std::map <long int, ACAudioStkGranulate*>::iterator grain = grains.begin(); grain != grains.end(); grain++){
+            long int mediaId = grain->first;
+            if(grain->second){
+                //if(grains[mediaId]->isOpen())
+                grain->second->closeFile();
+                //CF crash: delete grain->second;
+            }
+            grains.erase(mediaId);
+            std::cout << "ACAudioStkEngineRendererPlugin::muteAll: stop granularizing media " << mediaId << std::endl;
+            if(media_cycle)
+                media_cycle->getBrowser()->toggleSourceActivity(mediaId,0);
+
+        }
+        grains.clear();
+
+        //if(media_cycle)
+        //    media_cycle->muteAllSources();
+        gains.clear();
+        pans.clear();
+        for(std::map <long int, ACAudioStkFreeVerb*>::iterator frev = frevs.begin(); frev != frevs.end(); frev++){
+            //delete frev->second;
+            frevs.erase(frev->first);
+        }
+        frevs.clear();
+
+        current_frames.clear();
+        frevs.clear();
+        gains.clear();
+        pans.clear();
+
+        //pthread_mutex_unlock(&delete_mutex);
+        muting = false;
     }
-    grains.clear();
-
-    //if(media_cycle)
-    //    media_cycle->muteAllSources();
-    gains.clear();
-    pans.clear();
-    for(std::map <long int, ACAudioStkFreeVerb*>::iterator frev = frevs.begin(); frev != frevs.end(); frev++){
-        //delete frev->second;
-        frevs.erase(frev->first);
-    }
-    frevs.clear();
-
-    current_frames.clear();
-    frevs.clear();
-    gains.clear();
-    pans.clear();
-
-    //pthread_mutex_unlock(&delete_mutex);
 }
 
 void ACAudioStkEngineRendererPlugin::updateMasterVolume(){
@@ -854,7 +874,7 @@ int ACAudioStkEngineRendererPlugin::outputChannels(){
 }
 
 bool ACAudioStkEngineRendererPlugin::performActionOnMedia(std::string action, long int mediaId, std::vector<boost::any> arguments){
-    //std::cout << "ACAudioStkEngineRendererPlugin::performActionOnMedia: requesting action " << action << " mediaId " << mediaId << " with " << arguments.size() << " arg(s)" << std::endl;
+    std::cout << "ACAudioStkEngineRendererPlugin::performActionOnMedia: requesting action " << action << " mediaId " << mediaId << " with " << arguments.size() << " arg(s)" << " @ " << getTime() << std::endl;
     if(!media_cycle){
         std::cerr << "ACAudioStkEngineRendererPlugin::performActionOnMedia: mediacycle instance not set" << std::endl;
         return false;
@@ -872,208 +892,8 @@ bool ACAudioStkEngineRendererPlugin::performActionOnMedia(std::string action, lo
     bool allMedia = (mediaId == -2);
 
     if(action == "loop" || action == "play" || action == "granulate"){
-
-        std::map <long int, ACAudioStkFileWvIn*>::iterator _input = inputs.find(mediaId);
-        std::map <long int, ACAudioStkFileLoop*>::iterator _loop = loops.find(mediaId);
-        std::map <long int, ACAudioStkGranulate*>::iterator _grain = grains.find(mediaId);
-        bool playing = (_input != inputs.end());
-        bool looping = (_loop != loops.end());
-        bool granulating = (_grain != grains.end());
-        bool active = playing || looping || granulating;
-
-        if(active){
-            if(action == "play" && playing){
-                std::cout << "ACAudioStkEngineRendererPlugin::performActionOnMedia: action " << action << " media id " << mediaId << " already " << action << "ing" << std::endl;
-                return false;
-            }
-            else if(action == "loop" && looping){
-                std::cout << "ACAudioStkEngineRendererPlugin::performActionOnMedia: action " << action << " media id " << mediaId << " already " << action << "ing, forcing activity to 1" << std::endl;
-                ACMediaNode* node = media_cycle->getMediaNode(mediaId);
-                if(node)
-                    node->setActivity(1);
-                return false;
-            }
-            else if(action == "granulate" && granulating){
-                std::cout << "ACAudioStkEngineRendererPlugin::performActionOnMedia: action " << action << " media id " << mediaId << " already " << action << "ing" << std::endl;
-                return false;
-            }
-            else{
-                std::cout << "ACAudioStkEngineRendererPlugin::performActionOnMedia: action " << action << " requested on media id " << mediaId << " already ";
-                if(playing)
-                    std::cout << "playing";
-                else if(looping)
-                    std::cout << "looping";
-                else if(granulating)
-                    std::cout << "granulating";
-                std::cout << ", removing first" << std::endl;
-                this->stopSource(mediaId);
-            }
-        }
-
-        if(allMedia) // not playing all media, crash prone
-            return false;
-        std::string filename = media_cycle->getMediaFileName(mediaId);
-        if(filename == "")
-            return false;
-        int channels = 0;
-        // Try to load the soundfile.
-        if(action == "play"){
-            ACAudioStkFileWvIn* input = 0;
-            try {
-                input = new ACAudioStkFileWvIn();
-                input->openFile( filename.c_str() );
-                //input->ignoreSampleRateChange();
-            }
-            catch ( StkError & ) {
-                std::cerr << "ACAudioStkEngineRendererPlugin::performActionOnMedia: play: couldn't load media " << mediaId << " file " << filename << std::endl;
-                return false;
-            }
-
-            // Set input read rate based on the default STK sample rate.
-            double rate = 1.0;
-            rate = this->getNumberParameterValue("Playback Speed");//input->getFileRate() / Stk::sampleRate();
-            //if ( argc == 4 ) rate *= atof( argv[3] );
-            input->setRate( rate );
-
-            // Find out how many channels we have.
-            channels = input->channelsOut();
-            std::cout << "ACAudioStkEngineRendererPlugin::performActionOnMedia: play: file has " << input->channelsOut() << " channels " << std::endl;
-
-            inputs[mediaId] = input;
-            ACMediaNode* node = media_cycle->getMediaNode(mediaId);
-            if(node)
-                node->setActivity(1);
-            std::cout << "ACAudioStkEngineRendererPlugin::performActionOnMedia: action " << action << " media id " << mediaId << " done" << std::endl;
-        }
-        else if(action == "loop"){
-            ACAudioStkFileLoop* input = 0;
-            try {
-                input = new ACAudioStkFileLoop();
-                input->openFile( filename.c_str() );
-            }
-            catch ( StkError & ) {
-                std::cerr << "ACAudioStkEngineRendererPlugin::performActionOnMedia: loop: couldn't load media " << mediaId << " file " << filename << std::endl;
-                return false;
-            }
-
-            // Set input read rate based on the default STK sample rate.
-            double rate = 1.0;
-            rate = this->getNumberParameterValue("Playback Speed");//input->getFileRate() / Stk::sampleRate();
-            //if ( argc == 4 ) rate *= atof( argv[3] );
-            input->setRate( rate );
-
-            // Find out how many channels we have.
-            channels = input->channelsOut();
-
-            loops[mediaId] = input;
-            ACMediaNode* node = media_cycle->getMediaNode(mediaId);
-            if(node)
-                node->setActivity(1);
-
-            std::cout << "ACAudioStkEngineRendererPlugin::performActionOnMedia: action " << action << " media id " << mediaId << " done" << std::endl;
-        }
-        else if(action == "granulate"){
-            ACAudioStkGranulate* grain = 0;
-            try {
-                grain = new ACAudioStkGranulate();
-                grain->setVoices( this->getNumberParameterValue("Grain Voices") );
-                grain->setRandomFactor( this->getNumberParameterValue("Grain Randomness") ); // factor between 0 - 1.0
-                grain->setStretch( this->getNumberParameterValue("Grain Stretch") ); // factor (1-1000)
-                grain->setGrainParameters(
-                            /*duration (ms)*/ this->getNumberParameterValue("Grain Duration"),
-                            /*ramp: envelope percent (0-100)*/ this->getNumberParameterValue("Grain Ramp"),
-                            /*offset: hop time between grains (ms)*/ this->getNumberParameterValue("Grain Offset"),
-                            /*delay: pause time between grains (ms)*/ this->getNumberParameterValue("Grain Delay") );
-                grain->openFile( filename.c_str() );
-            }
-            catch ( StkError & ) {
-                std::cerr << "ACAudioStkEngineRendererPlugin::performActionOnMedia: granulate: couldn't load media " << mediaId << " file " << filename << std::endl;
-                return false;
-            }
-            grains[mediaId] = grain;
-            ACMediaNode* node = media_cycle->getMediaNode(mediaId);
-            if(node)
-                node->setActivity(1);
-
-            std::cout << "ACAudioStkEngineRendererPlugin::performActionOnMedia: action " << action << " media id " << mediaId << " done" << std::endl;
-        }
-
-        /*ACAudioStkFreeVerb* frev = 0;
-        try {
-            frev = new ACAudioStkFreeVerb();
-            frev->setEffectMix( this->getNumberParameterValue("Reverb Mix"));
-        }catch ( StkError & ) {
-            std::cerr << "ACAudioStkEngineRendererPlugin::performActionOnMedia: couldn't create reverb for media " << mediaId << " file " << filename << ", bypassing." << std::endl;
-        }
-        if(frev)
-            frevs[mediaId] = frev;*/
-        gains[mediaId] = 1.0f;
-        pans[mediaId] = 0.0f;
-
-        //done = false;
-
-        // Figure out how many bytes in an StkFloat and setup the RtAudio stream.
-        RtAudio::StreamParameters parameters;
-        parameters.deviceId = dac.getDefaultOutputDevice();
-        parameters.nChannels = this->outputChannels();//channels;
-        RtAudioFormat format = ( sizeof(StkFloat) == 8 ) ? RTAUDIO_FLOAT64 : RTAUDIO_FLOAT32;
-        unsigned int bufferFrames = RT_BUFFER_SIZE;
-
-        /*try {
-          dac.closeStream();
-        }
-        catch ( RtError &error ) {
-          error.printMessage();
-          //return false;
-        }*/
-
-        try {
-            if(!dac.isStreamOpen())
-                dac.openStream( &parameters, NULL, format, (unsigned int)Stk::sampleRate(), &bufferFrames, &tick, (void *)this );
-        }
-        catch ( RtError &error ) {
-            error.printMessage();
-            return false;
-        }
-
-        // Install an interrupt handler function.
-        //(void) signal(SIGINT, finish);
-
-        // Resize the StkFrames object appropriately.
-        if(frames.find(mediaId)!=frames.end() && frames[mediaId]!=0){
-            frames[mediaId]->resize( bufferFrames, channels );
-        }
-        else{
-            try{
-                frames[mediaId] = new StkFrames( (unsigned int)bufferFrames, (unsigned int)channels );
-            }
-            catch(...){
-                std::cerr << "ACAudioStkEngineRendererPlugin::performActionOnMedia: couldn't allocate frames for media " << mediaId << std::endl;
-            }
-        }
-        try {
-            if(!dac.isStreamRunning())
-                dac.startStream();
-        }
-        catch ( RtError &error ) {
-            error.printMessage();
-            return false;
-        }
-
-        // Block waiting until callback signals done.
-        /*while ( !done )
-          Stk::sleep( 100 );
-
-        // By returning a non-zero value in the callback above, the stream
-        // is automatically stopped.  But we should still close it.
-        try {
-          dac.closeStream();
-        }
-        catch ( RtError &error ) {
-          error.printMessage();
-          return false;
-        }*/
-        return true;
+        return this->createGenerator(action, mediaId, arguments);
+        std::cout << "ACAudioStkEngineRendererPlugin::performActionOnMedia: generated sound generator @ " << getTime() << std::endl;
     }
     else if(action == "mute"){
         if(allMedia)
@@ -1290,9 +1110,6 @@ bool ACAudioStkEngineRendererPlugin::performActionOnMedia(std::string action, lo
         activity = node->getActivity();
 
         if(action == "hover closest node"){
-
-
-
             /*std::list<int> pointerIds = media_cycle->getPointerIds();
             if(pointerIds.size() > 0){
                 std::cout << "ACAudioStkEngineRendererPlugin::performActionOnMedia: active pointer(s): ";
@@ -1416,10 +1233,232 @@ bool ACAudioStkEngineRendererPlugin::performActionOnMedia(std::string action, lo
         else if(action == "hover off node"){
             std::cout << "ACAudioStkEngineRendererPlugin::performActionOnMedia: hover off node " << mediaId << std::endl;
             //if(activity == 2)
-                media_cycle->performActionOnMedia("mute", mediaId);
+            media_cycle->performActionOnMedia("mute", mediaId);
         }
     }
     return false;
+}
+
+bool ACAudioStkEngineRendererPlugin::createGenerator(std::string action, long int mediaId, std::vector<boost::any> arguments){
+    std::map <long int, ACAudioStkFileWvIn*>::iterator _input = inputs.find(mediaId);
+    std::map <long int, ACAudioStkFileLoop*>::iterator _loop = loops.find(mediaId);
+    std::map <long int, ACAudioStkGranulate*>::iterator _grain = grains.find(mediaId);
+
+    ACAudioStkPlaybackType playback_type = PLAYBACK_OFF;
+    if(playback_types.find(mediaId) != playback_types.end()){
+        playback_type = playback_types[mediaId];
+    }
+
+    bool playing = playback_type&PLAYBACK_PLAY;//(_input != inputs.end());
+    bool looping = playback_type&PLAYBACK_LOOP;//(_loop != loops.end());
+    bool granulating = playback_type&PLAYBACK_GRANULATE;//(_grain != grains.end());
+    bool active = playing || looping || granulating;
+
+    if(active){
+        if(action == "play" && playing){
+            std::cout << "ACAudioStkEngineRendererPlugin::performActionOnMedia: action " << action << " media id " << mediaId << " already " << action << "ing" << std::endl;
+            return false;
+        }
+        else if(action == "loop" && looping){
+            std::cout << "ACAudioStkEngineRendererPlugin::performActionOnMedia: action " << action << " media id " << mediaId << " already " << action << "ing, forcing activity to 1" << std::endl;
+            ACMediaNode* node = media_cycle->getMediaNode(mediaId);
+            if(node)
+                node->setActivity(1);
+            return false;
+        }
+        else if(action == "granulate" && granulating){
+            std::cout << "ACAudioStkEngineRendererPlugin::performActionOnMedia: action " << action << " media id " << mediaId << " already " << action << "ing" << std::endl;
+            return false;
+        }
+        else{
+            std::cout << "ACAudioStkEngineRendererPlugin::performActionOnMedia: action " << action << " requested on media id " << mediaId << " already ";
+            if(playing)
+                std::cout << "playing";
+            else if(looping)
+                std::cout << "looping";
+            else if(granulating)
+                std::cout << "granulating";
+            std::cout << ", removing first" << std::endl;
+            this->stopSource(mediaId);
+        }
+    }
+
+    bool allMedia = (mediaId == -2);
+    if(allMedia) // not playing all media, crash prone
+        return false;
+    std::string filename = media_cycle->getMediaFileName(mediaId);
+    if(filename == "")
+        return false;
+    int channels = 0;
+    // Try to load the soundfile.
+    if(action == "play"){
+        ACAudioStkFileWvIn* input = 0;
+        try {
+            input = new ACAudioStkFileWvIn();
+            input->openFile( filename.c_str() );
+            //input->ignoreSampleRateChange();
+        }
+        catch ( StkError & ) {
+            std::cerr << "ACAudioStkEngineRendererPlugin::performActionOnMedia: play: couldn't load media " << mediaId << " file " << filename << std::endl;
+            return false;
+        }
+
+        // Set input read rate based on the default STK sample rate.
+        double rate = 1.0;
+        rate = this->getNumberParameterValue("Playback Speed");//input->getFileRate() / Stk::sampleRate();
+        //if ( argc == 4 ) rate *= atof( argv[3] );
+        input->setRate( rate );
+
+        // Find out how many channels we have.
+        channels = input->channelsOut();
+        std::cout << "ACAudioStkEngineRendererPlugin::performActionOnMedia: play: file has " << input->channelsOut() << " channels " << std::endl;
+
+        inputs[mediaId] = input;
+        playback_types[mediaId] = PLAYBACK_PLAY;
+        ACMediaNode* node = media_cycle->getMediaNode(mediaId);
+        if(node)
+            node->setActivity(1);
+        std::cout << "ACAudioStkEngineRendererPlugin::performActionOnMedia: action " << action << " media id " << mediaId << " done" << std::endl;
+    }
+    else if(action == "loop"){
+        ACAudioStkFileLoop* input = 0;
+        try {
+            input = new ACAudioStkFileLoop();
+            input->openFile( filename.c_str() );
+        }
+        catch ( StkError & ) {
+            std::cerr << "ACAudioStkEngineRendererPlugin::performActionOnMedia: loop: couldn't load media " << mediaId << " file " << filename << std::endl;
+            return false;
+        }
+
+        // Set input read rate based on the default STK sample rate.
+        double rate = 1.0;
+        rate = this->getNumberParameterValue("Playback Speed");//input->getFileRate() / Stk::sampleRate();
+        //if ( argc == 4 ) rate *= atof( argv[3] );
+        input->setRate( rate );
+
+        // Find out how many channels we have.
+        channels = input->channelsOut();
+
+        loops[mediaId] = input;
+        playback_types[mediaId] = PLAYBACK_LOOP;
+        ACMediaNode* node = media_cycle->getMediaNode(mediaId);
+        if(node)
+            node->setActivity(1);
+
+        std::cout << "ACAudioStkEngineRendererPlugin::performActionOnMedia: action " << action << " media id " << mediaId << " done" << std::endl;
+    }
+    else if(action == "granulate"){
+        ACAudioStkGranulate* grain = 0;
+        try {
+            grain = new ACAudioStkGranulate();
+            grain->setVoices( this->getNumberParameterValue("Grain Voices") );
+            grain->setRandomFactor( this->getNumberParameterValue("Grain Randomness") ); // factor between 0 - 1.0
+            grain->setStretch( this->getNumberParameterValue("Grain Stretch") ); // factor (1-1000)
+            grain->setGrainParameters(
+                        /*duration (ms)*/ this->getNumberParameterValue("Grain Duration"),
+                        /*ramp: envelope percent (0-100)*/ this->getNumberParameterValue("Grain Ramp"),
+                        /*offset: hop time between grains (ms)*/ this->getNumberParameterValue("Grain Offset"),
+                        /*delay: pause time between grains (ms)*/ this->getNumberParameterValue("Grain Delay") );
+            grain->openFile( filename.c_str() );
+        }
+        catch ( StkError & ) {
+            std::cerr << "ACAudioStkEngineRendererPlugin::performActionOnMedia: granulate: couldn't load media " << mediaId << " file " << filename << std::endl;
+            return false;
+        }
+        grains[mediaId] = grain;
+        playback_types[mediaId] = PLAYBACK_GRANULATE;
+        ACMediaNode* node = media_cycle->getMediaNode(mediaId);
+        if(node)
+            node->setActivity(1);
+
+        std::cout << "ACAudioStkEngineRendererPlugin::performActionOnMedia: action " << action << " media id " << mediaId << " done" << std::endl;
+    }
+
+    /*ACAudioStkFreeVerb* frev = 0;
+    try {
+        frev = new ACAudioStkFreeVerb();
+        frev->setEffectMix( this->getNumberParameterValue("Reverb Mix"));
+    }catch ( StkError & ) {
+        std::cerr << "ACAudioStkEngineRendererPlugin::performActionOnMedia: couldn't create reverb for media " << mediaId << " file " << filename << ", bypassing." << std::endl;
+    }
+    if(frev)
+        frevs[mediaId] = frev;*/
+    gains[mediaId] = 1.0f;
+    pans[mediaId] = 0.0f;
+
+    // Figure out how many bytes in an StkFloat and setup the RtAudio stream.
+    RtAudio::StreamParameters parameters;
+    parameters.deviceId = dac.getDefaultOutputDevice();
+    parameters.nChannels = this->outputChannels();//channels;
+    RtAudioFormat format = ( sizeof(StkFloat) == 8 ) ? RTAUDIO_FLOAT64 : RTAUDIO_FLOAT32;
+    unsigned int bufferFrames = RT_BUFFER_SIZE;
+
+    /*try {
+      dac.closeStream();
+    }
+    catch ( RtError &error ) {
+      error.printMessage();
+      //return false;
+    }*/
+
+    try {
+        if(!dac.isStreamOpen()){
+            dac.showWarnings();
+            RtAudio::StreamOptions *options = new RtAudio::StreamOptions;
+            options->flags = RTAUDIO_SCHEDULE_REALTIME /* | RTAUDIO_MINIMIZE_LATENCY | RTAUDIO_HOG_DEVICE*/;
+            if(options->flags & RTAUDIO_MINIMIZE_LATENCY)
+                std::cout << "ACAudioStkEngineRendererPlugin: with latency minimizing" << std::endl;
+            if(options->flags & RTAUDIO_HOG_DEVICE)
+                std::cout << "ACAudioStkEngineRendererPlugin: with device hogging" << std::endl;
+            if(options->flags & RTAUDIO_SCHEDULE_REALTIME)
+                std::cout << "ACAudioStkEngineRendererPlugin: with realtime scheduling" << std::endl;
+            dac.openStream( &parameters, NULL, format, (unsigned int)Stk::sampleRate(), &bufferFrames, &ACAudioStkEngineRendererPlugin::tickWrapper, this, options );
+        }
+    }
+    catch ( RtError &error ) {
+        error.printMessage();
+        return false;
+    }
+
+    // Install an interrupt handler function.
+    //(void) signal(SIGINT, finish);
+
+    // Resize the StkFrames object appropriately.
+    if(frames.find(mediaId)!=frames.end() && frames[mediaId]!=0){
+        frames[mediaId]->resize( bufferFrames, channels );
+    }
+    else{
+        try{
+            StkFrames* _frames = new StkFrames( (unsigned int)bufferFrames, (unsigned int)channels );
+            frames[mediaId] = _frames;
+        }
+        catch(...){
+            std::cerr << "ACAudioStkEngineRendererPlugin::performActionOnMedia: couldn't allocate frames for media " << mediaId << std::endl;
+        }
+    }
+    try {
+        if(!dac.isStreamRunning())
+            dac.startStream();
+    }
+    catch ( RtError &error ) {
+        error.printMessage();
+        return false;
+    }
+
+    // Block waiting until callback signals done.
+    /*while ( !done )
+      Stk::sleep( 100 );
+
+    // By returning a non-zero value in the callback above, the stream
+    // is automatically stopped.  But we should still close it.
+    try {
+      dac.closeStream();
+    }
+    catch ( RtError &error ) {
+      error.printMessage();
+      return false;
+    }*/
 }
 
 void ACAudioStkEngineRendererPlugin::muteMedia(int mediaId){

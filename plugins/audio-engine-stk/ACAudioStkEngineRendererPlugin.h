@@ -51,10 +51,11 @@
 #include <pthread.h>
 
 typedef unsigned int ACAudioStkPlaybackType;
-const ACAudioStkPlaybackType PLAYBACK_MUTE = 0x0000;
-const ACAudioStkPlaybackType PLAYBACK_PLAY = 0x0001;
-const ACAudioStkPlaybackType PLAYBACK_LOOP = 0x0002;
-const ACAudioStkPlaybackType PLAYBACK_GRANULATE = 0x0004;
+const ACAudioStkPlaybackType PLAYBACK_OFF = 0x0000;
+const ACAudioStkPlaybackType PLAYBACK_MUTE = 0x0001;
+const ACAudioStkPlaybackType PLAYBACK_PLAY = 0x0002;
+const ACAudioStkPlaybackType PLAYBACK_LOOP = 0x0004;
+const ACAudioStkPlaybackType PLAYBACK_GRANULATE = 0x0008;
 
 class ACAudioStkEngineRendererPlugin : public QObject, public ACPluginQt, public ACMediaRendererPlugin
 {
@@ -100,23 +101,35 @@ public:
 
     void muteMedia(int mediaId);
 
-public:
+    int outputChannels();
+
+private:
+    int tick( void *outputBuffer, void *inputBuffer, unsigned int nBufferFrames,
+              double streamTime, RtAudioStreamStatus status);
+    static int tickWrapper(void *outputBuffer, void *inputBuffer, unsigned int nFrames,
+                           double streamTime, RtAudioStreamStatus status, void *userData);
+
+    void midiInCallback( double timeStamp, std::vector<unsigned char> *message);
+    static void midiInCallbackWrapper( double timeStamp, std::vector<unsigned char> *message, void *userData);
+
+protected:
     RtAudio dac;
     std::map< long int, ACAudioStkFileWvIn*> inputs;
     std::map< long int, ACAudioStkFileLoop*> loops;
     std::map< long int, ACAudioStkGranulate*> grains;
-    std::map< long int, ACAudioStkPlaybackType> playback_type;
+    std::map< long int, ACAudioStkPlaybackType> playback_types;
     std::map< long int, int> current_frames;
     std::map< long int, ACAudioStkFreeVerb*> frevs;
     ACAudioStkFreeVerb* master_frev;
     std::map< long int, stk::StkFloat> gains;
     stk::StkFloat master_volume;
     std::map< long int, stk::StkFloat> pans;
+
     void justReadFrames(long int mediaId, int nFrames);
     void stopSource(long int mediaId);
     void deleteSource(long int mediaId);
     std::map< long int, stk::StkFrames*> frames;
-    int outputChannels();
+
 
     RtMidiIn* midi_in;
     RtMidiOut* midi_out;
@@ -125,6 +138,10 @@ public:
 
     pthread_mutex_t delete_mutex;
     pthread_mutexattr_t delete_mutex_attr;
+
+public:
+    bool createGenerator(std::string action, long int mediaId, std::vector<boost::any> arguments=std::vector<boost::any>());
+
 
 public:
     virtual std::vector<ACInputActionQt*> providesInputActions();
@@ -148,6 +165,7 @@ protected:
     std::string active_target;
     std::vector<std::string> midi_in_ports,midi_out_ports;
     long int current_closest_node;
+    bool muting;
 };
 
 #endif
