@@ -55,7 +55,14 @@ ACFeatureDimensions ACPDFFeaturesPlugin::getFeaturesDimensions(){
 
 std::vector<ACMediaFeatures*> ACPDFFeaturesPlugin::calculate(ACMedia* theMedia, bool _save_timed_feat) {
 	std::vector<ACMediaFeatures*> desc;
-	ACMediaFeatures* page_count;
+
+    std::cout << "ACPDFFeaturesPlugin::calculate: author '" << (std::string) ((ACPDF*) theMedia)->getAuthor() << "'" << std::endl;
+    std::cout << "ACPDFFeaturesPlugin::calculate: creator '" << (std::string) ((ACPDF*) theMedia)->getCreator() << "'" << std::endl;
+    std::cout << "ACPDFFeaturesPlugin::calculate: subject '" << (std::string) ((ACPDF*) theMedia)->getSubject() << "'" << std::endl;
+    std::cout << "ACPDFFeaturesPlugin::calculate: title '" << (std::string) ((ACPDF*) theMedia)->getTitle() << "'" << std::endl;
+    std::cout << "ACPDFFeaturesPlugin::calculate: keywords '" << (std::string) ((ACPDF*) theMedia)->getKeywords() << "'" << std::endl;
+
+    ACMediaFeatures* page_count;
 	vector<float> count;
     count.push_back( (float) ((ACPDF*) theMedia)->getPageCount());
     page_count = new ACMediaFeatures(count, "Page Count");

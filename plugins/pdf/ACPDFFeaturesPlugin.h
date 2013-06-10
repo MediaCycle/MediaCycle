@@ -45,6 +45,10 @@ public:
 
     virtual std::vector<ACMediaFeatures*> calculate(ACMedia* theMedia, bool _save_timed_feat=false);
     virtual ACFeatureDimensions getFeaturesDimensions();
+
+protected:
+    void extractText();
+
 };
 
 #endif	/* _ACPDFFeaturesPlugin_H */

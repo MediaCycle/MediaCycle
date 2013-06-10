@@ -46,40 +46,45 @@
 #include <osg/Texture2D>
 
 class ACPDF: public ACMedia {
-	// contains the *minimal* information about a PDF
+    // contains the *minimal* information about a PDF
 public:
-	ACPDF();
-	ACPDF(const ACPDF& m);
-	~ACPDF();
+    ACPDF();
+    ACPDF(const ACPDF& m);
+    ~ACPDF();
 private:
     void init();
 
 public:
-	void saveACLSpecific(std::ofstream &library_file);
-	int loadACLSpecific(std::ifstream &library_file);
-	void saveXMLSpecific(TiXmlElement* _media);
-	int loadXMLSpecific(TiXmlElement* _pMediaNode);
+    void saveACLSpecific(std::ofstream &library_file);
+    int loadACLSpecific(std::ifstream &library_file);
+    void saveXMLSpecific(TiXmlElement* _media);
+    int loadXMLSpecific(TiXmlElement* _pMediaNode);
 
-	//void setThumbnail(IplImage *_thumbnail) { thumbnail = _thumbnail; thumbnail_width = _thumbnail->width; thumbnail_height = _thumbnail->height; }
-	osg::ref_ptr<osg::Image> getThumbnail() { return thumbnail; }
-	osg::ref_ptr<osg::Texture2D> getTexture() { return image_texture; }
+    //void setThumbnail(IplImage *_thumbnail) { thumbnail = _thumbnail; thumbnail_width = _thumbnail->width; thumbnail_height = _thumbnail->height; }
+    osg::ref_ptr<osg::Image> getThumbnail() { return thumbnail; }
+    osg::ref_ptr<osg::Texture2D> getTexture() { return image_texture; }
 
-	bool extractData(std::string fname);
-	
-	int getPageCount(){return page_count;}
+    bool extractData(std::string fname);
+
+    int getPageCount(){return page_count;}
+    std::string getAuthor(){return author;}
+    std::string getCreator(){return creator;}
+    std::string getSubject(){return subject;}
+    std::string getTitle(){return title;}
+    std::string getKeywords(){return keywords;}
 
 private:
-	bool computeThumbnail(int w=0, int h=0);
-	bool computeThumbnailSize(int w_, int h_);
+    bool computeThumbnail(int w=0, int h=0);
+    bool computeThumbnailSize(int w_, int h_);
 
 private:
-	static const int default_thumbnail_area;
-	int thumbnail_width, thumbnail_height;
-	osg::ref_ptr<osg::Image> thumbnail;
-	osg::ref_ptr<osg::Texture2D> image_texture;
-//	ACPDFData* data;
-	
-	std::string author,creator,subject,title,keywords,format_unit;
-	int page_count;
+    static const int default_thumbnail_area;
+    int thumbnail_width, thumbnail_height;
+    osg::ref_ptr<osg::Image> thumbnail;
+    osg::ref_ptr<osg::Texture2D> image_texture;
+    //	ACPDFData* data;
+
+    std::string author,creator,subject,title,keywords,format_unit;
+    int page_count;
 };
 #endif // ACPDF_H
