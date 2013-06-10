@@ -1048,27 +1048,41 @@ void MediaCycle::muteAllSources() { mediaBrowser->muteAllSources(); }
 
 // == POINTERS on VIEW
 int MediaCycle::getNumberOfPointers() {
-    return mediaBrowser->getNumberOfPointers();
+    if(mediaBrowser)
+        return mediaBrowser->getNumberOfPointers();
+    else
+        return 0;
 }
 
 ACPointer* MediaCycle::getPointerFromIndex(int i) {
-    return mediaBrowser->getPointerFromIndex(i);
+    if(mediaBrowser)
+        return mediaBrowser->getPointerFromIndex(i);
+    else
+        return 0;
 }
 
 ACPointer* MediaCycle::getPointerFromId(int i) {
-    return mediaBrowser->getPointerFromId(i);
+    if(mediaBrowser)
+        return mediaBrowser->getPointerFromId(i);
+    else
+        return 0;
 }
 
 void MediaCycle::resetPointers() {
-    mediaBrowser->resetPointers();
+    if(mediaBrowser)
+        mediaBrowser->resetPointers();
 }
 
 std::list<int> MediaCycle::getPointerIds() {
-    return mediaBrowser->getPointerIds();
+    if(mediaBrowser)
+        return mediaBrowser->getPointerIds();
+    else
+        return std::list<int>();
 }
 
 void MediaCycle::addPointer(int p_id) {
-    mediaBrowser->addPointer(p_id);
+    if(mediaBrowser)
+        mediaBrowser->addPointer(p_id);
 }
 
 void MediaCycle::removePointer(int p_id) {
@@ -1077,7 +1091,8 @@ void MediaCycle::removePointer(int p_id) {
         int closest = pointer->getClosestNode();
         if(closest != -1)
             this->performActionOnMedia("hover off node",closest);
-        mediaBrowser->removePointer(p_id);
+        if(mediaBrowser)
+            mediaBrowser->removePointer(p_id);
     }
 }
 
