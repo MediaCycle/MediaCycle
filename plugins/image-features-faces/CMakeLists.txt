@@ -1,5 +1,5 @@
 SET(MEDIA_TYPE "image")
-SET(PLUGIN_NAME "image")
+SET(PLUGIN_NAME "image-features-faces")
 SET(MC_3RDPARTIES "cvBlobsLib;cvgabor")
 SET(MC_MEDIA_LIBS "${MEDIA_TYPE}-core;${MEDIA_TYPE}-features")
 list(APPEND 3RDPARTY_NAMES "cvBlobsLib")

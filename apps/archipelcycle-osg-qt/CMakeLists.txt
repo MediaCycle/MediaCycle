@@ -5,7 +5,7 @@ IF ( SUPPORT_ARCHIPEL AND SUPPORT_MULTIMEDIA AND SUPPORT_AUDIO AND SUPPORT_IMAGE
 	SET(WITH_OSC ON)
 
 	SET(MEDIA_TYPE "MEDIA_TYPE_MIXED")
-    SET(MC_PLUGINS "audio-engine;audio-features-yaafe;audio-osg;audio-reader-sndfile;file;image;image-osg;segmentation;text;text-osg;visualisation;visualisation-advanced;archipel") # load archipel after text plugin which also reads .xml
+    SET(MC_PLUGINS "audio-engine;audio-features-yaafe;audio-osg;audio-reader-sndfile;file;image-features-color;image-features-contours;image-features-faces;image-features-shape;image-features-texture;image-osg;segmentation;text;text-osg;visualisation;visualisation-advanced;archipel") # load archipel after text plugin which also reads .xml
         SET(CLUSTERS_METHOD "MediaCycle KMeans")
         SET(CLUSTERS_POSITIONS "Archipel Atoll")
 	SET(OSG_PLUGINS "")

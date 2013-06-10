@@ -483,7 +483,7 @@ ENDIF()
 #--------------------------------------------------------------------------------
 # Bundling other plugin-dependent files, should be rewritten less ad-hoc
 IF(APPLE AND NOT USE_DEBUG)
-	list(FIND MC_PLUGINS "image" MC_IMAGE_FOUND)
+	list(FIND MC_PLUGINS "image-features-faces" MC_IMAGE_FOUND)
 	IF(MC_IMAGE_FOUND GREATER -1)
 		MESSAGE("Bundling mc_image")
 		SET(OpenCV_HAARCASCADE "haarcascade_frontalface_alt.xml")
