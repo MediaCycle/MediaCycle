@@ -227,10 +227,10 @@ void MediaCycle::loadDefaultConfig(std::string name){
     if(config->preProcessPlugin() != "")
         this->changeActivePlugin(PLUGIN_TYPE_PREPROCESS,config->preProcessPlugin());
 
-    #if defined (SUPPORT_MULTIMEDIA)
+#if defined (SUPPORT_MULTIMEDIA)
     mediaLibrary->setActiveMediaType( config->activeMediaType(), this->pluginManager );
     mediaLibrary->setMediaReaderPlugin( this->getPlugin( config->mediaReaderPlugin() ) );
-    #endif
+#endif
 }
 
 ACAbstractDefaultConfig* MediaCycle::getCurrentConfig(){
@@ -543,33 +543,46 @@ int MediaCycle::setPath(string path) {
 
 void MediaCycle::libraryContentChanged(int needsNormalizeAndCluster)
 {
-    mediaBrowser->libraryContentChanged(needsNormalizeAndCluster);
+    if (mediaBrowser){
+        mediaBrowser->libraryContentChanged(needsNormalizeAndCluster);
+    }
 }
 
 void MediaCycle::saveACLLibrary(string path)
 {
-    mediaLibrary->saveACLLibrary(path);
+    if(mediaLibrary){
+        mediaLibrary->saveACLLibrary(path);
+    }
 }
 
 void MediaCycle::saveXMLLibrary(string path)
 {
-    mediaLibrary->saveXMLLibrary(path);
+    if(mediaLibrary){
+        mediaLibrary->saveXMLLibrary(path);
+    }
 }
 
 void MediaCycle::saveMCSLLibrary(string path)
 {
-    mediaLibrary->saveMCSLLibrary(path);
+    if(mediaLibrary){
+        mediaLibrary->saveMCSLLibrary(path);
+    }
 }
 
 void MediaCycle::cleanLibrary()
 {
     prevLibrarySize=0;
     eventManager->sig_libraryCleaned();
-    mediaLibrary->cleanLibrary();
+    if(mediaLibrary){
+        mediaLibrary->cleanLibrary();
+    }
 }
 
 int MediaCycle::importACLLibrary(string path) {
     // XS import = open + normalize
+    if(!mediaLibrary){
+        return -1;
+    }
     cout << "MediaCycle: importing ACL library: " << path << endl;
     int ok = 0;
     ok = this->mediaLibrary->openACLLibrary(path);
@@ -580,6 +593,9 @@ int MediaCycle::importACLLibrary(string path) {
 
 int MediaCycle::importXMLLibrary(string path) {
     // XS import = open + normalize
+    if(!mediaLibrary){
+        return -1;
+    }
     cout << "MediaCycle: importing XML library: " << path << endl;
     int ok = 0;
     ok = this->mediaLibrary->openXMLLibrary(path);
@@ -591,6 +607,9 @@ int MediaCycle::importXMLLibrary(string path) {
 //CF 31/05/2010 temporary MediaCycle Segmented Library (MCSL) for AudioGarden, adding a parentID for segments to the initial ACL, awaiting approval
 int MediaCycle::importMCSLLibrary(string path) {
     // XS import = open + some processing
+    if(!mediaLibrary){
+        return -1;
+    }
     cout << "MediaCycle: importing MCSL library: " << path << endl;
     int ok = 0;
     ok = this->mediaLibrary->openMCSLLibrary(path);
@@ -619,33 +638,46 @@ int MediaCycle::importLibrary(string path) {
 int MediaCycle::getLibrarySize()
 {
     int _size = 0;
-    if(mediaLibrary)
+    if(mediaLibrary){
         _size = mediaLibrary->getSize();
+    }
     return _size;
 }
 
 int MediaCycle::getNumberOfMediaNodes(){
     int _nodes;
-    if(mediaBrowser)
+    if(mediaBrowser){
         _nodes = mediaBrowser->getNumberOfMediaNodes();
+    }
     return _nodes;
 }
 
 // == Search by Similarity
 
 int MediaCycle::getKNN(int id, vector<int> &ids, int k) {
-    int ret = this->mediaBrowser->getKNN(id, ids, k);
+    int ret = -1;
+    if (mediaBrowser){
+        ret = this->mediaBrowser->getKNN(id, ids, k);
+    }
     return ret;
 }
 int MediaCycle::getKNN(ACMedia *aMedia, vector<ACMedia *> &result, int k) {
-    int ret = this->mediaBrowser->getKNN(aMedia, result, k);
+    int ret = -1;
+    if (mediaBrowser){
+        ret = this->mediaBrowser->getKNN(aMedia, result, k);
+    }
     return ret;
 }
 
 // Thumbnail
 
 string MediaCycle::getThumbnailFileName(int id) {
-    return this->mediaLibrary->getThumbnailFileName(id);
+    if(mediaLibrary){
+        return this->mediaLibrary->getThumbnailFileName(id);
+    }
+    else{
+        return "";
+    }
 }
 
 // Media Browser
@@ -655,22 +687,39 @@ bool MediaCycle::hasBrowser() {
         ok=true;
     return ok;
 }
-ACBrowserMode MediaCycle::getBrowserMode() {return mediaBrowser->getMode();}
-void MediaCycle::setBrowserMode(ACBrowserMode _mode) {mediaBrowser->setMode(_mode);}
+
+ACBrowserMode MediaCycle::getBrowserMode()
+{
+    if (mediaBrowser){
+        return mediaBrowser->getMode();
+    }
+    else{
+        return AC_MODE_NONE;
+    }
+}
+
+void MediaCycle::setBrowserMode(ACBrowserMode _mode){
+    if (mediaBrowser){
+        mediaBrowser->setMode(_mode);
+    }
+}
 
 bool MediaCycle::changeBrowserMode(ACBrowserMode _mode){
-    this->mediaBrowser->switchMode(_mode);
-    return true;
-};
-
+    if (mediaBrowser){
+        this->mediaBrowser->switchMode(_mode);
+        return true;
+    }
+    else{
+        return false;
+    }
+}
 
 //Listener Manager
-
 void MediaCycle::addListener(ACEventListener* eventListener){
-    if (eventManager!=NULL)
+    if (eventManager!=NULL){
         eventManager->addListener(eventListener);
-};
-
+    }
+}
 
 // Plugins
 int MediaCycle::loadPluginLibraryFromBasename(std::string basename){
@@ -704,15 +753,21 @@ int MediaCycle::addPluginLibrary(ACPluginLibrary* library) {
 }
 
 int MediaCycle::removePluginLibrary(string aPluginLibraryPath) {
+    if(this->pluginManager == 0)
+        return 0;
     return this->pluginManager->removeLibrary(aPluginLibraryPath);
 }
 
 int MediaCycle::removePluginLibraryFromBasename(std::string basename) {
+    if(this->pluginManager == 0)
+        return 0;
     std::string aPluginLibraryPath = this->getPluginPathFromBaseName(basename);
     return this->pluginManager->removeLibrary(aPluginLibraryPath);
 }
 
 ACPluginLibrary* MediaCycle::getPluginLibrary(string aPluginLibraryPath) const{
+    if(this->pluginManager == 0)
+        return 0;
     return this->pluginManager->getPluginLibrary(aPluginLibraryPath);
 }
 
@@ -723,14 +778,20 @@ ACPlugin*  MediaCycle::getPlugin(std::string name){
 }
 
 bool MediaCycle::removePluginFromLibrary(std::string _plugin_name, std::string _library_path){
+    if(this->pluginManager == 0)
+        return false;
     return this->pluginManager->removePluginFromLibrary(_plugin_name, _library_path);
 }
 
 std::vector<std::string> MediaCycle::getListOfPlugins(){
+    if(this->pluginManager == 0)
+        return std::vector<std::string>();
     return this->pluginManager->getListOfPlugins();
 }
 
 std::vector<std::string> MediaCycle::getListOfActivePlugins(){
+    if(this->mediaLibrary == 0)
+        return std::vector<std::string>();
     return this->mediaLibrary->getListOfActivePlugins();
 }
 
@@ -863,24 +924,79 @@ void MediaCycle::setMediaReaderPlugin(std::string pluginName){
 #ifdef SUPPORT_MULTIMEDIA
 
 std::string MediaCycle::getActiveSubMediaKey(){
+    if(this->mediaLibrary == 0)
+        return "";
     return (mediaLibrary->getActiveSubMediaKey());
 
 }
+
 int MediaCycle::setActiveMediaType(std::string mediaName){
-    int ret =mediaLibrary->setActiveMediaType(mediaName,pluginManager);
+    int ret = -1;
+    if(mediaLibrary && pluginManager){
+        ret = mediaLibrary->setActiveMediaType(mediaName,pluginManager);
+    }
     return ret ;
 }
 #endif//def USE_MULTIMEDIA
 
-void MediaCycle::dumpPluginsList(){this->pluginManager->dump();}
+void MediaCycle::dumpPluginsList(){
+    if(pluginManager){
+        this->pluginManager->dump();
+    }
+}
 
 // == Media
-ACMediaNode* MediaCycle::getMediaNode(int i) { return (mediaBrowser->getMediaNode(i)); }
-ACMediaNode* MediaCycle::getNodeFromMedia(ACMedia* _media) { return (mediaBrowser->getNodeFromMedia(_media)); }
-string MediaCycle::getMediaFileName(int i) { return (mediaLibrary->getMedia(i) ? mediaLibrary->getMedia(i)->getFileName():string("")); }
-ACMediaType MediaCycle::getMediaType(int i) { return mediaLibrary->getMedia(i)->getType(); }
-bool MediaCycle::mediaIsTagged(int i) { return (mediaLibrary->getMedia(i)?mediaLibrary->getMedia(i)->isTagged():false); }
-void MediaCycle::setMediaType(ACMediaType mt) {mediaLibrary->setMediaType(mt); }
+ACMediaNode* MediaCycle::getMediaNode(int i){
+    if (mediaBrowser){
+        return (mediaBrowser->getMediaNode(i));
+    }
+    else{
+        return 0;
+    }
+}
+
+ACMediaNode* MediaCycle::getNodeFromMedia(ACMedia* _media){
+    if (mediaBrowser){
+        return (mediaBrowser->getNodeFromMedia(_media));
+    }
+    else{
+        return 0;
+    }
+}
+
+string MediaCycle::getMediaFileName(int i){
+    if (mediaLibrary){
+        return (mediaLibrary->getMedia(i) ? mediaLibrary->getMedia(i)->getFileName():string(""));
+    }
+    else{
+        return "";
+    }
+}
+
+ACMediaType MediaCycle::getMediaType(int i){
+    if (mediaLibrary){
+        return mediaLibrary->getMedia(i)->getType();
+    }
+    else{
+        return MEDIA_TYPE_NONE;
+    }
+}
+
+bool MediaCycle::mediaIsTagged(int i) {
+    if(mediaLibrary){
+        return (mediaLibrary->getMedia(i)?mediaLibrary->getMedia(i)->isTagged():false);
+    }
+    else{
+        return false;
+    }
+}
+
+void MediaCycle::setMediaType(ACMediaType mt){
+    if(mediaLibrary){
+        mediaLibrary->setMediaType(mt);
+    }
+}
+
 bool MediaCycle::changeMediaType(ACMediaType aMediaType) {
     bool changeMe = true ;
     if (aMediaType == this->getMediaType())
@@ -895,31 +1011,137 @@ bool MediaCycle::changeMediaType(ACMediaType aMediaType) {
     return changeMe;
 }
 
-int MediaCycle::getWidth(int i) { return mediaLibrary->getMedia(i)->getWidth(); }
-int MediaCycle::getHeight(int i) { return mediaLibrary->getMedia(i)->getHeight(); }
-int MediaCycle::getNeedsDisplay() {	return mediaBrowser->getNeedsDisplay(); }
+int MediaCycle::getWidth(int i){
+    if (mediaLibrary){
+        return mediaLibrary->getMedia(i)->getWidth();
+    }
+    else{
+        return -1;
+    }
+}
+
+int MediaCycle::getHeight(int i){
+    if (mediaLibrary){
+        return mediaLibrary->getMedia(i)->getHeight();
+    }
+    else{
+        return -1;
+    }
+}
+
+int MediaCycle::getNeedsDisplay(){
+    if (mediaLibrary){
+        return mediaBrowser->getNeedsDisplay();
+    }
+    else{
+        return -1;
+    }
+}
+
 void MediaCycle::setNeedsDisplay(bool _dis) {
-    if (mediaBrowser) {
+    if (mediaBrowser){
         mediaBrowser->setNeedsDisplay(_dis);
     }
 }
-int MediaCycle::getNeedsDisplay3D() { return mNeedsDisplay; }
-void MediaCycle::setNeedsDisplay3D(bool mNeedsDisplay) { this->mNeedsDisplay = mNeedsDisplay; }
+
+int MediaCycle::getNeedsDisplay3D(){return mNeedsDisplay;}
+
+void MediaCycle::setNeedsDisplay3D(bool mNeedsDisplay){this->mNeedsDisplay = mNeedsDisplay;}
 
 // == view
-float MediaCycle::getCameraZoom() { return mediaBrowser->getCameraZoom(); }
-float MediaCycle::getCameraRotation() { return mediaBrowser->getCameraRotation(); }
-void MediaCycle::setCameraRotation(float angle) { mediaBrowser->setCameraRotation(angle); }
-void MediaCycle::setCameraPosition(float x, float y)		{ mediaBrowser->setCameraPosition(x,y); }
-void MediaCycle::getCameraPosition(float &x, float &y)		{ mediaBrowser->getCameraPosition(x,y); }
-void MediaCycle::setCameraZoom(float z)				{ mediaBrowser->setCameraZoom(z); }
-void MediaCycle::setCameraRecenter()				{ mediaBrowser->setCameraRecenter(); }
-void MediaCycle::setAutoPlay(int i) { mediaBrowser->setAutoPlay(i); }
-bool MediaCycle::getAutoPlay() { return mediaBrowser->getAutoPlay(); }
-void MediaCycle::setAutoDiscard(bool status) { mediaBrowser->setAutoDiscard(status); }
-bool MediaCycle::getAutoDiscard(){return mediaBrowser->getAutoDiscard();}
-int MediaCycle::getClickedNode() { return mediaBrowser->getClickedNode(); }
-void MediaCycle::setClickedNode(int i) { mediaBrowser->setClickedNode(i); }
+float MediaCycle::getCameraZoom(){
+    if(mediaBrowser){
+        return mediaBrowser->getCameraZoom();
+    }
+    else{
+        return 0.0f;
+    }
+}
+
+float MediaCycle::getCameraRotation(){
+    if(mediaBrowser){
+        return mediaBrowser->getCameraRotation();
+    }
+    else{
+        return 0.0f;
+    }
+}
+
+void MediaCycle::setCameraRotation(float angle){
+    if(mediaBrowser){
+        mediaBrowser->setCameraRotation(angle);
+    }
+}
+
+void MediaCycle::setCameraPosition(float x, float y){
+    if(mediaBrowser){
+        mediaBrowser->setCameraPosition(x,y);
+    }
+}
+
+void MediaCycle::getCameraPosition(float &x, float &y){
+    if(mediaBrowser){
+        mediaBrowser->getCameraPosition(x,y);
+    }
+}
+
+void MediaCycle::setCameraZoom(float z)	{
+    if(mediaBrowser){
+        mediaBrowser->setCameraZoom(z);
+    }
+}
+
+void MediaCycle::setCameraRecenter(){
+    if(mediaBrowser){
+        mediaBrowser->setCameraRecenter();
+    }
+}
+
+void MediaCycle::setAutoPlay(int i) {
+    if(mediaBrowser){
+        mediaBrowser->setAutoPlay(i);
+    }
+}
+
+bool MediaCycle::getAutoPlay(){
+    if(mediaBrowser){
+        return mediaBrowser->getAutoPlay();
+    }
+    else{
+        return false;
+    }
+}
+
+void MediaCycle::setAutoDiscard(bool status){
+    if(mediaBrowser){
+        mediaBrowser->setAutoDiscard(status);
+    }
+}
+
+bool MediaCycle::getAutoDiscard(){
+    if(mediaBrowser){
+        return mediaBrowser->getAutoDiscard();
+    }
+    else{
+        return false;
+    }
+}
+
+int MediaCycle::getClickedNode(){
+    if(mediaBrowser){
+        return mediaBrowser->getClickedNode();
+    }
+    else{
+        return -1;
+    }
+}
+
+void MediaCycle::setClickedNode(int i){
+    if(mediaBrowser){
+        mediaBrowser->setClickedNode(i);
+    }
+}
+
 void MediaCycle::setClosestNode(int i,int p_index) {
     int current = mediaBrowser->getClosestNode(p_index);
     std::map<long int,int> nodeActivities = mediaBrowser->setClosestNode(i,p_index);
@@ -938,26 +1160,126 @@ void MediaCycle::setClosestNode(int i,int p_index) {
         this->performActionOnMedia("hover closest node",i,arguments);
     }
 }
-int MediaCycle::getClosestNode(int p_index) { return mediaBrowser->getClosestNode(p_index); }
-int	MediaCycle::getLastSelectedNode() { return mediaBrowser->getLastSelectedNode(); }
+int MediaCycle::getClosestNode(int p_index){
+    if(mediaBrowser){
+        return mediaBrowser->getClosestNode(p_index);
+    }
+    else{
+        return -1;
+    }
+}
+
+int	MediaCycle::getLastSelectedNode(){
+    if(mediaBrowser){
+        return mediaBrowser->getLastSelectedNode();
+    }
+    else{
+        return -1;
+    }
+}
 
 // == Cluster Display
-void MediaCycle::updateState() { mediaBrowser->updateState(); }
-int MediaCycle::getNavigationLevel() { return mediaBrowser->getNavigationLevel(); }
-float MediaCycle::getFrac() { return mediaBrowser->getFrac(); }
-void MediaCycle::incrementNavigationLevels(int i) { mediaBrowser->incrementNavigationLevels(i); }
-void MediaCycle::setReferenceNode(int index) { mediaBrowser->setReferenceNode(index); }
-int MediaCycle::getReferenceNode() { return mediaBrowser->getReferenceNode(); }
-void MediaCycle::goBack() { mediaBrowser->goBack(); }
-void MediaCycle::goForward() { mediaBrowser->goForward(); }
-void MediaCycle::storeNavigationState() { mediaBrowser->storeNavigationState(); }
-void MediaCycle::setClusterNumber(int n) { mediaBrowser->setClusterNumber(n); }
-void MediaCycle::setWeight(int i, float weight) { mediaBrowser->setWeight(i, weight); }
-void MediaCycle::setWeightVector(std::vector<float> fw) { mediaBrowser->setWeightVector(fw); }
-vector<float> MediaCycle::getWeightVector(){return mediaBrowser->getWeightVector();}
-float MediaCycle::getWeight(int i){return mediaBrowser->getWeight(i);}
+void MediaCycle::updateState(){
+    if(mediaBrowser){
+        mediaBrowser->updateState();
+    }
+}
 
-void MediaCycle::setForwardDown(int i) { forwarddown = i; }
+int MediaCycle::getNavigationLevel(){
+    if(mediaBrowser){
+        return mediaBrowser->getNavigationLevel();
+    }
+    else{
+        return -1;
+    }
+}
+
+float MediaCycle::getFrac(){
+    if(mediaBrowser){
+        return mediaBrowser->getFrac();
+    }
+    else{
+        return -1;
+    }
+}
+
+void MediaCycle::incrementNavigationLevels(int i){
+    if(mediaBrowser){
+        mediaBrowser->incrementNavigationLevels(i);
+    }
+}
+
+void MediaCycle::setReferenceNode(int index){
+    if(mediaBrowser){
+        mediaBrowser->setReferenceNode(index);
+    }
+}
+
+int MediaCycle::getReferenceNode(){
+    if(mediaBrowser){
+        return mediaBrowser->getReferenceNode();
+    }
+    else{
+        return -1;
+    }
+}
+
+void MediaCycle::goBack(){
+    if(mediaBrowser){
+        mediaBrowser->goBack();
+    }
+}
+
+void MediaCycle::goForward(){
+    if(mediaBrowser){
+        mediaBrowser->goForward();
+    }
+}
+
+void MediaCycle::storeNavigationState(){
+    if(mediaBrowser){
+        mediaBrowser->storeNavigationState();
+    }
+}
+
+void MediaCycle::setClusterNumber(int n) {
+    if(mediaBrowser){
+        mediaBrowser->setClusterNumber(n);
+    }
+}
+
+void MediaCycle::setWeight(int i, float weight) {
+    if(mediaBrowser){
+        mediaBrowser->setWeight(i, weight);
+    }
+}
+
+void MediaCycle::setWeightVector(std::vector<float> fw){
+    if(mediaBrowser){
+        mediaBrowser->setWeightVector(fw);
+    }
+}
+
+vector<float> MediaCycle::getWeightVector(){
+    if(mediaBrowser){
+        return mediaBrowser->getWeightVector();
+    }
+    else{
+        return vector<float>();
+    }
+}
+
+float MediaCycle::getWeight(int i){
+    if(mediaBrowser){
+        return mediaBrowser->getWeight(i);
+    }
+    else{
+        return 0.0f;
+    }
+}
+
+void MediaCycle::setForwardDown(int i) { forwarddown = i;}
+
 void MediaCycle::forwardNextLevel(){
     // enters in the cluster of the last selected node
     if (this->hasBrowser()){
@@ -987,7 +1309,6 @@ void MediaCycle::changeSelectedMediaTagId(int ClusterId){
 
 }
 
-
 void MediaCycle::transferClassToTag(){
     bool changed=false;
     ACMediaNodes nodes=mediaBrowser->getMediaNodes();
@@ -1014,12 +1335,12 @@ void MediaCycle::cleanAllMediaTag(){
         }
     }
     if (changed)
-        mediaBrowser->updateDisplay();    
+        mediaBrowser->updateDisplay();
 }
 
 
 // == Features
-void MediaCycle::normalizeFeatures(int needsNormalize) { mediaLibrary->normalizeFeatures(needsNormalize); }
+void MediaCycle::normalizeFeatures(int needsNormalize) { mediaLibrary->normalizeFeatures(needsNormalize);}
 // Get Features Vector (identified by feature_name) in media i
 FeaturesVector MediaCycle::getFeaturesVectorInMedia(int i, string feature_name) {
     ACMedia* lmedia;
@@ -1037,52 +1358,71 @@ FeaturesVector MediaCycle::getFeaturesVectorInMedia(int i, string feature_name) 
 }
 
 // == Playing time stamp
-//XS TODO : add tests before setting values ?
 void MediaCycle::setSourceCursor(int lid, int frame_pos) {
-    mediaBrowser->setSourceCursor(lid, frame_pos);
+    if(mediaBrowser){
+        mediaBrowser->setSourceCursor(lid, frame_pos);
+    }
 }
+
 void MediaCycle::setCurrentFrame(int lid, int frame_pos) {
-    mediaBrowser->setCurrentFrame(lid, frame_pos);
+    if(mediaBrowser){
+        mediaBrowser->setCurrentFrame(lid, frame_pos);
+    }
 }
-void MediaCycle::muteAllSources() { mediaBrowser->muteAllSources(); }
+
+void MediaCycle::muteAllSources(){
+    if(mediaBrowser){
+        mediaBrowser->muteAllSources();
+    }
+}
 
 // == POINTERS on VIEW
 int MediaCycle::getNumberOfPointers() {
-    if(mediaBrowser)
+    if(mediaBrowser){
         return mediaBrowser->getNumberOfPointers();
-    else
+    }
+    else{
         return 0;
+    }
 }
 
 ACPointer* MediaCycle::getPointerFromIndex(int i) {
-    if(mediaBrowser)
+    if(mediaBrowser){
         return mediaBrowser->getPointerFromIndex(i);
-    else
+    }
+    else{
         return 0;
+    }
 }
 
 ACPointer* MediaCycle::getPointerFromId(int i) {
-    if(mediaBrowser)
+    if(mediaBrowser){
         return mediaBrowser->getPointerFromId(i);
-    else
+    }
+    else{
         return 0;
+    }
 }
 
 void MediaCycle::resetPointers() {
-    if(mediaBrowser)
+    if(mediaBrowser){
         mediaBrowser->resetPointers();
+    }
 }
 
 std::list<int> MediaCycle::getPointerIds() {
-    if(mediaBrowser)
+    if(mediaBrowser){
         return mediaBrowser->getPointerIds();
-    else
+    }
+    else{
         return std::list<int>();
+    }
 }
 
 void MediaCycle::addPointer(int p_id) {
-    if(mediaBrowser)
+    if(mediaBrowser){
         mediaBrowser->addPointer(p_id);
+    }
 }
 
 void MediaCycle::removePointer(int p_id) {
@@ -1097,9 +1437,33 @@ void MediaCycle::removePointer(int p_id) {
 }
 
 // == LABELS on VIEW
-int MediaCycle::getLabelSize() { return mediaBrowser->getLabelSize(); }
-string MediaCycle::getLabelText(int i) { return mediaBrowser->getLabelText(i); }
-ACPoint MediaCycle::getLabelPos(int i) { return mediaBrowser->getLabelPos(i); }
+int MediaCycle::getLabelSize(){
+    if(mediaBrowser){
+        return mediaBrowser->getLabelSize();
+    }
+    else{
+        return -1;
+    }
+}
+
+string MediaCycle::getLabelText(int i){
+    if(mediaBrowser){
+        return mediaBrowser->getLabelText(i);
+    }
+    else{
+        return "";
+    }
+}
+
+ACPoint MediaCycle::getLabelPos(int i){
+    if(mediaBrowser){
+        return mediaBrowser->getLabelPos(i);
+    }
+    else{
+        return ACPoint();
+    }
+}
+
 
 // == Update audio engine sources
 void MediaCycle::setNeedsActivityUpdateLock(int i) {
@@ -1141,13 +1505,15 @@ void MediaCycle::pickedObjectCallback(int _mediaId) {
 }
 
 void MediaCycle::hoverWithPointerId(float xx, float yy, int p_id) {
-    if (this->mediaBrowser)
+    if (this->mediaBrowser){
         mediaBrowser->hoverWithPointerId(xx, yy, p_id);
+    }
 }
 
 void MediaCycle::hoverWithPointerIndex(float xx, float yy, int p_index) {
-    if (this->mediaBrowser)
+    if (this->mediaBrowser){
         mediaBrowser->hoverWithPointerIndex(xx, yy, p_index);
+    }
 }
 
 bool MediaCycle::performActionOnMedia(std::string action, long int mediaId, std::vector<boost::any> arguments){
@@ -1195,10 +1561,16 @@ bool MediaCycle::performActionOnMedia(std::string action, long int mediaId, floa
 }
 
 void MediaCycle::updateDisplay(bool _animate) {
-    mediaBrowser->updateDisplay(_animate);
-
+    if(mediaBrowser){
+        mediaBrowser->updateDisplay(_animate);
+    }
 }
-void MediaCycle::initializeFeatureWeights() { mediaBrowser->initializeFeatureWeights();}
+
+void MediaCycle::initializeFeatureWeights(){
+    if(mediaBrowser){
+        mediaBrowser->initializeFeatureWeights();
+    }
+}
 
 // reads in the XML file :
 // - header information
@@ -1347,20 +1719,20 @@ int MediaCycle::readXMLConfigFileCore(TiXmlHandle _rootHandle) {
     int lastIndex=this->mediaLibrary->getNewestMediaId();
     
     long int media_id = this->mediaLibrary->getNewestMediaId();
-        int i = this->mediaLibrary->getNumberOfFilesProcessed();
-        int n = this->mediaLibrary->getNumberOfFilesToImport();
+    int i = this->mediaLibrary->getNumberOfFilesProcessed();
+    int n = this->mediaLibrary->getNumberOfFilesToImport();
 
-     //   needsNormalizeAndCluster = 0;
-        //if ( (mediaLibrary->getSize() >= int(prevLibrarySizeMultiplier * prevLibrarySize))
-          //   || (i==n-1)) {
-            needsNormalizeAndCluster = 1;
-        //}
-        normalizeFeatures(needsNormalizeAndCluster); // exclusively medialibrary
-        //mediaBrowser->setNeedsNavigationUpdateLock(1);
+    //   needsNormalizeAndCluster = 0;
+    //if ( (mediaLibrary->getSize() >= int(prevLibrarySizeMultiplier * prevLibrarySize))
+    //   || (i==n-1)) {
+    needsNormalizeAndCluster = 1;
+    //}
+    normalizeFeatures(needsNormalizeAndCluster); // exclusively medialibrary
+    //mediaBrowser->setNeedsNavigationUpdateLock(1);
     for (int newId=beginIndex+1;newId<=lastIndex;newId++){
         mediaBrowser->initializeNode(newId);
     }
-/*#if defined (SUPPORT_MULTIMEDIA)
+    /*#if defined (SUPPORT_MULTIMEDIA)
             if (this->getMediaType()==MEDIA_TYPE_MIXED){
                 ACMedia* media =  mediaLibrary->getMedia(media_id);
                 ACMediaContainer medias = (static_cast<ACMediaDocument*> (media))->getContainer();
@@ -1371,13 +1743,13 @@ int MediaCycle::readXMLConfigFileCore(TiXmlHandle _rootHandle) {
                 }
             }
 #endif*/
-        libraryContentChanged(needsNormalizeAndCluster); // exclusively mediabrowser, thus updateAfterFileImport and importDirectories can't be move to ACMediaLibrary
-        //mediaBrowser->setNeedsNavigationUpdateLock(0);
-        //std::cout<<"MediaCycle::readXMLConfigFileCore:"<<this->mediaLibrary->getNumberOfFilesProcessed()<<"/"<<this->mediaLibrary->getNumberOfFilesToImport()<<"("<<media_id<<")"<<std::endl;
+    libraryContentChanged(needsNormalizeAndCluster); // exclusively mediabrowser, thus updateAfterFileImport and importDirectories can't be move to ACMediaLibrary
+    //mediaBrowser->setNeedsNavigationUpdateLock(0);
+    //std::cout<<"MediaCycle::readXMLConfigFileCore:"<<this->mediaLibrary->getNumberOfFilesProcessed()<<"/"<<this->mediaLibrary->getNumberOfFilesToImport()<<"("<<media_id<<")"<<std::endl;
     vector<int> locIds;
     for (int newId=beginIndex+1;newId<=lastIndex;newId++){
         locIds.push_back( newId);
-//        eventManager->sig_mediaImported(this->mediaLibrary->getNumberOfFilesProcessed(),this->mediaLibrary->getNumberOfFilesToImport(),newId);
+        //        eventManager->sig_mediaImported(this->mediaLibrary->getNumberOfFilesProcessed(),this->mediaLibrary->getNumberOfFilesToImport(),newId);
     }
     eventManager->sig_mediasImported(this->mediaLibrary->getNumberOfFilesProcessed(),this->mediaLibrary->getNumberOfFilesToImport(),locIds);
 
@@ -1429,15 +1801,15 @@ int MediaCycle::readXMLConfigFilePlugins(TiXmlHandle _rootHandle) {
                     std::string type = MC_e_active_plugin->ValueStr();
                     if(MC_e_active_plugin){
                         try{
-                        ACPlugin* plugin = this->getPluginManager()->getPlugin( MC_e_active_plugin->GetText() );
-                        if(type == "ClustersMethod")
-                            this->getBrowser()->setClustersMethodPlugin(plugin);
-                        if(type == "ClustersPositions")
-                            this->getBrowser()->setClustersPositionsPlugin(plugin);
-                        if(type == "NeighborsMethod")
-                            this->getBrowser()->setNeighborsMethodPlugin(plugin);
-                        if(type == "NeighborsPositions")
-                            this->getBrowser()->setNeighborsPositionsPlugin(plugin);
+                            ACPlugin* plugin = this->getPluginManager()->getPlugin( MC_e_active_plugin->GetText() );
+                            if(type == "ClustersMethod")
+                                this->getBrowser()->setClustersMethodPlugin(plugin);
+                            if(type == "ClustersPositions")
+                                this->getBrowser()->setClustersPositionsPlugin(plugin);
+                            if(type == "NeighborsMethod")
+                                this->getBrowser()->setNeighborsMethodPlugin(plugin);
+                            if(type == "NeighborsPositions")
+                                this->getBrowser()->setNeighborsPositionsPlugin(plugin);
                         }
                         catch(const std::exception e){
                             // Nothing yet, no plugin set
@@ -1653,24 +2025,24 @@ TiXmlElement* MediaCycle::saveXMLConfigFile(string _fname) {
     else{
         cerr << "saving file " << _fname << " failed" << endl;
 
-/// When batch-importing files one-by-one with videocycle-cli, some won't output an XML file when saving, even the following workaround won't work
-//        // Declare a printer
-//        TiXmlPrinter printer;
+        /// When batch-importing files one-by-one with videocycle-cli, some won't output an XML file when saving, even the following workaround won't work
+        //        // Declare a printer
+        //        TiXmlPrinter printer;
 
-//        // attach it to the document you want to convert in to a std::string
-//        MC_doc.Accept(&printer);
+        //        // attach it to the document you want to convert in to a std::string
+        //        MC_doc.Accept(&printer);
 
-//        // Create a std::string and copy your document data in to the string
-//        std::string str = printer.CStr();
+        //        // Create a std::string and copy your document data in to the string
+        //        std::string str = printer.CStr();
 
-//        std::ofstream outfile(_fname.c_str(), ios::out);
-//        if(!outfile.is_open())
-//        {
-//            cout<<"MediaCycle::saveXMLConfigFile: could not open "<< _fname <<" for writing, maybe the parent directory isn't writable"<<endl;
-//            return MC_e_root;
-//        }
-//        outfile << str;
-//        outfile.close();
+        //        std::ofstream outfile(_fname.c_str(), ios::out);
+        //        if(!outfile.is_open())
+        //        {
+        //            cout<<"MediaCycle::saveXMLConfigFile: could not open "<< _fname <<" for writing, maybe the parent directory isn't writable"<<endl;
+        //            return MC_e_root;
+        //        }
+        //        outfile << str;
+        //        outfile.close();
     }
 
     // children of MC_Doc get deleted automatically
@@ -1746,6 +2118,9 @@ void MediaCycle::testThreads(){
 }
 
 void MediaCycle::testLabels(){
+    if(!mediaBrowser){
+        return;
+    }
     // Test Labels
     ACPoint p;
     p.x = -0.1; p.y = 0.0; p.z = 0.01;
