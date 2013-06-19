@@ -29,7 +29,7 @@
  * <mailto:avre@umons.ac.be>
  */
 
-#include "ACAudioWaveformThumbnailerPlugin.h"
+#include "ACAudioSvgWaveformThumbnailerPlugin.h"
 #include <ACAudioData.h>
 #include <ACMedia.h>
 #include <iostream>
@@ -59,28 +59,28 @@ std::string generateThumbnailName(std::string filename, std::string thumbnail_na
     return thumbnail_path.string();
 }
 
-ACAudioWaveformThumbnailerPlugin::ACAudioWaveformThumbnailerPlugin() : ACThumbnailerPlugin(){
-    this->mName = "Audio Waveform Thumbnailer";
-    this->mDescription ="Plugin for summarizing audio files in waveforms";
+ACAudioSvgWaveformThumbnailerPlugin::ACAudioSvgWaveformThumbnailerPlugin() : ACThumbnailerPlugin(){
+    this->mName = "Audio Waveform Thumbnailer (SVG)";
+    this->mDescription ="Plugin for summarizing audio files in waveforms for SVG browsers";
     this->mMediaType = MEDIA_TYPE_AUDIO;
 }
 
-ACAudioWaveformThumbnailerPlugin::~ACAudioWaveformThumbnailerPlugin(){
+ACAudioSvgWaveformThumbnailerPlugin::~ACAudioSvgWaveformThumbnailerPlugin(){
     thumbnails_specs.clear();
 }
 
-std::string ACAudioWaveformThumbnailerPlugin::requiresMediaReaderPlugin()
+std::string ACAudioSvgWaveformThumbnailerPlugin::requiresMediaReaderPlugin()
 {
     return "ACAudioSndfileReaderPlugin"; //for now
 }
 
-std::vector<std::string> ACAudioWaveformThumbnailerPlugin::requiresFeaturesPlugins(){
+std::vector<std::string> ACAudioSvgWaveformThumbnailerPlugin::requiresFeaturesPlugins(){
     std::vector<std::string> features_plugins;
     // No features plugin is required
     return features_plugins;
 }
 
-std::vector<std::string> ACAudioWaveformThumbnailerPlugin::requiresSegmentationPlugins(){
+std::vector<std::string> ACAudioSvgWaveformThumbnailerPlugin::requiresSegmentationPlugins(){
     std::vector<std::string> segmentation_plugins;
     // No segmentation plugin is required
     return segmentation_plugins;
@@ -102,12 +102,12 @@ void circular_waveform(ACAudioWaveformThumbnailSpecs& _specs)
                         );
 }
 
-std::vector<ACMediaThumbnail*> ACAudioWaveformThumbnailerPlugin::summarize(ACMedia* media){
+std::vector<ACMediaThumbnail*> ACAudioSvgWaveformThumbnailerPlugin::summarize(ACMedia* media){
     float start_time = getTime();
     std::vector<ACMediaThumbnail*> thumbnails;
 
     if(!media){
-        std::cerr << "ACAudioWaveformThumbnailerPlugin::summarize: no media to summarize" << std::endl;
+        std::cerr << "ACAudioSvgWaveformThumbnailerPlugin::summarize: no media to summarize" << std::endl;
         return thumbnails;
     }
 
@@ -120,12 +120,12 @@ std::vector<ACMediaThumbnail*> ACAudioWaveformThumbnailerPlugin::summarize(ACMed
         fs::path p( _filename.c_str());// , fs::native );
         if ( fs::exists( p ) )
         {
-            //std::cout << "ACAudioWaveformThumbnailerPlugin::summarize: the expected thumbnail already exists as file: " << _filename << std::endl;
+            //std::cout << "ACAudioSvgWaveformThumbnailerPlugin::summarize: the expected thumbnail already exists as file: " << _filename << std::endl;
             if ( fs::is_regular( p ) )
             {
-                //std::cout << "ACAudioWaveformThumbnailerPlugin::summarize: file is regular: " << _filename << std::endl;
+                //std::cout << "ACAudioSvgWaveformThumbnailerPlugin::summarize: file is regular: " << _filename << std::endl;
                 if(fs::file_size( p ) > 0 ){
-                    //std::cout << "ACAudioWaveformThumbnailerPlugin::summarize: size of " << _filename << " is non-zero, not recomputing "<< std::endl;
+                    //std::cout << "ACAudioSvgWaveformThumbnailerPlugin::summarize: size of " << _filename << " is non-zero, not recomputing "<< std::endl;
                 }
                 else
                     thumbnails_exist = false;
@@ -140,13 +140,13 @@ std::vector<ACMediaThumbnail*> ACAudioWaveformThumbnailerPlugin::summarize(ACMed
 
     // Consistency checks for the provided media instance (media data, start/end)
     if(!media->getMediaData()){
-        std::cerr << "ACAudioWaveformThumbnailerPlugin::summarize: no media data set" << std::endl;
+        std::cerr << "ACAudioSvgWaveformThumbnailerPlugin::summarize: no media data set" << std::endl;
         return thumbnails;
     }
     ACAudioData* audio_data = dynamic_cast<ACAudioData*>(media->getMediaData());
     if(!audio_data)
     {
-        std::cerr << "ACAudioWaveformThumbnailerPlugin::summarize: no audio data set" << std::endl;
+        std::cerr << "ACAudioSvgWaveformThumbnailerPlugin::summarize: no audio data set" << std::endl;
         return thumbnails;
     }
 
@@ -157,19 +157,19 @@ std::vector<ACMediaThumbnail*> ACAudioWaveformThumbnailerPlugin::summarize(ACMed
     int last_frame = n_frames-1;
     int current_frame = 0;
     if(media->getStart()<0){
-        std::cerr << "ACAudioWaveformThumbnailerPlugin::summarize: start not set" << std::endl;
+        std::cerr << "ACAudioSvgWaveformThumbnailerPlugin::summarize: start not set" << std::endl;
         return thumbnails;
     }
     else if(media->getStart() >0){
         current_frame = (int)(media->getStart()*sample_rate);//sf_seek(infile, (int)(media->getStart()*sample_rate), SEEK_SET) ;
-        std::cout << "ACAudioWaveformThumbnailerPlugin::summarize: seeked at " << current_frame << " while " << (int)(media->getStart()*sample_rate) << " was asked." << std::endl;
+        std::cout << "ACAudioSvgWaveformThumbnailerPlugin::summarize: seeked at " << current_frame << " while " << (int)(media->getStart()*sample_rate) << " was asked." << std::endl;
     }
     if(media->getEnd()<0){
-        std::cerr << "ACAudioWaveformThumbnailerPlugin::summarize: end not set" << std::endl;
+        std::cerr << "ACAudioSvgWaveformThumbnailerPlugin::summarize: end not set" << std::endl;
         return thumbnails;
     }
     else if(int(media->getEnd() * sample_rate) > n_frames){
-        std::cerr << "ACAudioWaveformThumbnailerPlugin::summarize: end beyond sample size" << std::endl;
+        std::cerr << "ACAudioSvgWaveformThumbnailerPlugin::summarize: end beyond sample size" << std::endl;
         return thumbnails;
     }
     else{
@@ -243,7 +243,7 @@ std::vector<ACMediaThumbnail*> ACAudioWaveformThumbnailerPlugin::summarize(ACMed
             thumbnails.push_back(thumbnail);
         }
         thumbnails_specs.clear();
-        std::cout << "ACAudioWaveformThumbnailerPlugin::summarize: reusing thumbnails took " << getTime() - start_time << std::endl;
+        std::cout << "ACAudioSvgWaveformThumbnailerPlugin::summarize: reusing thumbnails took " << getTime() - start_time << std::endl;
         return thumbnails;
     }
 
@@ -253,18 +253,18 @@ std::vector<ACMediaThumbnail*> ACAudioWaveformThumbnailerPlugin::summarize(ACMed
         // Access to the buffer with consistency checks
         ACMediaDataContainer* data_container = audio_data->getBuffer(current_frame, bufsize, 0);
         if(!data_container){
-            std::cerr << "ACAudioWaveformThumbnailerPlugin::summarize: couldn't get buffer at frame " << current_frame << " with buf size " << bufsize << std::endl;
+            std::cerr << "ACAudioSvgWaveformThumbnailerPlugin::summarize: couldn't get buffer at frame " << current_frame << " with buf size " << bufsize << std::endl;
             break;//return 0;
         }
         ACAudioFloatPtrDataContainer* float_data = dynamic_cast<ACAudioFloatPtrDataContainer*>(data_container);
         if(!float_data){
-            std::cerr << "ACAudioWaveformThumbnailerPlugin::summarize: couldn't convert buffer at frame " << current_frame << " with buf size " << bufsize << std::endl;
+            std::cerr << "ACAudioSvgWaveformThumbnailerPlugin::summarize: couldn't convert buffer at frame " << current_frame << " with buf size " << bufsize << std::endl;
             break;//return 0;
         }
         buffer = float_data->getData();
         readcount = float_data->getNumberOfFrames();
         if(!buffer)
-            std::cerr << "ACAudioWaveformThumbnailerPlugin::summarize: couldn't access data at current frame " << current_frame << std::endl;
+            std::cerr << "ACAudioSvgWaveformThumbnailerPlugin::summarize: couldn't access data at current frame " << current_frame << std::endl;
         current_frame += bufsize;
 
         // Draw an initial origin point
@@ -336,7 +336,7 @@ std::vector<ACMediaThumbnail*> ACAudioWaveformThumbnailerPlugin::summarize(ACMed
 
         bool saved = doc.save();
         if(!saved)
-            std::cerr << "ACAudioWaveformThumbnailerPlugin::summarize: couldn't save thumbnail " << thumbnail_specs->second.filename << std::endl;
+            std::cerr << "ACAudioSvgWaveformThumbnailerPlugin::summarize: couldn't save thumbnail " << thumbnail_specs->second.filename << std::endl;
 
         ACMediaThumbnail* thumbnail = new ACMediaThumbnail(MEDIA_TYPE_IMAGE);
         thumbnail->setFileName(thumbnail_specs->second.filename);
@@ -348,15 +348,15 @@ std::vector<ACMediaThumbnail*> ACAudioWaveformThumbnailerPlugin::summarize(ACMed
         thumbnails.push_back(thumbnail);
     }
 
-    std::cout << "ACAudioWaveformThumbnailerPlugin::summarize: done computing waveform(s) for " << filename << " in " << getTime()-waveform_in << " sec." << std::endl;
+    std::cout << "ACAudioSvgWaveformThumbnailerPlugin::summarize: done computing waveform(s) for " << filename << " in " << getTime()-waveform_in << " sec." << std::endl;
     progress = 1.0f;
 
     thumbnails_specs.clear();
-    std::cout << "ACAudioWaveformThumbnailerPlugin::summarize: creating thumbnails took " << getTime() - start_time << std::endl;
+    std::cout << "ACAudioSvgWaveformThumbnailerPlugin::summarize: creating thumbnails took " << getTime() - start_time << std::endl;
     return thumbnails;
 }
 
-std::vector<std::string> ACAudioWaveformThumbnailerPlugin::getThumbnailNames(){
+std::vector<std::string> ACAudioSvgWaveformThumbnailerPlugin::getThumbnailNames(){
     std::vector<std::string> names;
     names.push_back("Classic browser waveform");
     names.push_back("Classic timeline waveform");
@@ -364,7 +364,7 @@ std::vector<std::string> ACAudioWaveformThumbnailerPlugin::getThumbnailNames(){
     return names;
 }
 
-std::map<std::string,std::string> ACAudioWaveformThumbnailerPlugin::getThumbnailExtensions(){
+std::map<std::string,std::string> ACAudioSvgWaveformThumbnailerPlugin::getThumbnailExtensions(){
     std::map<std::string,std::string> extensions;
     extensions["Classic browser waveform"] = ".svg";
     extensions["Classic timeline waveform"] = ".svg";
@@ -372,7 +372,7 @@ std::map<std::string,std::string> ACAudioWaveformThumbnailerPlugin::getThumbnail
     return extensions;
 }
 
-std::map<std::string,ACMediaType> ACAudioWaveformThumbnailerPlugin::getThumbnailTypes(){
+std::map<std::string,ACMediaType> ACAudioSvgWaveformThumbnailerPlugin::getThumbnailTypes(){
     std::map<std::string,ACMediaType> thumbnail_types;
     thumbnail_types["Classic browser waveform"] = MEDIA_TYPE_IMAGE;
     thumbnail_types["Classic timeline waveform"] = MEDIA_TYPE_IMAGE;
@@ -380,7 +380,7 @@ std::map<std::string,ACMediaType> ACAudioWaveformThumbnailerPlugin::getThumbnail
     return thumbnail_types;
 }
 
-std::map<std::string,std::string> ACAudioWaveformThumbnailerPlugin::getThumbnailDescriptions(){
+std::map<std::string,std::string> ACAudioSvgWaveformThumbnailerPlugin::getThumbnailDescriptions(){
     std::map<std::string,std::string> thumbnail_descriptions;
     thumbnail_descriptions["Classic browser waveform"] = "Classic browser waveform";
     thumbnail_descriptions["Classic timeline waveform"] = "Classic timeline waveform";

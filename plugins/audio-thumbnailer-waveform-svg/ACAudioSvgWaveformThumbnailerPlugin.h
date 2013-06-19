@@ -29,8 +29,8 @@
  * <mailto:avre@umons.ac.be>
  */
 
-#ifndef ACAudioWaveformThumbnailerPlugin_H
-#define	ACAudioWaveformThumbnailerPlugin_H
+#ifndef ACAudioSvgWaveformThumbnailerPlugin_H
+#define	ACAudioSvgWaveformThumbnailerPlugin_H
 
 #include <ACPlugin.h>
 
@@ -77,11 +77,11 @@ struct ACAudioWaveformThumbnailSpecs{
     ~ACAudioWaveformThumbnailSpecs(){callback = 0;}
 };
 
-class ACAudioWaveformThumbnailerPlugin : public ACThumbnailerPlugin
+class ACAudioSvgWaveformThumbnailerPlugin : public ACThumbnailerPlugin
 {
 public:
-    ACAudioWaveformThumbnailerPlugin();
-    virtual ~ACAudioWaveformThumbnailerPlugin();
+    ACAudioSvgWaveformThumbnailerPlugin();
+    virtual ~ACAudioSvgWaveformThumbnailerPlugin();
     virtual std::vector<std::string> getThumbnailNames();
     virtual std::map<std::string,ACMediaType> getThumbnailTypes();
     virtual std::map<std::string,std::string> getThumbnailDescriptions();

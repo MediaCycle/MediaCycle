@@ -6,11 +6,11 @@ IF ( BUILD_AUDIOCYCLE_APP AND SUPPORT_AUDIO AND USE_QT4 AND USE_OSG AND USE_OSC 
 
 	SET(MEDIA_TYPE "MEDIA_TYPE_AUDIO")
 	IF(USE_DEBUG)
-        	SET(MC_PLUGINS "audio-features-yaafe;audio-engine;audio-osg;audio-reader-sndfile;audio-segmentation;audio-thumbnailer-waveform;file;io-osc;pcapreprocess;segmentation;visualisation;visualisation-advanced;visualisation-tagging")
-        	SET(OSG_PLUGINS "osgdb_svg") #required by audio-thumbnailer-waveform
+        	SET(MC_PLUGINS "audio-features-yaafe;audio-engine;audio-osg;audio-reader-sndfile;audio-segmentation;audio-thumbnailer-waveform-svg;file;io-osc;pcapreprocess;segmentation;visualisation;visualisation-advanced;visualisation-tagging")
+        	SET(OSG_PLUGINS "osgdb_svg") #required by audio-thumbnailer-waveform-svg
 	ELSE()
-        	SET(MC_PLUGINS "audio-engine;audio-features-yaafe;audio-osg;audio-reader-sndfile;audio-segmentation;audio-thumbnailer-waveform;file;io-osc;segmentation;visualisation")
-        	SET(OSG_PLUGINS "osgdb_svg") #required by audio-thumbnailer-waveform
+        	SET(MC_PLUGINS "audio-engine;audio-features-yaafe;audio-osg;audio-reader-sndfile;audio-segmentation;audio-thumbnailer-waveform-svg;file;io-osc;segmentation;visualisation")
+        	SET(OSG_PLUGINS "osgdb_svg") #required by audio-thumbnailer-waveform-svg
 	ENDIF()
         SET(DESCRIPTION "AudioCycle allows to organize audio files by similarity.")
 

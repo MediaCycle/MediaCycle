@@ -1,5 +1,5 @@
 SET(MEDIA_TYPE "audio")
-SET(PLUGIN_NAME "audio-thumbnailer-waveform")
+SET(PLUGIN_NAME "audio-thumbnailer-waveform-svg")
 SET(MC_3RDPARTIES "simple-svg")
 list(APPEND 3RDPARTY_NAMES "simple-svg")
 list(APPEND 3RDPARTY_LICENSES "BSD")

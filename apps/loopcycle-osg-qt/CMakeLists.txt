@@ -5,7 +5,7 @@ IF ( BUILD_LOOPJAM_APP AND SUPPORT_AUDIO AND USE_QT4 AND USE_OSG AND USE_OSC AND
         SET(CONNECT_OSC ON)
 
 	SET(MEDIA_TYPE "MEDIA_TYPE_AUDIO")
-        SET(MC_PLUGINS "audio-engine;audio-features-yaafe;audio-features-acid;audio-osg;audio-reader-sndfile;audio-thumbnailer-waveform;file;io-osc;pcapreprocess;visualisation")
+        SET(MC_PLUGINS "audio-engine;audio-features-yaafe;audio-features-acid;audio-osg;audio-reader-sndfile;audio-thumbnailer-waveform-svg;file;io-osc;pcapreprocess;visualisation")
         SET(CLUSTERS_METHOD "MediaCycle KMeans")
         SET(CLUSTERS_POSITIONS "AudioGarden Flower")
 	SET(OSG_PLUGINS "")
