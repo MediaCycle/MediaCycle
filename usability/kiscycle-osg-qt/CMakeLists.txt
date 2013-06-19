@@ -2,13 +2,13 @@ SET(TARGET_NAME "KnownItemSearchCycle")
 IF ( SUPPORT_AUDIO AND USE_QT4 AND USE_OSG AND ( OPENAL_FOUND OR PORTAUDIO_FOUND ) )
 
         SET(WITH_SEGMENTATION OFF)
-	SET(WITH_OSC OFF)
+        SET(WITH_OSC ON)
 
         SET(MC_PLUGINS_STATIC ON)
 
 	SET(MEDIA_TYPE "MEDIA_TYPE_AUDIO")
-        SET(MC_PLUGINS "usability-kis;audio-engine;audio-features-yaafe;audio-osg;audio-reader-sndfile;audio-thumbnailer-waveform;file;visualisation")#;visualisation-advanced;media-thumbnailer-feature-mapper
-        SET(OSG_PLUGINS "osgdb_svg") #required by audio-thumbnailer-waveform
+        SET(MC_PLUGINS "usability-kis;audio-engine;audio-features-yaafe;audio-reader-sndfile;audio-thumbnailer-waveform-svg;audio-osg;visualisation;media-thumbnailer-feature-mapper;io-osc")#visualisation-advanced
+        SET(OSG_PLUGINS "osgdb_svg") #required by audio-thumbnailer-waveform-svg
         SET(DESCRIPTION "KnownItemSearchCycle is a stripped-down version of AudioCycle, aimed at organizing audio files by similarity, tailored for usability testing.")
 
 	INCLUDE (${CMAKE_SOURCE_DIR}/cmake/CreateDefaultConfig.cmake)

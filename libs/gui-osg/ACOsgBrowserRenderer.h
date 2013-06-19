@@ -139,6 +139,7 @@ protected:
     std::string node_thumbnail;
     osg::Vec4 node_color;
     double node_size;
+    bool user_defined_node_color;
 
 public:
 

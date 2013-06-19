@@ -51,6 +51,7 @@ ACOsgMediaRenderer::ACOsgMediaRenderer() : ACOsgBaseRenderer() {
 #else
     media_node = new MatrixTransform();
 #endif
+    node_thumbnail = "";
     node_color = Vec4(1,1,0.5,1); //CF seminal yellow
     cluster_colors.push_back(osg::Vec4(1,1,0.5,1));//yello<
     cluster_colors.push_back(osg::Vec4(1,0.5,1,1));//
@@ -251,3 +252,48 @@ void ACOsgMediaRenderer::setActivity(int media_cycle_activity) {
 /*void ACOsgMediaRenderer::setMediaIndex(int media_index) {
  this->media_index = media_index;
 }*/
+
+ACOsgMediaThumbnail* ACOsgMediaRenderer::getNodeThumbnail()
+{
+    if(this->media == 0){
+        std::cerr << "ACOsgBaseRenderer::getNodeThumbnail: no media set" << std::endl;
+        return 0;
+    }
+    if(this->node_thumbnail == ""){
+        std::cerr << "ACOsgBaseRenderer::getNodeThumbnail: no node thumbnail name set" << std::endl;
+        return 0;
+    }
+    if(this->media->getThumbnail(this->node_thumbnail)==0){
+        std::cerr << "ACOsgBaseRenderer::getNodeThumbnail: no node thumbnail available" << std::endl;
+        return 0;
+    }
+    ACOsgMediaThumbnail* thumbnail = dynamic_cast<ACOsgMediaThumbnail*>(this->media->getThumbnail(this->node_thumbnail));
+    if(thumbnail == 0){
+        std::cerr << "ACOsgBaseRenderer::getNodeThumbnail: node thumbnail isn't an osg media thumbnail" << std::endl;
+        return 0;
+    }
+    return thumbnail;
+}
+
+osg::ref_ptr<osg::Image> ACOsgMediaRenderer::getNodeThumbnailImage(){
+    ACOsgMediaThumbnail* thumbnail = this->getNodeThumbnail();
+    if(!thumbnail)
+        return 0;
+    return thumbnail->getImage();
+}
+
+osg::ref_ptr<osg::Texture2D> ACOsgMediaRenderer::getNodeThumbnailTexture()
+{
+    ACOsgMediaThumbnail* thumbnail = this->getNodeThumbnail();
+    if(!thumbnail)
+        return 0;
+    return thumbnail->getTexture();
+}
+
+osg::ref_ptr<osg::ImageStream> ACOsgMediaRenderer::getNodeThumbnailStream()
+{
+    ACOsgMediaThumbnail* thumbnail = this->getNodeThumbnail();
+    if(!thumbnail)
+        return 0;
+    return thumbnail->getStream();
+}

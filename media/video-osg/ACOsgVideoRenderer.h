@@ -60,7 +60,6 @@ protected:
     void auraVideoGeode(bool flip=false, float sizemul=1.0, float zoomin=1.0);
     void auraGeode();
 
-    std::string node_thumbnail;
     double node_size;
 
 public:

@@ -113,6 +113,14 @@ public:
     /// This virtual function is called by ACOsgBrowserRenderer::changeNodeThumbnail
     virtual void changeThumbnail(std::string thumbnail){}
 
+    ACOsgMediaThumbnail* getNodeThumbnail();
+    osg::ref_ptr<osg::Image> getNodeThumbnailImage();
+    osg::ref_ptr<osg::Texture2D> getNodeThumbnailTexture();
+    osg::ref_ptr<osg::ImageStream> getNodeThumbnailStream();
+protected:
+    std::string node_thumbnail;
+
+public:
     void setDeltaTime(double media_cycle_deltatime);
     void setZoomAngle(float media_cycle_zoom, float media_cycle_angle);
     void setMode(int media_cycle_mode);

@@ -70,7 +70,6 @@ protected:
 
     ACBrowserAudioWaveformType waveform_type;
     std::string waveform_thumbnail;
-    std::string node_thumbnail;
     osg::ref_ptr<osg::Geometry> node_geometry;
     osg::ref_ptr<osg::ShapeDrawable> node_shape_drawable;
     double node_size;
