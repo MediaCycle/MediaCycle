@@ -717,3 +717,15 @@ ACServerPlugin::ACServerPlugin() : ACPlugin() {
 ACClientServerPlugin::ACClientServerPlugin() : ACPlugin() {
     this->mPluginType = mPluginType | (PLUGIN_TYPE_CLIENT | PLUGIN_TYPE_SERVER);
 }
+
+ACMediaLibraryFilePlugin::ACMediaLibraryFilePlugin() : ACPlugin() {
+    this->mPluginType = mPluginType | PLUGIN_TYPE_LIBRARY_FILE;
+}
+
+ACMediaLibraryReaderPlugin::ACMediaLibraryReaderPlugin() : ACMediaLibraryFilePlugin() {
+    this->mPluginType = mPluginType | PLUGIN_TYPE_LIBRARY_READER;
+}
+
+ACMediaLibraryWriterPlugin::ACMediaLibraryWriterPlugin() : ACMediaLibraryFilePlugin() {
+    this->mPluginType = mPluginType | PLUGIN_TYPE_LIBRARY_WRITER;
+}

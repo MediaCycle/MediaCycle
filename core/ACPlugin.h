@@ -114,25 +114,43 @@ public:
 };
 
 typedef		unsigned int ACPluginType;
-const ACPluginType	PLUGIN_TYPE_NONE				=	0x0000;
-const ACPluginType	PLUGIN_TYPE_FEATURES			=	0x0001;
-const ACPluginType	PLUGIN_TYPE_SEGMENTATION		=	0x0002;
-const ACPluginType	PLUGIN_TYPE_SERVER				=	0x0004;
-const ACPluginType	PLUGIN_TYPE_CLIENT				=	0x0008;	
-const ACPluginType	PLUGIN_TYPE_CLUSTERS_METHOD		=	0x0010;//CF updateClusters
-const ACPluginType	PLUGIN_TYPE_CLUSTERS_POSITIONS	=	0x0020;//CF updatePositions for the Clusters mode
-const ACPluginType	PLUGIN_TYPE_CLUSTERS_PIPELINE	=	0x0040;//CF updateClusters and updatePositions for the Clusters mode
-const ACPluginType	PLUGIN_TYPE_NEIGHBORS_METHOD	=	0x0080;//CF updateNeighborhoods
-const ACPluginType	PLUGIN_TYPE_NEIGHBORS_POSITIONS	=	0x0100;//CF updatePositions for the Neighbors mode
-const ACPluginType	PLUGIN_TYPE_NEIGHBORS_PIPELINE	=	0x0200;//CF updateNeighborhoods and updatePositions for the Neighbors mode
-const ACPluginType	PLUGIN_TYPE_POSITIONS			=	0x0400;//TR todo 
-const ACPluginType	PLUGIN_TYPE_NOMETHOD_POSITIONS	=	0x0800;//CF updatePositions for the Clusters or Neighbors modes
-const ACPluginType	PLUGIN_TYPE_ALLMODES_PIPELINE	=	0x1000;//CF updateClusters and updateNeighborhoods and updatePositions for both modes
-const ACPluginType	PLUGIN_TYPE_PREPROCESS			=	0x2000;//CF updateClusters and updateNeighborhoods and updatePositions for both modes
-const ACPluginType	PLUGIN_TYPE_MEDIAREADER			=	0x4000;
-const ACPluginType	PLUGIN_TYPE_MEDIARENDERER		=	0x8000;
-const ACPluginType	PLUGIN_TYPE_THUMBNAILER			=	0x10000;
-const ACPluginType	PLUGIN_TYPE_MEDIA_ANALYSIS		=	0x20000;
+const ACPluginType	PLUGIN_TYPE_NONE				=	0x0000;/// null type for failsafe checks
+const ACPluginType	PLUGIN_TYPE_FEATURES			=	0x0001;/// plugin type for extracting features
+const ACPluginType	PLUGIN_TYPE_SEGMENTATION		=	0x0002;/// plugin type for segmenting media files
+const ACPluginType	PLUGIN_TYPE_SERVER				=	0x0004;/// plugin type for server communication
+const ACPluginType	PLUGIN_TYPE_CLIENT				=	0x0008;/// plugin type for client communication
+const ACPluginType	PLUGIN_TYPE_CLUSTERS_METHOD		=	0x0010;/// plugin type for computing clusters
+const ACPluginType	PLUGIN_TYPE_CLUSTERS_POSITIONS	=	0x0020;/// plugin type for updating positions in clusters mode
+const ACPluginType	PLUGIN_TYPE_CLUSTERS_PIPELINE	=	0x0040;/// plugin type for computing clusters and updating positions in clusters mode
+const ACPluginType	PLUGIN_TYPE_NEIGHBORS_METHOD	=	0x0080;/// plugin type for computing neighborhoods
+const ACPluginType	PLUGIN_TYPE_NEIGHBORS_POSITIONS	=	0x0100;/// plugin type for updating positions in neighbors mode
+const ACPluginType	PLUGIN_TYPE_NEIGHBORS_PIPELINE	=	0x0200;/// plugin type for computing neighborhoods and updating positions in neighbors mode
+const ACPluginType	PLUGIN_TYPE_POSITIONS			=	0x0400;//TR todo
+const ACPluginType	PLUGIN_TYPE_NOMETHOD_POSITIONS	=	0x0800;/// plugin type for disabling clusters or neighborhoods computation
+const ACPluginType	PLUGIN_TYPE_ALLMODES_PIPELINE	=	0x1000;/// plugin type grouping clustering/neighborhoods-compliant methods and positioning
+const ACPluginType	PLUGIN_TYPE_PREPROCESS			=	0x2000;/// plugin type for pre-processing (after importing, before clusters/neighborhods computation)
+const ACPluginType	PLUGIN_TYPE_MEDIAREADER			=	0x4000;/// plugin type for media readers (file formats)
+const ACPluginType	PLUGIN_TYPE_MEDIARENDERER		=	0x8000;/// plugin type for media renderers (visual browser, audio engine, etc...)
+const ACPluginType	PLUGIN_TYPE_THUMBNAILER			=	0x10000;/// plugin for media thumbnailers (computing summaries: audio waveforms, etc...)
+const ACPluginType	PLUGIN_TYPE_MEDIA_ANALYSIS		=	0x20000;/// plugin type for functionnalities shared by feature extractors, segmenters, thumbnailers
+const ACPluginType	PLUGIN_TYPE_LIBRARY_FILE		=	0x40000;/// plugin type for library file management, shared by readers and writers
+const ACPluginType	PLUGIN_TYPE_LIBRARY_READER		=	0x80000;/// plugin type for library file reading
+const ACPluginType	PLUGIN_TYPE_LIBRARY_WRITER		=	0x100000;/// plugin type for library file writing
+
+// From http://cottonvibes.blogspot.be/2010/07/maxmin-values-for-signed-and-unsigned.html
+// u8, u16, u32... mean unsigned int of 8, 16, and 32 bits respectively
+// s8, s16, s32... mean   signed int of 8, 16, and 32 bits respectively
+//----------------------------------
+//| type | max        | min        |
+//----------------------------------
+//| u8   | 0xff       | 0x0        |
+//| u16  | 0xffff     | 0x0        |
+//| u32  | 0xffffffff | 0x0        |
+//----------------------------------
+//| s8   | 0x7f       | 0x80       |
+//| s16  | 0x7fff     | 0x8000     |
+//| s32  | 0x7fffffff | 0x80000000 |
+//----------------------------------
 
 class ACPlugin {
 public:
@@ -381,6 +399,32 @@ public:
 class ACClientServerPlugin : virtual public ACPlugin {
 public:
     ACClientServerPlugin();
+};
+
+class ACMediaLibraryFilePlugin : virtual public ACPlugin {
+public:
+    ACMediaLibraryFilePlugin();
+    virtual bool openLibrary(std::string filepath)=0;
+    virtual bool closeLibrary(std::string filepath="")=0;
+    virtual bool isLibraryOpened(std::string filepath="")=0;
+    virtual std::vector<std::string> fileFormats()=0;
+};
+
+class ACMediaLibraryReaderPlugin : virtual public ACMediaLibraryFilePlugin {
+public:
+    ACMediaLibraryReaderPlugin();
+    virtual std::vector<std::string> filenamesToOpen()=0;
+    virtual int numberOfFilesToOpen(){return this->filenamesToOpen().size();}
+    virtual ACMedia* importMedia(std::string mediafilepath)=0;
+    virtual std::map<std::string,ACMediaType> requiredMediaReaders();
+};
+
+class ACMediaLibraryWriterPlugin : virtual public ACMediaLibraryFilePlugin {
+public:
+    ACMediaLibraryWriterPlugin();
+    virtual bool saveLibraryMetadata()=0;
+    virtual bool saveMedia(ACMedia* media)=0;
+    //virtual std::map<std::string,ACMediaType> requiredMediaWriters();
 };
 
 // the types of the class factories
