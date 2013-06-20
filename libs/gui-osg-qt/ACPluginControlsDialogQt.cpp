@@ -1,5 +1,5 @@
 /*
- *  ACSegmentationControlsDialogQt.cpp
+ *  ACPluginControlsDialogQt.cpp
  *  MediaCycle
  *
  *  @author Christian Frisson
@@ -32,27 +32,27 @@
  *
  */
 
-#include "ACSegmentationControlsDialogQt.h"
+#include "ACPluginControlsDialogQt.h"
 
-ACSegmentationControlsDialogQt::ACSegmentationControlsDialogQt(QWidget *parent)
+ACPluginControlsDialogQt::ACPluginControlsDialogQt(ACPluginType type, QString title, QString question, QWidget *parent)
     : QDialog(parent), ACAbstractWidgetQt(),widget(0),label(0),buttonBox(0)
 {
     //ui.setupUi(this); // first thing to do if a *.ui file exists
 
     this->setFixedWidth(250);
     //this->setFixedHeight(500);
-    this->setWindowTitle("Segmentation?");
+    this->setWindowTitle(title);
     QVBoxLayout* layout = new QVBoxLayout();
     layout->setMargin(0);
 
-    label = new QLabel("Do you want to segment the media files?");
+    label = new QLabel(question);
     label->setWordWrap(true);
     label->setFixedWidth(250);
     label->adjustSize();
     label->setFixedHeight( label->height() );
     layout->addWidget(label);
 
-    widget = new ACPluginControlsWidgetQt(PLUGIN_TYPE_SEGMENTATION);
+    widget = new ACPluginControlsWidgetQt(type);
     layout->addWidget(widget);
     connect(widget,SIGNAL(readjustHeight()),this,SLOT(adjustHeight()));
 
@@ -67,7 +67,7 @@ ACSegmentationControlsDialogQt::ACSegmentationControlsDialogQt(QWidget *parent)
     this->show();
 }
 
-ACSegmentationControlsDialogQt::~ACSegmentationControlsDialogQt()
+ACPluginControlsDialogQt::~ACPluginControlsDialogQt()
 {
     disconnect(widget);
     disconnect(buttonBox);
@@ -82,30 +82,30 @@ ACSegmentationControlsDialogQt::~ACSegmentationControlsDialogQt()
     buttonBox = 0;
 }
 
-void ACSegmentationControlsDialogQt::adjustHeight(){
+void ACPluginControlsDialogQt::adjustHeight(){
     this->setMinimumHeight( widget->minimumHeight() + label->minimumHeight() + buttonBox->minimumHeight() );
     this->adjustSize();
 }
 
-void ACSegmentationControlsDialogQt::changeMediaType(ACMediaType _media_type)
+void ACPluginControlsDialogQt::changeMediaType(ACMediaType _media_type)
 {
     widget->setMediaCycle(this->media_cycle);
     widget->changeMediaType(_media_type);
 }
 
-void ACSegmentationControlsDialogQt::updatePluginsSettings()
+void ACPluginControlsDialogQt::updatePluginsSettings()
 {
     widget->setMediaCycle(this->media_cycle);
     widget->updatePluginsSettings();
     this->adjustSize();
 }
 
-void ACSegmentationControlsDialogQt::resetPluginsSettings()
+void ACPluginControlsDialogQt::resetPluginsSettings()
 {
     widget->resetPluginsSettings();
 }
 
-void ACSegmentationControlsDialogQt::resetMediaType(ACMediaType _media_type)
+void ACPluginControlsDialogQt::resetMediaType(ACMediaType _media_type)
 {
     widget->setMediaCycle(this->media_cycle);
     widget->resetMediaType(_media_type);

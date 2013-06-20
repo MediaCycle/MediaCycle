@@ -226,6 +226,10 @@ void MediaCycle::loadDefaultConfig(std::string name){
         this->changeActivePlugin(PLUGIN_TYPE_NEIGHBORS_POSITIONS,config->neighborsPositionsPlugin());
     if(config->preProcessPlugin() != "")
         this->changeActivePlugin(PLUGIN_TYPE_PREPROCESS,config->preProcessPlugin());
+    if(config->libraryReaderPlugin() != "")
+        this->changeActivePlugin(PLUGIN_TYPE_LIBRARY_READER,config->libraryReaderPlugin());
+    if(config->libraryWriterPlugin() != "")
+        this->changeActivePlugin(PLUGIN_TYPE_LIBRARY_WRITER,config->libraryWriterPlugin());
 
 #if defined (SUPPORT_MULTIMEDIA)
     mediaLibrary->setActiveMediaType( config->activeMediaType(), this->pluginManager );
@@ -547,6 +551,39 @@ void MediaCycle::libraryContentChanged(int needsNormalizeAndCluster)
         mediaBrowser->libraryContentChanged(needsNormalizeAndCluster);
     }
 }
+
+void MediaCycle::saveLibrary(std::string _path, ACMediaLibraryWriterPlugin* plugin){
+    if(mediaLibrary){
+        if(mediaLibrary->getSize()==0)
+            return;
+        try{
+            mediaLibrary->saveLibrary(_path,plugin);
+        }catch(const std::exception& e){
+            throw runtime_error(e.what());
+        }
+    }
+}
+
+void MediaCycle::saveLibrary(std::string _path, std::string plugin_name){
+    if(!mediaLibrary)
+        return;
+    if(mediaLibrary->getSize()==0)
+        return;
+    if(_path=="" || plugin_name =="")
+        return;
+    ACPlugin* plugin = this->getPlugin(plugin_name);
+    if(!plugin)
+        return;
+    ACMediaLibraryWriterPlugin* writer_plugin = dynamic_cast<ACMediaLibraryWriterPlugin*>(plugin);
+    if(!writer_plugin)
+        return;
+    try{
+        mediaLibrary->saveLibrary(_path,writer_plugin);
+    }catch(const std::exception& e){
+        throw runtime_error(e.what());
+    }
+}
+
 
 void MediaCycle::saveACLLibrary(string path)
 {

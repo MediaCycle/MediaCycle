@@ -145,7 +145,7 @@ ACMultiMediaCycleOsgQt::ACMultiMediaCycleOsgQt(QWidget *parent)
     : QMainWindow(parent),ACEventListener(),features_known(false),
       aboutDialog(0),controlsDialog(0),compositeOsgView(0),
       osgViewDockWidget(0),osgViewDockLayout(0),progressBar(0),metadataWindow(0),
-      userProfileWindow(0),segmentationDialog(0)
+      userProfileWindow(0),segmentationDialog(0),librarySaveDialog(0)
 {
     ui.setupUi(this); // first thing to do
     this->media_type = MEDIA_TYPE_NONE;
@@ -275,6 +275,7 @@ ACMultiMediaCycleOsgQt::~ACMultiMediaCycleOsgQt(){
     if (metadataWindow) delete metadataWindow;
     if (userProfileWindow) delete userProfileWindow;
     if (segmentationDialog) delete segmentationDialog;
+    if (librarySaveDialog) delete librarySaveDialog;
 }
 
 void ACMultiMediaCycleOsgQt::setMediaType(ACMediaType _mt)
@@ -353,7 +354,7 @@ void ACMultiMediaCycleOsgQt::destroyMediaCycle(){
 
 
 // XS in theory one could select multiple XML files and concatenate them (not tested yet)
-void ACMultiMediaCycleOsgQt::on_actionLoad_XML_triggered(bool checked){
+void ACMultiMediaCycleOsgQt::on_actionLoad_Library_triggered(bool checked){
     this->readXMLConfig();
 }
 
@@ -508,7 +509,7 @@ bool ACMultiMediaCycleOsgQt::readXMLConfig(string _filename){
         media_cycle->setWeightVector(fw);
 
         // XML features are not normalized, so we force normalization here
-       // media_cycle->normalizeFeatures(1);
+        // media_cycle->normalizeFeatures(1);
 
         // only after loading all XML files:
         //this->updateLibrary();//TR update will be done in the mediaImported(int n,int nTot,int mId) with n==nTot and mId==-1
@@ -530,7 +531,7 @@ bool ACMultiMediaCycleOsgQt::readXMLConfig(string _filename){
     return true;
 }
 
-void ACMultiMediaCycleOsgQt::on_actionSave_XML_triggered(bool checked){
+void ACMultiMediaCycleOsgQt::on_actionSave_Library_triggered(bool checked){
     // XS TODO what is the use of "checked" (in argument above) ?
     this->writeXMLConfig();
 }
@@ -539,52 +540,122 @@ void ACMultiMediaCycleOsgQt::on_actionSave_XML_triggered(bool checked){
 // ex: the user quits when all features have'nt been computed yet
 void ACMultiMediaCycleOsgQt::writeXMLConfig(string _filename){
     if (! hasMediaCycle()) return;
-    else {
-        if (_filename=="") {
-            // no file name supplied, ask for one
-            QString fileName("");
-            QString filters=QString("MediaCycle XML Library (*.xml);;Library (*.xml)");
-            QString filter=QString("MediaCycle XML Library (*.xml)");
-            try{
-                //CF condensed version that crashes on OSX 10.8+ when selecting the folder from the drop-down menu
-                //fileName = QFileDialog::getSaveFileName(this, tr("Save Config as XML Library"),"",filter));
 
-                //CF alternative with multiple file formats
-                //fileName = QFileDialog::getSaveFileName(this, tr("Save Config as XML Library"),"",filters,&filter);
+    if (_filename=="") {
+        // no file name supplied, ask for one
+        QString fileName("");
+        QString filters=QString("MediaCycle XML Library (*.xml);;Library (*.xml)");
+        QString filter=QString("MediaCycle XML Library (*.xml)");
 
-                //CF non-native alternative: ugly and won't provide the user-bookmarked locations
-                //fileName = QFileDialog::getSaveFileName(this, tr("Save Config as XML Library"),"",filter,0,QFileDialog::DontUseNativeDialog);
+        //CF condensed version that crashes on OSX 10.8+ when selecting the folder from the drop-down menu
+        //fileName = QFileDialog::getSaveFileName(this, tr("Save Config as XML Library"),"",filter));
 
-                QFileDialog dialog(this,"Save Config as XML Library");
-                dialog.setDefaultSuffix("xml");
-#ifndef __APPLE__
-                dialog.setNameFilter("MediaCycle XML Library (*.xml)"); // CF this makes the dialog crash when selecting the folder from the drop-down menu
-#endif
-                dialog.setFileMode(QFileDialog::AnyFile);
-                dialog.setAcceptMode(QFileDialog::AcceptSave);
-                QStringList fileNames;
-                if (dialog.exec())
-                    fileNames = dialog.selectedFiles();
-                if(fileNames.size() != 1)
-                    return;
-                fileName = fileNames.first();
-            }
-            catch(...){
-                std::cerr << "ACMultiMediaCycleOsgQt::writeXMLConfig: bug in Qt save dialog" << std::endl;
-            }
+        //CF alternative with multiple file formats
+        //fileName = QFileDialog::getSaveFileName(this, tr("Save Config as XML Library"),"",filters,&filter);
 
-            if (fileName.isEmpty()) return;
-            QFile file(fileName);
+        //CF non-native alternative: ugly and won't provide the user-bookmarked locations
+        //fileName = QFileDialog::getSaveFileName(this, tr("Save Config as XML Library"),"",filter,0,QFileDialog::DontUseNativeDialog);
 
-            if (!file.open(QIODevice::WriteOnly)) {
-                QMessageBox::warning(this,
-                                     tr("File error"),
-                                     tr("Failed to open\n%1").arg(fileName));
-            }
-            else {
-                _filename = fileName.toStdString();
+        QFileDialog dialog(this,"Save Config as XML Library");
+        //dialog.setDefaultSuffix("xml");
+        QStringList filtersList;
+        filtersList.append("MediaCycle XML Library (*.xml)");
+
+        QString default_writer("");
+        if(media_cycle->getCurrentConfig()){
+            default_writer = QString(media_cycle->getCurrentConfig()->libraryWriterPlugin().c_str());
+        }
+
+        std::vector<std::string> writers = media_cycle->getAvailablePluginNames(PLUGIN_TYPE_LIBRARY_WRITER, this->getMediaType());
+        for(std::vector<std::string>::iterator writer = writers.begin();writer != writers.end();writer++){
+            ACPlugin* plugin = media_cycle->getPlugin(*writer);
+            ACMediaLibraryWriterPlugin* writer_plugin = dynamic_cast<ACMediaLibraryWriterPlugin*>(plugin);
+            if(writer_plugin){
+                std::vector<std::string> formats = writer_plugin->fileFormats();
+                for(std::vector<std::string>::iterator format = formats.begin();format != formats.end();format++){
+                    QString current_writer( QString((*writer).c_str()) + " (*" + QString((*format).c_str()) +")" );
+                    if( default_writer.compare( QString((*writer).c_str())) == 0 ){
+                        filtersList.push_front( current_writer );
+                    }
+                    else{
+                        filtersList.append( current_writer );
+                    }
+                }
             }
         }
+
+        dialog.setNameFilters(filtersList);
+
+        dialog.setFileMode(QFileDialog::AnyFile);
+        dialog.setAcceptMode(QFileDialog::AcceptSave);
+        QStringList fileNames;
+        if (!dialog.exec())
+            return;
+
+        fileNames = dialog.selectedFiles();
+        QString nameFilter = dialog.selectedFilter();
+
+        bool as_xml = (nameFilter.compare("MediaCycle XML Library (*.xml)") == 0);
+
+        if(fileNames.size() != 1)
+            return;
+        fileName = fileNames.first();
+
+        if (fileName.isEmpty()) return;
+        QFile file(fileName);
+
+        if (!file.open(QIODevice::WriteOnly)) {
+            QMessageBox::warning(this,
+                                 tr("File error"),
+                                 tr("Failed to open\n%1").arg(fileName));
+        }
+        else {
+            _filename = fileName.toStdString();
+        }
+
+        if(as_xml){
+            cout << "saving config in XML file: " << _filename << endl;
+            media_cycle->saveXMLConfigFile(_filename);
+        }
+        else{
+            int ext = nameFilter.lastIndexOf('*');
+            int hyphen = nameFilter.lastIndexOf('(');
+            if(ext == -1 || hyphen == -1){
+                return;
+            }
+            QString extension(nameFilter);
+            extension = extension.remove(0,ext+1);
+            extension = extension.remove(")");
+            QString type(nameFilter);
+            type = nameFilter.remove(hyphen-1,nameFilter.size()-ext+2);
+
+            ACPlugin* plugin = media_cycle->getPlugin(type.toStdString());
+            ACMediaLibraryWriterPlugin* writer_plugin = dynamic_cast<ACMediaLibraryWriterPlugin*>(plugin);
+            if(!writer_plugin)
+                return;
+
+            if(writer_plugin->getParametersCount() > 0){
+
+                if(!librarySaveDialog)
+                    librarySaveDialog = new ACPluginControlsDialogQt(PLUGIN_TYPE_LIBRARY_WRITER,"Library saving parameters","Do you want to save the library?");
+                librarySaveDialog->setMediaCycle(media_cycle);
+                librarySaveDialog->updatePluginsSettings();
+
+                if(!librarySaveDialog->exec())
+                    return;
+                if(librarySaveDialog->result() != 1)
+                    return;
+
+                try{
+                    media_cycle->saveLibrary(_filename,type.toStdString());
+                }
+                catch (const exception& e) {
+                    this->showError(e);
+                    return;
+                }
+            }
+        }
+    }else{
         // filename supplied (either as argument or from QMessageBox above)
         cout << "saving config in XML file: " << _filename << endl;
         media_cycle->saveXMLConfigFile(_filename);
@@ -684,12 +755,24 @@ void ACMultiMediaCycleOsgQt::on_actionLoad_Media_Files_triggered(bool checked){
         mediaExts.append(QString((*mediaIter).c_str()));
     }
     mediaExts.append(")");
-    dialog.setNameFilter(mediaExts);
+
+    dialog.setNameFilterDetailsVisible(true);
+    QStringList filtersList;
+    filtersList.append(mediaExts);
+    //filtersList.append("Dummy (*.dumb)");
+    dialog.setNameFilters ( filtersList );
+
+    //dialog.setNameFilter(mediaExts);
+
+
+
     dialog.setFileMode(QFileDialog::ExistingFiles); // ExistingFile(s); "s" is for multiple file handling
 
     QStringList fileNames;
-    if (dialog.exec())
+    if (dialog.exec()){
         fileNames = dialog.selectedFiles();
+        QString filter = dialog.selectedNameFilter();
+    }
 
     QStringList::Iterator file = fileNames.begin();
     while(file != fileNames.end()) {
@@ -752,7 +835,7 @@ bool ACMultiMediaCycleOsgQt::doSegments(){
         return do_segments;
 
     if(!segmentationDialog)
-        segmentationDialog = new ACSegmentationControlsDialogQt(this);
+        segmentationDialog = new ACPluginControlsDialogQt(PLUGIN_TYPE_SEGMENTATION, "Segmentation?", "Do you want to segment the media files?", this);
     segmentationDialog->setMediaCycle(media_cycle);
     segmentationDialog->updatePluginsSettings();
 

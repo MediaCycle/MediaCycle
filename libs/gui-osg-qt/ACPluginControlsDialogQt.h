@@ -1,5 +1,5 @@
 /*
- *  ACSegmentationControlsDialogQt.h
+ *  ACPluginControlsDialogQt.h
  *  MediaCycle
  *
  *  @author Christian Frisson
@@ -32,8 +32,8 @@
  *
  */
 
-#ifndef HEADER_ACSegmentationControlsDialogQt
-#define HEADER_ACSegmentationControlsDialogQt
+#ifndef HEADER_ACPluginControlsDialogQt
+#define HEADER_ACPluginControlsDialogQt
 
 #include <iostream>
 #include <string.h>
@@ -41,17 +41,16 @@
 #include "ACAbstractDockWidgetQt.h"
 #include "ACPluginControlsWidgetQt.h"
 
-//#include "ui_ACSegmentationControlsDialogQt.h" // uncomment if a *.ui file exists
+//#include "ui_ACPluginControlsDialogQt.h" // uncomment if a *.ui file exists
 
-class ACSegmentationControlsDialogQt : public QDialog, public ACAbstractWidgetQt {
+class ACPluginControlsDialogQt : public QDialog, public ACAbstractWidgetQt {
     Q_OBJECT
 
 public slots:
     void adjustHeight();
-
 public:
-    ACSegmentationControlsDialogQt(QWidget *parent = 0);
-    virtual ~ACSegmentationControlsDialogQt();
+    ACPluginControlsDialogQt(ACPluginType type, QString title, QString question, QWidget *parent = 0);
+    virtual ~ACPluginControlsDialogQt();
 
     virtual void changeMediaType(ACMediaType media_type);
     virtual void updatePluginsSettings();
@@ -59,7 +58,7 @@ public:
     virtual void resetMediaType(ACMediaType _media_type);
 
 protected:
-    //Ui::ACSegmentationControlsDialogQt ui; // uncomment if a *.ui file exists
+    //Ui::ACPluginControlsDialogQt ui; // uncomment if a *.ui file exists
     ACPluginControlsWidgetQt* widget;
     QLabel *label;
     QDialogButtonBox* buttonBox;

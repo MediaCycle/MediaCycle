@@ -69,6 +69,8 @@ public:
     virtual std::string preProcessPlugin(){return "";}
     virtual bool useSegmentation()=0;
     virtual std::string segmentationPlugin(){return "";}
+    virtual std::string libraryReaderPlugin(){return "";}
+    virtual std::string libraryWriterPlugin(){return "";}
     #if defined (SUPPORT_MULTIMEDIA)
     virtual std::string mediaReaderPlugin(){return "";}//=0;
     virtual std::string activeMediaType(){return "";}//=0;

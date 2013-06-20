@@ -55,7 +55,7 @@
 
 #include "ACMediaLibraryMetadataQt.h"
 #include "ACUserProfileQt.h"
-#include "ACSegmentationControlsDialogQt.h"
+#include "ACPluginControlsDialogQt.h"
 
 #include "ACEventListener.h"
 
@@ -96,8 +96,8 @@ public slots:
 
 public slots:	
     // Library controls
-    void on_actionLoad_XML_triggered(bool checked); // features
-    void on_actionSave_XML_triggered(bool checked);
+    void on_actionLoad_Library_triggered(bool checked); // features
+    void on_actionSave_Library_triggered(bool checked);
     void on_actionLoad_Media_Directory_triggered(bool checked);
     void on_actionLoad_Media_Files_triggered(bool checked);
     void on_actionClean_triggered(bool checked);
@@ -196,7 +196,8 @@ private:
     ACAboutDialogFactoryQt* aboutDialogFactory;
     ACAbstractAboutDialogQt* aboutDialog;
     ACInputControlsDialogQt* controlsDialog;
-    ACSegmentationControlsDialogQt* segmentationDialog;
+    ACPluginControlsDialogQt* segmentationDialog;
+    ACPluginControlsDialogQt* librarySaveDialog;
 
     // methods
     bool readQSettings();
@@ -212,7 +213,7 @@ private:
     bool hasMediaCycle();
     void changeMediaType(ACMediaType _mt);
 
-//    void importDirectoriesThreaded(std::vector<std::string> directories);
+    //    void importDirectoriesThreaded(std::vector<std::string> directories);
 
     QDockWidget* osgViewDock;
     QWidget* osgViewDockWidget;

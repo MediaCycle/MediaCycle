@@ -214,9 +214,10 @@ void ACPluginControlsWidgetQt::buildPluginList()
             std::vector<std::string> numParamNames = plugin->getNumberParametersNames();
 
             // Check if parameters contain repeated first words
-            std::map<std::string,std::string> parameter_word;
-            std::map<std::string,int> word_count;
-            std::map<std::string,int> widget_count;
+            // unordered_maps without C++11
+            boost::unordered::unordered_map<std::string,std::string> parameter_word;
+            boost::unordered::unordered_map<std::string,int> word_count;
+            boost::unordered::unordered_map<std::string,int> widget_count;
             for(std::vector<std::string>::iterator callbackName=callbacksNames.begin();callbackName!=callbacksNames.end();callbackName++){
                 std::string word(*callbackName);
                 size_t space = word.find_first_of(" ");
@@ -241,8 +242,8 @@ void ACPluginControlsWidgetQt::buildPluginList()
                     parameter_word[*numParamName] = word;
                 }
             }
-            for(std::map<std::string,std::string>::iterator word = parameter_word.begin();word != parameter_word.end();word++){
-                std::map<std::string,int>::iterator count = word_count.find(word->second);
+            for(boost::unordered::unordered_map<std::string,std::string>::iterator word = parameter_word.begin();word != parameter_word.end();word++){
+                boost::unordered::unordered_map<std::string,int>::iterator count = word_count.find(word->second);
                 if(count==word_count.end()){
                     word_count[word->second]=0;
                 }
@@ -251,9 +252,9 @@ void ACPluginControlsWidgetQt::buildPluginList()
             }
             // Create a tab for each first word repeated at least twice, to group parameters
             QTabWidget* tabWidget = 0;
-            std::map<std::string,int> tab_index;
+            boost::unordered::unordered_map<std::string,int> tab_index;
             int _count = 0;
-            for(std::map<std::string,int>::iterator count = word_count.begin();count != word_count.end();count++){
+            for(boost::unordered::unordered_map<std::string,int>::iterator count = word_count.begin();count != word_count.end();count++){
                 if(count->second > 1){
                     if(!tabWidget){
                         tabWidget = new QTabWidget();

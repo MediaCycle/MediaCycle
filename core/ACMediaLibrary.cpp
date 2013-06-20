@@ -69,6 +69,8 @@ ACMediaLibrary::ACMediaLibrary() {
     mPreProcessPlugin=0;
     mPreProcessInfo=0;
     mReaderPlugin=0;
+    mLibraryReaderPlugin=0;
+    mLibraryWriterPlugin=0;
     files_processed = 0;
     files_to_import = 0;
     media_at_import = 0;
@@ -82,6 +84,8 @@ ACMediaLibrary::ACMediaLibrary(ACMediaType aMediaType) {
     mPreProcessPlugin=0;
     mPreProcessInfo=0;
     mReaderPlugin=0;
+    mLibraryReaderPlugin=0;
+    mLibraryWriterPlugin=0;
     this->cleanLibrary();
     files_processed = 0;
     files_to_import = 0;
@@ -937,6 +941,93 @@ int ACMediaLibrary::saveMCSLLibrary(std::string _path){
     }
     library_file.close();
     normalizeFeatures();
+}
+
+
+/// These must be try/catch'd, errors are thrown
+void ACMediaLibrary::importLibrary(std::string _path, ACMediaLibraryReaderPlugin* _plugin){
+    if(_path==""){
+        throw runtime_error("Couldn't open library from an empty path");
+    }
+    if(!_plugin){
+        throw runtime_error("Couldn't open library '" + _path + "', no media library reader plugin set");
+    }
+    if(_plugin->openLibrary(_path)==false){
+        throw runtime_error("Couldn't open library file '" + _path + "' for writing");
+    }
+    std::vector<std::string> filenames;
+    try{
+        filenames = this->filenamesToOpen(_path,_plugin);
+    }
+    catch(std::exception& e){
+        try{
+            _plugin->closeLibrary(_path);
+        }catch(...){}
+        throw runtime_error(e.what());
+    }
+    for(std::vector<std::string>::iterator filename = filenames.begin(); filename != filenames.end(); filename++){
+        try{
+            this->importFile(*filename);
+        }catch(...){
+            try{
+                _plugin->closeLibrary(_path);
+            }catch(...){}
+            throw runtime_error("Error when opening media " + *filename + " from library file " + _path);
+        }
+    }
+    bool libraryClosed = false;
+    try{
+        libraryClosed = _plugin->closeLibrary(_path);
+    }catch(...){}
+    if(libraryClosed==false){
+        throw runtime_error("Couldn't close library file '" + _path + "'");
+    }
+}
+
+std::vector<std::string> ACMediaLibrary::filenamesToOpen(std::string _path, ACMediaLibraryReaderPlugin* _plugin){
+    std::vector<std::string> filenames;
+    if(_plugin){
+        filenames = _plugin->filenamesToOpen();
+    }
+    else
+        throw runtime_error("Library '" + _path + "' is empty.");
+    return filenames;
+}
+
+void ACMediaLibrary::saveLibrary(std::string _path, ACMediaLibraryWriterPlugin* _plugin){
+    if(_path==""){
+        throw runtime_error("Couldn't save library with an empty path");
+    }
+    if(!_plugin){
+        throw runtime_error("Couldn't save library '" + _path + "', no media library writer plugin set");
+    }
+    if(_plugin->openLibrary(_path)==false){
+        throw runtime_error("Couldn't open library file '" + _path + "' for writing");
+    }
+    if(_plugin->saveLibraryMetadata()==false){
+        throw runtime_error("Couldn't save library metadata for file '" + _path + "'");
+    }
+    for(ACMedias::iterator _media = media_library.begin(); _media != media_library.end(); _media++){
+        if(_media->second != 0 && _media->first >=0 ){
+            try{
+                _plugin->saveMedia(_media->second);
+            }catch(...){
+                try{
+                    _plugin->closeLibrary(_path);
+                }catch(...){}
+                throw runtime_error("Error when saving media " + _media->second->getFileName() + " in library file " + _path);
+            }
+        }
+        //else{}
+        // silencing ghost media
+    }
+    bool libraryClosed = false;
+    try{
+        libraryClosed = _plugin->closeLibrary(_path);
+    }catch(...){}
+    if(libraryClosed==false){
+        throw runtime_error("Couldn't close library file '" + _path + "'");
+    }
 }
 
 std::vector<long> ACMediaLibrary::getAllMediaIds() {

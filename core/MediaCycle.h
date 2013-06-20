@@ -103,6 +103,8 @@ public:
     int importMCSLLibrary(std::string path);//CF 31/05/2010 temporary MediaCycle Segmented Library (MCSL) for AudioGarden, adding a parentID for segments to the initial ACL, awaiting approval
     void libraryContentChanged(int needsNormalizeAndCluster=1);
 
+    void saveLibrary(std::string _path, ACMediaLibraryWriterPlugin* plugin);
+    void saveLibrary(std::string _path, std::string plugin_name);
     void saveACLLibrary(std::string path);
     void saveXMLLibrary(std::string path);
     void saveMCSLLibrary(std::string path);//CF 31/05/2010 temporary MediaCycle Segmented Library (MCSL) for AudioGarden, adding a parentID for segments to the initial ACL, awaiting approval

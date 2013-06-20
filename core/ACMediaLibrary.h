@@ -81,6 +81,8 @@ protected:
     preProcessInfo mPreProcessInfo;
     ACPreProcessPlugin* mPreProcessPlugin;
     ACMediaReaderPlugin* mReaderPlugin;
+    ACMediaLibraryReaderPlugin* mLibraryReaderPlugin;
+    ACMediaLibraryWriterPlugin* mLibraryWriterPlugin;
     std::vector<std::string> failed_imports;
 
 public:
@@ -174,6 +176,16 @@ public:
 
     //XS special for Thomas Israel
     void saveSorted(std::string ouput_file);
+
+    /// These must be try/catch'd, errors are thrown
+    void importLibrary(std::string _path, ACMediaLibraryReaderPlugin* plugin=0);
+    std::vector<std::string> filenamesToOpen(std::string _path, ACMediaLibraryReaderPlugin* plugin=0);
+    void saveLibrary(std::string _path, ACMediaLibraryWriterPlugin* plugin=0);
+
+    ACMediaLibraryReaderPlugin* getLibraryReaderPlugin(){return mLibraryReaderPlugin;}
+    void setLibraryReaderPlugin(ACMediaLibraryReaderPlugin* plugin){this->mLibraryReaderPlugin = plugin;}
+    ACMediaLibraryWriterPlugin* getLibraryWriterPlugin(){return mLibraryWriterPlugin;}
+    void setLibraryWriterPlugin(ACMediaLibraryWriterPlugin* plugin){this->mLibraryWriterPlugin = plugin;}
 
     int scanDirectories(std::vector<std::string> _path, int _recursive, std::vector<std::string>& filenames);
 

@@ -19,6 +19,8 @@
 #  WITHOUT_NEIGHBORS: example: SET(WITHOUT_NEIGHBORS ON)
 #  MEDIA_READER: example: SET(MEDIA_READER "Archipel Reader")
 #  ACTIVE_MEDIA: example: SET(ACTIVE_MEDIA "text")
+#  LIBRARY_READER: example: SET(LIBRARY_READER "CSV import")
+#  LIBRARY_WRITER: example: SET(LIBRARY_WRITER "CSV export")
 #
 # Optional (osg-qt)
 #  WITH_OSC: example SET(WITH_OSC ON)
@@ -176,6 +178,8 @@ file(APPEND ${CMAKE_CURRENT_BINARY_DIR}/${CLASS_NAME}.h "
 	virtual std::string neighborsPositionsPlugin(){return \"${NEIGHBORS_POSITIONS}\";}
 	virtual std::string preProcessPlugin(){return \"${PREPROCESS}\";}
 	virtual std::string segmentationPlugin(){return \"${SEGMENTATION}\";}
+        virtual std::string libraryReaderPlugin(){return \"${LIBRARY_READER}\";}
+        virtual std::string libraryWriterPlugin(){return \"${LIBRARY_WRITER}\";}
 ")
 
 IF(WITH_SEGMENTATION)

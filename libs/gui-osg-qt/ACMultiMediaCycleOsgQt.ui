@@ -62,9 +62,9 @@
     </property>
     <addaction name="actionLoad_Media_Directory"/>
     <addaction name="actionLoad_Media_Files"/>
-    <addaction name="actionLoad_XML"/>
+    <addaction name="actionLoad_Library"/>
     <addaction name="separator"/>
-    <addaction name="actionSave_XML"/>
+    <addaction name="actionSave_Library"/>
     <addaction name="separator"/>
     <addaction name="actionClean"/>
    </widget>
@@ -137,8 +137,8 @@
    <addaction name="actionToggle_Controls"/>
    <addaction name="actionLoad_Media_Files"/>
    <addaction name="actionLoad_Media_Directory"/>
-   <addaction name="actionLoad_XML"/>
-   <addaction name="actionSave_XML"/>
+   <addaction name="actionLoad_Library"/>
+   <addaction name="actionSave_Library"/>
    <addaction name="actionClean"/>
   </widget>
   <widget class="QStatusBar" name="statusbar">
@@ -193,23 +193,23 @@
     <bool>true</bool>
    </property>
   </action>
-  <action name="actionLoad_XML">
+  <action name="actionLoad_Library">
    <property name="text">
-    <string>Load XML</string>
+    <string>Load Library</string>
    </property>
    <property name="toolTip">
-    <string>Load XML Library</string>
+    <string>Load Library Library</string>
    </property>
    <property name="shortcut">
     <string>Ctrl+O</string>
    </property>
   </action>
-  <action name="actionSave_XML">
+  <action name="actionSave_Library">
    <property name="text">
-    <string>Save XML</string>
+    <string>Save Library</string>
    </property>
    <property name="toolTip">
-    <string>Save XML Library</string>
+    <string>Save Library Library</string>
    </property>
    <property name="shortcut">
     <string>Ctrl+S</string>
