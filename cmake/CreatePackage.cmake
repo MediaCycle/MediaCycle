@@ -351,7 +351,7 @@ ENDIF()
 
 #--------------------------------------------------------------------------------
 # Install needed MC plugins
-IF(WITH_MC AND APPLE)#to generalize for other platforms
+IF(WITH_MC AND APPLE AND NOT MC_PLUGINS_STATIC)#to generalize for other platforms
 	foreach(MC_PLUGIN ${MC_PLUGINS})
 		INSTALL(PROGRAMS "${CMAKE_BINARY_DIR}/plugins/${MC_PLUGIN}/mc_${MC_PLUGIN}.dylib" DESTINATION ${PROGNAME}.app/Contents/MacOS COMPONENT ${PROGNAME})
 		list(APPEND BUNDLED_MCPLUGINS "${CMAKE_INSTALL_PREFIX}/${PROGNAME}.app/Contents/MacOS/${PLUGIN_PREFIX}${MC_PLUGIN}.${PLUGIN_SUFFIX}")
@@ -433,7 +433,7 @@ IF(WITH_OSG AND APPLE)
 ENDIF()
 
 #--------------------------------------------------------------------------------
-# Install the YAAFE settings file
+# Install the YAAFE settings file(s)
 IF(SUPPORT_AUDIO)
 	FOREACH(MC_PLUGIN ${MC_PLUGINS})
 		STRING(REGEX MATCH "[a-zA-Z-]*yaafe[a-zA-Z-]*" YAAFE_PLUGIN "${MC_PLUGIN}")
@@ -453,6 +453,30 @@ IF(SUPPORT_AUDIO)
 					INSTALL(PROGRAMS "${CMAKE_SOURCE_DIR}/plugins/${YAAFE_PLUGIN}/${YAAFE_SETTING}" DESTINATION share COMPONENT ${PROGNAME})
 				ENDIF()
 			ENDFOREACH(YAAFE_SETTING)
+		ENDIF()
+	ENDFOREACH(MC_PLUGIN)
+ENDIF()
+
+#--------------------------------------------------------------------------------
+# Install the KnownItemSearch settings file(s)
+IF(CURL_FOUND)
+	FOREACH(MC_PLUGIN ${MC_PLUGINS})
+		STRING(REGEX MATCH "[a-zA-Z-]*kis[a-zA-Z-]*" KIS_PLUGIN "${MC_PLUGIN}")
+		IF(KIS_PLUGIN)
+			#MESSAGE("KnownItemSearch plugin ${KIS_PLUGIN}")
+			FILE(GLOB KIS_SETTINGS RELATIVE ${CMAKE_SOURCE_DIR}/plugins/${KIS_PLUGIN} ${CMAKE_SOURCE_DIR}/plugins/${KIS_PLUGIN}/*.xml )
+			FOREACH(KIS_SETTING ${KIS_SETTINGS})
+				#MESSAGE("KIS_SETTING ${KIS_SETTING}")
+				IF(APPLE)
+					INSTALL(PROGRAMS "${CMAKE_SOURCE_DIR}/plugins/${KIS_PLUGIN}/${KIS_SETTING}" DESTINATION ${PROGNAME}.app/Contents/MacOS COMPONENT ${PROGNAME})
+				ELSEIF(WIN32 OR MINGW)
+					MESSAGE("Installing ${CMAKE_SOURCE_DIR}/plugins/${KIS_PLUGIN}/${KIS_SETTING} to ${CMAKE_CURRENT_BINARY_DIR}")
+					EXECUTE_PROCESS(COMMAND cp "${CMAKE_SOURCE_DIR}/plugins/${KIS_PLUGIN}/${KIS_SETTING}" "${CMAKE_CURRENT_BINARY_DIR}")
+					#INSTALL(PROGRAMS "${CMAKE_SOURCE_DIR}/plugins/${KIS_PLUGIN}/${KIS_SETTING}" DESTINATION ${CMAKE_CURRENT_BINARY_DIR} COMPONENT ${PROGNAME})
+				ELSE()
+					INSTALL(PROGRAMS "${CMAKE_SOURCE_DIR}/plugins/${KIS_PLUGIN}/${KIS_SETTING}" DESTINATION share COMPONENT ${PROGNAME})
+				ENDIF()
+			ENDFOREACH(KIS_SETTING)
 		ENDIF()
 	ENDFOREACH(MC_PLUGIN)
 ENDIF()

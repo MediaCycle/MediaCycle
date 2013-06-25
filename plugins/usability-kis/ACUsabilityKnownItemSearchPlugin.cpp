@@ -54,7 +54,7 @@ ACUsabilityKnownItemSearchPlugin::ACUsabilityKnownItemSearchPlugin() : QObject()
     this->mDescription ="Plugin for undertaking usability tests with known-item search tasks";
     this->mMediaType = MEDIA_TYPE_ALL;
 
-    url = "localhost";//"10.0.0.7";
+    url = "localhost";
     port = 4040;
     team = 1;
 
@@ -74,11 +74,12 @@ ACUsabilityKnownItemSearchPlugin::ACUsabilityKnownItemSearchPlugin() : QObject()
     triggerMediaHoverAction->setToolTip(tr("Trigger Media Hover (faster browsing with playback and magnification)"));
     connect(triggerMediaHoverAction, SIGNAL(triggered(bool)), this, SLOT(triggerMediaHover(bool)));
 
+    this->parseXmlConfig("KnownItemSearch.xml");
+
     this->addStringParameter("Server",this->url,std::vector<std::string>(),"Server",boost::bind(&ACUsabilityKnownItemSearchPlugin::changeServer,this));
     this->addNumberParameter("Port",this->port,1,65535,1,"Port",boost::bind(&ACUsabilityKnownItemSearchPlugin::changePort,this));
     this->addNumberParameter("Team",this->team,0,16,1,"Team",boost::bind(&ACUsabilityKnownItemSearchPlugin::changeTeam,this));
     this->addCallback("Submit","Submit the clicked or clostest node",boost::bind(&ACUsabilityKnownItemSearchPlugin::submitCallback,this));
-
 }
 
 void ACUsabilityKnownItemSearchPlugin::changeServer(){
@@ -180,3 +181,76 @@ std::vector<ACInputActionQt*> ACUsabilityKnownItemSearchPlugin::providesInputAct
     actions.push_back(triggerMediaHoverAction);
     return actions;
 }
+
+
+bool ACUsabilityKnownItemSearchPlugin::parseXmlConfig(std::string filename){
+    std::string filelist("");
+#ifdef USE_DEBUG
+    boost::filesystem::path s_path( __FILE__ );
+    //std::cout << "Current source path " << s_path.parent_path().string() << std::endl;
+    filelist += s_path.parent_path().string() + "/" + filename;
+#else
+#ifdef __APPLE__
+    filelist = getExecutablePath() + "/" + filename;
+#elif __WIN32__
+    filelist = filename;
+#else
+    filelist = "~/" + filename;
+#endif
+#endif
+    std::cout << "ACUsabilityKnownItemSearchPlugin::parseXmlConfig: XML config file: " << filelist << std::endl;
+    boost::filesystem::path b_path( filelist );
+
+    if(boost::filesystem::exists( b_path) == false){
+        std::cerr << "ACUsabilityKnownItemSearchPlugin::parseXmlConfig: couldn't load XML config "<< filelist << std::endl;
+        return false;
+    }
+
+    TiXmlDocument doc( filelist.c_str() );
+    try {
+        if (!doc.LoadFile( TIXML_ENCODING_UTF8 ))
+            throw runtime_error("bad parse");
+        //		doc.Print( stdout );
+    } catch (const exception& e) {
+        cout << e.what( ) << endl;
+        return false;//EXIT_FAILURE;
+    }
+
+    TiXmlHandle docHandle(&doc);
+    TiXmlHandle rootHandle = docHandle.FirstChildElement( "KnownItemSearch" );
+    TiXmlElement* serverNode=rootHandle.FirstChild( "Server" ).Element();
+    if(!serverNode){
+        std::cerr << "ACUsabilityKnownItemSearchPlugin::parseXmlConfig: couldn't access server parameters " << std::endl;
+        return false;
+    }
+    try {
+        string pIP ="";
+        if(serverNode->Attribute("IP"))
+            pIP = serverNode->Attribute("IP");
+        if (pIP == "")
+            throw runtime_error("corrupted XML file, wrong ip");
+
+        int pPort=-1;
+        serverNode->QueryIntAttribute("Port", &pPort); // If this fails, original value is left as-is
+        if (pPort < 0)
+            throw runtime_error("corrupted XML file, wrong port");
+
+        int pTeam=-1;
+        serverNode->QueryIntAttribute("Team", &pTeam); // If this fails, original value is left as-is
+        if (pTeam < 0)
+            throw runtime_error("corrupted XML file, wrong team");
+
+        // Only change default settings if all parameters are properly read from the XML file
+        this->url = pIP;
+        this->port = pPort;
+        this->team = pTeam;
+    }
+    catch (/*const exception& e*/...) {
+        //cout << e.what( ) << endl;
+        return false;//EXIT_FAILURE;
+    }
+
+
+    return true;
+}
+

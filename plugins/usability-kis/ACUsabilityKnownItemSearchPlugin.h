@@ -56,6 +56,9 @@ public slots:
     void submitCallback();
     void triggerMediaHover(bool trigger); // audio hover, image/video ... -> need a panel to configure the behaviour of hover
 
+protected:
+    bool parseXmlConfig(std::string filename);
+
 private:
     ACInputActionQt* submitAction;
     ACInputActionQt* triggerMediaHoverAction;
