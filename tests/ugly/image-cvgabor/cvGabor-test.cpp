@@ -1,7 +1,7 @@
 /**
  * @brief cvGabor-test.cpp
  * @author Nicolas Riche
- * @date 20/06/2013
+ * @date 08/07/2013
  * @copyright (c) 2013 – UMONS - Numediart
  * 
  * MediaCycle of University of Mons – Numediart institute is 
@@ -95,8 +95,8 @@ Mat GaborBankScale(Mat src_f,double th,int kernel_size)
 	
 	// PROBLEME: la normalisation 
 	// methode 1
-	minMaxLoc(Ori,&min ,&max ,0,0);
-	Ori = (Ori - min) / (max-min);
+	//minMaxLoc(Ori,&min ,&max ,0,0);
+	//Ori = (Ori - min) / (max-min);
 	// methode 2
 	//normalize(Ori,Ori,1);
 	// ou sans normalisation.... j'ai du mal a visualiser les résultats et voir ce qui est correct ou non ! 
@@ -110,11 +110,13 @@ Mat GaborBankScale(Mat src_f,double th,int kernel_size)
 // main fonction
 int main(int argc, char** argv)
 {  
-    Mat image = imread("../../Original_Img/3.jpg",1);
+   
+	//Mat image = imread( "/Volumes/data/Datasets/mc-test-image/tcts-faces/filtered/riche.jpg");
+	Mat image = imread( "/Users/nicolasriche/mediacycle-datasets-temp/toronto-eyetracking/chien.jpg");
     Mat src;
 	Mat src_f;
 	int kernel_size = 21;
-	double th = 0; 
+	double th = 90; 
 	
     cvtColor(image, src, CV_BGR2GRAY);
     src.convertTo(src_f, CV_32F, 1.0/255, 0);

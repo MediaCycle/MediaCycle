@@ -1,7 +1,7 @@
 /**
  * @brief cvInterp-test.cpp
  * @author Nicolas Riche
- * @date 20/06/2013
+ * @date 08/07/2013
  * @copyright (c) 2013 – UMONS - Numediart
  * 
  * MediaCycle of University of Mons – Numediart institute is 
@@ -31,101 +31,131 @@
 
 #include "opencv2/highgui/highgui.hpp"
 #include "opencv2/imgproc/imgproc.hpp"
+#include "opencv2/contrib/contrib.hpp"
+#include "opencv2/core/core.hpp"
 #include <iostream>
 #include <stdio.h>
+
+
+
 
 using namespace std;
 using namespace cv;
 
-// Fonction Matlab 1
-double* vectorize( int size, ... )
+//https://github.com/Itseez/opencv/blob/master/modules/contrib/src/colormap.cpp
+
+static Mat linspace(float x0, float x1, int n)
 {
-    // Variables Arguments
-    va_list arguments;
-    double *tab = (double*)malloc(sizeof(double) * size);
-	
-    //Use argument
-    va_start ( arguments, size );
-	
-    for(int idx = 0 ; idx < size ; ++idx){
-        tab[idx] = va_arg ( arguments, double );
-    }
-	
-    va_end ( arguments );
-	
-    return tab;
+    Mat pts(n, 1, CV_32FC1);
+    float step = (x1-x0)/(n-1);
+    for(int i = 0; i < n; i++)
+        pts.at<float>(i,0) = x0+i*step;
+    return pts;
 }
 
-// Fonction Matlab2: Create a tab like matlab [start;step;end] 
-double* createTab(double start, double step, double end){
-    // Size
-    int size = 1 + fabs((end - start)/step);
-    // Alloc
-    double * tab = (double*)malloc(sizeof(double) * size);
-    // Fill
-    for(int idx = 0; start <= end && idx < size; start += step, ++idx){
-        tab[idx] = start;
+static void sortMatrixRowsByIndices(InputArray _src, InputArray _indices, OutputArray _dst)
+{
+//    if(_indices.getMat().type() != CV_32SC1)
+//        CV_Error(cv::Error::StsUnsupportedFormat, "cv::sortRowsByIndices only works on integer indices!");
+		Mat src = _src.getMat();
+    std::vector<int> indices = _indices.getMat();
+    _dst.create(src.rows, src.cols, src.type());
+    Mat dst = _dst.getMat();
+    for(size_t idx = 0; idx < indices.size(); idx++) {
+        Mat originalRow = src.row(indices[idx]);
+        Mat sortedRow = dst.row((int)idx);
+        originalRow.copyTo(sortedRow);
     }
-    return tab;
 }
 
-// Fonction Matlab3: Create a tab with a value in all cases */
-double* instance(int size, double val){
-    // Alloc
-    double * tab = (double*)malloc(sizeof(double) * size);
-    // Fill
-    while(size--){
-        tab[size] = val;
-    }
-    return tab;
+static Mat sortMatrixRowsByIndices(InputArray src, InputArray indices)
+{
+    Mat dst;
+    sortMatrixRowsByIndices(src, indices, dst);
+    return dst;
 }
 
-// Fonction Matlab4: To inter-pole data 
-double* interp1(double * x, int sizex, double * y , double * xi, int sizexi){
-    
-	double * yi; // attention: a été ajouté mais à changer !!!!!! 
-	// indexes
-    int idyi = 0;
-    int idx = 0;
-    // After computing, to know the current step progress
-    double steps = (y[1] - y[0]) / (x[1] - x[0]);
+
+static Mat argsort(InputArray _src, bool ascending=true)
+{
+    Mat src = _src.getMat();
+//    if (src.rows != 1 && src.cols != 1)
+//        CV_Error(Error::StsBadArg, "cv::argsort only sorts 1D matrices.");
+    int flags = SORT_EVERY_ROW | (ascending ? SORT_ASCENDING : SORT_DESCENDING);
+    Mat sorted_indices;
+    sortIdx(src.reshape(1,1),sorted_indices,flags);
+    return sorted_indices;
+}
+
+template <typename _Tp> static
+Mat interp1_(const Mat& X_, const Mat& Y_, const Mat& XI)
+{
+    int n = XI.rows;
+    // sort input table
+    std::vector<int> sort_indices = argsort(X_);
 	
-    // fill left points
-    while(idyi < sizexi - 1 && xi[idyi] < x[0]){
-        yi[idyi] = y[0] - (steps * (x[0] - xi[idyi]) ) ;
-        ++idyi;
-    }
-	
-    // fill point in the same interval as the original values
-    while(idyi < sizexi && idx < sizex){
-        while(idx < sizex && xi[idyi] >= x[idx]){
-            ++idx;
+    Mat X = sortMatrixRowsByIndices(X_,sort_indices);
+    Mat Y = sortMatrixRowsByIndices(Y_,sort_indices);
+    // interpolated values
+    Mat yi = Mat::zeros(XI.size(), XI.type());
+    for(int i = 0; i < n; i++) {
+        int c = 0;
+        int low = 0;
+        int high = X.rows - 1;
+        // set bounds
+        if(XI.at<_Tp>(i,0) < X.at<_Tp>(low, 0))
+            high = 1;
+        if(XI.at<_Tp>(i,0) > X.at<_Tp>(high, 0))
+            low = high - 1;
+        // binary search
+        while((high-low)>1) {
+            c = low + ((high - low) >> 1);
+            if(XI.at<_Tp>(i,0) > X.at<_Tp>(c,0)) {
+                low = c;
+            } else {
+                high = c;
+            }
         }
-        if(idx != sizex){
-            steps = (y[idx] - y[idx-1]) / (x[idx] - x[idx-1]);
-            yi[idyi] = y[idx] - (steps * (x[idx] - xi[idyi]) ) ;
-            ++idyi;
-        }
+        // linear interpolation
+        yi.at<_Tp>(i,0) += Y.at<_Tp>(low,0)
+        + (XI.at<_Tp>(i,0) - X.at<_Tp>(low,0))
+        * (Y.at<_Tp>(high,0) - Y.at<_Tp>(low,0))
+        / (X.at<_Tp>(high,0) - X.at<_Tp>(low,0));
     }
-	
-    // fill the right points
-    if(idyi < sizexi){
-        steps = (y[sizex - 1] - y[sizex-2]) / (x[sizex-1] - x[sizex-2]);
-        while(idyi < sizexi){
-            yi[idyi] = y[sizex-1] + (steps * (xi[idyi] - x[sizex-1])) ;
-            ++idyi;
-        }
-    }
-	
     return yi;
 }
+
+static Mat interp1(InputArray _x, InputArray _Y, InputArray _xi)
+//static Mat interp1(Mat x, Mat Y, Mat xi)
+{
+    // get matrices
+    Mat x = _x.getMat();
+    Mat Y = _Y.getMat();
+    Mat xi = _xi.getMat();
+    // check types & alignment
+    CV_Assert((x.type() == Y.type()) && (Y.type() == xi.type()));
+    CV_Assert((x.cols == 1) && (x.rows == Y.rows) && (x.cols == Y.cols));
+    // call templated interp1
+    switch(x.type()) {
+        case CV_8SC1: return interp1_<char>(x,Y,xi); break;
+        case CV_8UC1: return interp1_<unsigned char>(x,Y,xi); break;
+        case CV_16SC1: return interp1_<short>(x,Y,xi); break;
+        case CV_16UC1: return interp1_<unsigned short>(x,Y,xi); break;
+        case CV_32SC1: return interp1_<int>(x,Y,xi); break;
+        case CV_32FC1: return interp1_<float>(x,Y,xi); break;
+        case CV_64FC1: return interp1_<double>(x,Y,xi); break;
+ //       default: CV_Error(Error::StsUnsupportedFormat, ""); break;
+    }
+    return Mat();
+}
+
 
 // main fonction
 int main( int argc, char** argv )
 {
   
   // Declarations
-  Mat src,src_resized,ycbcr;
+  Mat src,src_resized,ycbcr,Sint;
   double min, max, min1, max1, min2, max2;
   vector<Mat> planes,im_y_pyr,im_cb_pyr,im_cr_pyr;
   
@@ -135,8 +165,9 @@ int main( int argc, char** argv )
 	
   int ndp = 4;
 	
-  // Load image  
-  src = imread( "../../Original_Img/33.jpg");
+	// Load image  
+	//src = imread( "/Volumes/data/Datasets/mc-test-image/tcts-faces/filtered/riche.jpg");
+	src = imread( "/Users/nicolasriche/mediacycle-datasets-temp/toronto-eyetracking/111.jpg");
   if( !src.data ){ return -1; }
 
   // Pre-process: resize, color transformation, convert double and normalize
@@ -200,8 +231,8 @@ int main( int argc, char** argv )
 	int hist_w = 512; int hist_h = 400;
 	int bin_w = cvRound( (double) hist_w/histSize );
 	
-	Mat histImage( hist_h, hist_w, CV_8UC1);
-	
+	Mat histImage ( hist_h, hist_w, CV_8UC1);
+	Mat histImage1( hist_h, hist_w, CV_8UC1);
 	/// Normalize the result to [ 0, histImage.rows ]
 	normalize(y2_hist, y2_hist, 0, histImage.rows, NORM_MINMAX, -1, Mat() );
 	
@@ -214,46 +245,52 @@ int main( int argc, char** argv )
 		
 	}
 	
-	// Fonction Matlab3: B = 88 * ones(50,1)
-	double* B = instance(50, 88.0);
 	
-	// Fonction Matlab1: C = [1 1 2 2 3 3]
-	double* C = vectorize(6, 1.0 , 1.0 , 2.0 , 2.0 , 3.0 , 3.0);
+	// rarete algorithm
+	// 1. resize feature map
+	Mat channel;
+	resize(im_y_pyr[2], channel,Size(1,200*200));
+
+	// 2. build x
+	double mint,maxt;
+	minMaxLoc(channel,&mint ,&maxt ,0,0);
 	
-	// Fonction Matlab2: E = [start;step;end]
-	double* E = createTab(start, step, end);
+	int nn = 100;
+	Mat x = linspace(mint, maxt,nn);
+
+	// 3. build h
+	Mat h = y2_hist;
+	h = h+1;
+
+	Scalar d = sum(h);
+	double sommeh = d.val[0]; 
+	h = h/sommeh;
+	log(h,h);
+	h = -h;
+
+	// 4. interp1
+	Mat S =  interp1(x, h, channel);
+	resize(S, S,Size(200,200));
 	
-	// Fonction Matlab4: Titem = interp1(dt1,dt2,dt3,'linear');
-	double* Titem = interp1(dt1,sizedt1,dt2,dt3,sizedt3);
 	
-	// peux tu me montrer un exemple pour remplir interp1 en c ? 
-	// je vais essayer de l'adapter avec l'histogramme ;-) 
-	// grand merci ! (mélange c / c++ un peu abstrait pour le moment on en parle semaine prochaine !)
-	
-	
-	
-	
-	// Holds the colormap version of the image:
-	//Mat cm_im_y_pyr;
-	// Apply the colormap:
-	//applyColorMap(im_y_pyr[2], cm_im_y_pyr, COLORMAP_JET);
+	// 5. Apply the colormap:
+	Mat TEST;
+	applyColorMap(im_y_pyr[2], TEST, COLORMAP_AUTUMN);
 
 	
 	// Affichage
 	namedWindow("calcHist Demo", CV_WINDOW_AUTOSIZE );
 	imshow("calcHist Demo", histImage );
-	//cout <<  y2_hist.rows << "  " << y2_hist.cols ;
-	//cout << y2_hist;
-	//namedWindow("Y", CV_WINDOW_AUTOSIZE );
-	//imshow("Y",im_y_pyr[2]);
 	
-	//namedWindow("cm_img0", CV_WINDOW_AUTOSIZE );
-	//imshow("cm_img0",cm_im_y_pyr);
 	
+	namedWindow("calcHist Demo1", CV_WINDOW_AUTOSIZE );
+	imshow("calcHist Demo1", S );
 
+	namedWindow("calcHist Demo2", CV_WINDOW_AUTOSIZE );
+	imshow("calcHist Demo2", im_y_pyr[2] );
 	
-  waitKey(0);
+	waitKey(0);
 
-  return 0;
+	return 0;
 
 }
