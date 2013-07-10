@@ -1,0 +1,14 @@
+--- /opt/local/var/macports/build/_Volumes_data_Dev_numediart_mediacycle_doc_macports_ports_devel_libnifalcon/libnifalcon/work/libnifalcon-1.0.2/src/util/CMakeLists.txt	2010-11-27 05:42:07.000000000 +0100
++++ /Volumes/data/Dev/numediart/libnifalcon/src/util/CMakeLists.txt	2013-07-09 18:36:54.000000000 +0200
+@@ -36,6 +36,11 @@
+     ${Boost_THREAD_LIBRARY}
+     )
+ 
++  # Boost thread requires system since 1.5x
++  IF(Boost_SYSTEM_FOUND)
++    LIST(APPEND CPP_LINK_LIBS "${Boost_SYSTEM_LIBRARY}")
++  ENDIF()
++
+   SET(SRCS
+ 	"FalconDeviceBoostThread.cpp" 
+ 	"${LIBNIFALCON_INCLUDE_DIR}/falcon/util/FalconDeviceBoostThread.h"

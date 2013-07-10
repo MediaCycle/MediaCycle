@@ -1,0 +1,39 @@
+# -*- coding: utf-8; mode: tcl; tab-width: 4; indent-tabs-mode: nil; c-basic-offset: 4 -*- vim:fenc=utf-8:ft=tcl:et:sw=4:ts=4:sts=4
+# $Id: Portfile 84099 2011-09-17 03:11:04Z jmr@macports.org $
+
+PortSystem  1.0
+PortGroup   cmake 1.0
+PortGroup   github 1.0
+
+github.setup        qdot libnifalcon 7e98c9f2bd
+name        libnifalcon
+version     1.0.2
+revision    1
+categories  devel
+platforms   darwin
+
+maintainers gmail.com:richardsjohnt gmail.com:christian.frisson
+
+homepage            http://qdot.github.com/libnifalcon/
+description         Novint Falcon hardware support
+long_description    Driver and development library for the Novint Falcon haptic device
+license             BSD
+
+#master_sites    sourceforge:project/libnifalcon/libnifalcon/${version}
+checksums           md5     15f1d77f07b2b77fe3ae2de1a564020f \
+                    sha1    871a8c4cd6b2f2a87653586ff683d33b5828d4ce \
+                    rmd160  f1e1c19560420d97e4c3237ccf9059412f1eda96
+
+depends_lib port:boost \
+            port:libusb
+
+#patchfiles          patch-src-util-CMakeLists.diff
+
+post-extract {
+    file mkdir ${worksrcpath}/build
+}
+
+configure.args-append -G \"Unix Makefiles\" ..
+
+configure.dir   ${worksrcpath}/build
+build.dir       ${worksrcpath}/build
