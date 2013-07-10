@@ -1,6 +1,8 @@
 SET(TARGET_NAME "MultiMediaCycle")
 IF(BUILD_MULTIMEDIACYCLE_APP AND USE_QT4 AND USE_OSG)
 
+	SET(MC_PLUGINS_STATIC OFF)
+
         # Media configurations that currently don't have specific apps
         INCLUDE (${CMAKE_SOURCE_DIR}/cmake/CreateDefaultConfig.cmake)
 	# 3DmodelCycle
