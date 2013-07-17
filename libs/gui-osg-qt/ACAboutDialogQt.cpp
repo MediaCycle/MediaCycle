@@ -152,6 +152,7 @@ void ACAboutDialogQt::updateTeam(){
     html.append ("<li>Bernard Delcourt</li>");
     html.append ("<li>Rudi Giot</li>");
     html.append ("<li>Gauthier Keyaerts</li>");
+    html.append ("<li>Matthieu Michaux</li>");
     html.append ("<li>Jean-Louis Poliart</li>");
     html.append ("<li>Laszlo Umbreit</li>");
     html.append ("</ul>");
