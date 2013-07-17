@@ -45,6 +45,9 @@ ACAudioStkEngineRendererPlugin::ACAudioStkEngineRendererPlugin() : QObject(), AC
     this->mMediaType = MEDIA_TYPE_AUDIO;
     this->master_frev = 0;
 
+    this->with_granulation = false;
+    this->with_faders = false;
+
     current_closest_node = -1;
 
     // Set the global sample rate before creating class instances.
@@ -62,6 +65,8 @@ ACAudioStkEngineRendererPlugin::ACAudioStkEngineRendererPlugin() : QObject(), AC
     this->active_targets.push_back("Closest node");
     //this->addStringParameter("Effect target",active_target,active_targets,"Choose which node(s) to change effect parameters on",boost::bind(&ACAudioStkEngineRendererPlugin::updateActiveTarget,this));
 
+    // Master/playback effects
+
     this->addCallback("Mute","Mute",boost::bind(&ACAudioStkEngineRendererPlugin::muteAll,this));
     this->action_parameters["mute"] = ACMediaActionParameters();
 
@@ -78,32 +83,7 @@ ACAudioStkEngineRendererPlugin::ACAudioStkEngineRendererPlugin() : QObject(), AC
     this->addNumberParameter("Playback Pan",0.0,-1.0,1.0,0.01,"Playback Pan (-1 left, 0 center, 1 right)",boost::bind(&ACAudioStkEngineRendererPlugin::updatePlaybackPan,this));
     this->action_parameters["playback pan"] = ACMediaActionParameters(1,ACMediaActionParameter(AC_TYPE_FLOAT,this->getParameter("Playback Pan")));
 
-    this->addNumberParameter("Grain Voices",1,0,25,1,"Grain Voices",boost::bind(&ACAudioStkEngineRendererPlugin::updateGrainVoices,this));
-    this->action_parameters["grain voices"] = ACMediaActionParameters(1,ACMediaActionParameter(AC_TYPE_FLOAT,this->getParameter("Grain Voices")));
-
-    // factor between 0 - 1.0
-    this->addNumberParameter("Grain Randomness",0,0,1,0.1,"Grain Randomness",boost::bind(&ACAudioStkEngineRendererPlugin::updateGrainRandomness,this));
-    this->action_parameters["grain randomness"] = ACMediaActionParameters(1,ACMediaActionParameter(AC_TYPE_FLOAT,this->getParameter("Grain Randomness")));
-
-    // factor (1-1000)
-    this->addNumberParameter("Grain Stretch",1,1,1000,1,"Grain Stretch",boost::bind(&ACAudioStkEngineRendererPlugin::updateGrainStretch,this));
-    this->action_parameters["grain stretch"] = ACMediaActionParameters(1,ACMediaActionParameter(AC_TYPE_FLOAT,this->getParameter("Grain Stretch")));
-
-    //duration (ms)
-    this->addNumberParameter("Grain Duration",1000,0,10000,1,"Grain Duration (ms)",boost::bind(&ACAudioStkEngineRendererPlugin::updateGrainParameters,this));
-    this->action_parameters["grain duration"] = ACMediaActionParameters(1,ACMediaActionParameter(AC_TYPE_FLOAT,this->getParameter("Grain Duration")));
-
-    //ramp: envelope percent (0-100)
-    this->addNumberParameter("Grain Ramp",100,0,100,1,"Grain Ramp (envelope percent)",boost::bind(&ACAudioStkEngineRendererPlugin::updateGrainParameters,this));
-    this->action_parameters["grain ramp"] = ACMediaActionParameters(1,ACMediaActionParameter(AC_TYPE_FLOAT,this->getParameter("Grain Ramp")));
-
-    //offset: hop time between grains (ms)
-    this->addNumberParameter("Grain Offset",100,0,1000,1,"Grain Offset (hop time between grains in ms)",boost::bind(&ACAudioStkEngineRendererPlugin::updateGrainParameters,this));
-    this->action_parameters["grain offset"] = ACMediaActionParameters(1,ACMediaActionParameter(AC_TYPE_FLOAT,this->getParameter("Grain Offset")));
-
-    //delay: pause time between grains (ms)
-    this->addNumberParameter("Grain Delay",100,0,10000,1,"Grain Delay (pause time between grains in ms)",boost::bind(&ACAudioStkEngineRendererPlugin::updateGrainParameters,this));
-    this->action_parameters["grain delay"] = ACMediaActionParameters(1,ACMediaActionParameter(AC_TYPE_FLOAT,this->getParameter("Grain Delay")));
+    // Reverb
 
     master_frev = new ACAudioStkFreeVerb();
 
@@ -133,6 +113,95 @@ ACAudioStkEngineRendererPlugin::ACAudioStkEngineRendererPlugin() : QObject(), AC
     //this->addNumberParameter("Reverb Pan",1,0,1,0.01,"Reverb width (left-right mixing) parameter [0,1]",boost::bind(&ACAudioStkEngineRendererPlugin::updateReverbPan,this));
     //if(!master_frev)
     //this->action_parameters["reverb pan"] = ACMediaActionParameters(1,ACMediaActionParameter(AC_TYPE_FLOAT,this->getParameter("Reverb Pan")));
+
+
+
+    //midi_in->openVirtualPort("MashtaCycle In");
+    //midi_out->openVirtualPort("MashtaCycle Out");
+
+    loopClickedNodeAction = new ACInputActionQt(tr("Loop clicked node"), this);
+    loopClickedNodeAction->setShortcut(Qt::Key_L);
+    loopClickedNodeAction->setKeyEventType(QEvent::KeyPress);
+    loopClickedNodeAction->setMouseEventType(QEvent::MouseButtonRelease);
+    loopClickedNodeAction->setToolTip(tr("Loop the clicked node"));
+    connect(loopClickedNodeAction, SIGNAL(triggered()), this, SLOT(loopClickedNode()));
+
+    playClickedNodeAction = new ACInputActionQt(tr("Play clicked node"), this);
+    //playClickedNodeAction->setShortcut(Qt::Key_P);
+    //playClickedNodeAction->setKeyEventType(QEvent::KeyPress);
+    playClickedNodeAction->setMouseEventType(QEvent::MouseButtonRelease);
+    playClickedNodeAction->setToolTip(tr("Play the clicked node"));
+    connect(playClickedNodeAction, SIGNAL(triggered()), this, SLOT(playClickedNode()));
+
+    triggerClickedNodeAction = new ACInputActionQt(tr("Trigger clicked node"), this);
+    triggerClickedNodeAction->setShortcut(Qt::Key_T);
+    triggerClickedNodeAction->setKeyEventType(QEvent::KeyPress);
+    triggerClickedNodeAction->setMouseEventType(QEvent::MouseButtonRelease);
+    triggerClickedNodeAction->setToolTip(tr("Trigger the clicked node"));
+    connect(triggerClickedNodeAction, SIGNAL(triggered()), this, SLOT(triggerClickedNode()));
+
+    muteAllNodesAction = new ACInputActionQt(tr("Mute all"), this);
+    muteAllNodesAction->setShortcut(Qt::Key_M);
+    muteAllNodesAction->setKeyEventType(QEvent::KeyPress);
+    //muteAllNodesAction->setMouseEventType(QEvent::MouseButtonRelease);
+    muteAllNodesAction->setToolTip(tr("Mute all"));
+    connect(muteAllNodesAction, SIGNAL(triggered()), this, SLOT(muteAllNodes()));
+
+    muting = false;
+}
+
+void ACAudioStkEngineRendererPlugin::useGranulation(){
+
+    // make this function callable once
+
+    this->with_granulation = true;
+
+    //Granulation
+
+    this->addNumberParameter("Grain Voices",1,0,25,1,"Grain Voices",boost::bind(&ACAudioStkEngineRendererPlugin::updateGrainVoices,this));
+    this->action_parameters["grain voices"] = ACMediaActionParameters(1,ACMediaActionParameter(AC_TYPE_FLOAT,this->getParameter("Grain Voices")));
+
+    // factor between 0 - 1.0
+    this->addNumberParameter("Grain Randomness",0,0,1,0.1,"Grain Randomness",boost::bind(&ACAudioStkEngineRendererPlugin::updateGrainRandomness,this));
+    this->action_parameters["grain randomness"] = ACMediaActionParameters(1,ACMediaActionParameter(AC_TYPE_FLOAT,this->getParameter("Grain Randomness")));
+
+    // factor (1-1000)
+    this->addNumberParameter("Grain Stretch",1,1,1000,1,"Grain Stretch",boost::bind(&ACAudioStkEngineRendererPlugin::updateGrainStretch,this));
+    this->action_parameters["grain stretch"] = ACMediaActionParameters(1,ACMediaActionParameter(AC_TYPE_FLOAT,this->getParameter("Grain Stretch")));
+
+    //duration (ms)
+    this->addNumberParameter("Grain Duration",1000,0,10000,1,"Grain Duration (ms)",boost::bind(&ACAudioStkEngineRendererPlugin::updateGrainParameters,this));
+    this->action_parameters["grain duration"] = ACMediaActionParameters(1,ACMediaActionParameter(AC_TYPE_FLOAT,this->getParameter("Grain Duration")));
+
+    //ramp: envelope percent (0-100)
+    this->addNumberParameter("Grain Ramp",100,0,100,1,"Grain Ramp (envelope percent)",boost::bind(&ACAudioStkEngineRendererPlugin::updateGrainParameters,this));
+    this->action_parameters["grain ramp"] = ACMediaActionParameters(1,ACMediaActionParameter(AC_TYPE_FLOAT,this->getParameter("Grain Ramp")));
+
+    //offset: hop time between grains (ms)
+    this->addNumberParameter("Grain Offset",100,0,1000,1,"Grain Offset (hop time between grains in ms)",boost::bind(&ACAudioStkEngineRendererPlugin::updateGrainParameters,this));
+    this->action_parameters["grain offset"] = ACMediaActionParameters(1,ACMediaActionParameter(AC_TYPE_FLOAT,this->getParameter("Grain Offset")));
+
+    //delay: pause time between grains (ms)
+    this->addNumberParameter("Grain Delay",100,0,10000,1,"Grain Delay (pause time between grains in ms)",boost::bind(&ACAudioStkEngineRendererPlugin::updateGrainParameters,this));
+    this->action_parameters["grain delay"] = ACMediaActionParameters(1,ACMediaActionParameter(AC_TYPE_FLOAT,this->getParameter("Grain Delay")));
+
+    granulateClickedNodeAction = new ACInputActionQt(tr("Granulate clicked node"), this);
+    granulateClickedNodeAction->setShortcut(Qt::Key_G);
+    granulateClickedNodeAction->setKeyEventType(QEvent::KeyPress);
+    granulateClickedNodeAction->setMouseEventType(QEvent::MouseButtonRelease);
+    granulateClickedNodeAction->setToolTip(tr("Granulate the clicked node"));
+    connect(granulateClickedNodeAction, SIGNAL(triggered()), this, SLOT(granulateClickedNode()));
+}
+
+void ACAudioStkEngineRendererPlugin::useMotorizedFaders(){
+
+    // make this function callable once
+
+    this->with_faders = true;
+
+    // to replace by a callback probing for the device
+
+    // Behringer BCF 2000 motorized faders assignation
 
     fader_effect.push_back("reverb mix");
     fader_effect.push_back("reverb room size");
@@ -178,63 +247,26 @@ ACAudioStkEngineRendererPlugin::ACAudioStkEngineRendererPlugin() : QObject(), AC
         midi_out = 0;
     }
 
-    //midi_in->openVirtualPort("MashtaCycle In");
-    //midi_out->openVirtualPort("MashtaCycle Out");
 
-    loopClickedNodeAction = new ACInputActionQt(tr("Loop clicked node"), this);
-    loopClickedNodeAction->setShortcut(Qt::Key_L);
-    loopClickedNodeAction->setKeyEventType(QEvent::KeyPress);
-    loopClickedNodeAction->setMouseEventType(QEvent::MouseButtonRelease);
-    loopClickedNodeAction->setToolTip(tr("Loop the clicked node"));
-    connect(loopClickedNodeAction, SIGNAL(triggered()), this, SLOT(loopClickedNode()));
+    if(with_faders){
+        std::vector<std::string> available_effects;
+        for(std::map<std::string,ACMediaActionParameters>::iterator action = action_parameters.begin(); action != action_parameters.end(); action++){
+            if(action->second.size()>0){
+                std::cout << "Adding action " << action->first << std::endl;
+                available_effects.push_back(action->first);
+            }
 
-    playClickedNodeAction = new ACInputActionQt(tr("Play clicked node"), this);
-    //playClickedNodeAction->setShortcut(Qt::Key_P);
-    //playClickedNodeAction->setKeyEventType(QEvent::KeyPress);
-    playClickedNodeAction->setMouseEventType(QEvent::MouseButtonRelease);
-    playClickedNodeAction->setToolTip(tr("Play the clicked node"));
-    connect(playClickedNodeAction, SIGNAL(triggered()), this, SLOT(playClickedNode()));
-
-    granulateClickedNodeAction = new ACInputActionQt(tr("Granulate clicked node"), this);
-    granulateClickedNodeAction->setShortcut(Qt::Key_G);
-    granulateClickedNodeAction->setKeyEventType(QEvent::KeyPress);
-    granulateClickedNodeAction->setMouseEventType(QEvent::MouseButtonRelease);
-    granulateClickedNodeAction->setToolTip(tr("Granulate the clicked node"));
-    connect(granulateClickedNodeAction, SIGNAL(triggered()), this, SLOT(granulateClickedNode()));
-
-    triggerClickedNodeAction = new ACInputActionQt(tr("Trigger clicked node"), this);
-    triggerClickedNodeAction->setShortcut(Qt::Key_T);
-    triggerClickedNodeAction->setKeyEventType(QEvent::KeyPress);
-    triggerClickedNodeAction->setMouseEventType(QEvent::MouseButtonRelease);
-    triggerClickedNodeAction->setToolTip(tr("Trigger the clicked node"));
-    connect(triggerClickedNodeAction, SIGNAL(triggered()), this, SLOT(triggerClickedNode()));
-
-    muteAllNodesAction = new ACInputActionQt(tr("Mute all"), this);
-    muteAllNodesAction->setShortcut(Qt::Key_M);
-    muteAllNodesAction->setKeyEventType(QEvent::KeyPress);
-    //muteAllNodesAction->setMouseEventType(QEvent::MouseButtonRelease);
-    muteAllNodesAction->setToolTip(tr("Mute all"));
-    connect(muteAllNodesAction, SIGNAL(triggered()), this, SLOT(muteAllNodes()));
-
-    std::vector<std::string> available_effects;
-    for(std::map<std::string,ACMediaActionParameters>::iterator action = action_parameters.begin(); action != action_parameters.end(); action++){
-        if(action->second.size()>0){
-            std::cout << "Adding action " << action->first << std::endl;
-            available_effects.push_back(action->first);
         }
-
-    }
-    for(int fader = 1; fader<=8; fader++){
-        std::stringstream _fader;
-        _fader << fader;
-        this->addStringParameter("Fader " + _fader.str(),fader_effect[fader-1],available_effects,"Assign fader " + _fader.str() + " to an effect parameter " ,boost::bind(&ACAudioStkEngineRendererPlugin::updateFaderEffect,this,fader));
+        for(int fader = 1; fader<=8; fader++){
+            std::stringstream _fader;
+            _fader << fader;
+            this->addStringParameter("Fader " + _fader.str(),fader_effect[fader-1],available_effects,"Assign fader " + _fader.str() + " to an effect parameter " ,boost::bind(&ACAudioStkEngineRendererPlugin::updateFaderEffect,this,fader));
+        }
     }
 
     pthread_mutexattr_init(&delete_mutex_attr);
     pthread_mutex_init(&delete_mutex, &delete_mutex_attr);
     pthread_mutexattr_destroy(&delete_mutex_attr);
-
-    muting = false;
 }
 
 ACAudioStkEngineRendererPlugin::~ACAudioStkEngineRendererPlugin(){
@@ -1492,7 +1524,9 @@ std::map<std::string,ACMediaType> ACAudioStkEngineRendererPlugin::availableMedia
     std::map<std::string,ACMediaType> media_actions;
     media_actions["play"] = MEDIA_TYPE_AUDIO;
     media_actions["loop"] = MEDIA_TYPE_AUDIO;
-    media_actions["granulate"] = MEDIA_TYPE_AUDIO;
+    if(with_granulation){
+        media_actions["granulate"] = MEDIA_TYPE_AUDIO;
+    }
     media_actions["mute"] = MEDIA_TYPE_AUDIO;
     media_actions["mute all"] = MEDIA_TYPE_AUDIO;
     media_actions["trigger"] = MEDIA_TYPE_AUDIO;
@@ -1500,13 +1534,15 @@ std::map<std::string,ACMediaType> ACAudioStkEngineRendererPlugin::availableMedia
     media_actions["playback speed"] = MEDIA_TYPE_AUDIO;
     media_actions["playback volume"] = MEDIA_TYPE_AUDIO;
     media_actions["playback pan"] = MEDIA_TYPE_AUDIO;
-    media_actions["grain voices"] = MEDIA_TYPE_AUDIO;
-    media_actions["grain randomness"] = MEDIA_TYPE_AUDIO;
-    media_actions["grain stretch"] = MEDIA_TYPE_AUDIO;
-    media_actions["grain duration"] = MEDIA_TYPE_AUDIO;
-    media_actions["grain ramp"] = MEDIA_TYPE_AUDIO;
-    media_actions["grain offset"] = MEDIA_TYPE_AUDIO;
-    media_actions["grain delay"] = MEDIA_TYPE_AUDIO;
+    if(with_granulation){
+        media_actions["grain voices"] = MEDIA_TYPE_AUDIO;
+        media_actions["grain randomness"] = MEDIA_TYPE_AUDIO;
+        media_actions["grain stretch"] = MEDIA_TYPE_AUDIO;
+        media_actions["grain duration"] = MEDIA_TYPE_AUDIO;
+        media_actions["grain ramp"] = MEDIA_TYPE_AUDIO;
+        media_actions["grain offset"] = MEDIA_TYPE_AUDIO;
+        media_actions["grain delay"] = MEDIA_TYPE_AUDIO;
+    }
     media_actions["reverb mix"] = MEDIA_TYPE_AUDIO;
     media_actions["reverb room size"] = MEDIA_TYPE_AUDIO;
     media_actions["reverb damping"] = MEDIA_TYPE_AUDIO;
@@ -1556,7 +1592,9 @@ std::vector<ACInputActionQt*> ACAudioStkEngineRendererPlugin::providesInputActio
     std::vector<ACInputActionQt*> inputActions;
     inputActions.push_back(playClickedNodeAction);
     inputActions.push_back(loopClickedNodeAction);
-    inputActions.push_back(granulateClickedNodeAction);
+    if(with_granulation){
+        inputActions.push_back(granulateClickedNodeAction);
+    }
     inputActions.push_back(muteAllNodesAction);
     return inputActions;
 }

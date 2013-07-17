@@ -9,8 +9,7 @@ IF (SUPPORT_AUDIO AND USE_QT4 AND USE_OSG AND USE_OSC )
         SET(MC_PLUGINS_STATIC ON)
 
 	SET(MEDIA_TYPE "MEDIA_TYPE_AUDIO")
-        #SET(MC_PLUGINS "audio-engine;audio-features-yaafe;audio-osg;audio-reader-sndfile;audio-segmentation;file;io-osc;io-3m-multitouch-screen;pcapreprocess;segmentation;visualisation")
-        SET(MC_PLUGINS "audio-engine-stk;audio-features-yaafe;audio-osg;audio-reader-sndfile;io-osc;audio-thumbnailer-waveform-svg;visualisation")#io-3m-multitouch-screen;
+        SET(MC_PLUGINS "audio-engine-stk-mashta;audio-features-yaafe;audio-osg;audio-reader-sndfile;io-osc;audio-thumbnailer-waveform-svg;visualisation")#io-3m-multitouch-screen;
         SET(OSG_PLUGINS "osgdb_svg")
         #SET(SETTING_INSTALLATION ON)
         SET(CLUSTERS_POSITIONS "MediaCycle t_Sne")

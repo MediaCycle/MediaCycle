@@ -68,6 +68,12 @@ public:
     virtual bool performActionOnMedia(std::string action, long int mediaId, std::vector<boost::any> arguments=std::vector<boost::any>());
     virtual std::map<std::string,ACMediaType> availableMediaActions();
     virtual std::map<std::string,ACMediaActionParameters> mediaActionsParameters();
+
+protected:
+    void useGranulation();
+    void useMotorizedFaders();
+
+public:
     void updateMasterVolume();
     void updatePlaybackSpeed();
     void muteAll();
@@ -166,6 +172,8 @@ protected:
     std::vector<std::string> midi_in_ports,midi_out_ports;
     long int current_closest_node;
     bool muting;
+    bool with_granulation;
+    bool with_faders;
 };
 
 #endif
