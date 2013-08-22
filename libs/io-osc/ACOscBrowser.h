@@ -108,10 +108,13 @@ public:
         return this->osc_feedback;
     }
 
+    void forwardMessages(bool _forward_messages){forward_messages = _forward_messages;}
+
 protected:
     MediaCycle *media_cycle;
     std::map<std::string,std::string> media_actions;
     std::map<std::string,ACMediaActionParameters> actions_parameters;
+    bool forward_messages;
 };
 
 #endif /* _ACOSCBROWSER_H_ */

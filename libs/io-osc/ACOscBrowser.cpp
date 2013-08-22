@@ -51,6 +51,7 @@ ACOscBrowser::ACOscBrowser() {
     this->server_thread = 0;
     this->active = false;
     this->verbosity = false;
+    this->forward_messages = true;
 }
 
 ACOscBrowser::~ACOscBrowser() {
@@ -125,6 +126,25 @@ int ACOscBrowser::process_mess(const char *path, const char *types, lo_arg **arg
     bool tuio = (tag.find("/tuio", 0) != string::npos);
     if (!mc && !tuio)//we don't process messages not containing /mediacycle or /tuio
         return 1;
+
+    if (osc_feedback and forward_messages) {
+        osc_feedback->messageBegin(path);
+        for(int arg=0; arg<argc; arg++){
+            if(types[arg]=='f'){
+                osc_feedback->messageAppendFloat(argv[arg]->f);
+            }
+            else if(types[arg]=='i'){
+                osc_feedback->messageAppendInt(argv[arg]->i);
+            }
+            else if(types[arg]=='s'){
+                osc_feedback->messageAppendString(&argv[arg]->s);
+            }
+        }
+        //osc_feedback->messageAppendFloat();
+        osc_feedback->messageEnd();
+        osc_feedback->messageSend();
+    }
+
 
     // test - sends back message (console + OSC feedback) if received properly
     if (tag.find("/test", 0) != string::npos) {
