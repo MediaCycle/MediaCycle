@@ -1,0 +1,30 @@
+--- wscript.orig	2013-08-24 15:25:12.000000000 +0200
++++ wscript	2013-08-24 15:41:46.000000000 +0200
+@@ -18,19 +18,22 @@
+ 	#conf.env.CXXFLAGS += ['-O2', '-fPIC', '-std=c++0x']
+ 	conf.env.CXXFLAGS = ['-w', '-O2']
+ 	conf.load('compiler_cxx')
+-	conf.check_cxx(lib='freenect', uselib_store='freenect')
+-	
++
+ 	if platform.system() == 'Darwin':
+ 		conf.env.CXX = ['clang++'] # can remove if OSX has >= gcc-4.6
++		conf.env.INCLUDES_MACPORTS     = ['/opt/local/include']
++		conf.env.LIBPATH_MACPORTS   = ['/opt/local/lib']
++
++	conf.check_cxx(lib='freenect', use = 'MACPORTS', uselib_store='freenect')
++
+ 
+ def build(bld):
+ 	bld.shlib(
+ 		target = APPNAME,
+ 		name = APPNAME,
+ 		vnum = VERSION,
++		use= ['MACPORTS','freenect'],
+ 		install_path = None,
+-		includes = ['extern/OpenNI-Linux-x64-2.2/Include', '/usr/include/libfreenect', '/usr/local/include/libfreenect'],
++		includes = ['/opt/local/include', '/opt/local/include/libfreenect'],
+ 		source = bld.path.ant_glob('src/*.cpp'),
+-		
+-		use = 'freenect',
+ 	)

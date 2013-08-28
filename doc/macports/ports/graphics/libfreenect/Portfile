@@ -4,8 +4,8 @@
 PortSystem          1.0
 PortGroup           github 1.0
 
-github.setup        piedar libfreenect a0e1e4112e
-version             0.1.2
+github.setup        OpenKinect libfreenect 5eed1f061d
+version             0.2.0
 categories          graphics
 platforms           darwin
 maintainers         christian.frisson@gmail.com openmaintainer
@@ -22,8 +22,8 @@ long_description    libfreenect is the core library for accessing the Microsoft 
                     - LED \
                     Audio is currently being worked on.
 
-checksums           rmd160  949d16341a0c6c0e196bb12e78b71da8fb126beb \
-                    sha256  977a44d3a89e054b8e56ac3b47bb62aa3b54e256ccfc61ed55944bf1ba52d368
+checksums           rmd160  da55443638b33dbd8dbac551250f186a18ab3d89 \
+                    sha256  671c16b33018e28db92ee050618f908ff738f61b64540706c4277cff5478d225
 
 depends_build       port:cmake
 

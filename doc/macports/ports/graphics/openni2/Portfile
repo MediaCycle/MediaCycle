@@ -1,0 +1,68 @@
+# -*- coding: utf-8; mode: tcl; tab-width: 4; indent-tabs-mode: nil; c-basic-offset: 4 -*- vim:fenc=utf-8:ft=tcl:et:sw=4:ts=4:sts=4
+# $Id: Portfile 96206 2012-08-04 00:27:43Z ryandesign@macports.org $
+
+PortSystem          1.0
+PortGroup           github 1.0
+
+github.setup        ChristianFrisson OpenNI2 0a435fc3a2
+name                openni2
+version             2.2.0.30
+categories          graphics
+platforms           darwin
+maintainers         gmail.com:christian.frisson openmaintainer
+license             LGPL-3+
+supported_archs     i386 x86_64
+
+description         APIs for natural interaction devices
+
+long_description    The OpenNI framework provides a set of APIs for accessing \
+                    natural interaction devices, including support for voice \
+                    and voice command recognition, hand gestures, and body \
+                    motion tracking. \
+
+checksums           rmd160  75e4ebc69fb7507d9914d3a6d5b7163128242f64 \
+                    sha256  6fbd5e9c3f81c14f22e6c7855e8f390b7785db86e2306d32b910b11893ed9673
+
+conflicts           openni
+
+depends_build       port:doxygen \
+                    port:python27
+
+depends_lib         port:libusb
+
+pre-fetch {
+    if {${os.platform} == "darwin" && ${os.major} < 10} {
+        ui_error "${name} ${version} requires OS X 10.6 or greater."
+        return -code error "incompatible OS X version"
+    }
+}
+
+use_configure       no
+
+variant universal {}
+
+build.cmd           make
+
+post-destroot {
+	system "cd ${worksrcpath}/Packaging && ${prefix}/bin/python2.7 ReleaseVersion.py x64"
+   	system "cp -R ${worksrcpath}/Packaging/OpenNI-MacOSX*/Include/*.h ${destroot}${prefix}/include"
+   	system "cp -R ${worksrcpath}/Packaging/OpenNI-MacOSX*/Include/Driver ${destroot}${prefix}/include"
+   	system "cp -R ${worksrcpath}/Packaging/OpenNI-MacOSX*/Include/Linux-x86 ${destroot}${prefix}/include"
+   	system "cp -R ${worksrcpath}/Packaging/OpenNI-MacOSX*/Include/MacOSX ${destroot}${prefix}/include"
+   	system "cp -R ${worksrcpath}/Packaging/OpenNI-MacOSX*/Redist/* ${destroot}${prefix}/lib"
+   	system "cp -R ${worksrcpath}/Packaging/OpenNI-MacOSX*/Tools/NiViewer ${destroot}${prefix}/bin"
+	system "cp -R ${worksrcpath}/Packaging/OpenNI-MacOSX*/Tools/PS1080Console ${destroot}${prefix}/bin"
+	system "cp -R ${worksrcpath}/Packaging/OpenNI-MacOSX*/Tools/PSLinkConsole ${destroot}${prefix}/bin"
+	system "install_name_tool -id ${prefix}/lib/libOpenNI2.dylib ${destroot}${prefix}/lib/libOpenNI2.dylib"
+	system "install_name_tool -id ${prefix}/lib/libOpenNI2.jni.dylib ${destroot}${prefix}/lib/libOpenNI2.jni.dylib"
+	system "install_name_tool -id ${prefix}/lib/OpenNI2/Drivers/libOniFile.dylib ${destroot}${prefix}/lib/OpenNI2/Drivers/libOniFile.dylib"
+	system "install_name_tool -id ${prefix}/lib/OpenNI2/Drivers/libPS1080.dylib ${destroot}${prefix}/lib/OpenNI2/Drivers/libPS1080.dylib"
+	system "install_name_tool -id ${prefix}/lib/OpenNI2/Drivers/libPSLink.dylib ${destroot}${prefix}/lib/OpenNI2/Drivers/libPSLink.dylib"
+	system "install_name_tool -change libOpenNI2.dylib ${prefix}/lib/libOpenNI2.dylib ${destroot}${prefix}/lib/libOpenNI2.jni.dylib"
+	system "install_name_tool -change libOpenNI2.dylib ${prefix}/lib/libOpenNI2.dylib ${destroot}${prefix}/lib/OpenNI2/Drivers/libOniFile.dylib"
+	system "install_name_tool -change libOpenNI2.dylib ${prefix}/lib/libOpenNI2.dylib ${destroot}${prefix}/lib/OpenNI2/Drivers/libPS1080.dylib"
+	system "install_name_tool -change libOpenNI2.dylib ${prefix}/lib/libOpenNI2.dylib ${destroot}${prefix}/lib/OpenNI2/Drivers/libPSLink.dylib"
+	system "install_name_tool -change libOpenNI2.dylib ${prefix}/lib/libOpenNI2.dylib ${destroot}${prefix}/bin/NiViewer"
+	system "install_name_tool -change libOpenNI2.dylib ${prefix}/lib/libOpenNI2.dylib ${destroot}${prefix}/bin/PS1080Console"
+	system "install_name_tool -change libOpenNI2.dylib ${prefix}/lib/libOpenNI2.dylib ${destroot}${prefix}/bin/PSLinkConsole"
+}
