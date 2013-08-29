@@ -1185,7 +1185,7 @@ void ACOsgCompositeViewQt::prepareFromBrowser()
     browser_renderer->prepareLabels();
     hud_renderer->preparePointers(browser_view);
     hud_renderer->prepareLibrary(browser_view);
-    hud_renderer->prepareMediaActions(browser_view);
+    //hud_renderer->prepareMediaActions(browser_view); // CF: temporarily disabled, makes MashtaCycle crash
     browser_view->setSceneData(browser_renderer->getShapes());
 
 //    osgDB::SharedStateManager* ssm = osgDB::Registry::instance()->getSharedStateManager();
@@ -1206,7 +1206,7 @@ void ACOsgCompositeViewQt::updateTransformsFromBrowser( double frac)
     browser_renderer->prepareLabels();
     hud_renderer->preparePointers();
     hud_renderer->prepareLibrary();
-    hud_renderer->prepareMediaActions();
+    //hud_renderer->prepareMediaActions(); // CF: temporarily disabled, makes MashtaCycle crash
 
     // get screen coordinates
     //int closest_node;//CF to deprecate
@@ -1220,7 +1220,7 @@ void ACOsgCompositeViewQt::updateTransformsFromBrowser( double frac)
 
     hud_renderer->updatePointers(browser_view);
     hud_renderer->updateLibrary(browser_view);
-    hud_renderer->updateMediaActions(browser_view);
+    // hud_renderer->updateMediaActions(browser_view); // CF: temporarily disabled, makes MashtaCycle crash
     /*osgViewer::ViewerBase::Views views;
  bool have_views;
  view->getViews(views,have_views);
