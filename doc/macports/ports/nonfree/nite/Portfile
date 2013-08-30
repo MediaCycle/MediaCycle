@@ -1,0 +1,74 @@
+# -*- coding: utf-8; mode: tcl; tab-width: 4; indent-tabs-mode: nil; c-basic-offset: 4 -*- vim:fenc=utf-8:ft=tcl:et:sw=4:ts=4:sts=4
+# $Id: Portfile 96206 2012-08-04 00:27:43Z ryandesign@macports.org $
+
+PortSystem          1.0
+
+name                nite
+version             1.5.2.21
+categories          nonfree
+platforms           darwin
+maintainers         gmail.com:christian.frisson openmaintainer
+license             Proprietary
+supported_archs     i386 x86_64
+
+description         Middleware for natural interaction devices
+
+long_description    The PrimeSense NiTE is the most advance and robust 3D \
+                    computer vision middleware available today, boasting a \
+                    thin host, minimal CPU load, and multiplatform support.
+
+homepage            http://www.openni.org/files/nite/
+master_sites        http://www.openni.org/wp-content/uploads/2012/12/
+distfiles           NITE-Bin-MacOSX-v1.5.2.21.tar.zip
+use_zip             yes
+
+checksums           rmd160  d03e081e559b9f3e447b2e50c6a9b4b24246d4b3 \
+                    sha256  1d67ab0e69ef3417f8e02f0c4aac0fbbb4eb3bdce267e8617097b6f6da8a5641
+
+#depends_build       port:doxygen
+
+depends_lib         port:openni
+
+conflicts	    port:openni2 \
+                    port:nite2
+
+pre-fetch {
+    if {${os.platform} == "darwin" && ${os.major} < 10} {
+        ui_error "${name} ${version} requires OS X 10.6 or greater."
+        return -code error "incompatible OS X version"
+    }
+}
+
+use_configure       no
+
+build {
+}
+
+destroot {
+   	system "cd ${workpath} && tar xfvj N?TE*Mac*.tar.bz2"
+   	system "cp -R ${workpath}/NITE-*${version}/Include/*.h ${destroot}${prefix}/include"
+   	system "cp -R ${workpath}/NITE-*${version}/Bin/*.dylib ${destroot}${prefix}/lib"
+   	system "cd ${destroot}${prefix} && rm -fr bin/.\_* && rm -fr lib/.\_* && rm -fr include/.\_*"
+	system "install_name_tool -id ${prefix}/lib/libXnVCNITE_1_5_2.dylib ${destroot}${prefix}/lib/libXnVCNITE_1_5_2.dylib"
+	system "install_name_tool -id ${prefix}/lib/libXnVFeatures_1_5_2.dylib ${destroot}${prefix}/lib/libXnVFeatures_1_5_2.dylib"
+	system "install_name_tool -id ${prefix}/lib/libXnVHandGenerator_1_5_2.dylib ${destroot}${prefix}/lib/libXnVHandGenerator_1_5_2.dylib"
+	system "install_name_tool -id ${prefix}/lib/libXnVNITE.jni.dylib ${destroot}${prefix}/lib/libXnVNITE.jni.dylib"
+	system "install_name_tool -id ${prefix}/lib/libXnVNite_1_5_2.dylib ${destroot}${prefix}/lib/libXnVNite_1_5_2.dylib"
+	system "install_name_tool -change ../../Bin/x64-Release/libOpenNI.dylib ${prefix}/lib/libOpenNI.dylib ${destroot}${prefix}/lib/libXnVNite_1_5_2.dylib"
+	system "install_name_tool -change ../../Bin/x64-Release/libOpenNI.dylib ${prefix}/lib/libOpenNI.dylib ${destroot}${prefix}/lib/libXnVNITE.jni.dylib"
+	system "install_name_tool -change ../../Bin/x64-Release/libOpenNI.dylib ${prefix}/lib/libOpenNI.dylib ${destroot}${prefix}/lib/libXnVCNITE_1_5_2.dylib"
+	system "install_name_tool -change ../../Bin/x64-Release/libOpenNI.dylib ${prefix}/lib/libOpenNI.dylib ${destroot}${prefix}/lib/libXnVFeatures_1_5_2.dylib"
+	system "install_name_tool -change ../../Bin/x64-Release/libOpenNI.dylib ${prefix}/lib/libOpenNI.dylib ${destroot}${prefix}/lib/libXnVHandGenerator_1_5_2.dylib"
+	system "install_name_tool -change ../../Bin/x64-Release/libOpenNI.dylib ${prefix}/lib/libOpenNI.dylib ${destroot}${prefix}/lib/libXnVNite_1_5_2.dylib"
+	system "install_name_tool -change ../../Bin/x64-Release/libXnVNite_1_5_2.dylib ${prefix}/lib/libXnVNite_1_5_2.dylib ${destroot}${prefix}/lib/libXnVCNITE_1_5_2.dylib"
+	system "install_name_tool -change ../../../Bin/x64-Release/libXnVCNITE_1_5_2.dylib ${prefix}/lib/libXnVCNITE_1_5_2.dylib ${destroot}${prefix}/lib/libXnVNITE.jni.dylib"
+	system "install_name_tool -change libOpenNI.jni.dylib ${prefix}/lib/libOpenNI.dylib ${destroot}${prefix}/lib/libXnVNITE.jni.dylib"
+	system "install_name_tool -change libXnVNite_1_5_2.dylib ${prefix}/lib/libXnVNite_1_5_2.dylib ${destroot}${prefix}/lib/libXnVCNITE_1_5_2.dylib"
+	system "install_name_tool -change libXnVNite_1_5_2.dylib ${prefix}/lib/libXnVNite_1_5_2.dylib ${destroot}${prefix}/lib/libXnVFeatures_1_5_2.dylib"
+	system "install_name_tool -change libXnVNite_1_5_2.dylib ${prefix}/lib/libXnVNite_1_5_2.dylib ${destroot}${prefix}/lib/libXnVHandGenerator_1_5_2.dylib"
+	system "install_name_tool -change libXnVNite_1_5_2.dylib ${prefix}/lib/libXnVNite_1_5_2.dylib ${destroot}${prefix}/lib/libXnVNITE.jni.dylib"
+	system "cd ${destroot}${prefix}/lib && ln -s libXnVNite_1_5_2.dylib libXnVNite.dylib"
+}
+
+livecheck.url                  http://www.openni.org/files/nite/index.php
+livecheck.regex                Version:</strong>\[ \t\n\](\[0-9.\]+)

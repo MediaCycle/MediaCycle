@@ -1,0 +1,17 @@
+--- Platform/Linux/Build/Utils/EngineUtilMakefile.orig	2012-05-24 20:35:24.000000000 +0200
++++ Platform/Linux/Build/Utils/EngineUtilMakefile	2013-08-30 01:18:22.000000000 +0200
+@@ -14,11 +14,13 @@
+ #############################################################################
+ 
+ INC_DIRS += \
+-	=/usr/include/ni \
++	=@PREFIX@/include/ni \
+ 	../../../../../Include \
+ 	../../../../../Source \
+ 	../../../../../Source/XnCommon
+ 
++LIB_DIRS += @PREFIX@/lib
++
+ BIN_DIR = ../../../Bin
+ 
+ include ../../Common/CommonCppMakefile

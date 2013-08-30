@@ -1,0 +1,18 @@
+--- Platform/Linux/Build/EngineLibMakefile.orig	2013-08-30 01:18:40.000000000 +0200
++++ Platform/Linux/Build/EngineLibMakefile	2013-08-30 01:18:16.000000000 +0200
+@@ -14,12 +14,14 @@
+ #############################################################################
+ 
+ INC_DIRS += \
+-	=/usr/include/ni \
++	=@PREFIX@/include/ni \
+ 	../../../../Include \
+ 	../../../../Source \
+ 	../../../../Source/XnCommon
+ 
+ BIN_DIR = ../../Bin
+ 
++LIB_DIRS += @PREFIX@/lib
++
+ include ../Common/CommonCppMakefile
+ 

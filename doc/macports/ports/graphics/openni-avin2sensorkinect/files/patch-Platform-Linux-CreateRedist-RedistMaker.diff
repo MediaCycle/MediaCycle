@@ -1,0 +1,11 @@
+--- Platform/Linux/CreateRedist/RedistMaker.orig	2013-08-30 01:30:27.000000000 +0200
++++ Platform/Linux/CreateRedist/RedistMaker	2013-08-30 01:30:41.000000000 +0200
+@@ -5,7 +5,7 @@
+ 
+ function calc_jobs_number() {
+ 	if [ $OS_TYPE == "Darwin" ] ; then
+-		N_CORES=$(sysctl -n hw.physicalcpu)
++		N_CORES=1
+ 	else
+ 		N_CORES=$(grep "processor\W:" /proc/cpuinfo | wc -l)
+ 	fi
