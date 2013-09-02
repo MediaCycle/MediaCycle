@@ -1,4 +1,4 @@
- /*
+/*
  *  ACOsgLibraryRenderer.h
  *  MediaCycle
  *
@@ -38,20 +38,25 @@
 
 #include "ACOsgMediaRenderer.h"
 
-struct ACOsgLibraryTextRenderer {
+class ACOsgLibraryTextRenderer {
+public:
     osg::ref_ptr<osgText::Text> text;
     osg::ref_ptr<osg::Geode> geode;
     std::string value;
     std::string caption;
     float x,y;
+public:
     ACOsgLibraryTextRenderer() : text(0),geode(0),value(""),caption(""),x(0.0f),y(0.0f){}
     ~ACOsgLibraryTextRenderer(){text = 0; geode = 0;}
+
 };
 
-struct ACOsgLibraryImageRenderer {
+class ACOsgLibraryImageRenderer {
+public:
     osg::ref_ptr<osg::MatrixTransform> transform;
     std::string file;
     float x,y;
+public:
     ACOsgLibraryImageRenderer() : transform(0),file(""),x(0.0f),y(0.0f){}
     ~ACOsgLibraryImageRenderer(){transform = 0;}
 };

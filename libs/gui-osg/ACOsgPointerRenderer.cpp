@@ -133,7 +133,7 @@ void ACOsgPointerRenderer::updateNodes(double ratio)
     Matrix Trotate;
 
     T.makeTranslate(Vec3(pos.x, pos.y, pos.z));
-    text->setText( text_string );
+    //CF MashtaDebug text->setText( text_string );
 
     if(pointer_transform)
         pointer_transform->setMatrix(T);
