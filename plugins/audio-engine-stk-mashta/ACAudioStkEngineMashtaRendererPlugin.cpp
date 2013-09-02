@@ -32,7 +32,7 @@
 #include "ACAudioStkEngineMashtaRendererPlugin.h"
 
 ACAudioStkEngineMashtaRendererPlugin::ACAudioStkEngineMashtaRendererPlugin() : ACAudioStkEngineRendererPlugin(){
-    this->mName = "Audio Engine for Sound Design (STK)";
+    this->mName = "MashtaCycle Audio Engine (STK)";
     this->mDescription ="Plugin for repurposing audio files with The Synthesis ToolKit in C++ (STK) for MashtaCycle";
 
     this->useGranulation();

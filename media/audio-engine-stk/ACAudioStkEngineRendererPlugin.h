@@ -73,10 +73,12 @@ protected:
     void useGranulation();
     void useMotorizedFaders();
 
+public slots:
+    void muteAll();
+
 public:
     void updateMasterVolume();
     void updatePlaybackSpeed();
-    void muteAll();
     void updateGrainVoices();
     void updateGrainRandomness();
     void updateGrainStretch();
@@ -119,7 +121,7 @@ private:
     static void midiInCallbackWrapper( double timeStamp, std::vector<unsigned char> *message, void *userData);
 
 protected:
-    RtAudio dac;
+    RtAudio* dac;
     std::map< long int, ACAudioStkFileWvIn*> inputs;
     std::map< long int, ACAudioStkFileLoop*> loops;
     std::map< long int, ACAudioStkGranulate*> grains;
@@ -174,6 +176,7 @@ protected:
     bool muting;
     bool with_granulation;
     bool with_faders;
+    int active_sources;
 };
 
 #endif
