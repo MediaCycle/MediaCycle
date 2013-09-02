@@ -70,7 +70,8 @@ ACOsgCompositeViewQt::ACOsgCompositeViewQt( QWidget * parent, const char * name,
       resetBrowserAction(0), rotateBrowserAction(0), zoomBrowserAction(0),
       translateBrowserAction(0), addMediaOnTimelineTrackAction(0), toggleTimelinePlaybackAction(0), adjustTimelineHeightAction(0),
       discardMediaAction(0),
-      setting(AC_SETTING_NONE)
+      setting(AC_SETTING_NONE),
+      mouse_disabled(false)
 {
 #ifdef UNIX
     osg::setNotifyLevel(osg::DEBUG_INFO);
@@ -441,7 +442,7 @@ void ACOsgCompositeViewQt::updateGL()
         // Moved to ACOsgCompositeViewQt::changeSetting
 
         // Automatically erase the mouse pointer if outside the view for installations, keep it for other settings
-        if(setting == AC_SETTING_INSTALLATION){
+        if(setting == AC_SETTING_INSTALLATION && !mouse_disabled){
             if(mouseover!=this->underMouse()){
                 if(this->underMouse())// && media_cycle->hasBrowser() && media_cycle->getBrowser()->hasMousePointer() == false)//Qt
                     media_cycle->getBrowser()->addMousePointer();
@@ -530,6 +531,24 @@ void ACOsgCompositeViewQt::pluginLoaded(std::string plugin_name){
         else
             std::cerr << "ACOsgCompositeViewQt::pluginLoaded: warning, malformed action from plugin " << plugin_name << std::endl;
 
+    }
+}
+
+
+void ACOsgCompositeViewQt::mediaImported(int n, int nTot,int mId){
+    if(n < nTot && !mouse_disabled){
+        std::cout << "ACOsgCompositeViewQt::mediaImported: disabling interaction with the browser while importing " << std::endl;
+        mouse_disabled = true;
+        if(media_cycle && media_cycle->hasBrowser())
+            media_cycle->getBrowser()->removeMousePointer();
+        return;
+    }
+    else if(n==nTot && mId==-1){
+        std::cout << "ACOsgCompositeViewQt::mediaImported: restoring interaction with the browser after importing " << std::endl;
+        if(media_cycle && media_cycle->hasBrowser())
+            media_cycle->getBrowser()->addMousePointer();
+        mouse_disabled = false;
+        return;
     }
 }
 
@@ -1266,12 +1285,12 @@ void ACOsgCompositeViewQt::changeSetting(ACSettingType _setting)
         this->setCursor(QCursor( Qt::BlankCursor ) );
         // QApplication::setOverrideCursor( QCursor( Qt::BlankCursor ) );
         // QApplication::restoreOverrideCursor();
-        if(media_cycle->hasBrowser() && media_cycle->getBrowser()->hasMousePointer())
+        if(media_cycle->hasBrowser() && media_cycle->getBrowser()->hasMousePointer() && !mouse_disabled)
             media_cycle->getBrowser()->removeMousePointer();
        }
     else{
         this->setCursor(QCursor());
-        if(media_cycle->hasBrowser() && media_cycle->getBrowser()->hasMousePointer() == false)
+        if(media_cycle->hasBrowser() && media_cycle->getBrowser()->hasMousePointer() == false && !mouse_disabled)
             media_cycle->getBrowser()->addMousePointer();
     }
 }

@@ -154,6 +154,7 @@ public:
     QList<ACInputActionQt*> getInputActions(){return inputActions;}
     // MediaCycle listener callback
     virtual void pluginLoaded(std::string plugin_name);
+    void mediaImported(int n,int nTot,int mId);
 
 private:
     void updateBrowserView(int width, int height);
@@ -189,6 +190,7 @@ private:
     bool mouseover;
     QPoint dragStartPosition;
     bool dragFlag;
+    bool mouse_disabled;
 
     //MediaBlender specific members:
 private:
