@@ -1175,6 +1175,10 @@ void ACAudioFeedback::processAudioEngineSamplePosition(int _loop_slot, int *_pre
 	// DT : made sample_start and end actually useful
 	// XS : added tmp_audio_ptr to check if loop exists
 	// XS TODO : what to do if it does not ? (currently just return)
+    if(!media_cycle)
+        return;
+    if(!media_cycle->getLibrary())
+        return;
 	ACAudio* tmp_audio_ptr = static_cast<ACAudio*> (media_cycle->getLibrary()->getMedia(loop_id));
 	if (!tmp_audio_ptr) return;
 	int sample_start = tmp_audio_ptr->getSampleStart();
@@ -2127,14 +2131,17 @@ int ACAudioFeedback::deleteSource(int loop_id)
 	error = alGetError();
 	if(error == AL_INVALID_VALUE) {
 		printf("Error Unqueue Buffers invalid value %d!\n", current_unqueue);
+        pthread_mutex_unlock(&audio_engine_mutex);
         return -1;//exit(1);
 	}
 	if(error == AL_INVALID_NAME) {
 		printf("Error Unqueue Buffers invalid name %d!\n", current_unqueue);
+        pthread_mutex_unlock(&audio_engine_mutex);
         return -1;//exit(1);
 	}
 	if(error == AL_INVALID_OPERATION) {
 		printf("Error Unqueue Buffers invalid operation %d!\n", current_unqueue);
+        pthread_mutex_unlock(&audio_engine_mutex);
         return -1;//exit(1);
 	}
 	//alSourcei(loop_source, AL_BUFFER, 0);

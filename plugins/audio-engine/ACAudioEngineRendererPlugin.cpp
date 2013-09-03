@@ -38,7 +38,7 @@
 using namespace std;
 
 ACAudioEngineRendererPlugin::ACAudioEngineRendererPlugin() : QObject(), ACPluginQt(), ACMediaRendererPlugin(){
-    this->mName = "Audio Engine";
+    this->mName = "Audio Engine (OpenAL)";
     this->mDescription ="Plugin for playing audio files with OpenAL or PortAudio";
     this->mMediaType = MEDIA_TYPE_AUDIO | MEDIA_TYPE_MIXED;
 
@@ -174,7 +174,7 @@ std::map<std::string,ACMediaType> ACAudioEngineRendererPlugin::getSupportedExten
 }
 
 bool ACAudioEngineRendererPlugin::performActionOnMedia(std::string action, long int mediaId, std::vector<boost::any> arguments){
-    //std::cout << "ACAudioEngineRendererPlugin::performActionOnMedia: action " << action << " mediaId " << mediaId << std::endl;
+    std::cout << "ACAudioEngineRendererPlugin::performActionOnMedia: action " << action << " mediaId " << mediaId << std::endl;
     if(!media_cycle){
         std::cerr << "ACAudioEngineRendererPlugin::performActionOnMedia: mediacycle instance not set" << std::endl;
         return false;
@@ -185,7 +185,7 @@ bool ACAudioEngineRendererPlugin::performActionOnMedia(std::string action, long 
         return false;
     }
 
-    if(action == "mute all"){
+    if(action == "mute all" || action == "kill all"){
         this->muteAll();
         return true;
     }
@@ -195,7 +195,20 @@ bool ACAudioEngineRendererPlugin::performActionOnMedia(std::string action, long 
         return false;
     }
 
-    if(action.find("mode", 0) != string::npos){
+    if(action == "hover closest node"){
+        // For now managed by MediaCycle
+    }
+    else if(action == "hover off node"){
+        //std::cout << "ACAudioStkEngineRendererPlugin::performActionOnMedia: hover off node " << mediaId << std::endl;
+        //if(activity == 2)
+        media_cycle->performActionOnMedia("mute", mediaId);
+    }
+    else if(action == "mute"){
+        //std::cout << "ACAudioStkEngineRendererPlugin::performActionOnMedia: hover off node " << mediaId << std::endl;
+        //if(activity == 2)
+        //media_cycle->performActionOnMedia("mute", mediaId);
+    }
+    else if(action.find("mode", 0) != string::npos){
 
         if(arguments.size() !=1){
             std::cerr << "ACAudioEngineRendererPlugin::performActionOnMedia: action " << action << " requires 1 string argument" << std::endl;
@@ -245,11 +258,39 @@ bool ACAudioEngineRendererPlugin::performActionOnMedia(std::string action, long 
         if(action == "scrub"){
             audio_engine->setScrub(new_value);
         }
-        else if(action == "pitch"){
+        else if(action == "reverb freeze"){
+            if(new_value==1){
+                std::cout << "Reverb freeze on" << std::endl;
+                audio_engine->updateScaleMode(ACAudioEngineScaleModeVocode);
+                audio_engine->updateSynchroMode(ACAudioEngineSynchroModeManual);
+            }
+            else{
+                std::cout << "Reverb freeze off" << std::endl;
+                audio_engine->updateScaleMode(ACAudioEngineScaleModeNone);
+                audio_engine->updateSynchroMode(ACAudioEngineSynchroModeNone);
+
+            }
+        }
+        else if(action == "pitch" || action == "playback speed"){
             audio_engine->setSourcePitch(mediaId, new_value);
         }
-        else if(action == "gain"){
+        else if(action == "gain" || action == "playback volume"){
             audio_engine->setSourceGain(mediaId, new_value);
+        }
+        else if(action == "playback pan"){
+            const ACMediaNode* attribute(0);
+            if(media_cycle->getLibrarySize() >0) //CF when cleaning a library when some nodes are still active
+                attribute = media_cycle->getMediaNode(mediaId);
+            if(attribute){
+                // Audio Engine defaults
+                const ACPoint &p = attribute->getCurrentPosition();
+                float x=p.x;
+                float y=0;
+                float z=p.y;
+                // New attribution
+                x = new_value;
+                audio_engine->setSourcePosition(mediaId, x, y, z);
+            }
         }
         /*else if(action == "loop" || action == "play"){
         media_cycle->setNeedsActivityUpdateMedia();
@@ -263,11 +304,17 @@ std::map<std::string,ACMediaType> ACAudioEngineRendererPlugin::availableMediaAct
     media_actions["scale mode"] = MEDIA_TYPE_AUDIO;
     media_actions["synchro mode"] = MEDIA_TYPE_AUDIO;
     media_actions["scrub"] = MEDIA_TYPE_AUDIO;
+    media_actions["reverb freeze"] = MEDIA_TYPE_AUDIO;
     media_actions["pitch"] = MEDIA_TYPE_AUDIO;
+    media_actions["playback speed"] = MEDIA_TYPE_AUDIO;
+    media_actions["playback volume"] = MEDIA_TYPE_AUDIO;
+    media_actions["playback pan"] = MEDIA_TYPE_AUDIO;
     media_actions["gain"] = MEDIA_TYPE_AUDIO;
     media_actions["play"] = MEDIA_TYPE_AUDIO;
     media_actions["loop"] = MEDIA_TYPE_AUDIO;
     media_actions["mute all"] = MEDIA_TYPE_AUDIO;
+    media_actions["kill all"] = MEDIA_TYPE_AUDIO;
+    media_actions["mute"] = MEDIA_TYPE_AUDIO;
     return media_actions;
 }
 

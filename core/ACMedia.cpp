@@ -715,9 +715,9 @@ ACMediaFeatures* ACMedia::getPreProcFeaturesVector(string feature_name) {
             return preproc_features_vectors[i];
         }
     }
-#ifdef USE_DEBUG // use debug message levels instead
-    std::cerr << "ACMedia::getPreProcFeaturesVector : not found feature named " << feature_name << std::endl;
-#endif
+//#ifdef USE_DEBUG // use debug message levels instead
+//    std::cerr << "ACMedia::getPreProcFeaturesVector : not found feature named " << feature_name << std::endl;
+//#endif
     return 0;
 }
 
