@@ -5,12 +5,13 @@ PortSystem                      1.0
 PortGroup                       cmake 1.0
 
 name                            openal-soft
-version                         1.14
+version                        	1.15.1
+revision			1
 set branch                      ${version}
 categories                      audio devel
 license                         LGPL
 platforms                       darwin
-maintainers                     nomaintainer
+maintainers                     gmail.com:christian.frisson nomaintainer
 
 description                     OpenAL Soft is an LGPL-licensed, cross-platform, \
 				software implementation of the OpenAL 3D audio API. 
@@ -29,15 +30,21 @@ long_description                OpenAL Soft is an LGPL-licensed, cross-platform,
 				buffers, and audio capture.
 
 homepage                        http://kcat.strangesoft.net/openal.html
-master_sites                    http://kcat.strangesoft.net/openal-releases
-use_bzip2                       yes
-distname                        openal-soft-${version}
+master_sites                    http://repo.or.cz/w/openal-soft.git/snapshot/
+use_zip                         yes
+distfiles                       94884ed04b88697acd851f1b4ab492221b809ad6.zip
+worksrcdir			${name}
 
-checksums                       md5     3d8b86c21a2f87a2a5e60f78f3b3f03d \
-				sha1    e6d69db13ec15465b83a45ef89978e8a0f55beca \
-				rmd160  35b4d46f2179fb847d22abe4c1cb8d4a974f8a5a
+checksums           md5     27cfafc202920ba8c234e98a9f3e4c80 \
+                    sha1    e76c25d7b3652fcac8af5ff9ddb409f13396c2b3 \
+                    rmd160  5bd21bc62b94514ce3195653fd3a5721d25e1ce9
 
-depends_build-append            port:pkgconfig
+depends_build-append            port:pkgconfig \
+				port:portaudio \
+				port:qt4-mac
 
-# CF: openal-soft examples require only ffmpeg, but collides with version 0.10.4
-configure.args-append           -DEXAMPLES=OFF
+patchfiles			patch-cmake-FindPortaudio.cmake.diff \
+				patch-CMakeLists.txt.diff
+
+
+
