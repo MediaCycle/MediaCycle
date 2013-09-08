@@ -43,94 +43,143 @@ namespace stk {
 FileRead :: FileRead()
   : fd_(0), fileSize_(0), channels_(0), dataType_(0), fileRate_(0.0)
 {
+    sfinfo = 0;
+    audio_file = 0;
 }
 
 FileRead :: FileRead( std::string fileName, bool typeRaw, unsigned int nChannels,
                       StkFormat format, StkFloat rate )
   : fd_(0)
 {
+    sfinfo = 0;
+    audio_file = 0;
   open( fileName, typeRaw, nChannels, format, rate );
 }
 
 FileRead :: ~FileRead()
 {
-  if ( fd_ )
-    fclose( fd_ );
+//  if ( fd_ )
+//    fclose( fd_ );
+    if(audio_file){
+        sf_close (audio_file);
+        audio_file = 0;
+    }
 }
 
 void FileRead :: close( void )
 {
-  if ( fd_ ) fclose( fd_ );
+  //if ( fd_ )
+//      fclose( fd_ );
+
+    if(audio_file){
+        sf_close (audio_file);
+        audio_file = 0;
+    }
+
   fd_ = 0;
   wavFile_ = false;
   fileSize_ = 0;
   channels_ = 0;
   dataType_ = 0;
   fileRate_ = 0.0;
+
+
+
+
 }
 
 bool FileRead :: isOpen( void )
 {
-  if ( fd_ ) return true;
+  if ( audio_file && channels_ != 0/*fd_*/ ) return true;
   else return false;
+
 }
 
 void FileRead :: open( std::string fileName, bool typeRaw, unsigned int nChannels,
                        StkFormat format, StkFloat rate )
 {
-  // If another file is open, close it.
-  close();
+    if(!sfinfo)
+        sfinfo = new SF_INFO;
 
-  // Try to open the file.
-  fd_ = fopen( fileName.c_str(), "rb" );
-  if ( !fd_ ) {
-    oStream_ << "FileRead::open: could not open or find file (" << fileName << ")!";
-    handleError( StkError::FILE_NOT_FOUND );
-  }
-
-  // Attempt to determine file type from header (unless RAW).
-  bool result = false;
-  if ( typeRaw )
-    result = getRawInfo( fileName.c_str(), nChannels, format, rate );
-  else {
-    char header[12];
-    if ( fread( &header, 4, 3, fd_ ) != 3 ) goto error;
-    if ( !strncmp( header, "RIFF", 4 ) &&
-         !strncmp( &header[8], "WAVE", 4 ) )
-      result = getWavInfo( fileName.c_str() );
-    else if ( !strncmp( header, ".snd", 4 ) )
-      result = getSndInfo( fileName.c_str() );
-    else if ( !strncmp( header, "FORM", 4 ) &&
-              ( !strncmp( &header[8], "AIFF", 4 ) || !strncmp(&header[8], "AIFC", 4) ) )
-      result = getAifInfo( fileName.c_str() );
-    else {
-      if ( fseek( fd_, 126, SEEK_SET ) == -1 ) goto error;
-      if ( fread( &header, 2, 1, fd_ ) != 1 ) goto error;
-      if ( !strncmp( header, "MI", 2 ) ||
-           !strncmp( header, "IM", 2 ) )
-        result = getMatInfo( fileName.c_str() );
-      else {
-        oStream_ << "FileRead::open: file (" << fileName << ") format unknown.";
-        handleError( StkError::FILE_UNKNOWN_FORMAT );
-      }
+    if (! (audio_file = sf_open (fileName.c_str(), SFM_READ, sfinfo))){
+        // Open failed so print an error message.
+        std::cout << "FileRead :: isOpen: not able to open input file " <<  fileName << std::endl;
+        // Print the error message from libsndfile.
+        return ;
     }
-  }
 
-  // If here, we had a file type candidate but something else went wrong.
-  if ( result == false )
-    handleError( StkError::FILE_ERROR );
+    this->channels_ = sfinfo->channels;
+    this->fileSize_ = sfinfo->frames;
+    this->fileRate_ = sfinfo->samplerate;
 
-  // Check for empty files.
-  if ( fileSize_ == 0 ) {
-    oStream_ << "FileRead::open: file (" << fileName << ") data size is zero!";
-    handleError( StkError::FILE_ERROR );
-  }
+    if((sfinfo->format & SF_FORMAT_SUBMASK) == SF_FORMAT_PCM_S8)
+        dataType_ = STK_SINT8;
+    if((sfinfo->format & SF_FORMAT_SUBMASK) == SF_FORMAT_PCM_16)
+        dataType_ = STK_SINT16;
+    if((sfinfo->format & SF_FORMAT_SUBMASK) == SF_FORMAT_PCM_24)
+        dataType_ = STK_SINT24;
+    if((sfinfo->format & SF_FORMAT_SUBMASK) == SF_FORMAT_PCM_32)
+        dataType_ = STK_SINT32;
+    if((sfinfo->format & SF_FORMAT_SUBMASK) == SF_FORMAT_PCM_U8)
+        dataType_ = STK_SINT8;
+    if((sfinfo->format & SF_FORMAT_SUBMASK) == SF_FORMAT_FLOAT)
+        dataType_ = STK_FLOAT32;
+    if((sfinfo->format & SF_FORMAT_SUBMASK) == SF_FORMAT_DOUBLE)
+        dataType_ = STK_FLOAT64;
 
-  return;
+//  // If another file is open, close it.
+//  close();
 
- error:
-  oStream_ << "FileRead::open: error reading file (" << fileName << ")!";
-  handleError( StkError::FILE_ERROR );
+//  // Try to open the file.
+//  fd_ = fopen( fileName.c_str(), "rb" );
+//  if ( !fd_ ) {
+//    oStream_ << "FileRead::open: could not open or find file (" << fileName << ")!";
+//    handleError( StkError::FILE_NOT_FOUND );
+//  }
+
+//  // Attempt to determine file type from header (unless RAW).
+//  bool result = false;
+//  if ( typeRaw )
+//    result = getRawInfo( fileName.c_str(), nChannels, format, rate );
+//  else {
+//    char header[12];
+//    if ( fread( &header, 4, 3, fd_ ) != 3 ) goto error;
+//    if ( !strncmp( header, "RIFF", 4 ) &&
+//         !strncmp( &header[8], "WAVE", 4 ) )
+//      result = getWavInfo( fileName.c_str() );
+//    else if ( !strncmp( header, ".snd", 4 ) )
+//      result = getSndInfo( fileName.c_str() );
+//    else if ( !strncmp( header, "FORM", 4 ) &&
+//              ( !strncmp( &header[8], "AIFF", 4 ) || !strncmp(&header[8], "AIFC", 4) ) )
+//      result = getAifInfo( fileName.c_str() );
+//    else {
+//      if ( fseek( fd_, 126, SEEK_SET ) == -1 ) goto error;
+//      if ( fread( &header, 2, 1, fd_ ) != 1 ) goto error;
+//      if ( !strncmp( header, "MI", 2 ) ||
+//           !strncmp( header, "IM", 2 ) )
+//        result = getMatInfo( fileName.c_str() );
+//      else {
+//        oStream_ << "FileRead::open: file (" << fileName << ") format unknown.";
+//        handleError( StkError::FILE_UNKNOWN_FORMAT );
+//      }
+//    }
+//  }
+
+//  // If here, we had a file type candidate but something else went wrong.
+//  if ( result == false )
+//    handleError( StkError::FILE_ERROR );
+
+//  // Check for empty files.
+//  if ( fileSize_ == 0 ) {
+//    oStream_ << "FileRead::open: file (" << fileName << ") data size is zero!";
+//    handleError( StkError::FILE_ERROR );
+//  }
+
+//  return;
+
+// error:
+//  oStream_ << "FileRead::open: error reading file (" << fileName << ")!";
+//  handleError( StkError::FILE_ERROR );
 }
 
 bool FileRead :: getRawInfo( const char *fileName, unsigned int nChannels, StkFormat format, StkFloat rate )
@@ -719,11 +768,11 @@ bool FileRead :: getMatInfo( const char *fileName )
 
 void FileRead :: read( StkFrames& buffer, unsigned long startFrame, bool doNormalize )
 {
-  // Make sure we have an open file.
-  if ( fd_ == 0 ) {
-    oStream_ << "FileRead::read: a file is not open!";
-    Stk::handleError( StkError::WARNING ); return;
-  }
+//  // Make sure we have an open file.
+//  if ( fd_ == 0 ) {
+//    oStream_ << "FileRead::read: a file is not open!";
+//    Stk::handleError( StkError::WARNING ); return;
+//  }
 
   // Check the buffer size.
   unsigned int nFrames = buffer.frames();
@@ -737,142 +786,162 @@ void FileRead :: read( StkFrames& buffer, unsigned long startFrame, bool doNorma
     Stk::handleError( StkError::FUNCTION_ARGUMENT );
   }
 
-  // Check for file end.
-  if ( startFrame + nFrames >= fileSize_ )
-    nFrames = fileSize_ - startFrame;
 
-  long i, nSamples = (long) ( nFrames * channels_ );
-  unsigned long offset = startFrame * channels_;
+  float* buf = new float[channels_ * nFrames];
 
-  // Read samples into StkFrames data buffer.
-  if ( dataType_ == STK_SINT16 ) {
-    SINT16 *buf = (SINT16 *) &buffer[0];
-    if ( fseek( fd_, dataOffset_+(offset*2), SEEK_SET ) == -1 ) goto error;
-    if ( fread( buf, nSamples * 2, 1, fd_ ) != 1 ) goto error;
-    if ( byteswap_ ) {
-      SINT16 *ptr = buf;
-      for ( i=nSamples-1; i>=0; i-- )
-        swap16( (unsigned char *) ptr++ );
-    }
-    if ( doNormalize ) {
-      StkFloat gain = 1.0 / 32768.0;
-      for ( i=nSamples-1; i>=0; i-- )
-        buffer[i] = buf[i] * gain;
-    }
-    else {
-      for ( i=nSamples-1; i>=0; i-- )
-        buffer[i] = buf[i];
-    }
+  int readcount = sf_readf_float (audio_file, buf, nFrames);
+  if(readcount != nFrames){
+      //std::cerr << "FileRead :: read: couldn't read " << nFrames << " frames, got instead " << readcount << " frames" << std::endl;
+      //return;
   }
-  else if ( dataType_ == STK_SINT32 ) {
-    SINT32 *buf = (SINT32 *) &buffer[0];
-    if ( fseek( fd_, dataOffset_+(offset*4 ), SEEK_SET ) == -1 ) goto error;
-    if ( fread( buf, nSamples * 4, 1, fd_ ) != 1 ) goto error;
-    if ( byteswap_ ) {
-      SINT32 *ptr = buf;
-      for ( i=nSamples-1; i>=0; i-- )
-        swap32( (unsigned char *) ptr++ );
-    }
-    if ( doNormalize ) {
-      StkFloat gain = 1.0 / 2147483648.0;
-      for ( i=nSamples-1; i>=0; i-- )
-        buffer[i] = buf[i] * gain;
-    }
-    else {
-      for ( i=nSamples-1; i>=0; i-- )
-        buffer[i] = buf[i];
-    }
+  long i,nSamples = (long) ( nFrames * channels_ );
+  for ( i=nSamples-1; i>=0; i-- )
+          buffer[i] = buf[i];
+  if(i>0){
+      int last = i;
+    for (; i>=0; i-- )
+        buffer[i] = buf[last];
   }
-  else if ( dataType_ == STK_FLOAT32 ) {
-    FLOAT32 *buf = (FLOAT32 *) &buffer[0];
-    if ( fseek( fd_, dataOffset_+(offset*4), SEEK_SET ) == -1 ) goto error;
-    if ( fread( buf, nSamples * 4, 1, fd_ ) != 1 ) goto error;
-    if ( byteswap_ ) {
-      FLOAT32 *ptr = buf;
-      for ( i=nSamples-1; i>=0; i-- )
-        swap32( (unsigned char *) ptr++ );
-    }
-    for ( i=nSamples-1; i>=0; i-- )
-      buffer[i] = buf[i];
-  }
-  else if ( dataType_ == STK_FLOAT64 ) {
-    FLOAT64 *buf = (FLOAT64 *) &buffer[0];
-    if ( fseek( fd_, dataOffset_+(offset*8), SEEK_SET ) == -1 ) goto error;
-    if ( fread( buf, nSamples * 8, 1, fd_ ) != 1 ) goto error;
-    if ( byteswap_ ) {
-      FLOAT64 *ptr = buf;
-      for ( i=nSamples-1; i>=0; i-- )
-        swap64( (unsigned char *) ptr++ );
-    }
-    for ( i=nSamples-1; i>=0; i-- )
-      buffer[i] = buf[i];
-  }
-  else if ( dataType_ == STK_SINT8 && wavFile_ ) { // 8-bit WAV data is unsigned!
-    unsigned char *buf = (unsigned char *) &buffer[0];
-    if ( fseek( fd_, dataOffset_+offset, SEEK_SET ) == -1 ) goto error;
-    if ( fread( buf, nSamples, 1, fd_) != 1 ) goto error;
-    if ( doNormalize ) {
-      StkFloat gain = 1.0 / 128.0;
-      for ( i=nSamples-1; i>=0; i-- )
-        buffer[i] = ( buf[i] - 128 ) * gain;
-    }
-    else {
-      for ( i=nSamples-1; i>=0; i-- )
-        buffer[i] = buf[i] - 128.0;
-    }
-  }
-  else if ( dataType_ == STK_SINT8 ) { // signed 8-bit data
-    char *buf = (char *) &buffer[0];
-    if ( fseek( fd_, dataOffset_+offset, SEEK_SET ) == -1 ) goto error;
-    if ( fread( buf, nSamples, 1, fd_ ) != 1 ) goto error;
-    if ( doNormalize ) {
-      StkFloat gain = 1.0 / 128.0;
-      for ( i=nSamples-1; i>=0; i-- )
-        buffer[i] = buf[i] * gain;
-    }
-    else {
-      for ( i=nSamples-1; i>=0; i-- )
-        buffer[i] = buf[i];
-    }
-  }
-  else if ( dataType_ == STK_SINT24 ) {
-    // 24-bit values are harder to import efficiently since there is
-    // no native 24-bit type.  The following routine works but is much
-    // less efficient than that used for the other data types.
-    SINT32 temp;
-    unsigned char *ptr = (unsigned char *) &temp;
-    StkFloat gain = 1.0 / 2147483648.0;
-    if ( fseek(fd_, dataOffset_+(offset*3), SEEK_SET ) == -1 ) goto error;
-    for ( i=0; i<nSamples; i++ ) {
-#ifdef __LITTLE_ENDIAN__
-      if ( byteswap_ ) {
-        if ( fread( ptr, 3, 1, fd_ ) != 1 ) goto error;
-        temp &= 0x00ffffff;
-        swap32( (unsigned char *) ptr );
-      }
-      else {
-        if ( fread( ptr+1, 3, 1, fd_ ) != 1 ) goto error;
-        temp &= 0xffffff00;
-      }
-#else
-      if ( byteswap_ ) {
-        if ( fread( ptr+1, 3, 1, fd_ ) != 1 ) goto error;
-        temp &= 0xffffff00;
-        swap32( (unsigned char *) ptr );
-      }
-      else {
-        if ( fread( ptr, 3, 1, fd_ ) != 1 ) goto error;
-        temp &= 0x00ffffff;
-      }
-#endif
+    
+  delete[] buf;
 
-      if ( doNormalize ) {
-        buffer[i] = (StkFloat) temp * gain; // "gain" also  includes 1 / 256 factor.
-      }
-      else
-        buffer[i] = (StkFloat) temp / 256;  // right shift without affecting the sign bit
-    }
-  }
+
+//  // Check for file end.
+//  if ( startFrame + nFrames >= fileSize_ )
+//    nFrames = fileSize_ - startFrame;
+
+//  long i, nSamples = (long) ( nFrames * channels_ );
+//  unsigned long offset = startFrame * channels_;
+
+//  // Read samples into StkFrames data buffer.
+//  if ( dataType_ == STK_SINT16 ) {
+//    SINT16 *buf = (SINT16 *) &buffer[0];
+//    if ( fseek( fd_, dataOffset_+(offset*2), SEEK_SET ) == -1 ) goto error;
+//    if ( fread( buf, nSamples * 2, 1, fd_ ) != 1 ) goto error;
+//    if ( byteswap_ ) {
+//      SINT16 *ptr = buf;
+//      for ( i=nSamples-1; i>=0; i-- )
+//        swap16( (unsigned char *) ptr++ );
+//    }
+//    if ( doNormalize ) {
+//      StkFloat gain = 1.0 / 32768.0;
+//      for ( i=nSamples-1; i>=0; i-- )
+//        buffer[i] = buf[i] * gain;
+//    }
+//    else {
+//      for ( i=nSamples-1; i>=0; i-- )
+//        buffer[i] = buf[i];
+//    }
+//  }
+//  else if ( dataType_ == STK_SINT32 ) {
+//    SINT32 *buf = (SINT32 *) &buffer[0];
+//    if ( fseek( fd_, dataOffset_+(offset*4 ), SEEK_SET ) == -1 ) goto error;
+//    if ( fread( buf, nSamples * 4, 1, fd_ ) != 1 ) goto error;
+//    if ( byteswap_ ) {
+//      SINT32 *ptr = buf;
+//      for ( i=nSamples-1; i>=0; i-- )
+//        swap32( (unsigned char *) ptr++ );
+//    }
+//    if ( doNormalize ) {
+//      StkFloat gain = 1.0 / 2147483648.0;
+//      for ( i=nSamples-1; i>=0; i-- )
+//        buffer[i] = buf[i] * gain;
+//    }
+//    else {
+//      for ( i=nSamples-1; i>=0; i-- )
+//        buffer[i] = buf[i];
+//    }
+//  }
+//  else if ( dataType_ == STK_FLOAT32 ) {
+//    FLOAT32 *buf = (FLOAT32 *) &buffer[0];
+//    if ( fseek( fd_, dataOffset_+(offset*4), SEEK_SET ) == -1 ) goto error;
+//    if ( fread( buf, nSamples * 4, 1, fd_ ) != 1 ) goto error;
+//    if ( byteswap_ ) {
+//      FLOAT32 *ptr = buf;
+//      for ( i=nSamples-1; i>=0; i-- )
+//        swap32( (unsigned char *) ptr++ );
+//    }
+//    for ( i=nSamples-1; i>=0; i-- )
+//      buffer[i] = buf[i];
+//  }
+//  else if ( dataType_ == STK_FLOAT64 ) {
+//    FLOAT64 *buf = (FLOAT64 *) &buffer[0];
+//    if ( fseek( fd_, dataOffset_+(offset*8), SEEK_SET ) == -1 ) goto error;
+//    if ( fread( buf, nSamples * 8, 1, fd_ ) != 1 ) goto error;
+//    if ( byteswap_ ) {
+//      FLOAT64 *ptr = buf;
+//      for ( i=nSamples-1; i>=0; i-- )
+//        swap64( (unsigned char *) ptr++ );
+//    }
+//    for ( i=nSamples-1; i>=0; i-- )
+//      buffer[i] = buf[i];
+//  }
+//  else if ( dataType_ == STK_SINT8 && wavFile_ ) { // 8-bit WAV data is unsigned!
+//    unsigned char *buf = (unsigned char *) &buffer[0];
+//    if ( fseek( fd_, dataOffset_+offset, SEEK_SET ) == -1 ) goto error;
+//    if ( fread( buf, nSamples, 1, fd_) != 1 ) goto error;
+//    if ( doNormalize ) {
+//      StkFloat gain = 1.0 / 128.0;
+//      for ( i=nSamples-1; i>=0; i-- )
+//        buffer[i] = ( buf[i] - 128 ) * gain;
+//    }
+//    else {
+//      for ( i=nSamples-1; i>=0; i-- )
+//        buffer[i] = buf[i] - 128.0;
+//    }
+//  }
+//  else if ( dataType_ == STK_SINT8 ) { // signed 8-bit data
+//    char *buf = (char *) &buffer[0];
+//    if ( fseek( fd_, dataOffset_+offset, SEEK_SET ) == -1 ) goto error;
+//    if ( fread( buf, nSamples, 1, fd_ ) != 1 ) goto error;
+//    if ( doNormalize ) {
+//      StkFloat gain = 1.0 / 128.0;
+//      for ( i=nSamples-1; i>=0; i-- )
+//        buffer[i] = buf[i] * gain;
+//    }
+//    else {
+//      for ( i=nSamples-1; i>=0; i-- )
+//        buffer[i] = buf[i];
+//    }
+//  }
+//  else if ( dataType_ == STK_SINT24 ) {
+//    // 24-bit values are harder to import efficiently since there is
+//    // no native 24-bit type.  The following routine works but is much
+//    // less efficient than that used for the other data types.
+//    SINT32 temp;
+//    unsigned char *ptr = (unsigned char *) &temp;
+//    StkFloat gain = 1.0 / 2147483648.0;
+//    if ( fseek(fd_, dataOffset_+(offset*3), SEEK_SET ) == -1 ) goto error;
+//    for ( i=0; i<nSamples; i++ ) {
+//#ifdef __LITTLE_ENDIAN__
+//      if ( byteswap_ ) {
+//        if ( fread( ptr, 3, 1, fd_ ) != 1 ) goto error;
+//        temp &= 0x00ffffff;
+//        swap32( (unsigned char *) ptr );
+//      }
+//      else {
+//        if ( fread( ptr+1, 3, 1, fd_ ) != 1 ) goto error;
+//        temp &= 0xffffff00;
+//      }
+//#else
+//      if ( byteswap_ ) {
+//        if ( fread( ptr+1, 3, 1, fd_ ) != 1 ) goto error;
+//        temp &= 0xffffff00;
+//        swap32( (unsigned char *) ptr );
+//      }
+//      else {
+//        if ( fread( ptr, 3, 1, fd_ ) != 1 ) goto error;
+//        temp &= 0x00ffffff;
+//      }
+//#endif
+
+//      if ( doNormalize ) {
+//        buffer[i] = (StkFloat) temp * gain; // "gain" also  includes 1 / 256 factor.
+//      }
+//      else
+//        buffer[i] = (StkFloat) temp / 256;  // right shift without affecting the sign bit
+//    }
+//  }
 
   buffer.setDataRate( fileRate_ );
 

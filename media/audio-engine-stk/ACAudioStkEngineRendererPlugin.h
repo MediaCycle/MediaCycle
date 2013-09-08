@@ -35,11 +35,18 @@
 #include <MediaCycle.h>
 #include <ACPlugin.h>
 #include <ACPluginQt.h>
-#include <QtGui>
+//#include <QtGui>
 
-#include <FileWvIn.h>
-#include <FileLoop.h>
 #include <RtAudio.h>
+
+#ifdef __APPLE__
+#define __OS_MACOSX__
+#elif defined (UNIX)
+#define __OS_LINUX__
+#elif defined (WIN32) || defined (_WIN32) || defined (__WIN32__)
+#define __OS_WINDOWS__
+#endif
+#include <Mutex.h>
 
 #include <ACAudioStkFileWvIn.h>
 #include <ACAudioStkFileLoop.h>
@@ -47,15 +54,6 @@
 
 #include "ACAudioStkFreeVerb.h"
 #include "RtMidi.h"
-
-#include <pthread.h>
-
-typedef unsigned int ACAudioStkPlaybackType;
-const ACAudioStkPlaybackType PLAYBACK_OFF = 0x0000;
-const ACAudioStkPlaybackType PLAYBACK_MUTE = 0x0001;
-const ACAudioStkPlaybackType PLAYBACK_PLAY = 0x0002;
-const ACAudioStkPlaybackType PLAYBACK_LOOP = 0x0004;
-const ACAudioStkPlaybackType PLAYBACK_GRANULATE = 0x0008;
 
 class ACAudioStkEngineRendererPlugin : public QObject, public ACPluginQt, public ACMediaRendererPlugin
 {
@@ -79,10 +77,11 @@ public slots:
 public:
     void updateMasterVolume();
     void updatePlaybackSpeed();
-    void updateGrainVoices();
-    void updateGrainRandomness();
-    void updateGrainStretch();
-    void updateGrainParameters();
+
+//    void updateGrainVoices();
+//    void updateGrainRandomness();
+//    void updateGrainStretch();
+//    void updateGrainParameters();
 
     //! Update the reverb effect mix [0 = mostly dry, 1 = mostly wet].
     void updateReverbEffectMix();
@@ -100,15 +99,10 @@ public:
     void updateReverbPan();
 
     void updatePlaybackPan();
-
     void updatePlaybackVolume();
-
     void updateActiveTarget();
-
     void updateFaderEffect(int fader);
-
     void muteMedia(int mediaId);
-
     int outputChannels();
 
 private:
@@ -119,33 +113,49 @@ private:
 
     void midiInCallback( double timeStamp, std::vector<unsigned char> *message);
     static void midiInCallbackWrapper( double timeStamp, std::vector<unsigned char> *message, void *userData);
+    static void errorCallback( RtError::Type type, const std::string &errorText );
+
+protected:
+    bool openStream(unsigned int& bufferFrames);
+    bool startStream();
 
 protected:
     RtAudio* dac;
-    std::map< long int, ACAudioStkFileWvIn*> inputs;
-    std::map< long int, ACAudioStkFileLoop*> loops;
-    std::map< long int, ACAudioStkGranulate*> grains;
-    std::map< long int, ACAudioStkPlaybackType> playback_types;
-    std::map< long int, int> current_frames;
-    std::map< long int, ACAudioStkFreeVerb*> frevs;
+    stk::Mutex* mutex;
+
+    std::vector<int> input_ids;// -2 input being closed, -1 slot available, >=0 media id
+    std::vector<ACAudioStkFileWvIn> inputs;
+    std::vector<stk::StkFloat> input_pans;
+    std::vector<stk::StkFloat> input_gains;
+    std::vector<int> input_current_frames;
+    std::vector<stk::StkFrames*> input_frames;
+
+    std::vector<int> loop_ids; // -2 loop being closed, -1 slot available, >=0 media id
+    std::vector<ACAudioStkFileLoop*> loops;
+    std::vector<stk::StkFloat> loop_pans;
+    std::vector<stk::StkFloat> loop_gains;
+    std::vector<int> loop_current_frames;
+    std::vector<stk::StkFrames*> loop_frames;
+
+    std::vector<int> grain_ids;// -2 grain being closed, -1 slot available, >=0 media id
+    std::vector<ACAudioStkGranulate> grains;
+    std::vector<stk::StkFloat> grain_pans;
+    std::vector<stk::StkFloat> grain_gains;
+    std::vector<int> grain_current_frames;
+    std::vector<stk::StkFrames*> grain_frames;
+
+    //std::vector<ACAudioStkFreeVerb> frevs;
     ACAudioStkFreeVerb* master_frev;
-    std::map< long int, stk::StkFloat> gains;
+
     stk::StkFloat master_volume;
-    std::map< long int, stk::StkFloat> pans;
 
     void justReadFrames(long int mediaId, int nFrames);
     void stopSource(long int mediaId);
-    void deleteSource(long int mediaId);
-    std::map< long int, stk::StkFrames*> frames;
-
 
     RtMidiIn* midi_in;
     RtMidiOut* midi_out;
 
     std::vector<std::string> fader_effect;
-
-    pthread_mutex_t delete_mutex;
-    pthread_mutexattr_t delete_mutex_attr;
 
 public:
     bool createGenerator(std::string action, long int mediaId, std::vector<boost::any> arguments=std::vector<boost::any>());
@@ -155,18 +165,18 @@ public:
     virtual std::vector<ACInputActionQt*> providesInputActions();
 
 public slots:
-    void playClickedNode();
+//    void playClickedNode();
     void loopClickedNode();
-    void granulateClickedNode();
+//    void granulateClickedNode();
     void muteAllNodes();
-    void triggerClickedNode();
+//    void triggerClickedNode();
 
 protected:
-    ACInputActionQt* playClickedNodeAction;
+//    ACInputActionQt* playClickedNodeAction;
     ACInputActionQt* loopClickedNodeAction;
-    ACInputActionQt* granulateClickedNodeAction;
+//    ACInputActionQt* granulateClickedNodeAction;
     ACInputActionQt* muteAllNodesAction;
-    ACInputActionQt* triggerClickedNodeAction;
+//    ACInputActionQt* triggerClickedNodeAction;
 
     std::map<std::string,ACMediaActionParameters> action_parameters;
     std::vector<std::string> active_targets;
@@ -177,6 +187,7 @@ protected:
     bool with_granulation;
     bool with_faders;
     int active_sources;
+    //long int sourcesGenerated;
 };
 
 #endif

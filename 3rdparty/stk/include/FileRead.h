@@ -3,6 +3,10 @@
 
 #include "Stk.h"
 
+#include <sndfile.h>
+#include <cstdlib>
+#include <cstring>
+
 namespace stk {
 
 /***************************************************/
@@ -127,6 +131,10 @@ protected:
   bool findNextMatArray( SINT32 *chunkSize, SINT32 *rows, SINT32 *columns, SINT32 *nametype );
 
   FILE *fd_;
+
+  SF_INFO* sfinfo;
+  SNDFILE* audio_file;
+
   bool byteswap_;
   bool wavFile_;
   unsigned long fileSize_;

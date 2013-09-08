@@ -42,13 +42,18 @@ ACAudioStkFileLoop :: ~ACAudioStkFileLoop( void )
   Stk::removeSampleRateAlert( this );
 }
 
-void ACAudioStkFileLoop :: openFile( std::string fileName, bool raw, bool doNormalize )
+void ACAudioStkFileLoop ::  openFile( std::string fileName, bool raw, bool doNormalize )
 {
   // Call close() in case another file is already open.
   this->closeFile();
 
   // Attempt to open the file ... an error might be thrown here.
+    try{
   file_.open( fileName, raw );
+    }
+    catch(StkError& e){
+        std::cerr << "ACAudioStkFileLoop::openFile: error " << std::endl;
+    }
 
   // Determine whether chunking or not.
   if ( file_.fileSize() > chunkThreshold_ ) {
@@ -137,6 +142,9 @@ StkFloat ACAudioStkFileLoop :: tick( unsigned int channel )
   // Check limits of time address ... if necessary, recalculate modulo
   // fileSize.
   StkFloat fileSize = file_.fileSize();
+
+  if(fileSize==0)//CF
+    return 0;//CF
 
   while ( time_ < 0.0 )
     time_ += fileSize;

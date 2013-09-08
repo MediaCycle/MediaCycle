@@ -371,6 +371,9 @@ public:
     smaller or equal to a previously allocated size.
   */
   void resize( size_t nFrames, unsigned int nChannels, StkFloat value );
+    
+  //! Deletes the data.  
+  void clear();
 
   //! Return the number of channels represented by the data.
   unsigned int channels( void ) const { return nChannels_; };

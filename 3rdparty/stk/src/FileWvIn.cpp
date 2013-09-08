@@ -33,6 +33,8 @@
 
 #include "FileWvIn.h"
 #include <cmath>
+#include "Stk.h"
+#include <stdlib.h>
 
 namespace stk {
 
@@ -56,6 +58,8 @@ FileWvIn :: ~FileWvIn()
 {
   this->closeFile();
   Stk::removeSampleRateAlert( this );
+  if(!data_.empty())//CF
+    data_.clear();//CF
 }
 
 void FileWvIn :: sampleRateChanged( StkFloat newRate, StkFloat oldRate )
