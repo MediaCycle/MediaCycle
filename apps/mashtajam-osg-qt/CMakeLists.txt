@@ -9,11 +9,10 @@ IF (SUPPORT_AUDIO AND USE_QT4 AND USE_OSG AND USE_OSC )
         SET(MC_PLUGINS_STATIC ON)
 
 	SET(MEDIA_TYPE "MEDIA_TYPE_AUDIO")
-        SET(MC_PLUGINS "audio-engine-stk-mashta;audio-features-yaafe;audio-osg;audio-reader-sndfile;io-osc;audio-thumbnailer-waveform-svg;visualisation")
+        SET(MC_PLUGINS "audio-engine;audio-features-yaafe;audio-osg;audio-reader-sndfile;io-osc;audio-thumbnailer-waveform-svg;visualisation")
         SET(OSG_PLUGINS "osgdb_svg")
         SET(SETTING_INSTALLATION ON)
 	SET(MAIN_CLASS "ACMashtaJam")
-	SET(ICON_NAME "MashtaCycle")
         SET(CLUSTERS_POSITIONS "MediaCycle t_Sne")
         SET(DESCRIPTION "MashtaJam is an application tailored for Gauthier Keyaerts aka The Very Mash'ta, allowing artistic installations/performances with audio collages from audio files organized by similarity.")
 
@@ -27,6 +26,14 @@ IF (SUPPORT_AUDIO AND USE_QT4 AND USE_OSG AND USE_OSC )
 	#ADD_DEPENDENCIES(${TARGET_NAME} )
 	# Link these dependences:
 	#TARGET_LINK_LIBRARIES(${TARGET_NAME} )
+	
+	IF(APPLE)
+		INSTALL(PROGRAMS "${CMAKE_CURRENT_SOURCE_DIR}/MashtaJamLibraries.xml" DESTINATION ${TARGET_NAME}.app/Contents/MacOS COMPONENT ${TARGET_NAME})
+	ELSEIF(WIN32)
+		INSTALL(PROGRAMS "${CMAKE_CURRENT_SOURCE_DIR}/MashtaJamLibraries.xml" DESTINATION . COMPONENT ${TARGET_NAME})
+	ELSE()
+		INSTALL(PROGRAMS "${CMAKE_CURRENT_SOURCE_DIR}/MashtaJamLibraries.xml" DESTINATION share COMPONENT ${TARGET_NAME})
+	ENDIF()
 	
 	# Packaging
 	SET(PROGNAME "${TARGET_NAME}")

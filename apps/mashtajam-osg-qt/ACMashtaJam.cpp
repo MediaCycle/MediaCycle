@@ -31,46 +31,31 @@
 
 #include "ACMashtaJam.h"
 
+#define MashtaPI 3.14159265
+
 ACMashtaJam::ACMashtaJam() : ACMultiMediaCycleOsgQt() {
     count = 0;
-    // delay after which we change media_files (if it's ok)
-    attente = 5*60*1000; // in ms
+    clock_tick = 100; // in ms
+    clock_freq = 0.01; // in Hz
 
     this->useSegmentationByDefault(false);
-
-    QAction *actionNextLibrary = new QAction(style()->standardIcon(QStyle::SP_MediaSkipForward), tr("Next Library"), this);
-    //actionNextLibrary->setShortcut(QKeySequence(Qt::Key_MediaNext)); //CF requires Qt 4.8+
-    actionNextLibrary->setShortcut(QKeySequence(Qt::Key_Right )); //CF instead of Qt::Key_F1
-    //actionNextLibrary->setShortcut(QKeySequence::NextChild);
-
-    this->addAction(actionNextLibrary);
-    connect(actionNextLibrary, SIGNAL(triggered()), this, SLOT(openNextLibrary()));
-    this->addAction(actionNextLibrary);
-
-    // Qt 4.8+ Enables application to receive multimedia key events (play, next, previous etc).
-    //QCoreApplication::setAttribute(Qt::AA_CaptureMultimediaKeys);
-
-    QAction *actionPreviousLibrary = new QAction(style()->standardIcon(QStyle::SP_MediaSkipBackward), tr("Previous Library"), this);
-    //actionPreviousLibrary->setShortcut(QKeySequence(Qt::Key_MediaPrevious)); //CF requires Qt 4.8+
-    actionPreviousLibrary->setShortcut(QKeySequence(Qt::Key_Left));
-    //actionNextLibrary->setShortcut(QKeySequence::PreviousChild);
-    this->addAction(actionPreviousLibrary);
-    connect(actionPreviousLibrary, SIGNAL(triggered()), this, SLOT(openPreviousLibrary()));
-    this->addAction(actionPreviousLibrary);
 
     //this->on_actionFullscreen_triggered(true); // to be set after the window is shown
     //this->autoConnectOSC(true); // to be set after loading the default config
     this->changeSetting(AC_SETTING_INSTALLATION);
-    this->on_actionFullscreen_triggered(true);
-    this->on_actionToggle_Controls_triggered(false);
+    //this->on_actionFullscreen_triggered(true);
+    this->on_actionToggle_Controls_triggered(true);
+    //this->on_actionToggle_Controls_triggered(false);
 }
 
 void ACMashtaJam::postLoadDefaultConfig(){
 
+    timer = new QTimer(this);
+    connect( timer, SIGNAL(timeout()), this, SLOT(clockWisely()) );
+
     this->parseXMLlist("MashtaJamLibraries.xml");
 
-    timer = new QTimer(this);
-    connect( timer, SIGNAL(timeout()), this, SLOT(openNextLibrary()) );
+    //media_cycle->setCameraPosition(0.0f,1.0f);
 
     this->startLoopXML();
 }
@@ -110,6 +95,56 @@ bool ACMashtaJam::parseXMLlist(std::string filename){
 
     TiXmlHandle docHandle(&doc);
     TiXmlHandle rootHandle = docHandle.FirstChildElement( "MashtaJam" );
+    TiXmlElement* clockNode=rootHandle.FirstChild( "Clock" ).Element();
+    if(clockNode){
+        if(clockNode->Attribute("Tick")){
+            std::stringstream strm;
+            strm << clockNode->Attribute("Tick");
+            float _tick(1.0f);
+            strm >> _tick;
+            this->clock_tick = _tick;
+            std::cout << "MashtaJam: clock tick " << clock_tick << " ms" << std::endl;
+        }
+        if(clockNode->Attribute("Frequency")){
+            std::stringstream strm;
+            strm << clockNode->Attribute("Frequency");
+            float _freq(1.0f);
+            strm >> _freq;
+            this->clock_freq = _freq;
+            std::cout << "MashtaJam: clock freq " << clock_freq << " Hz" << std::endl;
+        }
+    }
+    TiXmlElement* oscNode=rootHandle.FirstChild( "OSC" ).Element();
+    if(oscNode){
+        TiXmlElement* oscBrowserNode=rootHandle.FirstChild( "OSC" ).FirstChild( "Browser" ).Element();
+        if(oscBrowserNode){
+            if(oscBrowserNode->Attribute("IP")){
+                string _ip = oscBrowserNode->Attribute("IP");
+                std::cout << "MashtaJam: browser IP " << _ip << " " << std::endl;
+            }
+            if(oscBrowserNode->Attribute("Port")){
+                std::stringstream strm;
+                strm << oscBrowserNode->Attribute("Port");
+                int _port(0);
+                strm >> _port;
+                std::cout << "MashtaJam: browser port " << _port << " " << std::endl;
+            }
+        }
+        TiXmlElement* oscFeedbackNode=rootHandle.FirstChild( "OSC" ).FirstChild( "Feedback" ).Element();
+        if(oscFeedbackNode){
+            if(oscFeedbackNode->Attribute("IP")){
+                string _ip = oscFeedbackNode->Attribute("IP");
+                std::cout << "MashtaJam: feedback IP " << _ip << " " << std::endl;
+            }
+            if(oscFeedbackNode->Attribute("Port")){
+                std::stringstream strm;
+                strm << oscFeedbackNode->Attribute("Port");
+                int _port(0);
+                strm >> _port;
+                std::cout << "MashtaJam: feedback port " << _port << " " << std::endl;
+            }
+        }
+    }
     TiXmlElement* fileNode=rootHandle.FirstChild( "File" ).Element();
     std::cout << "fileNode " << fileNode << std::endl;
     try {
@@ -132,16 +167,8 @@ bool ACMashtaJam::parseXMLlist(std::string filename){
     if(XMLfiles.empty())
         return false;
 
-    return true;
-}
+    //return true;
 
-void ACMashtaJam::startLoopXML(){
-    timer->stop();
-    openNextLibrary(); // start first one before time starts so you don't wait for 30 min for the app to run
-    timer->start(attente);
-}
-
-void ACMashtaJam::openNextLibrary(){
     cout << "Opening next library: " << count << endl;
     // going through all files again
     if (count >= XMLfiles.size())
@@ -153,22 +180,23 @@ void ACMashtaJam::openNextLibrary(){
     cout << "opening : '" << XMLfiles[count] << "'" << endl;
     this->readXMLConfig(XMLfiles[count]);
     //setDefaultWaveform(AC_BROWSER_AUDIO_WAVEFORM_CLASSIC);
-    timer->start(attente);
+
     count++;
 }
 
-void ACMashtaJam::openPreviousLibrary(){
-    cout << "Opening previous library: " << count << endl;
-    // going through all files again
-    cout << "opening : " << XMLfiles[count] << endl;
-    media_cycle->muteAllSources();
-    this->clean(true);
+void ACMashtaJam::startLoopXML(){
     timer->stop();
-    this->readXMLConfig(XMLfiles[count]);
-    //setDefaultWaveform(AC_BROWSER_AUDIO_WAVEFORM_CLASSIC);
-    timer->start(attente);
-    if (count == 0)
-        count=XMLfiles.size()-1;
-    else
-        count--;
+    clockWisely(); // start first one before time starts so you don't wait for 30 min for the app to run
+    timer->start(clock_tick);
+}
+
+void ACMashtaJam::clockWisely(){
+
+    if(!media_cycle)
+        return;
+    float rotation = media_cycle->getCameraRotation();
+    rotation += clock_freq*clock_tick/1000.0f;
+    media_cycle->setCameraRotation(rotation);
+    //...
+    timer->start(clock_tick);
 }

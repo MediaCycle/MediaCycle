@@ -1,5 +1,5 @@
 <?xml version="1.0" ?>
 <MashtaJam>
+    <Clock Tick="100" Frequency="0.01"/>
     <File>/Volumes/data/Datasets/xml/EasternPromises.xml</File>
-    <File>/Volumes/data/Datasets/xml/KelstoneTheCrow.xml</File>
 </MashtaJam>

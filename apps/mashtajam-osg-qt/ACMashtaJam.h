@@ -38,9 +38,9 @@
 
 class ACMashtaJam: public ACMultiMediaCycleOsgQt {
     Q_OBJECT
+
 public slots:
-    void openNextLibrary();
-    void openPreviousLibrary();
+    void clockWisely();
 
 public:
     ACMashtaJam();
@@ -53,7 +53,8 @@ protected:
     bool parseXMLlist(std::string filename);
 
 private:
-    int count, attente;
+    int count, clock_tick;
+    float clock_freq;
     std::vector <std::string> XMLfiles;
     QTimer *timer;
 };
