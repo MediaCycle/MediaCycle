@@ -51,8 +51,8 @@ ACAudioEngineRendererPlugin::ACAudioEngineRendererPlugin() : QObject(), ACPlugin
         synchro_modes.push_back(synchro_mode->first);
     }
 #else
-    synchro_modes.push_back("None");
     synchro_modes.push_back("AutoBeat");
+    synchro_modes.push_back("None");
 #endif
 
 #ifdef USE_DEBUG
@@ -62,8 +62,9 @@ ACAudioEngineRendererPlugin::ACAudioEngineRendererPlugin() : QObject(), ACPlugin
         scale_modes.push_back(scale_mode->first);
     }
 #else
-    scale_modes.push_back("None");
+    scale_modes.push_back("Resample");
     scale_modes.push_back("Vocode");
+    scale_modes.push_back("None");
 #endif
 
     presets.push_back("High-Fidelity");
@@ -78,7 +79,7 @@ ACAudioEngineRendererPlugin::ACAudioEngineRendererPlugin() : QObject(), ACPlugin
     this->addNumberParameter("Volume",100,1,100,1,"Main volume",boost::bind(&ACAudioEngineRendererPlugin::updateVolume,this));
     this->action_parameters["gain"] = ACMediaActionParameters(1,ACMediaActionParameter(AC_TYPE_FLOAT,this->getParameter("Volume")));
 
-    this->addNumberParameter("BPM",100,1,240,1,"BPM",boost::bind(&ACAudioEngineRendererPlugin::updateBPM,this));
+    this->addNumberParameter("BPM",61,1,240,1,"BPM",boost::bind(&ACAudioEngineRendererPlugin::updateBPM,this));
     this->action_parameters["pitch"] = ACMediaActionParameters(1,ACMediaActionParameter(AC_TYPE_FLOAT,this->getParameter("BPM")));
 
     this->addStringParameter("Scale Mode","None",scale_modes,"Scale Mode",boost::bind(&ACAudioEngineRendererPlugin::updateScaleMode,this));
@@ -195,8 +196,35 @@ bool ACAudioEngineRendererPlugin::performActionOnMedia(std::string action, long 
         return false;
     }
 
-    if(action == "hover closest node"){
+    if(action == "loop"){
+        ACMediaNode* node = media_cycle->getMediaNode(mediaId);
+        if(node){
+            int activity = 0;
+            activity = node->getActivity();
+            if(activity != 1){
+                if(node){
+                    //std::cout << "ACAudioStkEngineRendererPlugin::performActionOnMedia: audio hover, forcing activity to 2" << std::endl;
+                    node->setActivity(2);
+                }
+            }
+        }
+    }
+    else if(action == "hover closest node"){
         // For now managed by MediaCycle
+        int activity = 0;
+        if(media_cycle->getAutoPlay()){
+            //media_cycle->performActionOnMedia("loop", mediaId);
+            ACMediaNode* node = media_cycle->getMediaNode(mediaId);
+            if(node){
+                activity = node->getActivity();
+                if(activity != 1){
+                    if(node){
+                        //std::cout << "ACAudioStkEngineRendererPlugin::performActionOnMedia: audio hover, forcing activity to 2" << std::endl;
+                        node->setActivity(2);
+                    }
+                }
+            }
+        }
     }
     else if(action == "hover off node"){
         //std::cout << "ACAudioStkEngineRendererPlugin::performActionOnMedia: hover off node " << mediaId << std::endl;
@@ -266,13 +294,17 @@ bool ACAudioEngineRendererPlugin::performActionOnMedia(std::string action, long 
             }
             else{
                 std::cout << "Reverb freeze off" << std::endl;
-                audio_engine->updateScaleMode(ACAudioEngineScaleModeNone);
-                audio_engine->updateSynchroMode(ACAudioEngineSynchroModeNone);
+                //audio_engine->updateScaleMode(ACAudioEngineScaleModeNone);
+                //audio_engine->updateSynchroMode(ACAudioEngineSynchroModeNone);
+                audio_engine->updateSynchroMode(ACAudioEngineSynchroModeAutoBeat);
+                audio_engine->updateScaleMode(ACAudioEngineScaleModeResample);
 
             }
         }
-        else if(action == "pitch" || action == "playback speed"){
-            audio_engine->setSourcePitch(mediaId, new_value);
+        else if(action == "playback speed"){
+            //audio_engine->updateSynchroMode(ACAudioEngineSynchroModeAutoBeat);
+            //audio_engine->updateScaleMode(ACAudioEngineScaleModeResample);
+            audio_engine->setSourceBPM(mediaId,60.0f+(2-new_value)*20.0f);
         }
         else if(action == "gain" || action == "playback volume"){
             audio_engine->setSourceGain(mediaId, new_value);
@@ -288,13 +320,22 @@ bool ACAudioEngineRendererPlugin::performActionOnMedia(std::string action, long 
                 float y=0;
                 float z=p.y;
                 // New attribution
-                x = new_value;
+                x = (0.5-new_value);
+                std::cout << "Pan " << x << std::endl;
                 audio_engine->setSourcePosition(mediaId, x, y, z);
             }
         }
-        /*else if(action == "loop" || action == "play"){
-        media_cycle->setNeedsActivityUpdateMedia();
-    }*/
+        else if(action == "loop" || action == "pause_all"){
+            //media_cycle->setNeedsActivityUpdateMedia();
+            ACMediaNode* node = media_cycle->getMediaNode(mediaId);
+            if(node){
+                int activity = node->getActivity();
+                if(node){
+                    node->setActivity(1);
+                }
+
+            }
+        }
     }
     return true;
 }

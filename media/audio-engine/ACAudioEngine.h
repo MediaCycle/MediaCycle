@@ -101,6 +101,7 @@ public:
     void setGain(float gain){feedback->setGain(gain);}
 	void setKey(int key){feedback->setKey(key);}
 	void setTimeSignature(int tsnum, int tsden){feedback->setTimeSignature(tsnum, tsden);}
+    void setResampleRatio(float resample){feedback->setResampleRatio(resample);}
 
 	// Scrub/Scratch control
 	void setScrub(float scrub){feedback->setScrub(scrub);}
@@ -133,6 +134,8 @@ public:
 	
 	// other (less crucial) effects possible with OpenAL
 	int setSourcePitch(int loop_id, float pitch){return feedback->setSourcePitch(loop_id, pitch);}
+    int setSourceResampleRatio(int loop_id, float resample){return feedback->setSourceResampleRatio(loop_id, resample);}
+    int setSourceBPM(int loop_id, float bpm){return feedback->setSourceBPM(loop_id, bpm);}
 	int setSourceGain(int loop_id, float gain){return feedback->setSourceGain(loop_id,gain);}
 	int setSourceRolloffFactor(int loop_id, float rolloff_factor){return feedback->setSourceRolloffFactor(loop_id, rolloff_factor);} // use by distance attenuation model
 	int setSourceReferenceDistance(int loop_id, float reference_distance){return feedback->setSourceReferenceDistance(loop_id, reference_distance);}
