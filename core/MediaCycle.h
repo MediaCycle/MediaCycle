@@ -320,12 +320,14 @@ private:
     int import_recursive;
     bool import_forward_order;
     bool import_doSegment;
+    bool importing;
 
     void* mediacycle_callback_data;
 
 public:
     // Callback
     void mediaImported(int n,int nTot,int mId);
+    bool isImporting(){return this->importing;}
 };
 
 #endif	/* _MEDIACYCLE_H */

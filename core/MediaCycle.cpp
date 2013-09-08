@@ -79,6 +79,7 @@ MediaCycle::MediaCycle(ACMediaType aMediaType, string local_directory, string li
     // 1) the library creates a media
     // 2) the browser creates a node
     // 3) mediacycle propagates the event to external listeners
+    this->importing = false;
 }
 
 MediaCycle::MediaCycle(const MediaCycle& orig) {
@@ -418,6 +419,7 @@ void *threadImport(void *import_thread_arg) {
 // XS TODO return value does not make much sense, should add some test
 // XS TODO this does not seem compatible with Qt GUI
 int MediaCycle::importDirectoriesThreaded(vector<string> directories, int recursive, bool forward_order, bool doSegment) {
+    this->importing = true;
 
     import_directories = directories;
     import_recursive = recursive;
@@ -441,6 +443,7 @@ int MediaCycle::importDirectories() {
 // then normalize the features and updates the library ("libraryContentChanged")
 // each time the library grows by a factor prevLibrarySizeMultiplier, re-normalize and re-cluster everything
 int MediaCycle::importDirectories(vector<string> directories, int recursive, bool forward_order, bool doSegment) {
+    this->importing = true;
     int ok = 0;
     float prevLibrarySizeMultiplier = 2;
     int needsNormalizeAndCluster = 0;
@@ -516,6 +519,7 @@ int MediaCycle::importDirectories(vector<string> directories, int recursive, boo
     //}
 
     filenames.empty();
+    this->importing = false;
     return ok;
 }
 
@@ -530,12 +534,14 @@ int MediaCycle::importDirectories(vector<string> directories, int recursive, boo
 }*/
 
 int MediaCycle::importDirectory(string path, int recursive, bool forward_order, bool doSegment, bool _save_timed_feat) {
+    this->importing = true;
     cout << "MediaCycle: importing directory: " << path << endl;
     int ok = 0;
     if (this->pluginManager == 0){
         cout << "no analysis plugins were loaded. you will need to load a plugin to use the application." << endl;
     }
     ok = this->mediaLibrary->importDirectory(path, recursive, this->pluginManager, forward_order, doSegment, _save_timed_feat);
+    this->importing = false;
     return ok;
 }
 
@@ -629,6 +635,7 @@ int MediaCycle::importACLLibrary(string path) {
 }
 
 int MediaCycle::importXMLLibrary(string path) {
+    this->importing = true;
     // XS import = open + normalize
     if(!mediaLibrary){
         return -1;
@@ -637,6 +644,7 @@ int MediaCycle::importXMLLibrary(string path) {
     int ok = 0;
     ok = this->mediaLibrary->openXMLLibrary(path);
     //if (ok>=1) this->mediaLibrary->normalizeFeatures();//CF done by signals
+    this->importing = false;
     return ok;
 
 }
@@ -1135,6 +1143,9 @@ void MediaCycle::setCameraRecenter(){
 }
 
 void MediaCycle::setAutoPlay(int i) {
+    // Block media actions while importing
+    if(this->importing)
+        return;
     if(mediaBrowser){
         mediaBrowser->setAutoPlay(i);
     }
@@ -1165,6 +1176,9 @@ bool MediaCycle::getAutoDiscard(){
 }
 
 int MediaCycle::getClickedNode(){
+    // Block media actions while importing
+    if(this->importing)
+        return -1;
     if(mediaBrowser){
         return mediaBrowser->getClickedNode();
     }
@@ -1198,6 +1212,9 @@ void MediaCycle::setClosestNode(int i,int p_index) {
     }
 }
 int MediaCycle::getClosestNode(int p_index){
+    // Block media actions while importing
+    if(this->importing)
+        return -1;
     if(mediaBrowser){
         return mediaBrowser->getClosestNode(p_index);
     }
@@ -1207,6 +1224,9 @@ int MediaCycle::getClosestNode(int p_index){
 }
 
 int	MediaCycle::getLastSelectedNode(){
+    // Block media actions while importing
+    if(this->importing)
+        return -1;
     if(mediaBrowser){
         return mediaBrowser->getLastSelectedNode();
     }
@@ -1415,6 +1435,9 @@ void MediaCycle::muteAllSources(){
 
 // == POINTERS on VIEW
 int MediaCycle::getNumberOfPointers() {
+    // Block media actions while importing
+    if(this->importing)
+        return 0;
     if(mediaBrowser){
         return mediaBrowser->getNumberOfPointers();
     }
@@ -1424,6 +1447,9 @@ int MediaCycle::getNumberOfPointers() {
 }
 
 ACPointer* MediaCycle::getPointerFromIndex(int i) {
+    // Block media actions while importing
+    if(this->importing)
+        return false;
     if(mediaBrowser){
         return mediaBrowser->getPointerFromIndex(i);
     }
@@ -1433,6 +1459,9 @@ ACPointer* MediaCycle::getPointerFromIndex(int i) {
 }
 
 ACPointer* MediaCycle::getPointerFromId(int i) {
+    // Block media actions while importing
+    if(this->importing)
+        return 0;
     if(mediaBrowser){
         return mediaBrowser->getPointerFromId(i);
     }
@@ -1442,12 +1471,18 @@ ACPointer* MediaCycle::getPointerFromId(int i) {
 }
 
 void MediaCycle::resetPointers() {
+    // Block media actions while importing
+    if(this->importing)
+        return;
     if(mediaBrowser){
         mediaBrowser->resetPointers();
     }
 }
 
 std::list<int> MediaCycle::getPointerIds() {
+    // Block media actions while importing
+    if(this->importing)
+        return std::list<int>();;
     if(mediaBrowser){
         return mediaBrowser->getPointerIds();
     }
@@ -1457,12 +1492,18 @@ std::list<int> MediaCycle::getPointerIds() {
 }
 
 void MediaCycle::addPointer(int p_id) {
+    // Block media actions while importing
+    if(this->importing)
+        return;
     if(mediaBrowser){
         mediaBrowser->addPointer(p_id);
     }
 }
 
 void MediaCycle::removePointer(int p_id) {
+    // Block media actions while importing
+    if(this->importing)
+        return;
     ACPointer* pointer = this->getPointerFromId(p_id);
     if(pointer){
         int closest = pointer->getClosestNode();
@@ -1542,12 +1583,18 @@ void MediaCycle::pickedObjectCallback(int _mediaId) {
 }
 
 void MediaCycle::hoverWithPointerId(float xx, float yy, int p_id) {
+    // Block media actions while importing
+    if(this->importing)
+        return;
     if (this->mediaBrowser){
         mediaBrowser->hoverWithPointerId(xx, yy, p_id);
     }
 }
 
 void MediaCycle::hoverWithPointerIndex(float xx, float yy, int p_index) {
+    // Block media actions while importing
+    if(this->importing)
+        return;
     if (this->mediaBrowser){
         mediaBrowser->hoverWithPointerIndex(xx, yy, p_index);
     }
@@ -1558,6 +1605,11 @@ bool MediaCycle::performActionOnMedia(std::string action, long int mediaId, std:
         std::cerr << "MediaCycle::performActionOnMedia: plugin manager not set" << std::endl;
         return false;
     }
+
+    // Block media actions while importing
+    if(this->importing)
+        return false;
+
     if(this->eventManager)
         eventManager->sig_mediaActionPerformed(action, mediaId, arguments);
 
@@ -2169,6 +2221,12 @@ void MediaCycle::testLabels(){
 }
 
 void MediaCycle::mediaImported(int n,int nTot,int mId){
+     if(n < nTot){
+          this->importing = true;
+     }
+     else if(n==nTot && mId==-1){
+         this->importing = false;
+     }
     std::cout << "MediaCycle::mediaImported media id " << mId << " ("<< n << "/" << nTot << ")" << std::endl;
     eventManager->sig_mediaImported(n,nTot,mId);
 }
