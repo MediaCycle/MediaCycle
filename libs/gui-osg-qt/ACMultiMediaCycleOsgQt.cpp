@@ -91,7 +91,8 @@ void ACMultiMediaCycleOsgQt::mediaImported(int n,int nTot,int mId){
 
         //Threading problem if we change during the import
         if(media_cycle->getLibrary()->getParentIds().size()>=1){
-            dockWidgetsManager->updatePluginsSettings();
+            if(dockWidgetsManager)
+                dockWidgetsManager->updatePluginsSettings();
         }
     }
     else if(n<nTot){
@@ -145,6 +146,7 @@ ACMultiMediaCycleOsgQt::ACMultiMediaCycleOsgQt(QWidget *parent)
     : QMainWindow(parent),ACEventListener(),features_known(false),
       aboutDialog(0),controlsDialog(0),compositeOsgView(0),
       osgViewDockWidget(0),osgViewDockLayout(0),progressBar(0),metadataWindow(0),
+      dockWidgetsManager(0),
       userProfileWindow(0),segmentationDialog(0),librarySaveDialog(0)
 {
     ui.setupUi(this); // first thing to do
@@ -172,13 +174,14 @@ ACMultiMediaCycleOsgQt::ACMultiMediaCycleOsgQt(QWidget *parent)
 #endif
 
     dockWidgetsManager = new ACDockWidgetsManagerQt(this);
-    connect( dockWidgetsManager, SIGNAL( toggleControls(bool)), ui.actionToggle_Controls, SLOT(setChecked(bool)));
+
     aboutDialogFactory = new ACAboutDialogFactoryQt();
     settingsDialog = new ACSettingsDialogQt(this);
 
-    //connect( ui.actionAnchor_Controls, SIGNAL(triggered(bool)), dockWidgetsManager, SLOT(updateDocksVisibility(bool)));
-    //connect( dockWidgetsManager, SIGNAL( toggleControls(bool)), ui.actionAnchor_Controls, SLOT(setChecked(bool)));
-    connect( ui.actionAnchor_Controls, SIGNAL(triggered(bool)), dockWidgetsManager, SLOT(anchorDocks(bool)));
+    if(dockWidgetsManager){
+        connect( dockWidgetsManager, SIGNAL( toggleControls(bool)), ui.actionToggle_Controls, SLOT(setChecked(bool)));
+        connect( ui.actionAnchor_Controls, SIGNAL(triggered(bool)), dockWidgetsManager, SLOT(anchorDocks(bool)));
+    }
 
     // This is required to populate the available file extensions list at startup
     // until we clean mediacycle instead of deleting/creating it at every media type change.
@@ -264,7 +267,7 @@ ACMultiMediaCycleOsgQt::ACMultiMediaCycleOsgQt(QWidget *parent)
 ACMultiMediaCycleOsgQt::~ACMultiMediaCycleOsgQt(){
     delete settingsDialog;
     delete aboutDialogFactory;
-    delete dockWidgetsManager;
+    if(dockWidgetsManager) delete dockWidgetsManager;
     if (aboutDialog) delete aboutDialog;
     if (controlsDialog) delete controlsDialog;
     if (compositeOsgView) delete compositeOsgView;
@@ -283,7 +286,8 @@ void ACMultiMediaCycleOsgQt::setMediaType(ACMediaType _mt)
     if(this->media_type != MEDIA_TYPE_NONE && this->media_type != _mt)
         this->clean(); //CF this ensures that the browser is cleaned at every media type change, and kept when adding new media files of the same type
     this->media_type = _mt;
-    dockWidgetsManager->changeMediaType(_mt);
+    if(dockWidgetsManager)
+        dockWidgetsManager->changeMediaType(_mt);
 }
 
 // tries to read settings from previous run
@@ -302,7 +306,8 @@ void ACMultiMediaCycleOsgQt::configureSettings(){
         case QMessageBox::Yes:
             // config file normally in readSettings...
             if (this->readXMLConfig(this->config_file_xml)){
-                dockWidgetsManager->changeMediaType(this->media_type);
+                if(dockWidgetsManager)
+                    dockWidgetsManager->changeMediaType(this->media_type);
             }
             else
                 this->showError("Error occured reading XML. Please Load your media and save a new XML file.");
@@ -339,8 +344,10 @@ void ACMultiMediaCycleOsgQt::init(){
     compositeOsgView->prepareFromBrowser();
     compositeOsgView->prepareFromTimeline();
     aboutDialogFactory->setMediaCycle(media_cycle);
-    dockWidgetsManager->setMediaCycle(media_cycle);
-    dockWidgetsManager->setOsgView(compositeOsgView);
+    if(dockWidgetsManager){
+        dockWidgetsManager->setMediaCycle(media_cycle);
+        dockWidgetsManager->setOsgView(compositeOsgView);
+    }
     metadataWindow->setMediaCycle(media_cycle);
     userProfileWindow->setMediaCycle(media_cycle);
 }
@@ -515,7 +522,8 @@ bool ACMultiMediaCycleOsgQt::readXMLConfig(string _filename){
         //this->updateLibrary();//TR update will be done in the mediaImported(int n,int nTot,int mId) with n==nTot and mId==-1
         media_cycle->storeNavigationState();
 
-        dockWidgetsManager->updatePluginsSettings();
+        if(dockWidgetsManager)
+            dockWidgetsManager->updatePluginsSettings();
 
         if(needs_saving)
             this->showError("Please save again your library.");
@@ -880,11 +888,15 @@ void ACMultiMediaCycleOsgQt::on_actionEdit_Input_Controls_triggered(bool checked
 }
 
 bool ACMultiMediaCycleOsgQt::addControlDock(std::string dock_type){
+    if(!dockWidgetsManager)
+        return false;
     ACAbstractDockWidgetQt* dock = dockWidgetsManager->addControlDock(dock_type);
     return this->addControlDock(dock);
 }
 
 bool ACMultiMediaCycleOsgQt::addControlDock(ACPluginType plugin_type){
+    if(!dockWidgetsManager)
+        return false;
     ACAbstractDockWidgetQt* dock = dockWidgetsManager->addControlDock(plugin_type);
     return this->addControlDock(dock);
 }
@@ -906,7 +918,8 @@ bool ACMultiMediaCycleOsgQt::addControlDock(ACAbstractDockWidgetQt* dock)
 }
 
 void ACMultiMediaCycleOsgQt::on_actionToggle_Controls_triggered(bool controlsToEnable){
-    dockWidgetsManager->updateDocksVisibility(controlsToEnable);
+    if(dockWidgetsManager)
+        dockWidgetsManager->updateDocksVisibility(controlsToEnable);
 }
 
 bool ACMultiMediaCycleOsgQt::addAboutDialog(ACAbstractAboutDialogQt* dialog)
@@ -957,6 +970,7 @@ void ACMultiMediaCycleOsgQt::on_actionFullscreen_triggered(bool checked) {
     else{
         this->writeQSettings();
         ui.actionToggle_Controls->setChecked(false);
+        this->on_actionToggle_Controls_triggered(false);
         this->on_actionToggle_Controls_triggered(false);
         ui.menubar->hide();
         ui.statusbar->hide();
@@ -1036,7 +1050,8 @@ void ACMultiMediaCycleOsgQt::updateLibrary(){
     compositeOsgView->prepareFromTimeline();
     //browserOsgView->setPlaying(true);
     media_cycle->setNeedsDisplay(true);
-    dockWidgetsManager->updatePluginsSettings();
+    if(dockWidgetsManager)
+        dockWidgetsManager->updatePluginsSettings();
     compositeOsgView->setFocus();
     metadataWindow->updateLibrary();
     //media_cycle->updateDisplay(true); //CF tried
@@ -1129,7 +1144,8 @@ bool ACMultiMediaCycleOsgQt::addDefaultConfig(ACAbstractDefaultConfig* _config)
     if(media_cycle->getDefaultConfigsNumber()==2){
         this->addControlDock("MCMediaConfig"); // the dock widget manager checks for duplicates
     }
-    dockWidgetsManager->updatePluginsSettings();
+    if(dockWidgetsManager)
+        dockWidgetsManager->updatePluginsSettings();
     return true;
 }
 
@@ -1255,8 +1271,10 @@ bool ACMultiMediaCycleOsgQt::loadDefaultConfig(ACAbstractDefaultConfig* _config)
         this->addControlDock(PLUGIN_TYPE_CLIENT);
 
     // Update the plugin lists of the browser control dock through DockWidget
-    dockWidgetsManager->changeMediaType(_config->mediaType());
-    dockWidgetsManager->updatePluginsSettings();
+    if(dockWidgetsManager){
+        dockWidgetsManager->changeMediaType(_config->mediaType());
+        dockWidgetsManager->updatePluginsSettings();
+    }
 
     this->postLoadDefaultConfig();
     return true;
@@ -1312,8 +1330,10 @@ void ACMultiMediaCycleOsgQt::changeActiveMediaType(QString name){
         media_cycle->initializeFeatureWeights();
         media_cycle->normalizeFeatures(1);
         media_cycle->libraryContentChanged(1);
-        dockWidgetsManager->resetPluginsSettings();
-        dockWidgetsManager->updatePluginsSettings();
+        if(dockWidgetsManager){
+            dockWidgetsManager->resetPluginsSettings();
+            dockWidgetsManager->updatePluginsSettings();
+        }
     }
 }
 #endif
@@ -1332,7 +1352,9 @@ void ACMultiMediaCycleOsgQt::clean(bool _updategl){
 
     this->media_cycle->cleanLibrary();
     this->media_cycle->cleanBrowser();
-    dockWidgetsManager->resetPluginsSettings();
+    if(dockWidgetsManager){
+        dockWidgetsManager->resetPluginsSettings();
+    }
     
     this->use_segmentation_default = true;
     this->use_segmentation_current = true;
@@ -1465,7 +1487,9 @@ void ACMultiMediaCycleOsgQt::setDefaultQSettings() {
 void ACMultiMediaCycleOsgQt::changeMediaType(ACMediaType _media_type){
     // XS TODO turn off current audio engine if switch away from audio
     this->media_cycle->changeMediaType(_media_type);
-    dockWidgetsManager->changeMediaType(_media_type);
+    if(dockWidgetsManager){
+        dockWidgetsManager->changeMediaType(_media_type);
+    }
     metadataWindow->setMediaCycle(media_cycle);
     metadataWindow->clean();
     userProfileWindow->setMediaCycle(media_cycle);

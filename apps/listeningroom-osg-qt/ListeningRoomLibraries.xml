@@ -1,0 +1,7 @@
+<?xml version="1.0" ?>
+<ListeningRoom>
+    <File>/Volumes/data/Datasets/xml/ListeningRoom/KISS2013Carla.xml</File>
+    <File>/Volumes/data/Datasets/xml/ListeningRoom/KISS2013Gauthier.xml</File>
+    <File>/Volumes/data/Datasets/xml/ListeningRoom/KISS2013Ilker.xml</File>
+    <File>/Volumes/data/Datasets/xml/ListeningRoom/KISS2013Olga.xml</File>
+</ListeningRoom>

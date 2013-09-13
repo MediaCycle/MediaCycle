@@ -191,8 +191,9 @@ private:
     std::string project_directory;
 
     std::vector<std::string> plugins_libraries, plugins_basenames;
-
+protected:
     ACDockWidgetsManagerQt* dockWidgetsManager;
+private:
     ACAboutDialogFactoryQt* aboutDialogFactory;
     ACAbstractAboutDialogQt* aboutDialog;
     ACInputControlsDialogQt* controlsDialog;
