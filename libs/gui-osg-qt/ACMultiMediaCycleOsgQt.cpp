@@ -536,6 +536,11 @@ bool ACMultiMediaCycleOsgQt::readXMLConfig(string _filename){
     // no errors occured, no exception caught.
 
     this->postLoadXML();
+
+    if(this->setting == AC_SETTING_INSTALLATION){
+        if(dockWidgetsManager) dockWidgetsManager->updateDocksVisibility(false);
+    }
+
     return true;
 }
 
@@ -962,9 +967,11 @@ void ACMultiMediaCycleOsgQt::on_actionFullscreen_triggered(bool checked) {
         compositeOsgView->showNormal();
         ui.actionToggle_Controls->setChecked(true);
         this->on_actionToggle_Controls_triggered(true);
-        ui.menubar->show();
-        ui.statusbar->show();
-        ui.toolbar->show();
+        if(this->setting != AC_SETTING_INSTALLATION){
+            ui.menubar->show();
+            ui.statusbar->show();
+            ui.toolbar->show();
+        }
         this->readQSettings();
     }
     else{
@@ -1526,4 +1533,11 @@ void ACMultiMediaCycleOsgQt::changeSetting(ACSettingType _setting)
 
     if(this->setting != _setting)
         this->setting = _setting;
+
+    if(this->setting == AC_SETTING_INSTALLATION){
+        ui.menubar->hide();
+        ui.statusbar->hide();
+        ui.toolbar->hide();
+        if(dockWidgetsManager) dockWidgetsManager->updateDocksVisibility(false);
+    }
 }

@@ -44,7 +44,7 @@ ACMashtaJam::ACMashtaJam() : ACMultiMediaCycleOsgQt() {
     //this->autoConnectOSC(true); // to be set after loading the default config
     this->changeSetting(AC_SETTING_INSTALLATION);
     //this->on_actionFullscreen_triggered(true);
-    this->on_actionToggle_Controls_triggered(true);
+    //this->on_actionToggle_Controls_triggered(true);
     //this->on_actionToggle_Controls_triggered(false);
 }
 

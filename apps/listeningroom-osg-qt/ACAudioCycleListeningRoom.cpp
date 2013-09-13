@@ -62,7 +62,7 @@ ACAudioCycleListeningRoom::ACAudioCycleListeningRoom() : ACMultiMediaCycleOsgQt(
     this->addAction(actionPreviousLibrary);
 
     this->changeSetting(AC_SETTING_INSTALLATION);
-    this->on_actionFullscreen_triggered(true); // to be set after the window is shown
+    //this->on_actionFullscreen_triggered(true); // to be set after the window is shown
     //this->on_actionFullscreen_triggered(true); // to be set after the window is shown
     //this->autoConnectOSC(true); // to be set after loading the default config
     //this->dockWidgetsManager->updateDocksVisibility(false);

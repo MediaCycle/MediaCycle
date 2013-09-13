@@ -273,9 +273,9 @@ void ACOsgLibraryRenderer::updateNodes(double ratio) {
 
         this->updateImageRenderer(library_cover,media_cycle->getLibrary()->getCover(),library_node);
 
-        //if(this->library_cover.file!=""){
+        if(this->library_cover.file!=""){
             library_title.x = library_author.x = library_year.x = library_publisher.x = library_license.x = library_website.x = library_medias_number.x = max_side_size/2 + font_size;
-        //}
+        }
 
         //CF be careful with positionning, overlapping text geodes explode CPU usage
         library_title.y = 3*line_sep-max_side_size/2;
@@ -309,9 +309,9 @@ void ACOsgLibraryRenderer::updateNodes(double ratio) {
         // cout<<"test:"<<library_medias_number.text->getFont()->getFileName()<<"\t"<<library_medias_number.text->getText().createUTF8EncodedString ()<<endl;
         this->updateImageRenderer(curator_picture,media_cycle->getLibrary()->getCuratorPicture(),curator_node);
 
-        //if(this->library_cover.file!=""){
+        if(this->library_cover.file!=""){
             curator_name.x = curator_email.x = curator_website.x = curator_location.x = max_side_size/2+font_size;
-        //}
+        }
 
         //CF be careful with positionning, overlapping text geodes explode CPU usage
         curator_name.y = 3*line_sep-max_side_size/2;
