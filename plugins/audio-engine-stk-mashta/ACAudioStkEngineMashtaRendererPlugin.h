@@ -39,6 +39,7 @@ class ACAudioStkEngineMashtaRendererPlugin : public ACAudioStkEngineRendererPlug
 public:
     ACAudioStkEngineMashtaRendererPlugin();
     virtual ~ACAudioStkEngineMashtaRendererPlugin();
+    virtual int outputChannels(){return 4;}
 };
 
 #endif

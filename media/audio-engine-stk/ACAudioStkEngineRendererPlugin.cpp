@@ -683,10 +683,6 @@ std::map<std::string,ACMediaType> ACAudioStkEngineRendererPlugin::getSupportedEx
     return extensions;
 }
 
-int ACAudioStkEngineRendererPlugin::outputChannels(){
-    return 2; // for now
-}
-
 bool ACAudioStkEngineRendererPlugin::performActionOnMedia(std::string action, long int mediaId, std::vector<boost::any> arguments){
 
     //std::cout << "ACAudioStkEngineRendererPlugin::performActionOnMedia: requesting action " << action << " mediaId " << mediaId << " with " << arguments.size() << " arg(s)" << " @ " << getTime() << std::endl;

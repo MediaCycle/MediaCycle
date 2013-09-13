@@ -103,7 +103,7 @@ public:
     void updateActiveTarget();
     void updateFaderEffect(int fader);
     void muteMedia(int mediaId);
-    int outputChannels();
+    virtual int outputChannels(){return 2;}
 
 private:
     int tick( void *outputBuffer, void *inputBuffer, unsigned int nBufferFrames,
