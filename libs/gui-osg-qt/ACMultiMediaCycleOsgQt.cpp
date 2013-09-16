@@ -169,6 +169,7 @@ ACMultiMediaCycleOsgQt::ACMultiMediaCycleOsgQt(QWidget *parent)
     QDir dir(QApplication::applicationDirPath());
     dir.cdUp();
     dir.cd("PlugIns");
+    std::cout << "OSG plugins path" << dir.absolutePath().toStdString() << std::endl;
     osgDB::Registry::instance()->setLibraryFilePathList(dir.absolutePath().toStdString());
 #endif
 #endif

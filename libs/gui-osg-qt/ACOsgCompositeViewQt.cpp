@@ -356,9 +356,10 @@ void ACOsgCompositeViewQt::initFont()
 #endif
 #endif
     std::cout << "Current font path " << font_path << std::endl;
-    font = osgText::readFontFile(font_path + font_file);
+    std::string _font_file = font_path + font_file;
+    font = osgText::readFontFile(_font_file);
     if(!font)
-        std::cerr << "ACOsgCompositeViewQt::initFont: couldn't load font " << std::endl;
+        std::cerr << "ACOsgCompositeViewQt::initFont: couldn't load font " << _font_file << std::endl;
 }
 
 void ACOsgCompositeViewQt::initializeGL()
