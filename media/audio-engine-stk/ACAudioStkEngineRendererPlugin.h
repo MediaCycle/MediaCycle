@@ -104,6 +104,8 @@ public:
     void updateFaderEffect(int fader);
     void muteMedia(int mediaId);
     virtual int outputChannels(){return 2;}
+protected:
+    int availableChannels();
 
 private:
     int tick( void *outputBuffer, void *inputBuffer, unsigned int nBufferFrames,

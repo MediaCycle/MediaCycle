@@ -381,6 +381,14 @@ void ACAudioStkEngineRendererPlugin::errorCallback( RtError::Type type, const st
     std::cerr << "RtAudio Error: " << errorText << std::endl;
 }
 
+int ACAudioStkEngineRendererPlugin::availableChannels(){
+    if(!dac)
+        return 0;
+    
+    RtAudio::DeviceInfo deviceInfo = dac->getDeviceInfo( dac->getDefaultOutputDevice());
+    return (this->outputChannels() > deviceInfo.outputChannels) ? deviceInfo.outputChannels : this->outputChannels();
+}
+
 int ACAudioStkEngineRendererPlugin::tick( void *outputBuffer, void *inputBuffer, unsigned int nBufferFrames,
                                           double streamTime, RtAudioStreamStatus status )
 {
@@ -411,7 +419,7 @@ int ACAudioStkEngineRendererPlugin::tick( void *outputBuffer, void *inputBuffer,
 
     double rate = 1.0;
     rate = (float)this->getNumberParameterValue("Playback Speed");
-    int outputChannels = this->outputChannels();
+    int outputChannels = this->availableChannels();
 
     for(int n=0;n<loops.size();n++){
         if(loop_ids[n]>-1 && loops[n]->isOpen()){
@@ -1249,7 +1257,7 @@ bool ACAudioStkEngineRendererPlugin::openStream(unsigned int & bufferFrames){
     // Figure out how many bytes in an StkFloat and setup the RtAudio stream.
     RtAudio::StreamParameters parameters;
     parameters.deviceId = dac->getDefaultOutputDevice();
-    parameters.nChannels = this->outputChannels();//channels;
+    parameters.nChannels = this->availableChannels();//channels;
     RtAudioFormat format = ( sizeof(StkFloat) == 8 ) ? RTAUDIO_FLOAT64 : RTAUDIO_FLOAT32;
 
     try {
