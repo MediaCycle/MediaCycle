@@ -4,7 +4,7 @@ IF ( SUPPORT_AUDIO AND USE_QT4 AND USE_OSG )
         SET(WITH_SEGMENTATION OFF)
         SET(WITH_OSC ON)
 
-        SET(MC_PLUGINS_STATIC OFF)
+        SET(MC_PLUGINS_STATIC ON)
 
 	SET(MEDIA_TYPE "MEDIA_TYPE_AUDIO")
         SET(MC_PLUGINS "usability-kis;audio-engine-stk-sounddesign;audio-features-yaafe;audio-reader-sndfile;audio-thumbnailer-waveform-svg;audio-osg;visualisation;media-thumbnailer-feature-mapper;io-osc")#visualisation-advanced
