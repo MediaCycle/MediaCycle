@@ -58,11 +58,18 @@ ACUsabilityKnownItemSearchPlugin::ACUsabilityKnownItemSearchPlugin() : QObject()
     port = 4040;
     team = 1;
 
+    this->active = false;
+    this->handle = 0;
+
+    button_left = false;
+    button_right = false;
+    x=y=z=rx=ry=rz=0;
+
     submitAction = new ACInputActionQt(tr("Submit the file"), this);
     submitAction->setToolTip(tr("Submit the file"));
     submitAction->setShortcut(Qt::Key_K);
     submitAction->setKeyEventType(QEvent::KeyPress);
-    submitAction->setMouseEventType(QEvent::MouseButtonRelease);
+    //CFsubmitAction->setMouseEventType(QEvent::MouseButtonRelease);
     //submitAction->setDeviceName(device);
     //submitAction->setDeviceEvent("button 09 pressed");
     connect(submitAction, SIGNAL(triggered()), this, SLOT(submitCallback()));
@@ -80,7 +87,119 @@ ACUsabilityKnownItemSearchPlugin::ACUsabilityKnownItemSearchPlugin() : QObject()
     this->addNumberParameter("Port",this->port,1,65535,1,"Port",boost::bind(&ACUsabilityKnownItemSearchPlugin::changePort,this));
     this->addNumberParameter("Team",this->team,0,16,1,"Team",boost::bind(&ACUsabilityKnownItemSearchPlugin::changeTeam,this));
     this->addCallback("Submit","Submit the clicked or clostest node",boost::bind(&ACUsabilityKnownItemSearchPlugin::submitCallback,this));
+
+    this->init_hid();
 }
+
+void ACUsabilityKnownItemSearchPlugin::print_ascii_status(){
+
+}
+
+bool ACUsabilityKnownItemSearchPlugin::init_hid(){
+
+    struct hid_device_info *devs, *cur_dev;
+    if (hid_init())
+        return -1;
+
+    devs = hid_enumerate(0x0, 0x0);
+    cur_dev = devs;
+
+    std::string cur_path("");
+
+    while (cur_dev) {
+        printf("Device Found\n  type: %04hx %04hx\n  path: %s\n  serial_number: %ls", cur_dev->vendor_id, cur_dev->product_id, cur_dev->path, cur_dev->serial_number);
+        printf("\n");
+        printf("  Manufacturer: %ls\n", cur_dev->manufacturer_string);
+        printf("  Product:      %ls\n", cur_dev->product_string);
+        printf("  Release:      %hx\n", cur_dev->release_number);
+        printf("  Interface:    %d\n",  cur_dev->interface_number);
+        printf("\n");
+
+        if(cur_dev->vendor_id != 0x046d && cur_dev->product_id != 0xc626)
+            cur_dev = cur_dev->next;
+        else{
+            cur_path = std::string(cur_dev->path);
+            std::cout << "ACUsabilityKnownItemSearchPlugin: using path " << cur_path << std::endl;
+            break;
+        }
+    }
+
+    //hid_free_enumeration(devs);
+
+    if(!cur_dev){
+        std::cerr << "ACUsabilityKnownItemSearchPlugin: couldn't find a 3Dconnexion Space Navigator device, aborting." << std::endl;
+        return 0;
+    }
+
+    // Open the device using the VID, PID,
+    // and optionally the Serial number.
+    handle = hid_open(0x046d,0xc626, NULL);
+    // Open the device using its path, since subdevices can't be differenciated with their empty serial numbers
+    //handle = hid_open_path(cur_path.c_str());
+    if (!handle) {
+        printf("ACUsabilityKnownItemSearchPlugin: unable to open the 3Dconnexion Space Navigator device\n");
+        hid_free_enumeration(devs);
+        return 1;
+    }
+
+    return this->StartInternalThread();
+}
+
+void ACUsabilityKnownItemSearchPlugin::hid_loop(){
+    std::cout << "hid loop" << std::endl;
+    int res = 0;
+    unsigned char buf[256];
+    int i = 0;
+    while(this->active){
+        res = hid_read_timeout(handle, buf, sizeof(buf),10 /*msec*/);
+        if (res > 0){
+            if(res==2){
+
+                int buttons = (int)buf[1];
+                if(buttons == 0){
+                    button_left = false;
+                    button_right = false;
+                }
+                else if(buttons == 1){
+                    button_left = true;
+                }
+                else if(buttons == 2){
+                    button_right = true;
+                }
+                else if(buttons == 3){
+                    button_left = true;
+                    button_right = true;
+                }
+
+            }
+            else if(res==7){
+
+                int dim = (int)buf[0];
+
+                if(dim == 1){
+                    x = (((int)buf[2])>=254) ? -( (255-(int)buf[2])*256+255-(int)buf[1] ) : (int)buf[2]*256+(int)buf[1];
+                    y = (((int)buf[4])>=254) ? -( (255-(int)buf[4])*256+255-(int)buf[3] ) : (int)buf[4]*256+(int)buf[3];
+
+                    int threshold = 250;
+                    int _z = (((int)buf[6])>=254) ? -( (255-(int)buf[6])*256+255-(int)buf[5] ) : (int)buf[6]*256+(int)buf[5];
+                    if(z<threshold && _z>threshold){
+                        bool buz = true;
+                        this->submitCallback();
+                    }
+                    z = _z;
+
+                }
+                else if( dim == 2){
+                    rx = (((int)buf[2])>=254) ? -( (255-(int)buf[2])*256+255-(int)buf[1] ) : (int)buf[2]*256+(int)buf[1];
+                    ry = (((int)buf[4])>=254) ? -( (255-(int)buf[4])*256+255-(int)buf[3] ) : (int)buf[4]*256+(int)buf[3];
+                    rz = (((int)buf[6])>=254) ? -( (255-(int)buf[6])*256+255-(int)buf[5] ) : (int)buf[6]*256+(int)buf[5];
+                    //std::cout << "x " << x << " y " << y << " z " << z << " rx " << rx << " ry " << ry << " rz " << rz << std::endl;
+                }
+            }
+        }
+    }
+}
+
 
 void ACUsabilityKnownItemSearchPlugin::changeServer(){
     this->url = this->getStringParameterValue("Server");
@@ -98,7 +217,16 @@ void ACUsabilityKnownItemSearchPlugin::changeTeam(){
 }
 
 ACUsabilityKnownItemSearchPlugin::~ACUsabilityKnownItemSearchPlugin(){
+    this->active = false;
+    this->WaitForInternalThreadToExit();
+    hid_close(handle);
 
+    /* Free static HIDAPI objects. */
+    hid_exit();
+
+#ifdef WIN32
+    system("pause");
+#endif
 }
 
 void ACUsabilityKnownItemSearchPlugin::submitCallback(){

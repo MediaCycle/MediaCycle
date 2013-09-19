@@ -33,6 +33,10 @@
 #include <ACPlugin.h>
 #include <ACPluginQt.h>
 
+#include <stdio.h>
+#include <pthread.h>
+#include "hidapi.h"
+
 #ifndef ACUsabilityKnownItemSearchPlugin_H
 #define	ACUsabilityKnownItemSearchPlugin_H
 
@@ -65,6 +69,39 @@ private:
     std::string url;
     int port;
     int team;
+
+public:
+
+    /** Returns true if the thread was successfully started, false if there was an error starting the thread */
+    bool StartInternalThread()
+    {
+        this->active = true;
+        return (pthread_create(&hid_thread, NULL, hid_loop_func, this) == 0);
+    }
+
+    /** Will not return until the internal thread has exited. */
+    void WaitForInternalThreadToExit()
+    {
+        (void) pthread_join(hid_thread, NULL);
+    }
+
+protected:
+    bool init_hid();
+    /** Implement this method in your subclass with the code you want your thread to run. */
+    virtual void hid_loop();// = 0;
+
+private:
+    static void * hid_loop_func(void * This) {((ACUsabilityKnownItemSearchPlugin *)This)->hid_loop(); return NULL;}
+
+    hid_device *handle;
+    pthread_t hid_thread;
+    bool active;
+
+    void print_ascii_status();
+
+    bool button_left, button_right;
+    int x,y,z,rx,ry,rz;
+
 };
 
 #endif
