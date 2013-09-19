@@ -1863,7 +1863,11 @@ int MediaCycle::readXMLConfigFilePlugins(TiXmlHandle _rootHandle) {
 
         TiXmlElement* pluginLibraryNode=MC_e_features_plugin_manager->FirstChild()->ToElement();
         for( pluginLibraryNode; pluginLibraryNode; pluginLibraryNode=pluginLibraryNode->NextSiblingElement()) {
-            string libraryName = pluginLibraryNode->Attribute("LibraryPath");
+            string libraryName("");
+            if(pluginLibraryNode->Attribute("LibraryPath"))
+                libraryName = pluginLibraryNode->Attribute("LibraryPath");
+            else if(pluginLibraryNode->Attribute("Name"))
+                libraryName = pluginLibraryNode->Attribute("Name");
             if(libraryName!=""){
                 int lib_size=0;
                 pluginLibraryNode->QueryIntAttribute("NumberOfPlugins", &lib_size);
