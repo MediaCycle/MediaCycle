@@ -454,6 +454,9 @@ void ACOsgCompositeViewQt::updateGL()
                 mouseover=this->underMouse();
             }
         }
+        else if(mouse_disabled){
+            media_cycle->getBrowser()->removeMousePointer();
+        }
 
         media_cycle->updateState();
         frac = media_cycle->getFrac();
@@ -546,7 +549,7 @@ void ACOsgCompositeViewQt::mediaImported(int n, int nTot,int mId){
     }
     else if(n==nTot && mId==-1){
         std::cout << "ACOsgCompositeViewQt::mediaImported: restoring interaction with the browser after importing " << std::endl;
-        if(media_cycle && media_cycle->hasBrowser())
+        if(media_cycle && media_cycle->hasBrowser() && this->setting != AC_SETTING_INSTALLATION)
             media_cycle->getBrowser()->addMousePointer();
         mouse_disabled = false;
         return;
