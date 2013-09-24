@@ -34,8 +34,9 @@ import java.math.*;
 public class VBSServer {
 
 	static int PORT = 8080;
-	public static int TEAMS = 3;
-	public static String[] TEAM_NAMES = {"Christian", "Stephane", "Thierry"};
+	public static int TEAMS = 1;
+	//public static String[] TEAM_NAMES = {"Christian", "Stephane", "Thierry"};
+    public static String[] TEAM_NAMES = {"You"};
 	public static String LOGFILE = "VBSlogs.txt"; //verbose log file
 	public static String LOGSUCCESSFILE = "log.csv"; //default log file in CSV format
 	public static String LOGSTATS = "VBSlogs.txt"; //"stats.txt";
@@ -48,7 +49,7 @@ public class VBSServer {
 	public static int GTSTART; //ground truth segment start frame
 	public static int GTSTOP; //ground truth segment stop frame
 	public static String GTFILE; //target filename
-	public static long MAX_TASK_SOLVE_TIME = 180000;//180000; //maximum task solve time
+	public static long MAX_TASK_SOLVE_TIME = 60000;//180000; //maximum task solve time
 	
 	public static int[] SUBMISSON_COUNT = new int[TEAMS]; //number of submission for this task
 	public static boolean[] TEAM_FINISHED = new boolean[TEAMS]; //is team already finished (for this task)?
@@ -84,6 +85,8 @@ public class VBSServer {
 			SUBMISSION[i] = new Vector<Submission>();
 		}
 		
+        String library = "";
+        
 		if (args.length >= 1) {
 			try {
 				PORT = Integer.parseInt(args[0]);
@@ -97,21 +100,30 @@ public class VBSServer {
 			    //readGroundTruth(args[1]);
 				VLC = args[1];
 			}
+            if (args.length >= 2) {
+                library = args[1];
+            }
+            if (args.length == 3) {
+				TEAM_NAMES[0] = args[2];
+                log("\tTeam 1 is " + args[2]);
+                SCOREFILE = "scores-" + args[2] + ".txt";
+            }
 			else 
 				System.out.println("Warning: VLC path not specified!");
 		} else 
 			System.out.println("Warning: VLC path not specified!");
 		initTask();
 
+        
 		
-	    InputHandler input = new InputHandler();
+	    InputHandler input = new InputHandler(library);
 	    input.start();
 	    
-	    frame = new JFrame("Known Item Search tasks @ UMONS");
+	    frame = new JFrame("MediaCycle Known Item Search tasks");
 	    frame.setPreferredSize(new Dimension(1000,550));
 	    //frame.setSize(800,600);
 	    //frame.setDefaultCloseOperation(JFrame.DO_NOTHING_ON_CLOSE);
-	    chart = new ChartPanel(SCORE, TEAM_NAMES, "Known Item Search tasks @ UMONS");
+	    chart = new ChartPanel(SCORE, TEAM_NAMES, "MediaCycle Known Item Search tasks");
 	    frame.getContentPane().add(chart, BorderLayout.CENTER);
 	    frame.pack();
 	    
@@ -128,9 +140,6 @@ public class VBSServer {
 	    
 		Server server = new Server(PORT);
 		server.open();
-
-		//loadLibrary("/Volumes/data/Datasets/xml/OLPC.xml");
-
 	}
 	
 	public static void initTask() {
@@ -177,9 +186,14 @@ public class VBSServer {
 	}
 	
 	public static void loadLibrary(String filepath) {
-		filepath = "/Volumes/data/Datasets/xml/OLPC.xml";
+		//filepath = "/Volumes/data/Datasets/xml/OLPC.xml";
+        
+        System.out.println("\trestoring scores");
+        
+        restoreScore();
+        
 		System.out.println("\tloading library: " + filepath);
-		
+		       
 		XMLElement xml = null;
 		if (filepath.indexOf(".xml") != -1) {
 			try {
@@ -384,12 +398,13 @@ public class VBSServer {
 	}
 	
 	public static void play(String filename, int sleepTime) {
-		String command = VLC + VLCEXE + VBSServer.CUESDIR + "/" + filename + "cue.mp4";
+		//String command = VLC + VLCEXE + VBSServer.CUESDIR + "/" + filename + "cue.mp4";
 		try {
 			//Process p = Runtime.getRuntime().exec(command);
 			Process p = new ProcessBuilder("/opt/local/bin/ffplay","-autoexit","-nodisp",filename).start();
 			//Process p = new ProcessBuilder("/usr/bin/afplay",filename).start();
-			System.out.println("\tplaying " + command);
+			//System.out.println("\tplaying " + command);
+            System.out.println("\tplaying " + filename);
 			//Thread.sleep(22000);
 			Thread.sleep(sleepTime);
 			//VBSServer.readGroundTruth(filename + ".txt");
@@ -398,7 +413,8 @@ public class VBSServer {
 			//p.waitFor();
 			Thread.sleep((int)(MAX_TASK_SOLVE_TIME));
 		} catch (IOException e) {
-			System.out.println("CANNOT EXECUTE: " + command);
+			//System.out.println("CANNOT EXECUTE: " + command);
+            System.out.println("can't play: " + filename);
 		} catch (InterruptedException e) {
 			// TODO Auto-generated catch block
 			e.printStackTrace();

@@ -15,14 +15,21 @@ import java.util.Scanner;
 
 public class InputHandler extends Thread {
     
-    public InputHandler() {
+    public InputHandler(String _library) {
         setDaemon(true);
+        library = _library;
     }
     
     public void run() {
         
     	System.out.println();
     	System.out.println("To load a task please enter 'start <filename without extension>' (e.g.: start 040) or enter 'exit' to quit.");
+        System.out.println("To load a library please enter 'lib <path to xml file>' (e.g.: lib /Volumes/data/Datasets/xml/library.xml) or enter 'exit' to quit.");
+        
+        if(library!=""){
+            System.out.println("Loading library " + library);
+            VBSServer.loadLibrary(library);
+        }
     	
         while (true) {
             try {
@@ -59,4 +66,5 @@ public class InputHandler extends Thread {
         }
         
     }
+    public String library;
 }
