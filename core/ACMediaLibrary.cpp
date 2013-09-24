@@ -706,7 +706,7 @@ TiXmlElement* ACMediaLibrary::openCoreXMLLibrary(TiXmlHandle _rootHandle){
 }
 
 // has to be called right after ACMediaLibrary::openCoreXMLLibrary using its return TiXmlElement* is input
-TiXmlElement* ACMediaLibrary::openNextMediaFromXMLLibrary(TiXmlElement* pMediaNode){
+TiXmlElement* ACMediaLibrary::openNextMediaFromXMLLibrary(TiXmlElement* pMediaNode, bool with_thumbnails){
     /*if (!pMediaNode)
         throw runtime_error("corrupted XML file, no medias");
     else {
@@ -724,7 +724,7 @@ TiXmlElement* ACMediaLibrary::openNextMediaFromXMLLibrary(TiXmlElement* pMediaNo
         if(!local_media){
             throw runtime_error("Couldn't create the media, no media reader available");
         }
-        local_media->loadXML(pMediaNode);
+        local_media->loadXML(pMediaNode,with_thumbnails);
         if (mPreProcessPlugin==NULL)
             local_media->defaultPreProcFeatureInit();
         this->addMedia(local_media);
@@ -765,7 +765,7 @@ TiXmlElement* ACMediaLibrary::openNextMediaFromXMLLibrary(TiXmlElement* pMediaNo
                         local_submedia->defaultPreProcFeatureInit();
                     this->addMedia(local_submedia);
                     local_submedia->setParentId(local_media->getId());
-                    local_submedia->loadXML(mediaElement);
+                    local_submedia->loadXML(mediaElement,with_thumbnails);
 
                     string pKey ="";
                     pKey = mediaElement->Attribute("Key");

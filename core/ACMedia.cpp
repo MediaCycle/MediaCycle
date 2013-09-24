@@ -446,7 +446,7 @@ void ACMedia::fixWhiteSpace (std::string &str) {
     str = temp;
 }
 
-void ACMedia::loadXML(TiXmlElement* _pMediaNode){
+void ACMedia::loadXML(TiXmlElement* _pMediaNode, bool with_thumbnails){
     //  const char *pName=_pMediaNode->Attribute("FileName");
     //  XS: no need for char*; string should work since we defined TIXML_USE_STL
     if (!_pMediaNode)
@@ -494,22 +494,24 @@ void ACMedia::loadXML(TiXmlElement* _pMediaNode){
     TiXmlHandle _pMediaNodeHandle(_pMediaNode);
 
     // allow an XML without thumbnails
-    TiXmlElement* thumbnailsElement = _pMediaNodeHandle.FirstChild( "Thumbnails" ).Element();
-    if (thumbnailsElement) {
-        int nt = -1;
-        thumbnailsElement->QueryIntAttribute("NumberOfThumbnails", &nt);
-        if (nt < 0)
-            throw runtime_error("corrupted XML file, <Thumbnails> present, but no thumbnails");
+    if(with_thumbnails){
+        TiXmlElement* thumbnailsElement = _pMediaNodeHandle.FirstChild( "Thumbnails" ).Element();
+        if (thumbnailsElement) {
+            int nt = -1;
+            thumbnailsElement->QueryIntAttribute("NumberOfThumbnails", &nt);
+            if (nt < 0)
+                throw runtime_error("corrupted XML file, <Thumbnails> present, but no thumbnails");
 
-        TiXmlElement* thumbnailElement = _pMediaNodeHandle.FirstChild( "Thumbnails" ).FirstChild( "Thumbnail" ).Element();
-        TiXmlText* thumbnailIDElementsAsText = 0;
-        int count_s = 0;
+            TiXmlElement* thumbnailElement = _pMediaNodeHandle.FirstChild( "Thumbnails" ).FirstChild( "Thumbnail" ).Element();
+            TiXmlText* thumbnailIDElementsAsText = 0;
+            int count_s = 0;
 
-        for( thumbnailElement; thumbnailElement; thumbnailElement = thumbnailElement->NextSiblingElement() ) {
-            ACMediaThumbnail* thumbnail = new ACMediaThumbnail();
-            thumbnail->loadXML(thumbnailElement);
-            if(thumbnail)
-                this->addThumbnail(thumbnail);
+            for( thumbnailElement; thumbnailElement; thumbnailElement = thumbnailElement->NextSiblingElement() ) {
+                ACMediaThumbnail* thumbnail = new ACMediaThumbnail();
+                thumbnail->loadXML(thumbnailElement);
+                if(thumbnail)
+                    this->addThumbnail(thumbnail);
+            }
         }
     }
 
@@ -715,9 +717,9 @@ ACMediaFeatures* ACMedia::getPreProcFeaturesVector(string feature_name) {
             return preproc_features_vectors[i];
         }
     }
-//#ifdef USE_DEBUG // use debug message levels instead
-//    std::cerr << "ACMedia::getPreProcFeaturesVector : not found feature named " << feature_name << std::endl;
-//#endif
+    //#ifdef USE_DEBUG // use debug message levels instead
+    //    std::cerr << "ACMedia::getPreProcFeaturesVector : not found feature named " << feature_name << std::endl;
+    //#endif
     return 0;
 }
 

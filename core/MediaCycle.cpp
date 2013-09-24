@@ -1784,13 +1784,17 @@ int MediaCycle::readXMLConfigFileCore(TiXmlHandle _rootHandle) {
 
     int needsNormalizeAndCluster = 0;
     float prevLibrarySizeMultiplier = 2;
+
+    bool with_thumbnails = true;
+    if(this->getCurrentConfig() && this->getCurrentConfig()->loadThumbnails() == false)
+        with_thumbnails = false;
     
     int beginIndex=this->mediaLibrary->getNewestMediaId();
     while(  media_element != 0 ){
         //mediaBrowser->setNeedsNavigationUpdateLock(1);
         //media_element = this->mediaLibrary->openNextMediaFromXMLLibrary(media_element);
         try{
-            media_element = this->mediaLibrary->openNextMediaFromXMLLibrary(media_element);
+            media_element = this->mediaLibrary->openNextMediaFromXMLLibrary(media_element,with_thumbnails);
         }
         catch (const exception& e) {
             cout << "MediaCycle::readXMLConfigFileCore: error: " << e.what( ) << endl;

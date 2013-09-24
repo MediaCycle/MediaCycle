@@ -170,7 +170,7 @@ public:
 
     int openXMLLibrary(std::string _path, bool aInitLib=false);
     TiXmlElement* openCoreXMLLibrary(TiXmlHandle _rootHandle);
-    TiXmlElement* openNextMediaFromXMLLibrary(TiXmlElement* pMediaNode);
+    TiXmlElement* openNextMediaFromXMLLibrary(TiXmlElement* pMediaNode, bool with_thumbnails=true);
     int saveXMLLibrary(std::string _path);
     int saveCoreXMLLibrary( TiXmlElement* _MC_e_root, TiXmlElement* _MC_e_medias);
 
