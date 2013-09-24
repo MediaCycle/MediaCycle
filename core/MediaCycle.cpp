@@ -1620,14 +1620,14 @@ bool MediaCycle::performActionOnMedia(std::string action, long int mediaId, std:
         if(plugin)
             renderers_passed &= plugin->performActionOnMedia(action,mediaId,arguments);
     }
-    /*std::vector<std::string> client_plugins = pluginManager->getAvailablePluginsNames(PLUGIN_TYPE_CLIENT, this->getMediaType());
+    std::vector<std::string> client_plugins = pluginManager->getAvailablePluginsNames(PLUGIN_TYPE_CLIENT, this->getMediaType());
     bool clients_passed = true;
     for(std::vector<std::string>::iterator client_plugin = client_plugins.begin();client_plugin!=client_plugins.end();client_plugin++){
         ACClientPlugin* plugin = dynamic_cast<ACClientPlugin*>(pluginManager->getPlugin(*client_plugin));
         if(plugin)
             clients_passed &= plugin->performActionOnMedia(action,mediaId,arguments);
-    }*/
-    return renderers_passed;// && clients_passed;
+    }
+    return renderers_passed && clients_passed;
 }
 
 
