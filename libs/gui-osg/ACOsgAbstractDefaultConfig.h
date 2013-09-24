@@ -43,6 +43,7 @@ public:
     ACOsgAbstractDefaultConfig() : ACAbstractDefaultConfig(){}
     virtual ~ACOsgAbstractDefaultConfig(){}
     virtual std::vector<std::string> osgPlugins()=0;
+    virtual bool hideInformation()=0;
 };
 
 #endif //__ACOsgAbstractDefaultConfig_H__

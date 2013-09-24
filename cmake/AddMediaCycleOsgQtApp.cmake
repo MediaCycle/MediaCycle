@@ -11,6 +11,7 @@
 #  MC_PLUGINS_STATIC: example SET(MC_PLUGINS_STATIC ON)
 #  MAIN_CLASS: that inherits from ACMultiMediaCycleOsgQt: example SET(MAIN_CLASS "ACAudioCycleLoopJam")
 #  ICON_NAME: example SET(ICON_NAME "MultiMediaCycle")
+#  HIDE_INFORMATION: example SET(HIDE_INFORMATION ON)
 
 include(${CMAKE_SOURCE_DIR}/cmake/AddQtApp.cmake)
 macro(ADD_MC_OSG_QT_EXECUTABLE APP_NAME)

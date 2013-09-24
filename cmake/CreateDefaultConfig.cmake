@@ -27,6 +27,8 @@
 #  CONNECT_OSC: example SET(CONNECT_OSC ON)
 #  FULLSCREEN: example SET(FULLSCREEN ON)
 #  SETTING_INSTALLATION: example SET(SETTING_INSTALLATION ON)
+#  HIDE_INFORMATION: example SET(HIDE_INFORMATION ON)
+#  FORGET_THUMBNAILS: example SET(FORGET_THUMBNAILS ON)
 
 macro(CREATE_DEFAULT_CONFIG TARGET_NAME)
 
@@ -169,6 +171,13 @@ endforeach(OSG_PLUGIN)
 file(APPEND ${CMAKE_CURRENT_BINARY_DIR}/${CLASS_NAME}.h "\t\treturn plugins;
     }
 ")
+
+IF(HIDE_INFORMATION)
+file(APPEND ${CMAKE_CURRENT_BINARY_DIR}/${CLASS_NAME}.h "\tvirtual bool hideInformation(){return true;}\n")
+ELSE()
+file(APPEND ${CMAKE_CURRENT_BINARY_DIR}/${CLASS_NAME}.h "\tvirtual bool hideInformation(){return false;}\n")
+ENDIF()
+
 ENDIF()
 
 file(APPEND ${CMAKE_CURRENT_BINARY_DIR}/${CLASS_NAME}.h "
@@ -181,6 +190,12 @@ file(APPEND ${CMAKE_CURRENT_BINARY_DIR}/${CLASS_NAME}.h "
         virtual std::string libraryReaderPlugin(){return \"${LIBRARY_READER}\";}
         virtual std::string libraryWriterPlugin(){return \"${LIBRARY_WRITER}\";}
 ")
+
+IF(FORGET_THUMBNAILS)
+        file(APPEND ${CMAKE_CURRENT_BINARY_DIR}/${CLASS_NAME}.h "\tvirtual bool loadThumbnails(){return false;}")
+ELSE()
+        file(APPEND ${CMAKE_CURRENT_BINARY_DIR}/${CLASS_NAME}.h "\tvirtual bool loadThumbnails(){return true;}")
+ENDIF()
 
 IF(WITH_SEGMENTATION)
 	file(APPEND ${CMAKE_CURRENT_BINARY_DIR}/${CLASS_NAME}.h "\tvirtual bool useSegmentation(){return true;}")

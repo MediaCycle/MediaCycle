@@ -67,6 +67,7 @@ public:
     virtual std::string neighborsMethodPlugin(){return "";}
     virtual std::string neighborsPositionsPlugin(){return "";}
     virtual std::string preProcessPlugin(){return "";}
+    virtual bool loadThumbnails(){return true;}
     virtual bool useSegmentation()=0;
     virtual std::string segmentationPlugin(){return "";}
     virtual std::string libraryReaderPlugin(){return "";}
