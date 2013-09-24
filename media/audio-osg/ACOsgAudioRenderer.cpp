@@ -312,8 +312,12 @@ void ACOsgAudioRenderer::updateNodes(double ratio) {
     z = 0;
 
     T.makeTranslate(Vec3(x, y, z));
+
     localscale = maxscale - distance_mouse * (maxscale - minscale) / maxdistance ;
+    if(waveform_type == AC_BROWSER_AUDIO_WAVEFORM_NONE) localscale = minscale;//CF for KIS tests
     localscale = max(localscale,minscale);
+
+    osg::Vec4f current_color;
 
     if (media && attribute->getActivity()>=1) {	// with waveform
         localscale = 0.5;
@@ -381,6 +385,14 @@ void ACOsgAudioRenderer::updateNodes(double ratio) {
             }
         }
 
+        //CF for KIS tests
+        if(waveform_type == AC_BROWSER_AUDIO_WAVEFORM_NONE){
+            current_color = osg::Vec4(0,0,0,1);
+            if(node_shape_drawable){
+                node_shape_drawable->setColor(current_color);
+            }
+        }
+
         if(waveform_type != AC_BROWSER_AUDIO_WAVEFORM_NONE){
 #ifdef AUTO_TRANSFORM
             curser_transform->setPosition(Vec3((float) attribute->getCurrentFrame() / (float)(((ACAudio*) media )->getNFrames()) * media->getThumbnailWidth(waveform_thumbnail) * xstep, 0.0, 0.0));
@@ -409,7 +421,6 @@ void ACOsgAudioRenderer::updateNodes(double ratio) {
         }
 
         //CF nodes colored along their relative cluster on in Clusters Mode
-        osg::Vec4f current_color;
         if (media_cycle->getBrowserMode() == AC_MODE_CLUSTERS){
             const vector<int> centerNodeIds=media_cycle->getBrowser()->getIdNodeClusterCenter();
             if(cluster_colors.size()>0){
@@ -447,64 +458,69 @@ void ACOsgAudioRenderer::updateNodes(double ratio) {
         if (user_defined_color)
             current_color = node_color;
 
-        osg::ref_ptr<osg::Vec4Array> current_color_array = new Vec4Array(1);
-        (*current_color_array)[0] = current_color;
-        if (node_geometry){
-            node_geometry->setColorArray(current_color_array);
-        }
-        if( waveform_geometry){
-            waveform_geometry->setColorArray(current_color_array);
-        }
-        if(node_shape_drawable){
-            node_shape_drawable->setColor(current_color);
+        //CF KIS tests
+        if(waveform_type == AC_BROWSER_AUDIO_WAVEFORM_NONE){
+            current_color = osg::Vec4(1,1,1,1);
+
+            osg::ref_ptr<osg::Vec4Array> current_color_array = new Vec4Array(1);
+            (*current_color_array)[0] = current_color;
+            if (node_geometry){
+                node_geometry->setColorArray(current_color_array);
+            }
+            if( waveform_geometry){
+                waveform_geometry->setColorArray(current_color_array);
+            }
+            if(node_shape_drawable){
+                node_shape_drawable->setColor(current_color);
+            }
+
+            T =  Matrix::rotate(-media_cycle_angle,Vec3(0.0,0.0,1.0)) * Matrix::scale(localscale/media_cycle_zoom,localscale/media_cycle_zoom,localscale/media_cycle_zoom) * T;
         }
 
-        T =  Matrix::rotate(-media_cycle_angle,Vec3(0.0,0.0,1.0)) * Matrix::scale(localscale/media_cycle_zoom,localscale/media_cycle_zoom,localscale/media_cycle_zoom) * T;
-    }
+        if(attribute->getNavigationLevel() >= media_cycle->getNavigationLevel()) {
+            if (aura_geode)
+                aura_geode->setNodeMask(mask);
+        }
+        else {
+            this->setEntryGeodeVisible(false);
+            if (aura_geode)
+                aura_geode->setNodeMask(0);
+        }
 
-    if(attribute->getNavigationLevel() >= media_cycle->getNavigationLevel()) {
-        if (aura_geode)
-            aura_geode->setNodeMask(mask);
-    }
-    else {
-        this->setEntryGeodeVisible(false);
-        if (aura_geode)
-            aura_geode->setNodeMask(0);
-    }
-
-    float magic_number = 0.0005; // since we're not using an ortho2D projection
+        float magic_number = 0.0005; // since we're not using an ortho2D projection
 #ifdef AUTO_TRANSFORM
-    if(waveform_transform)
-        waveform_transform->setScale(magic_number*node_size,magic_number*node_size,1.0);
-    if(entry_transform){
-        if(node_geometry) // if the node is a thumbnail and not a shape
-            entry_transform->setScale(magic_number*node_size,magic_number*node_size,1.0);
-        else
-            entry_transform->setScale(node_size,node_size,1.0);
-    }
-#else
-    Matrix magic_numbers;
-    magic_numbers.makeScale(magic_number*node_size,magic_number*node_size,1.0);
-    if(waveform_transform)
-        waveform_transform->setMatrix(magic_numbers);
-    if(entry_transform){
-        if(node_geometry) // if the node is a thumbnail and not a shape
-            entry_transform->setMatrix(magic_numbers);
-        else{
-            Matrix node_scale;
-            node_scale.makeScale(node_size,node_size,1.0);
-            entry_transform->setMatrix(node_scale);
+        if(waveform_transform)
+            waveform_transform->setScale(magic_number*node_size,magic_number*node_size,1.0);
+        if(entry_transform){
+            if(node_geometry) // if the node is a thumbnail and not a shape
+                entry_transform->setScale(magic_number*node_size,magic_number*node_size,1.0);
+            else
+                entry_transform->setScale(node_size,node_size,1.0);
         }
-    }
+#else
+        Matrix magic_numbers;
+        magic_numbers.makeScale(magic_number*node_size,magic_number*node_size,1.0);
+        if(waveform_transform)
+            waveform_transform->setMatrix(magic_numbers);
+        if(entry_transform){
+            if(node_geometry) // if the node is a thumbnail and not a shape
+                entry_transform->setMatrix(magic_numbers);
+            else{
+                Matrix node_scale;
+                node_scale.makeScale(node_size,node_size,1.0);
+                entry_transform->setMatrix(node_scale);
+            }
+        }
 #endif
 
 #ifdef AUTO_TRANSFORM
-    media_node->setPosition(Vec3(x,y,z));
-    media_node->setRotation(Quat(0.0, 0.0, 1.0, -media_cycle_angle));
-    media_node->setScale(Vec3(localscale/media_cycle_zoom,localscale/media_cycle_zoom,localscale/media_cycle_zoom));
+        media_node->setPosition(Vec3(x,y,z));
+        media_node->setRotation(Quat(0.0, 0.0, 1.0, -media_cycle_angle));
+        media_node->setScale(Vec3(localscale/media_cycle_zoom,localscale/media_cycle_zoom,localscale/media_cycle_zoom));
 #else
-    media_node->setMatrix(T);
+        media_node->setMatrix(T);
 #endif
+    }
 }
 
 void ACOsgAudioRenderer::setWaveformType(ACBrowserAudioWaveformType _type)
