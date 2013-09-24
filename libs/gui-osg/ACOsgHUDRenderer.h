@@ -44,6 +44,7 @@
 #include "ACOsgPointerRenderer.h"
 #include "ACOsgLibraryRenderer.h"
 #include "ACOsgMediaActionsRenderer.h"
+#include "ACOsgAbstractDefaultConfig.h"
 
 #include <osgViewer/Viewer>
 
@@ -62,6 +63,7 @@ protected:
     ACOsgMediaActionsRenderer* media_actions_renderer;
     ACSettingType setting;
     osg::ref_ptr<osgText::Font> font;
+    ACOsgAbstractDefaultConfig* osg_config;
 
     // SD - Results from centralized request to MediaCycle
     ACPoint media_cycle_pointer_current_pos;

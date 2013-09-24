@@ -37,7 +37,7 @@
 using namespace osg;
 
 ACOsgHUDRenderer::ACOsgHUDRenderer()
- : font(0)
+    : font(0),osg_config(0)
 {
     media_cycle_pointer_current_pos.x = 0;
     media_cycle_pointer_current_pos.y = 0;
@@ -220,6 +220,7 @@ void ACOsgHUDRenderer::prepareLibrary(osgViewer::View* view) {
     if(!library_renderer){
         library_renderer = new ACOsgLibraryRenderer();
         library_renderer->setMediaCycle(media_cycle);
+        osg_config = dynamic_cast<ACOsgAbstractDefaultConfig*>( media_cycle->getCurrentConfig() );
         library_renderer->changeSetting(this->setting);
         library_renderer->setFont(font);
     }
@@ -227,16 +228,19 @@ void ACOsgHUDRenderer::prepareLibrary(osgViewer::View* view) {
 
 void ACOsgHUDRenderer::updateLibrary(osgViewer::View* view) {
     if(library_renderer){
-        camera->removeChild(library_renderer->getNode());
+        camera->removeChild(library_renderer->getNode());       
         int w, h;
         h = 1; w = 1;
         if (view->getViewerBase()->isRealized()) {
             w = view->getCamera()->getViewport()->width();
             h = view->getCamera()->getViewport()->height();
         }
-        this->library_renderer->updateSize(w,h);
-        this->library_renderer->updateNodes();
-        camera->addChild(library_renderer->getNode());
+
+        if(!osg_config || (osg_config && !osg_config->hideInformation())){
+            this->library_renderer->updateSize(w,h);
+            this->library_renderer->updateNodes();
+            camera->addChild(library_renderer->getNode());
+        }
     }
 }
 
