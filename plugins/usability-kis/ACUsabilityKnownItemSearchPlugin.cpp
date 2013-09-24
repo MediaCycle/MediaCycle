@@ -55,7 +55,7 @@ ACUsabilityKnownItemSearchPlugin::ACUsabilityKnownItemSearchPlugin() : QObject()
     this->mMediaType = MEDIA_TYPE_ALL;
 
     url = "localhost";
-    port = 4040;
+    port = 8080;
     team = 1;
 
     this->active = false;
@@ -67,7 +67,7 @@ ACUsabilityKnownItemSearchPlugin::ACUsabilityKnownItemSearchPlugin() : QObject()
 
     submitAction = new ACInputActionQt(tr("Submit the file"), this);
     submitAction->setToolTip(tr("Submit the file"));
-    submitAction->setShortcut(Qt::Key_K);
+    submitAction->setShortcut(Qt::Key_Space);
     submitAction->setKeyEventType(QEvent::KeyPress);
     //CFsubmitAction->setMouseEventType(QEvent::MouseButtonRelease);
     //submitAction->setDeviceName(device);
