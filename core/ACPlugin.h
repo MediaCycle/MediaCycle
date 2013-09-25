@@ -275,6 +275,8 @@ public:
     virtual std::map<std::string,ACMediaType> availableMediaActions(){return std::map<std::string,ACMediaType>();}
     virtual std::map<std::string,ACMediaActionParameters> mediaActionsParameters(){return std::map<std::string,ACMediaActionParameters>();}
     virtual void mediaCycleSet(){}
+    virtual void disable(){}
+    virtual void enable(){}
 };
 
 // plugin for internal use to report the import progress

@@ -614,6 +614,13 @@ void MediaCycle::saveMCSLLibrary(string path)
 
 void MediaCycle::cleanLibrary()
 {
+    std::vector<std::string> renderer_plugins = pluginManager->getAvailablePluginsNames(PLUGIN_TYPE_MEDIARENDERER, this->getMediaType());
+    for(std::vector<std::string>::iterator renderer_plugin = renderer_plugins.begin();renderer_plugin!=renderer_plugins.end();renderer_plugin++){
+        ACMediaRendererPlugin* plugin = dynamic_cast<ACMediaRendererPlugin*>(pluginManager->getPlugin(*renderer_plugin));
+        if(plugin)
+            plugin->disable();
+    }
+
     prevLibrarySize=0;
     eventManager->sig_libraryCleaned();
     if(mediaLibrary){
@@ -1146,6 +1153,8 @@ void MediaCycle::setAutoPlay(int i) {
     // Block media actions while importing
     if(this->importing)
         return;
+    if(this->getLibrarySize()==0)
+        return;
     if(mediaBrowser){
         mediaBrowser->setAutoPlay(i);
     }
@@ -1430,6 +1439,7 @@ void MediaCycle::setCurrentFrame(int lid, int frame_pos) {
 void MediaCycle::muteAllSources(){
     if(mediaBrowser){
         mediaBrowser->muteAllSources();
+        this->performActionOnMedia("mute all",-1);
     }
 }
 
@@ -1847,7 +1857,8 @@ int MediaCycle::readXMLConfigFileCore(TiXmlHandle _rootHandle) {
     eventManager->sig_mediasImported(this->mediaLibrary->getNumberOfFilesProcessed(),this->mediaLibrary->getNumberOfFilesToImport(),locIds);
 
     n = this->mediaLibrary->getSize(); // segmentation might have increased the number of medias in the library
-    eventManager->sig_mediaImported(n,n,-1);
+
+    this->mediaImported(n,n,-1);
 }
 
 // XS TODO return value, tests
@@ -2234,6 +2245,12 @@ void MediaCycle::mediaImported(int n,int nTot,int mId){
      }
      else if(n==nTot && mId==-1){
          this->importing = false;
+         std::vector<std::string> renderer_plugins = pluginManager->getAvailablePluginsNames(PLUGIN_TYPE_MEDIARENDERER, this->getMediaType());
+         for(std::vector<std::string>::iterator renderer_plugin = renderer_plugins.begin();renderer_plugin!=renderer_plugins.end();renderer_plugin++){
+             ACMediaRendererPlugin* plugin = dynamic_cast<ACMediaRendererPlugin*>(pluginManager->getPlugin(*renderer_plugin));
+             if(plugin)
+                 plugin->enable();
+         }
      }
     std::cout << "MediaCycle::mediaImported media id " << mId << " ("<< n << "/" << nTot << ")" << std::endl;
     eventManager->sig_mediaImported(n,nTot,mId);

@@ -249,9 +249,9 @@ bool ACBrowserNavigationToolsPlugin::performActionOnMedia(std::string action, lo
         media->setDiscarded(true);
         return true;
     }
-    else if(action == "hover closest node"){
-        std::cout << "Hovering closest node "<< mediaId << std::endl;
-    }
+//    else if(action == "hover closest node"){
+//        std::cout << "Hovering closest node "<< mediaId << std::endl;
+//    }
     else if(action == "discard nearest nodes"){
         this->discardNearestNodes(mediaId);
     }

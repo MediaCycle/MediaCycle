@@ -66,6 +66,8 @@ public:
     virtual bool performActionOnMedia(std::string action, long int mediaId, std::vector<boost::any> arguments=std::vector<boost::any>());
     virtual std::map<std::string,ACMediaType> availableMediaActions();
     virtual std::map<std::string,ACMediaActionParameters> mediaActionsParameters();
+    virtual void disable(){active = false; this->muteAll();}
+    virtual void enable(){active = true;}
 
 protected:
     void useGranulation();
@@ -189,6 +191,7 @@ protected:
     bool with_granulation;
     bool with_faders;
     int active_sources;
+    bool active;
     //long int sourcesGenerated;
 };
 

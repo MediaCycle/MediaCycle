@@ -48,6 +48,7 @@ ACAudioStkEngineRendererPlugin::ACAudioStkEngineRendererPlugin() : QObject(), AC
     this->mDescription ="Plugin for playing audio files with The Synthesis ToolKit in C++ (STK)";
     this->mMediaType = MEDIA_TYPE_AUDIO;
     this->master_frev = 0;
+    this->active = false;
 
     this->with_granulation = false;
     this->with_faders = false;
@@ -549,13 +550,14 @@ void ACAudioStkEngineRendererPlugin::midiInCallbackWrapper( double timeStamp, st
 }
 
 void ACAudioStkEngineRendererPlugin::muteAll(){
+    if(media_cycle) media_cycle->setAutoPlay(0);
     if(!muting){
         muting = true;
         for(int n=0;n<loop_ids.size();n++){
             if(loop_ids[n]>-1){
-                if(loops[n]->isFinished()){
+                //if(loops[n]->isFinished()){
                     this->stopSource(loop_ids[n]);
-                }
+                //}
             }
         }
         //if(media_cycle)
@@ -1056,6 +1058,9 @@ bool ACAudioStkEngineRendererPlugin::performActionOnMedia(std::string action, lo
 }
 
 bool ACAudioStkEngineRendererPlugin::createGenerator(std::string action, long int mediaId, std::vector<boost::any> arguments){
+
+    if(!active)
+        return false;
 
     std::vector<int>::iterator loop_id = std::find(loop_ids.begin(),loop_ids.end(),mediaId);
     bool looping = (loop_id!=loop_ids.end());
