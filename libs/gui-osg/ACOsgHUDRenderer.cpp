@@ -135,6 +135,9 @@ void ACOsgHUDRenderer::preparePointers(osgViewer::View* view) {
     unsigned int n = media_cycle->getNumberOfPointers();
 
     unsigned int prev_size =  pointer_renderer.size();
+
+    osg_config = dynamic_cast<ACOsgAbstractDefaultConfig*>( media_cycle->getCurrentConfig() );
+    bool hideInformation = (osg_config && osg_config->hideInformation());
     //std::cout << "ACOsgHUDRenderer::preparePointers n " << n << " prev_size " << prev_size << std::endl;
 
     /*if(n == 1)
@@ -171,6 +174,7 @@ void ACOsgHUDRenderer::preparePointers(osgViewer::View* view) {
             if (pointer_renderer[i]) {
                 pointer_renderer[i]->setMediaCycle(media_cycle);
                 pointer_renderer[i]->setNodeIndex(i);
+                pointer_renderer[i]->hideInformation(hideInformation);
                 ACPointer* p = media_cycle->getPointerFromIndex(i);
                 if(p){
                     std::string txt = p->getText();

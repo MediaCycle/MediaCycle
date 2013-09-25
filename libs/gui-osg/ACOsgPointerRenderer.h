@@ -59,6 +59,9 @@ public:
     void updateNodes(double ratio=0.0);
     void setText(std::string text) {text_string = text;}
     void setPos(ACPoint p) {pos = p;}
+    void hideInformation(bool status){this->hide_information = status;}
+private:
+    bool hide_information;
 };
 
 #endif

@@ -113,12 +113,14 @@ void ACOsgPointerRenderer::pointerGeode()
 
 void ACOsgPointerRenderer::prepareNodes()
 {
-    textGeode();
+    if(!hide_information)
+        textGeode();
     pointerGeode();
 
     pointer_transform = new MatrixTransform();
     //ref_ptr//pointer_transform->ref();
-    pointer_transform->addChild(text_geode);
+    if(!hide_information)
+        pointer_transform->addChild(text_geode);
     pointer_transform->addChild(pointer_geode);
 
     pointer_transform->setCullingActive(false);
@@ -133,7 +135,8 @@ void ACOsgPointerRenderer::updateNodes(double ratio)
     Matrix Trotate;
 
     T.makeTranslate(Vec3(pos.x, pos.y, pos.z));
-    //CF MashtaDebug text->setText( text_string );
+    if(!hide_information)
+        text->setText( text_string );
 
     if(pointer_transform)
         pointer_transform->setMatrix(T);
