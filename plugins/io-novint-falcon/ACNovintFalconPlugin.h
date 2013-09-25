@@ -154,6 +154,23 @@ public:
     void nifalcon_homing_mode(long t);
 
 private:
+    unsigned int m_axis;
+    unsigned long m_runClickCount;
+    bool m_positiveForce;
+    double m_plane_stiffness;
+    gmtl::Vec3f m_axisBounds;
+    bool m_isInitializing;
+    bool m_hasPrintedInitMsg;
+    bool m_buttonDown;
+
+    double m_stiffness;
+    double m_radius;
+    bool m_plusButtonDown;
+    bool m_minusButtonDown;
+    bool m_centerButtonDown;
+    bool m_forwardButtonDown;
+
+private:
     pthread_t device_thread;
     bool active;
 

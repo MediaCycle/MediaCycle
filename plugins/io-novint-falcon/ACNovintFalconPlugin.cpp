@@ -62,7 +62,21 @@ ACNovintFalconPlugin::ACNovintFalconPlugin()
       coordinate_changed(false),
       homing_state(false),
       button_state(0),
-      sleep_time(.001)
+      sleep_time(.001),
+      m_axisBounds(0, 0, .100),//.130
+      m_plane_stiffness(1000),
+      m_isInitializing(true),
+      m_hasPrintedInitMsg(false),
+      m_axis(2),
+      m_positiveForce(true),
+      m_runClickCount(0),
+      m_buttonDown(false),
+      m_stiffness(1000),
+      m_radius(0.024),
+      m_plusButtonDown(false),
+      m_minusButtonDown(false),
+      m_centerButtonDown(false),
+      m_forwardButtonDown(false)
 {
     this->mName = "Force-feedback input the Novint Falcon 3DOF device";
     this->mDescription ="Plugin for using the Novint Falcon 3DOF device for force-feedback control";
@@ -82,8 +96,8 @@ ACNovintFalconPlugin::ACNovintFalconPlugin()
     }
 
     m_falconDevice.setFalconFirmware<FalconFirmwareNovintSDK>();
-    m_falconDevice.setFalconGrip<FalconGripFourButton>();
     m_falconDevice.setFalconKinematic<FalconKinematicStamper>();
+    m_falconDevice.setFalconGrip<FalconGripFourButton>();
 
     this->active = false;
 
@@ -100,6 +114,7 @@ bool ACNovintFalconPlugin::init_device(){
         this->nifalcon_vector();
 
         //this->nifalcon_start_thread();
+        this->active = true;
     }
     else
         return false;
@@ -114,7 +129,7 @@ ACNovintFalconPlugin::~ACNovintFalconPlugin(){
     if(m_runThread) nifalcon_stop();
     m_falconDevice.close();
 
-    //this->active = false;
+    this->active = false;
     this->WaitForInternalThreadToExit();
 
 #ifdef WIN32
@@ -125,6 +140,7 @@ ACNovintFalconPlugin::~ACNovintFalconPlugin(){
 void ACNovintFalconPlugin::Exit()
 {
     m_alwaysOutput = false;
+    m_falconDevice.getFalconFirmware()->setLEDStatus(libnifalcon::FalconFirmware::RED_LED);
     if(m_runThread) nifalcon_stop();
     m_falconDevice.close();
     //flext_base::Exit();
@@ -135,8 +151,7 @@ void ACNovintFalconPlugin::device_loop(){
     int res = 0;
     unsigned char buf[256];
     int i = 0;
-    //    while(this->active){
-    //    }
+
     this->nifalcon_start_thread();
 }
 
@@ -194,12 +209,12 @@ void ACNovintFalconPlugin::nifalcon_nvent_firmware()
         std::cout << "ACNovintFalconPlugin: Falcon not open" << std::endl;
         return;
     }
-    if(m_falconDevice.isFirmwareLoaded())
+    /*if(m_falconDevice.isFirmwareLoaded())
     {
         m_isInited = true;
         std::cout << "ACNovintFalconPlugin "<< m_deviceIndex <<": Firmware already loaded, no need to reload..." << std::endl;
         return;
-    }
+    }*/
     ScopedMutex s(m_deviceMutex);
     for(int i = 0; i < 10; ++i)
     {
@@ -234,8 +249,8 @@ void ACNovintFalconPlugin::nifalcon_open()
     }
     ScopedMutex s(m_deviceMutex);
     int index = /*-1;
-                                            if(argc == 1) index = GetInt(argv[0]);
-                                            else index =*/ 0;
+                                                                                                                                                    if(argc == 1) index = GetInt(argv[0]);
+                                                                                                                                                    else index =*/ 0;
     std::cout << "np_nifalcon: Opening first falcon found" << std::endl;
     if(!m_falconDevice.open(index))
     {
@@ -254,6 +269,7 @@ void ACNovintFalconPlugin::nifalcon_close()
         std::cout << "ACNovintFalconPlugin: Falcon not open" << std::endl;
         return;
     }
+
     m_isInited = false;
     if(m_runThread) nifalcon_stop();
     //ScopedMutex s(m_deviceMutex);
@@ -339,6 +355,7 @@ void ACNovintFalconPlugin::nifalcon_stop()
         std::cout << "ACNovintFalconPlugin: Falcon not open"<< std::endl;
         return;
     }
+
     if(!m_runThread)
     {
         std::cout << "ACNovintFalconPlugin " << m_deviceIndex << ": No thread running" << std::endl;
@@ -391,46 +408,119 @@ void ACNovintFalconPlugin::nifalcon_update_loop()
             coordinate_list[i] = m_falconDevice.getPosition()[i];
         }
         if(coordinate_changed){
-            if(media_cycle){
-                media_cycle->setAutoPlay(1);
-                float x,y;
-                if(this->getStringParameterValue("Layout") == "Desktop"){
-                    // Falcon x,y -> Screen x,y : Desktop
-                    x = 20*coordinate_list[0];
-                    y = 20*coordinate_list[1];
-                }
-                else if(this->getStringParameterValue("Layout") == "Left-handed starfish eNTERFACE"){
-                    // Falcon y, -x -> Screen x,y : Left-handed starfish eNTERFACE
-                    x = 20*coordinate_list[1];
-                    y = -20*coordinate_list[0];
-                }
-                else /*if(this->getStringParameterValue("Layout") == "Right-handed starfish eNTERFACE")*/{
-                    // Falcon -y, x -> Screen x,y : Right-handed starfish eNTERFACE
-                    x = -20*coordinate_list[1];
-                    y = 20*coordinate_list[0];
-                }
-                media_cycle->hoverWithPointerId(x,y,0);
 
-//                if(media_cycle->getLibrarySize()>0){
-//                    ACMediaNode* node = media_cycle->getMediaNode( media_cycle->getClosestNode(0) );
-//                    if(node){
-//                        ACPoint p = node->getCurrentPosition();
-//                        float distance = sqrt( (x-p.x)*(x-p.x) + (y-p.y)*(y-p.y) );
-//                        //std::cout << "Closest node at " << distance << std::endl;
-//                    }
-//                }
-
+            boost::array<double, 3> pos = m_falconDevice.getPosition();
+            if(m_isInitializing)
+            {
+                if(!m_hasPrintedInitMsg)
+                {
+                    std::cout << "Move the end effector out of the wall area" << std::endl;
+                    m_hasPrintedInitMsg = true;
+                    m_falconDevice.getFalconFirmware()->setLEDStatus(libnifalcon::FalconFirmware::RED_LED);
+                }
+                if(((pos[m_axis] > m_axisBounds[m_axis]) && m_positiveForce) || ((pos[m_axis] < m_axisBounds[m_axis]) && !m_positiveForce))
+                {
+                    std::cout << "Starting wall simulation..." << std::endl;
+                    m_isInitializing = false;
+                    m_falconDevice.getFalconFirmware()->setLEDStatus(libnifalcon::FalconFirmware::GREEN_LED);
+                    //tstart();
+                }
             }
+            else{
 
-            //            std::cout << "Coords ";
-            //            for(i = 0; i < 3; ++i)
-            //            {
-            //                std::cout << coordinate_list[i] << " ";
-            //            }
-            //            std::cout << std::endl;
+                float x(0.0f),y(0.0f);
+                if(media_cycle){
+                    media_cycle->setAutoPlay(1);
+                    if(this->getStringParameterValue("Layout") == "Desktop"){
+                        // Falcon x,y -> Screen x,y : Desktop
+                        x = 20*pos[0];
+                        y = 20*pos[1];
+                    }
+                    else if(this->getStringParameterValue("Layout") == "Left-handed starfish eNTERFACE"){
+                        // Falcon y, -x -> Screen x,y : Left-handed starfish eNTERFACE
+                        x = 20*pos[1];
+                        y = -20*pos[0];
+                    }
+                    else /*if(this->getStringParameterValue("Layout") == "Right-handed starfish eNTERFACE")*/{
+                        // Falcon -y, x -> Screen x,y : Right-handed starfish eNTERFACE
+                        x = -20*pos[1];
+                        y = 20*pos[0];
+                    }
+                    if(media_cycle->hasBrowser()) media_cycle->getBrowser()->removeMousePointer();
+                    media_cycle->hoverWithPointerId(x,y,0);
+                    //std::cout << pos[0] << " " << pos[1] << " " << pos[2] << " "<< std::endl;
+                }
 
+                boost::array<double, 3> force;
+                force[0] = 0.0;
+                force[1] = 0.0;
+                force[2] = 0.0;
 
+                //CF: Z-wall from libnifalcon FalconWallTest
 
+                double plane_dist = 10000;
+                int closest = -1, outside=3;
+
+                // For each axis, check if the end effector is inside
+                // the cube.  Record the distance to the closest wall.
+
+                force[m_axis] = 0;
+                if(((pos[m_axis] < m_axisBounds[m_axis]) && m_positiveForce) || ((pos[m_axis] > m_axisBounds[m_axis]) && !m_positiveForce))
+                {
+                    double dA = pos[m_axis]-m_axisBounds[m_axis];
+                    plane_dist = dA;
+                    closest = m_axis;
+                }
+
+                // If so, add a proportional force to kick it back
+                // outside from the nearest wall.
+
+                if (closest > -1)
+                    force[closest] = -m_plane_stiffness*plane_dist;
+
+                if(media_cycle){
+                    if(media_cycle->getLibrarySize()>0 && this->getBrowserRenderer()){
+                        ACMediaNode* node = media_cycle->getMediaNode( media_cycle->getClosestNode(0) );
+                        if(node){
+                            ACPoint p = node->getCurrentPosition(); // getNextPosition();//
+                            float distance = 0;
+                            if( this->getBrowserRenderer())
+                                distance = this->getBrowserRenderer()->getDistanceMouse()[media_cycle->getClosestNode(0)];
+
+                            if(distance < 0.03){
+
+                                //CF: node friction from libnifalcon FalconSphereTest
+
+                                //make sphere soft radius or "slippery"
+                                //m_stiffness = -300.0;//attraction
+                                //m_stiffness = 500.0;//friction
+                                m_stiffness = 0.225;
+
+                                if(this->getStringParameterValue("Layout") == "Desktop"){
+                                    // Falcon x,y -> Screen x,y : Desktop
+                                    force[0] = (p.x - pos[0]) * m_stiffness * 10.0;
+                                    force[1] = (p.y - pos[1]) * m_stiffness * 10.0;
+                                }
+                                else if(this->getStringParameterValue("Layout") == "Left-handed starfish eNTERFACE"){
+                                    // Falcon y, -x -> Screen x,y : Left-handed starfish eNTERFACE
+                                    force[0] = (p.y - pos[1]) * m_stiffness * 10.0;
+                                    force[1] = -(p.x - pos[0]) * m_stiffness * 10.0;
+
+                                }
+                                else /*if(this->getStringParameterValue("Layout") == "Right-handed starfish eNTERFACE")*/{
+                                    // Falcon -y, x -> Screen x,y : Right-handed starfish eNTERFACE
+                                    force[0] = -(p.y - pos[1]) * m_stiffness * 10.0;
+                                    force[1] = (p.x - pos[0]) * m_stiffness * 10.0;
+                                }
+                                //Alt
+                                //force[0] = (pos[0] / dist) * (m_radius - dist) * m_stiffness;
+                                //force[1] = (pos[1] / dist) * (m_radius - dist) * m_stiffness;
+                            }
+                        }
+                    }
+                }
+                m_falconDevice.setForce(force);
+            }
         }
 
         //Output digital values
@@ -467,14 +557,14 @@ void ACNovintFalconPlugin::nifalcon_update_loop()
         //lock to make sure we don't try to update information from a patch while it's written to the device object
         //ScopedMutex t(m_updateMutex);
         //Now that we're done parsing what we got back, set the new internal values
-        if(!m_inRawMode)
-        {
-            m_falconDevice.setForce(m_motorVectorForce);
-        }
-        else
-        {
-            m_falconDevice.getFalconFirmware()->setForces(m_motorRawForce);
-        }
+        //        if(!m_inRawMode)
+        //        {
+        //            m_falconDevice.setForce(m_motorVectorForce);
+        //        }
+        //        else
+        //        {
+        //            m_falconDevice.getFalconFirmware()->setForces(m_motorRawForce);
+        //        }
 
         m_falconDevice.getFalconFirmware()->setHomingMode(m_homingMode);
 
