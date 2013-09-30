@@ -71,13 +71,23 @@ ACAudioCycleKIS::ACAudioCycleKIS() : ACMultiMediaCycleOsgQt(), timer(0) {
 
 void ACAudioCycleKIS::postLoadDefaultConfig(){
 
-    this->parseXMLlist("KISLibraries.xml");
+    //this->parseXMLlist("KISLibraries.xml");
 
     //timer = new QTimer(this);
     //connect( timer, SIGNAL(timeout()), this, SLOT(openNextLibrary()) );
 
-    this->startLoopXML();
+    //this->startLoopXML();
 }
+
+void ACAudioCycleKIS::commandLine(int argc, char *argv[]){
+    for(int arg= 0;arg<argc;arg++){
+        std::cout << "commandLine: arg " << arg << ": " << argv[arg] << std::endl;
+    }
+    if(argc >= 2){
+        this->readXMLConfig(argv[1]);
+    }
+}
+
 
 ACAudioCycleKIS::~ACAudioCycleKIS(){
     if(timer){
@@ -157,7 +167,7 @@ void ACAudioCycleKIS::openNextLibrary(){
     this->clean(true);
     cout << "opening : '" << XMLfiles[count] << "'" << endl;
     this->readXMLConfig(XMLfiles[count]);
-    media_cycle->setAutoPlay(true);
+    //media_cycle->setAutoPlay(true);
     if(timer) timer->start(attente);
     count++;
 }

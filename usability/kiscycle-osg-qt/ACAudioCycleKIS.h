@@ -51,6 +51,7 @@ public:
     /// This will be run right after the default config has been loaded
     virtual void postLoadDefaultConfig();
     void startLoopXML();
+    virtual void commandLine(int argc, char *argv[]);
 
 protected:
     bool parseXMLlist(std::string filename);
