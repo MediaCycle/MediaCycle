@@ -1032,7 +1032,7 @@ void ACOsgCompositeViewQt::mousePressEvent( QMouseEvent* event )
 void ACOsgCompositeViewQt::mouseMoveEvent( QMouseEvent* event )
 {
     if (media_cycle&&event->buttons() ){
-        
+
         if (media_cycle->getClickedNode()>-1){//DRAG (click on a node and move)
             dragFlag=true;
             cout<<(event->pos() - dragStartPosition).manhattanLength();
@@ -1061,6 +1061,10 @@ void ACOsgCompositeViewQt::mouseMoveEvent( QMouseEvent* event )
             
             return;
         }
+    }
+
+    if(setting == AC_SETTING_INSTALLATION && media_cycle->getAutoPlay()==0){
+        media_cycle->setAutoPlay(1);
     }
     
     int button = 0;
