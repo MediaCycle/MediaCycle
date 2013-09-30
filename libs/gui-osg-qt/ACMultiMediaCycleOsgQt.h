@@ -121,6 +121,7 @@ public:
     virtual void postLoadDefaultConfig(){}
     /// This will be run right after an XML has been loaded
     virtual void postLoadXML(){}
+    virtual void commandLine(int argc, char *argv[]){}
 
     void updateLibrary();
 

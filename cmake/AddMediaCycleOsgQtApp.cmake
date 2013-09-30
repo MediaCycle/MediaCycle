@@ -175,6 +175,7 @@ foreach(DEFAULT_CONFIG ${DEFAULT_CONFIGS})
 endforeach(DEFAULT_CONFIG)
 
 file(APPEND ${CMAKE_CURRENT_BINARY_DIR}/main.cpp "
+        window.commandLine(argc,argv);
 	#ifdef USE_DEBUG
 	}
 	catch (const exception& e) {
