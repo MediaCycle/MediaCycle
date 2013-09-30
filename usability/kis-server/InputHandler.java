@@ -26,10 +26,10 @@ public class InputHandler extends Thread {
     	System.out.println("To load a task please enter 'start <filename without extension>' (e.g.: start 040) or enter 'exit' to quit.");
         System.out.println("To load a library please enter 'lib <path to xml file>' (e.g.: lib /Volumes/data/Datasets/xml/library.xml) or enter 'exit' to quit.");
         
-        if(library!=""){
+        //if(library!=""){
             System.out.println("Loading library " + library);
             VBSServer.loadLibrary(library);
-        }
+        //}
     	
         while (true) {
             try {

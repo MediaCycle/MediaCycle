@@ -60,6 +60,8 @@ public class VBSServer {
 		
 	public static ChartPanel chart;
 	public static JFrame frame;
+    
+    public static MediaCycleHandler mediacycle;
 	
 	//WINDOWS
 	//public static String VLC = "C:\\Program Files (x86)\\VideoLAN\\VLC";
@@ -89,7 +91,13 @@ public class VBSServer {
         
 		if (args.length >= 1) {
 			try {
-				PORT = Integer.parseInt(args[0]);
+				//PORT = Integer.parseInt(args[0]);
+                TEAM_NAMES[0] = args[0];
+                log("\tTeam 1 is " + args[0]);
+                SCOREFILE = "scores-" + args[0] + ".txt";
+                LOGFILE = "VBSlogs-" + args[0] + ".txt";
+                LOGSUCCESSFILE = "log-" + args[0] + ".csv";
+                LOGSTATS = "VBSlogs-" + args[0] + ".txt";
 			}
 			catch (NumberFormatException nfe) {
 				System.out.println("Please specify a valid port number!");
@@ -114,16 +122,16 @@ public class VBSServer {
 			System.out.println("Warning: VLC path not specified!");
 		initTask();
 
-        
+         //mediacycle = new MediaCycleHandler("");
 		
 	    InputHandler input = new InputHandler(library);
 	    input.start();
 	    
 	    frame = new JFrame("MediaCycle Known Item Search tasks");
-	    frame.setPreferredSize(new Dimension(1000,550));
+	    frame.setPreferredSize(new Dimension(300,1000));
 	    //frame.setSize(800,600);
 	    //frame.setDefaultCloseOperation(JFrame.DO_NOTHING_ON_CLOSE);
-	    chart = new ChartPanel(SCORE, TEAM_NAMES, "MediaCycle Known Item Search tasks");
+	    chart = new ChartPanel(SCORE, TEAM_NAMES, "");//"MediaCycle Known Item Search tasks"
 	    frame.getContentPane().add(chart, BorderLayout.CENTER);
 	    frame.pack();
 	    
@@ -188,9 +196,25 @@ public class VBSServer {
 	public static void loadLibrary(String filepath) {
 		//filepath = "/Volumes/data/Datasets/xml/OLPC.xml";
         
+        int num = 4;
+        String[] libraries = new String[num];
+        libraries[0]="/Volumes/data/Datasets/xml/KIS/OLPC-metal-grid.xml";
+        libraries[1]="/Volumes/data/Datasets/xml/KIS/OLPC-metal-tsne.xml";
+        libraries[2]="/Volumes/data/Datasets/xml/KIS/OLPC-water-grid.xml";
+        libraries[3]="/Volumes/data/Datasets/xml/KIS/OLPC-water-tsne.xml";
+        
+        String application = "/Volumes/data/Datasets/xml/KIS/KnownItemSearchCycle.app/Contents/MacOS/KnownItemSearchCycle";
+        
         System.out.println("\trestoring scores");
         
         restoreScore();
+        while(true){
+
+        int index = (int)(Math.random()*(num-1));
+            filepath = libraries[index];
+    
+            log("\tCollection " + filepath);
+        
         
 		System.out.println("\tloading library: " + filepath);
 		       
@@ -239,16 +263,24 @@ public class VBSServer {
 		}
 		
 		System.out.println("xml file '"+filepath+"' contains " + number_of_medias + " medias");
-				
-		
-		while(true){
+
 			double a = Math.random();
 			System.out.println("random '"+a+"'");
 			int b = (int)(a*(number_of_medias-1));
 			System.out.println("loading media '"+b+"'");
 				
 			if (medias.get(b).getAttribute("FileName", null) != null)
-			{ 
+			{
+                try
+                {
+                    Process myProcess = new ProcessBuilder("killall", "KnownItemSearchCycle").start();
+                }
+                catch(IOException e)
+                {
+                    // Handle error.
+                    e.printStackTrace();
+                }
+                
 			
 				String filename = medias.get(b).getAttribute("FileName", null);
 				System.out.println("Filename:"+filename);
@@ -262,14 +294,19 @@ public class VBSServer {
 				int wait = (int)((float)samples/(float)samplerate*1000);
 				System.out.println("SamplingRate:"+samplerate);
 				System.out.println("SampleEnd:"+samples);
-				System.out.println("wait:"+wait);
-		
+                System.out.println("wait:"+wait);
+                
+                mediacycle = new MediaCycleHandler(application,filepath);
+                mediacycle.start();
+                
 				play(filename,wait);
+                
+                
 			}
 		}
 		
 	}
-	
+    
 	public static void restoreScore()
 	{
 		BufferedReader reader = null;
@@ -396,8 +433,8 @@ public class VBSServer {
             e.printStackTrace();
         }
 	}
-	
-	public static void play(String filename, int sleepTime) {
+    
+    public static void play(String filename, int sleepTime) {
 		//String command = VLC + VLCEXE + VBSServer.CUESDIR + "/" + filename + "cue.mp4";
 		try {
 			//Process p = Runtime.getRuntime().exec(command);
@@ -419,6 +456,5 @@ public class VBSServer {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
 		}
-	}
-	
+	}	
 }
