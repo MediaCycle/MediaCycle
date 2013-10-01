@@ -210,7 +210,7 @@ public class VBSServer {
         restoreScore();
         while(true){
 
-        int index = (int)(Math.random()*(num-1));
+        int index = (int)(Math.random()*(num));
             filepath = libraries[index];
     
             log("\tCollection " + filepath);
@@ -443,8 +443,9 @@ public class VBSServer {
 			//System.out.println("\tplaying " + command);
             System.out.println("\tplaying " + filename);
 			//Thread.sleep(22000);
-			Thread.sleep(sleepTime);
-			//VBSServer.readGroundTruth(filename + ".txt");
+			//Thread.sleep(sleepTime);
+			Thread.sleep(3000);
+            //VBSServer.readGroundTruth(filename + ".txt");
 			VBSServer.readGroundTruth(filename);
 			p.destroy();
 			//p.waitFor();
