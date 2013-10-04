@@ -1596,18 +1596,30 @@ void MediaCycle::hoverWithPointerId(float xx, float yy, int p_id) {
     // Block media actions while importing
     if(this->importing)
         return;
-    if (this->mediaBrowser){
-        mediaBrowser->hoverWithPointerId(xx, yy, p_id);
-    }
+    if (!this->mediaBrowser)
+        return;
+    mediaBrowser->hoverWithPointerId(xx, yy, p_id);
+    std::vector<boost::any> arguments;
+    arguments.push_back(p_id);
+    arguments.push_back(xx);
+    arguments.push_back(yy);
+    if(this->getLibrarySize()>0)
+        this->performActionOnMedia("hover pointer id",-1,arguments);
 }
 
 void MediaCycle::hoverWithPointerIndex(float xx, float yy, int p_index) {
     // Block media actions while importing
     if(this->importing)
         return;
-    if (this->mediaBrowser){
-        mediaBrowser->hoverWithPointerIndex(xx, yy, p_index);
-    }
+    if (!this->mediaBrowser)
+        return;
+    mediaBrowser->hoverWithPointerIndex(xx, yy, p_index);
+    std::vector<boost::any> arguments;
+    arguments.push_back(p_index);
+    arguments.push_back(xx);
+    arguments.push_back(yy);
+    if(this->getLibrarySize()>0)
+        this->performActionOnMedia("hover pointer index",-1,arguments);
 }
 
 bool MediaCycle::performActionOnMedia(std::string action, long int mediaId, std::vector<boost::any> arguments){

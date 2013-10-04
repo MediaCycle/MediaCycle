@@ -146,7 +146,8 @@ void ACOsgBrowserRenderer::clean(){
     this->removeNodes();
     this->removeLinks();
     this->removeLabels();
-    media_group->removeChildren(0,media_group->getNumChildren());
+    if(media_group)
+        media_group->removeChildren(0,media_group->getNumChildren());
     //CF this is a temporary solution until we implement signals/slots in the core
     if(media_cycle){
         if(media_cycle->hasBrowser()){

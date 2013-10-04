@@ -266,6 +266,7 @@ ACMultiMediaCycleOsgQt::ACMultiMediaCycleOsgQt(QWidget *parent)
 }
 
 ACMultiMediaCycleOsgQt::~ACMultiMediaCycleOsgQt(){
+    this->clean();
     delete settingsDialog;
     delete aboutDialogFactory;
     if(dockWidgetsManager) delete dockWidgetsManager;
@@ -275,11 +276,11 @@ ACMultiMediaCycleOsgQt::~ACMultiMediaCycleOsgQt(){
     if (progressBar) delete progressBar;
     if (osgViewDockLayout) delete osgViewDockLayout;
     if (osgViewDockWidget) delete osgViewDockWidget;
-    this->destroyMediaCycle();
     if (metadataWindow) delete metadataWindow;
     if (userProfileWindow) delete userProfileWindow;
     if (segmentationDialog) delete segmentationDialog;
     if (librarySaveDialog) delete librarySaveDialog;
+    this->destroyMediaCycle();
 }
 
 void ACMultiMediaCycleOsgQt::setMediaType(ACMediaType _mt)
