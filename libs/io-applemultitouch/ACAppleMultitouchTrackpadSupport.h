@@ -40,12 +40,11 @@
 
 #include <math.h>
 #include <unistd.h>
-#include<vector>
+#include <vector>
 #include <algorithm>
 
+#include <mach/mach.h>
 #include <CoreFoundation/CoreFoundation.h>
-
-#include <MediaCycle.h>
 
 #ifdef __cplusplus
 extern "C" {
@@ -55,25 +54,25 @@ typedef struct { float x,y; } mtPoint;
 typedef struct { mtPoint pos,vel; } mtReadout;
 
 typedef struct {
-	int frame;
-	double timestamp;
-	int identifier, state, foo3, foo4;
-	mtReadout normalized;
-	float size;
-	int zero1;
-	float angle, majorAxis, minorAxis; // ellipsoid
-	mtReadout mm;
-	int zero2[2];
-	float unk2;
+    int frame;
+    double timestamp;
+    int identifier, state, foo3, foo4;
+    mtReadout normalized;
+    float size;
+    int zero1;
+    float angle, majorAxis, minorAxis; // ellipsoid
+    mtReadout mm;
+    int zero2[2];
+    float unk2;
 } Finger;
 
-typedef void* MTDeviceRef; // CF instead of int
+typedef void* MTDeviceRef;
 typedef int (*MTContactCallbackFunction)(int,Finger*,int,double,int);
 
 MTDeviceRef MTDeviceCreateDefault();
 void MTRegisterContactFrameCallback(MTDeviceRef, MTContactCallbackFunction);
-void MTUnregisterContactFrameCallback(MTDeviceRef, MTContactCallbackFunction);//CF
-void MTDeviceStart(MTDeviceRef, int); // void MTDeviceStart(MTDeviceRef); //CF
+void MTUnregisterContactFrameCallback(MTDeviceRef, MTContactCallbackFunction);
+void MTDeviceStart(MTDeviceRef, int);
 void MTDeviceStop(MTDeviceRef);
 void MTDeviceRelease(MTDeviceRef);
 
@@ -83,18 +82,15 @@ void MTDeviceRelease(MTDeviceRef);
 
 typedef void* ACAppleMultitouchTrackpadSupportRef;
 
-static MTDeviceRef dev;		
+static MTDeviceRef dev;
 
 class ACAppleMultitouchTrackpadSupport {
-	public:
-		ACAppleMultitouchTrackpadSupport(){};
-		~ACAppleMultitouchTrackpadSupport(){};
-		void setMediaCycle(MediaCycle *_media_cycle) { this->media_cycle = _media_cycle; };
-		MediaCycle* getMediaCycle(){return this->media_cycle;}
-		void start();
-		void stop();
-	protected:
-		MediaCycle *media_cycle;
+public:
+    ACAppleMultitouchTrackpadSupport(){}
+    ~ACAppleMultitouchTrackpadSupport(){}
+    void start();
+    void stop();
+    virtual int callback(int device, Finger *data, int nFingers, double timestamp, int frame){return 0;}
 };
 
 static std::vector<ACAppleMultitouchTrackpadSupport*> instances;

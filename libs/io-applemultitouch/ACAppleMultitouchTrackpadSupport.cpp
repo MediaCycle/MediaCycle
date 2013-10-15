@@ -1,8 +1,8 @@
 /**
  * @brief ACAppleMultitouchTrackpadSupport.cpp
  * @author Christian Frisson
- * @date 24/02/2011
- * @copyright (c) 2011 – UMONS - Numediart
+ * @date 15/10/2013
+ * @copyright (c) 2013 – UMONS - Numediart
  * 
  * MediaCycle of University of Mons – Numediart institute is 
  * licensed under the GNU AFFERO GENERAL PUBLIC LICENSE Version 3 
@@ -31,9 +31,9 @@
 
 #include "ACAppleMultitouchTrackpadSupport.h"
 
-static int callback(int device, Finger *data, int nFingers, double timestamp, int frame) {
+static int _callback(int device, Finger *data, int nFingers, double timestamp, int frame) {
 
-	vector<Finger*> fingers;
+    std::vector<Finger*> fingers;
 	fingers.resize(nFingers);
 	
 	 for (int i=0; i<nFingers; i++) {
@@ -61,14 +61,7 @@ static int callback(int device, Finger *data, int nFingers, double timestamp, in
 	
 	for (std::vector< ACAppleMultitouchTrackpadSupport* >::iterator instance = instances.begin(); instance < instances.end(); instance++) 
 	{	
-		if ( (*instance)->getMediaCycle()->getBrowser()->getState() == AC_IDLE ) {
-			//std::cout << "Library size " << (*instance)->getMediaCycle()->getLibrarySize() << std::endl;
-			if ( (*instance)->getMediaCycle()->getLibrarySize() > 0 ) {
-				if (nFingers == 2) {
-				//...
-				}	
-			}
-		}	
+        (*instance)->callback(device, data, nFingers, timestamp, frame);
 	}	
 	return 0;
 }
@@ -77,7 +70,7 @@ void ACAppleMultitouchTrackpadSupport::start()
 {	
 	if (instances.empty()) {
 		dev = MTDeviceCreateDefault();
-		MTRegisterContactFrameCallback(dev, callback);
+        MTRegisterContactFrameCallback(dev, _callback);
 		MTDeviceStart(dev, 0);
 	}
 	if (find(instances.begin(), instances.end(), this) == instances.end())
@@ -91,7 +84,7 @@ void ACAppleMultitouchTrackpadSupport::stop()
 	instances.erase(it);
 	assert(find(instances.begin(), instances.end(), this) == instances.end());
 	if (instances.empty()) {
-		MTUnregisterContactFrameCallback(dev, callback);
+        MTUnregisterContactFrameCallback(dev, _callback);
 		MTDeviceStop(dev);
 		MTDeviceRelease(dev);
 		dev = 0;

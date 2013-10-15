@@ -503,7 +503,7 @@ int MediaCycle::importDirectories(vector<string> directories, int recursive, boo
         }
     }
     n = mediaLibrary->getSize(); // segmentation might have increased the number of medias in the library
-    eventManager->sig_mediaImported(n,n,-1);
+    this->mediaImported(n,n,-1);
     /*usleep(1000000);
     ACMediaNodes tempNodes=mediaBrowser->getMediaNodes();
     std::cout<<"NodeIndex:\n";
