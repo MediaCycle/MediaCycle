@@ -122,6 +122,10 @@ public:
     /// This will be run right after an XML has been loaded
     virtual void postLoadXML(){}
     virtual void commandLine(int argc, char *argv[]){}
+	
+	void changeMenuBarVisibility(bool visibility);
+	void changeStatusBarVisibility(bool visibility);
+	void changeToolBarVisibility(bool visibility);	
 
     void updateLibrary();
 
@@ -182,7 +186,7 @@ signals:
 
 private:
     // variables
-    Ui::ACMediaCycleOsgQt ui;
+    Ui::ACMultiMediaCycleOsgQt ui;
     ACSettingsDialogQt *settingsDialog;
     //	QProgressBar *pb;
     bool features_known;

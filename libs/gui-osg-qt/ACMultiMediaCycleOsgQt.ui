@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <ui version="4.0">
- <class>ACMediaCycleOsgQt</class>
- <widget class="QMainWindow" name="ACMediaCycleOsgQt">
+ <class>ACMultiMediaCycleOsgQt</class>
+ <widget class="QMainWindow" name="ACMultiMediaCycleOsgQt">
   <property name="enabled">
    <bool>true</bool>
   </property>

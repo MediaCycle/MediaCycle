@@ -283,6 +283,30 @@ ACMultiMediaCycleOsgQt::~ACMultiMediaCycleOsgQt(){
     this->destroyMediaCycle();
 }
 
+void ACMultiMediaCycleOsgQt::changeMenuBarVisibility(bool visibility)
+{
+	if(visibility)
+		ui.menubar->show();
+	else
+		ui.menubar->hide();
+}
+
+void ACMultiMediaCycleOsgQt::changeStatusBarVisibility(bool visibility)
+{
+	if(visibility)
+		ui.statusbar->show();
+	else
+		ui.statusbar->hide();
+}
+
+void ACMultiMediaCycleOsgQt::changeToolBarVisibility(bool visibility)
+{
+	if(visibility)
+		ui.toolbar->show();
+	else
+		ui.toolbar->hide();
+}
+
 void ACMultiMediaCycleOsgQt::setMediaType(ACMediaType _mt)
 {
     if(this->media_type != MEDIA_TYPE_NONE && this->media_type != _mt)
