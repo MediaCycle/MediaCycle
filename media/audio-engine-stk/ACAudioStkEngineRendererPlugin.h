@@ -128,7 +128,7 @@ protected:
     stk::Mutex* mutex;
 
     std::vector<int> input_ids;// -2 input being closed, -1 slot available, >=0 media id
-    std::vector<ACAudioStkFileWvIn> inputs;
+    std::vector<ACAudioStkFileWvIn*> inputs;
     std::vector<stk::StkFloat> input_pans;
     std::vector<stk::StkFloat> input_gains;
     std::vector<int> input_current_frames;
@@ -142,7 +142,7 @@ protected:
     std::vector<stk::StkFrames*> loop_frames;
 
     std::vector<int> grain_ids;// -2 grain being closed, -1 slot available, >=0 media id
-    std::vector<ACAudioStkGranulate> grains;
+    std::vector<ACAudioStkGranulate*> grains;
     std::vector<stk::StkFloat> grain_pans;
     std::vector<stk::StkFloat> grain_gains;
     std::vector<int> grain_current_frames;
