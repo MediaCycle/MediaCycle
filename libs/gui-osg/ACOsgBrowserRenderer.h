@@ -107,7 +107,11 @@ protected:
     pthread_mutexattr_t activity_update_mutex_attr;*/
     OpenThreads::Mutex activity_update_mutex;
 
+    osg::Matrix VPM;
+
 public:
+    ACPoint getScreenCoordinates(ACPoint core);
+
     void mutexLock(){activity_update_mutex.lock();}
     void mutexUnlock(){activity_update_mutex.unlock();}
     //void setLayoutPlugin(ACPlugin* acpl){mLayoutPlugin=acpl;}

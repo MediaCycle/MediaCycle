@@ -472,7 +472,7 @@ int ACOsgBrowserRenderer::computeScreenCoordinates(osgViewer::View* view, double
         osg::Matrix viewMatrix = view->getCamera()->getViewMatrix();
         osg::Matrix projectionMatrix = view->getCamera()->getProjectionMatrix();
         //osg::Matrix window = view->getWindowMatrix();
-        osg::Matrix VPM = viewMatrix * projectionMatrix;
+        /*osg::Matrix*/ VPM = viewMatrix * projectionMatrix;
 
         // convertpoints in model coordinates to view coordinates
         // Not necessary to go to screen coordinated because pick function can get normalized mouse coordinates
@@ -561,7 +561,7 @@ int ACOsgBrowserRenderer::computeScreenCoordinates(osgViewer::View* view, double
         osg::Matrix viewMatrix = view->getCamera()->getViewMatrix();
         osg::Matrix projectionMatrix = view->getCamera()->getProjectionMatrix();
         //osg::Matrix window = view->getWindowMatrix();
-        osg::Matrix VPM = viewMatrix * projectionMatrix;
+        /*osg::Matrix*/ VPM = viewMatrix * projectionMatrix;
 
         // convertpoints in model coordinates to view coordinates
         // Not necessary to go to screen coordinated because pick function can get normalized mouse coordinates
@@ -696,6 +696,12 @@ bool ACOsgBrowserRenderer::removeNodes(){//private method
     }
     node_renderers.clear();
     return true;
+}
+
+ACPoint ACOsgBrowserRenderer::getScreenCoordinates(ACPoint core){
+    osg::Vec3 modelPoint = Vec3(core.x,core.y,core.z);
+    osg::Vec3 screenPoint = modelPoint * VPM;
+    return ACPoint(screenPoint.x(),screenPoint.y(),screenPoint.z());
 }
 
 //bool ACOsgBrowserRenderer::addNodes(int _first, int _last){
