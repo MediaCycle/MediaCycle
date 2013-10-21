@@ -31,17 +31,12 @@ public class MediaCycleHandler extends Thread {
     public Process p;
     
     public void run() {
-        
- 
+
         if(application!=""){
             System.out.println("Loading MediaCycle with application " + application);
             try {
                 ProcessBuilder pb = new ProcessBuilder(application,library);
                 Process process = pb.start();
-                
-                //Runtime rt = Runtime.getRuntime();
-                //Process process = rt.exec(application,library);
-
                 
                 BufferedInputStream in = new BufferedInputStream(process.getInputStream());
 
@@ -51,22 +46,9 @@ public class MediaCycleHandler extends Thread {
 
                 // wait for completion
                 process.waitFor();
-                
-                //Runtime rt = Runtime.getRuntime();
-                //Process proc = rt.exec(application + " &");
-                
-                //int exitVal = proc.waitFor();
-                //Process p = new ProcessBuilder(application).start();
-                //System.out.println("\tplaying " + command);
+
                 System.out.println("\tloading mediacycle with " + application);
-                //Thread.sleep(22000);
-                //Thread.sleep(sleepTime);
-                
-                //p.destroy();
-                //p.waitFor();
-                //Thread.sleep((int)(MAX_TASK_SOLVE_TIME));
             } catch (Exception e) {
-                //System.out.println("CANNOT EXECUTE: " + command);
                 System.out.println("can't load mediacycle with: " + application);
             }
         }

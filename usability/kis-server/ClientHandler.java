@@ -145,9 +145,11 @@ public class ClientHandler extends Thread {
 	    			        System.out.println("Correct answer from team " + team + " after " + time + "ms" + "! Got score: " + sub.score);
 	    		
 	    			        VBSServer.logSuccess(sub, inputLine + " #IP=" + sockAddressS);
+							
 	    			    }
-	    			} else 
+	    			} else {
 	    				VBSServer.logNoSuccess(sub, inputLine + " #IP=" + sockAddressS);
+					}
 			    	
 			    }
     			
@@ -164,7 +166,8 @@ public class ClientHandler extends Thread {
 			String loginfo = team + ":" + media + ":" + (System.currentTimeMillis()-VBSServer.TASK_START_TIME) + ":" + VBSServer.SUBMISSON_COUNT[team-1];
 			String responseInfo = "<html><body>" + loginfo + "</body></html>";
 			//VBSServer.log(System.currentTimeMillis()+ ": "  + inputLine + " | " + loginfo + " //GTSTART=" + VBSServer.GTSTART + " GTSTOP=" + VBSServer.GTSTOP  + " #IP=" + sockAddressS);
-			VBSServer.log(System.currentTimeMillis()+ ": "  + inputLine + " | " + loginfo + " //file=" + media + " #IP=" + sockAddressS);
+			//VBSServer.log(System.currentTimeMillis()+ ": "  + inputLine + " | " + loginfo + " //file=" + media + " #IP=" + sockAddressS);
+			VBSServer.log((System.currentTimeMillis()-VBSServer.TASK_START_TIME)+ ";" + media);
 			
 			out.write("HTTP/1.1 200 OK\r\n");
 			out.write("Content-Type: text/html\r\n");

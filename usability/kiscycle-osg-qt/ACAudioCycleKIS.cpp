@@ -34,10 +34,10 @@
 
 #include "ACAudioCycleKIS.h"
 
-ACAudioCycleKIS::ACAudioCycleKIS() : ACMultiMediaCycleOsgQt(), timer(0) {
+ACAudioCycleKIS::ACAudioCycleKIS() : ACMediaCycleOsgQt(), task_timer(0), hear_timer(0), currentId(-1) {
     count = 0;
     // delay after which we change media_files (if it's ok)
-    attente = 5*60*1000; // in ms
+    attente = 1*60*1000; // in ms
 
     this->useSegmentationByDefault(false);
 
@@ -52,31 +52,18 @@ ACAudioCycleKIS::ACAudioCycleKIS() : ACMultiMediaCycleOsgQt(), timer(0) {
 
     // Qt 4.8+ Enables application to receive multimedia key events (play, next, previous etc).
     //QCoreApplication::setAttribute(Qt::AA_CaptureMultimediaKeys);
-
-    QAction *actionPreviousLibrary = new QAction(style()->standardIcon(QStyle::SP_MediaSkipBackward), tr("Previous Library"), this);
-    //actionPreviousLibrary->setShortcut(QKeySequence(Qt::Key_MediaPrevious)); //CF requires Qt 4.8+
-    actionPreviousLibrary->setShortcut(QKeySequence(Qt::Key_Left));
-    //actionNextLibrary->setShortcut(QKeySequence::PreviousChild);
-    this->addAction(actionPreviousLibrary);
-    connect(actionPreviousLibrary, SIGNAL(triggered()), this, SLOT(openPreviousLibrary()));
-    this->addAction(actionPreviousLibrary);
-
-    this->changeSetting(AC_SETTING_INSTALLATION);
-    //this->on_actionFullscreen_triggered(true); // to be set after the window is shown
-    //this->on_actionFullscreen_triggered(true); // to be set after the window is shown
-    //this->autoConnectOSC(true); // to be set after loading the default config
-    //this->dockWidgetsManager->updateDocksVisibility(false);
-
 }
 
 void ACAudioCycleKIS::postLoadDefaultConfig(){
 
-    //this->parseXMLlist("KISLibraries.xml");
+    this->parseXMLlist("KISLibraries.xml");
 
-    //timer = new QTimer(this);
-    //connect( timer, SIGNAL(timeout()), this, SLOT(openNextLibrary()) );
+    task_timer = new QTimer(this);
+    connect( task_timer, SIGNAL(timeout()), this, SLOT(openNextLibrary()) );
+    hear_timer = new QTimer(this);
+    connect( hear_timer, SIGNAL(timeout()), this, SLOT(finishedHearing()) );
 
-    //this->startLoopXML();
+    this->startLoopXML();
 }
 
 void ACAudioCycleKIS::commandLine(int argc, char *argv[]){
@@ -90,9 +77,13 @@ void ACAudioCycleKIS::commandLine(int argc, char *argv[]){
 
 
 ACAudioCycleKIS::~ACAudioCycleKIS(){
-    if(timer){
-        timer->stop();
-        delete timer;
+    if(task_timer){
+        task_timer->stop();
+        delete task_timer;
+    }
+    if(hear_timer){
+        hear_timer->stop();
+        delete hear_timer;
     }
 }
 
@@ -151,38 +142,74 @@ bool ACAudioCycleKIS::parseXMLlist(std::string filename){
 }
 
 void ACAudioCycleKIS::startLoopXML(){
-    if(timer) timer->stop();
+    if(task_timer) task_timer->stop();
     openNextLibrary(); // start first one before time starts so you don't wait for 30 min for the app to run
-    if(timer) timer->start(attente);
+    //if(task_timer) task_timer->start(attente);
 }
 
 void ACAudioCycleKIS::openNextLibrary(){
+    media_cycle->performActionOnMedia("reset",-1);
+    this->getTimer()->reset();
     cout << "Opening next library: " << count << endl;
     // going through all files again
     if (count >= XMLfiles.size())
         count=0;
     cout << "closing library" << endl;
-    if(timer) timer->stop();
+    if(task_timer) task_timer->stop();
     media_cycle->muteAllSources();
     this->clean(true);
-    cout << "opening : '" << XMLfiles[count] << "'" << endl;
+
+    int a = qrand();
+
+    int item  = a % XMLfiles.size();
+
+    cout << "opening : '" << XMLfiles[item] << "'" << endl;
+
     this->readXMLConfig(XMLfiles[count]);
+
+    std::vector<boost::any> arguments;
+    arguments.push_back(XMLfiles[count]);
+    media_cycle->performActionOnMedia("xml loaded",-1,arguments);
+
+    int librarySize = this->media_cycle->getLibrarySize();
+    if(librarySize< 1){
+        std::cerr << "Library empty "<< std::endl;
+    }
+
+    int b = qrand();
+
+    currentId = b % librarySize;
+
+    media_cycle->performActionOnMedia("hear",currentId);
+
+    if(hear_timer) hear_timer->start(3*1000);
+}
+
+void ACAudioCycleKIS::finishedHearing(){
     //media_cycle->setAutoPlay(true);
-    if(timer) timer->start(attente);
+    if(hear_timer) this->hear_timer->stop();
+    media_cycle->performActionOnMedia("target",currentId);
+    media_cycle->muteAllSources();
+    if(task_timer) task_timer->start(attente);
+    this->getTimer()->start();
     count++;
 }
 
-void ACAudioCycleKIS::openPreviousLibrary(){
-    cout << "Opening previous library: " << count << endl;
-    // going through all files again
-    cout << "opening : " << XMLfiles[count] << endl;
-    media_cycle->muteAllSources();
-    this->clean(true);
-    if(timer) timer->stop();
-    this->readXMLConfig(XMLfiles[count]);
-    if(timer) timer->start(attente);
-    if (count == 0)
-        count=XMLfiles.size()-1;
-    else
-        count--;
+void ACAudioCycleKIS::mediaActionPerformed(std::string action, long int mediaId, std::vector<boost::any> arguments){
+    if(action == "submit"){
+        std::cout << "Submitted media " << mediaId << std::endl;
+        if(mediaId == currentId){
+            this->getTimer()->success();
+            media_cycle->performActionOnMedia("success",currentId);
+        }
+        else
+            this->getTimer()->fail();
+    }
+}
+
+void ACAudioCycleKIS::postLoadXML(){
+    if(dockWidgetsManager) dockWidgetsManager->updateDocksVisibility(false);
+    this->changeMenuBarVisibility(false);
+	this->changeStatusBarVisibility(false);
+	this->changeToolBarVisibility(false);
 }

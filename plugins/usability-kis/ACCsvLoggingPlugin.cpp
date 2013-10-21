@@ -48,6 +48,9 @@ ACCsvLoggingPlugin::ACCsvLoggingPlugin() : ACClientPlugin()
     this->mId = "";
     this->actions_filepath = "";
     this->pointers_filepath = "";
+    this->positions_filepath = "";
+    this->delim =",";
+    this->pointer_valid = false;
 }
 
 ACCsvLoggingPlugin::~ACCsvLoggingPlugin()
@@ -57,6 +60,9 @@ ACCsvLoggingPlugin::~ACCsvLoggingPlugin()
     }
     if(isLibraryOpened(pointers_file)){
         closeLibrary(pointers_file);
+    }
+    if(isLibraryOpened(positions_file)){
+        closeLibrary(positions_file);
     }
 }
 
@@ -76,6 +82,13 @@ bool ACCsvLoggingPlugin::isLibraryOpened(std::ofstream& file){
 
 bool ACCsvLoggingPlugin::performActionOnMedia(std::string action, long int mediaId, std::vector<boost::any> arguments)
 {
+    if(action == "reset"){
+        pointers_file.close();
+        actions_file.close();
+        positions_file.close();
+        return true;
+    }
+
     if(!isLibraryOpened(pointers_file)){
 
         time_t t = time(0);
@@ -86,8 +99,8 @@ bool ACCsvLoggingPlugin::performActionOnMedia(std::string action, long int media
         std::cout << "Logging pointers on file: " << pointers_filepath << std::endl;
 
         openLibrary(pointers_file,pointers_filepath);
-        pointers_file << "\"Time\",\"Action\",\"ID\",\"x\",\"y\"" << std::endl;
-
+        //pointers_file << "\"Time\"" << delim << "\"Action\"" << delim << "\"ID\"" << delim << "\"x\"" << delim << "\"y\"" << std::endl;
+        pointers_file << "\"Time\"" << delim << "\"x\"" << delim << "\"y\"" << std::endl;
     }
     if(!isLibraryOpened(actions_file)){
 
@@ -99,8 +112,20 @@ bool ACCsvLoggingPlugin::performActionOnMedia(std::string action, long int media
         std::cout << "Logging actions on file: " << actions_filepath << std::endl;
 
         openLibrary(actions_file,actions_filepath);
-        actions_file << "\"Time\",\"Action\",\"Media ID\",\"Arguments\",\"1\",\"2\",\"3\"" << std::endl;
+        //actions_file << "\"Time\"" << delim << "\"Action\"" << delim << "\"Media ID\"" << delim << "\"Arguments\"" << delim << "\"1\"" << delim << "\"2\"" << delim << "\"3\"" << std::endl;
+        actions_file << "\"Time\"" << delim << "\"Action\"" << delim << "\"Media ID\"" << std::endl;
+    }
+    if(!isLibraryOpened(positions_file)){
 
+        time_t t = time(0);
+        struct tm * now = localtime( & t );
+        std::stringstream filename;
+        filename << getExecutablePath() << "MediaCyclePositionsLog-" << (now->tm_year + 1900) << '-' << (now->tm_mon + 1) << '-' << now->tm_mday << '-' << now->tm_hour << '-' << now->tm_min << '-' << now->tm_sec << ".csv";
+        positions_filepath = filename.str();
+        std::cout << "Logging positions on file: " << positions_filepath << std::endl;
+
+        openLibrary(positions_file,positions_filepath);
+        positions_file << "\"Media ID\"" << delim << "\"Filename\"" << delim << "\"x\"" << delim << "\"y\"" << std::endl;
     }
 
     time_t t = time(0);
@@ -109,30 +134,47 @@ bool ACCsvLoggingPlugin::performActionOnMedia(std::string action, long int media
     struct timezone tz = {0, 0};
     gettimeofday(&tv, &tz);
 
+    if(action == "xml loaded"){
+        std::string filename = "";
+        try{
+            filename = boost::any_cast<std::string>(arguments[0]);
+        }
+        catch(const boost::bad_any_cast &){
+            std::cerr << "Couldn't retrieve xml filename from arguments" << std::endl;
+            return false;
+        }
+
+        positions_file << "xml" << delim << filename << delim << 0 << delim << 0 << std::endl;
+        actions_file << now->tm_hour << '-' << now->tm_min << '-' << now->tm_sec << '-' << tv.tv_usec/1000.0f << delim << "xml loaded" << delim << filename << std::endl;
+        pointer_valid = false;
+    }
+
     if(action == "hover pointer index" || action == "hover pointer id"){
-        pointers_file << now->tm_hour << '-' << now->tm_min << '-' << now->tm_sec << '-' << tv.tv_usec/1000.0f << ',';
-        pointers_file << action;
-        int arg=0;
-        for(int arg=0;arg<arguments.size();arg++){
+
+        std::vector<float> args = std::vector<float>(3,0.0f);
+
+        for(int arg=1/*0*/;arg<arguments.size();arg++){
             std::string new_value = "";
-            pointers_file << ',';
+            //pointers_file << delim;
             try{
                 new_value = boost::any_cast<std::string>(arguments[arg]);
-                pointers_file << new_value;
+                //pointers_file << new_value;
             }
             catch(const boost::bad_any_cast &){
                 //std::cerr << "ACCsvLoggingPlugin::mediaActionPerformed: couldn't convert to string, aborting..."<< std::endl;
                 float float_arg (0.0f);
                 try{
                     float_arg = boost::any_cast<float>(arguments[arg]);
-                    pointers_file << float_arg;
+                    //pointers_file << float_arg;
+                    args[arg] = float_arg;
                 }
                 catch(const boost::bad_any_cast &){
                     //std::cerr << "ACCsvLoggingPlugin::mediaActionPerformed: couldn't convert to float, aborting..."<< std::endl;
                     int int_arg (-1);
                     try{
                         int_arg = boost::any_cast<int>(arguments[arg]);
-                        pointers_file << int_arg;
+                        //pointers_file << int_arg;
+                        args[arg] = (float) int_arg;
                     }
                     catch(const boost::bad_any_cast &){
                         //std::cerr << "ACCsvLoggingPlugin::mediaActionPerformed: couldn't convert to int, aborting..."<< std::endl;
@@ -140,17 +182,43 @@ bool ACCsvLoggingPlugin::performActionOnMedia(std::string action, long int media
                 }
             }
         }
-        pointers_file << std::endl;
+
+        if(args[1] != 0.0f || args[2] != 0.0f){
+
+            if(!pointer_valid){
+                std::vector<long> ids = media_cycle->getLibrary()->getAllMediaIds();
+                for (int i=0; i<ids.size(); i++){
+                    ACMediaNode* node = media_cycle->getMediaNode(i);
+                    std::string filename = media_cycle->getMediaFileName(i);
+                    if(node){
+                        positions_file << node->getMediaId() << delim << filename << delim << node->getCurrentPosition().x << delim << node->getCurrentPosition().y << std::endl;
+                    }
+                }
+            }
+            pointer_valid = true;
+        }
+        if(pointer_valid){
+            pointers_file << now->tm_hour << '-' << now->tm_min << '-' << now->tm_sec << '-' << tv.tv_usec/1000.0f;
+            //pointers_file << delim << action;
+            pointers_file << delim << args[1];
+            pointers_file << delim << args[2];
+            pointers_file << std::endl;
+        }
 
     }
     else{
-        actions_file << now->tm_hour << '-' << now->tm_min << '-' << now->tm_sec << '-' << tv.tv_usec/1000.0f << ',';
-        actions_file << action << ',' << mediaId << ',';
+        // Skipping unnecessarry logging
+        if(action != "loop" && action != "hear" && action != "submit"  && action != "target"  && action != "success")
+            return true;
+
+        actions_file << now->tm_hour << '-' << now->tm_min << '-' << now->tm_sec << '-' << tv.tv_usec/1000.0f << delim;
+        actions_file << action << delim << mediaId;
+		/*actions_file << delim;
         actions_file << arguments.size();
         int arg=0;
         for(int arg=0;arg<arguments.size();arg++){
             std::string new_value = "";
-            actions_file << ',';
+            actions_file << delim;
             try{
                 new_value = boost::any_cast<std::string>(arguments[arg]);
                 actions_file << new_value;
@@ -176,9 +244,9 @@ bool ACCsvLoggingPlugin::performActionOnMedia(std::string action, long int media
             }
         }
         while(arg<3){
-            actions_file << ',';
+            actions_file << delim;
             arg++;
-        }
+        }*/
         actions_file << std::endl;
     }
 

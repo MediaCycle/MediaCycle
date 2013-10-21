@@ -674,6 +674,7 @@ int ACOsgBrowserRenderer::computeScreenCoordinates(osgViewer::View* view, double
             }
         }
         media_cycle->setClosestNode(closest_node,p_index);
+        media_cycle->hoverWithPointerIndex(mx,my,p_index);
     }
     
     //    pthread_mutex_unlock(&activity_update_mutex);

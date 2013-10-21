@@ -55,7 +55,7 @@ ACUsabilityKnownItemSearchPlugin::ACUsabilityKnownItemSearchPlugin() : QObject()
     this->mMediaType = MEDIA_TYPE_ALL;
 
     url = "localhost";
-    port = 8080;
+    port = 4040;
     team = 1;
 
     this->active = false;

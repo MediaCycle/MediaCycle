@@ -51,6 +51,10 @@ protected:
     std::string pointers_filepath;
     std::ofstream actions_file;
     std::string actions_filepath;
+    std::ofstream positions_file;
+    std::string positions_filepath;
+    std::string delim;
+    bool pointer_valid;
 };
 
 #endif	/* _ACCsvLoggingPlugin_ */

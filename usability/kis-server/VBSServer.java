@@ -31,16 +31,20 @@ import net.n3.nanoxml.XMLParserFactory;
 
 import java.math.*;
 
+import java.util.Date;
+import java.text.SimpleDateFormat;
+
 public class VBSServer {
 
-	static int PORT = 8080;
+	static int PORT = 4040;
 	public static int TEAMS = 1;
 	//public static String[] TEAM_NAMES = {"Christian", "Stephane", "Thierry"};
     public static String[] TEAM_NAMES = {"You"};
-	public static String LOGFILE = "VBSlogs.txt"; //verbose log file
-	public static String LOGSUCCESSFILE = "log.csv"; //default log file in CSV format
-	public static String LOGSTATS = "VBSlogs.txt"; //"stats.txt";
-	public static String SCOREFILE = "scores.txt"; //used to store intermediate results for recovery in case of crash
+	public static String BASENAME = "MediaCycleKIS";
+	public static String LOGFILE = BASENAME + ".txt"; //verbose log file
+	public static String LOGSUCCESSFILE = BASENAME + ".csv"; //default log file in CSV format
+	public static String LOGSTATS = BASENAME + ".txt"; //"stats.txt";
+	public static String SCOREFILE = BASENAME + "Scores.txt"; //used to store intermediate results for recovery in case of crash
 	public static long TASK_START_TIME = -1;
 	public static long TASK_END_TIME = -1;
 	public static int TASK_NUM = 0;
@@ -93,11 +97,10 @@ public class VBSServer {
 			try {
 				//PORT = Integer.parseInt(args[0]);
                 TEAM_NAMES[0] = args[0];
-                log("\tTeam 1 is " + args[0]);
-                SCOREFILE = "scores-" + args[0] + ".txt";
-                LOGFILE = "VBSlogs-" + args[0] + ".txt";
-                LOGSUCCESSFILE = "log-" + args[0] + ".csv";
-                LOGSTATS = "VBSlogs-" + args[0] + ".txt";
+                SCOREFILE = BASENAME + "Scores-" + args[0] + ".txt";
+                LOGFILE = BASENAME + "-" + args[0] + ".txt";
+                LOGSUCCESSFILE = BASENAME + "-" + args[0] + ".csv";
+                LOGSTATS =  BASENAME + "-" + args[0] + ".txt";
 			}
 			catch (NumberFormatException nfe) {
 				System.out.println("Please specify a valid port number!");
@@ -113,8 +116,7 @@ public class VBSServer {
             }
             if (args.length == 3) {
 				TEAM_NAMES[0] = args[2];
-                log("\tTeam 1 is " + args[2]);
-                SCOREFILE = "scores-" + args[2] + ".txt";
+                SCOREFILE = BASENAME + "Scores-" + args[2] + ".txt";
             }
 			else 
 				System.out.println("Warning: VLC path not specified!");
@@ -178,8 +180,8 @@ public class VBSServer {
             //reader.close();
             //file.close();
             TASKS.add(filepath.substring(0, filepath.indexOf('.')));
-            System.out.println("\tTask successfully loaded from " + filepath);
-            log("\tTask successfully loaded from " + filepath);
+            System.out.println("\tTarget " + filepath);
+            //log("Target;" + filepath);
             stats(false);
             initTask();
         } catch (Exception e) {
@@ -205,15 +207,30 @@ public class VBSServer {
         
         String application = "/Volumes/data/Datasets/xml/KIS/KnownItemSearchCycle.app/Contents/MacOS/KnownItemSearchCycle";
         
-        System.out.println("\trestoring scores");
-        
-        restoreScore();
+        //System.out.println("\trestoring scores");
+        //restoreScore();
         while(true){
+			
+			try
+			{
+				Process myProcess = new ProcessBuilder("killall", "KnownItemSearchCycle").start();
+			}
+			catch(IOException e)
+			{
+				// Handle error.
+				e.printStackTrace();
+			}
+			/*try{
+				Thread.sleep(1000);
+			} catch (InterruptedException e) {
+				// TODO Auto-generated catch block
+				e.printStackTrace();
+			}*/
 
-        int index = (int)(Math.random()*(num));
+			int index = (int)(Math.random()*(num));
             filepath = libraries[index];
     
-            log("\tCollection " + filepath);
+            //log("Collection " + filepath);
         
         
 		System.out.println("\tloading library: " + filepath);
@@ -271,17 +288,6 @@ public class VBSServer {
 				
 			if (medias.get(b).getAttribute("FileName", null) != null)
 			{
-                try
-                {
-                    Process myProcess = new ProcessBuilder("killall", "KnownItemSearchCycle").start();
-                }
-                catch(IOException e)
-                {
-                    // Handle error.
-                    e.printStackTrace();
-                }
-                
-			
 				String filename = medias.get(b).getAttribute("FileName", null);
 				System.out.println("Filename:"+filename);
 			
@@ -296,12 +302,24 @@ public class VBSServer {
 				System.out.println("SampleEnd:"+samples);
                 System.out.println("wait:"+wait);
                 
-                mediacycle = new MediaCycleHandler(application,filepath);
+				mediacycle = new MediaCycleHandler(application,filepath);
                 mediacycle.start();
-                
+				
+				long time = System.currentTimeMillis();
+				SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd-HH-mm-ss");//,SSS
+				String suffix = sdf.format(time);
+				
+				SCOREFILE = BASENAME + "Scores-" + suffix + ".txt";
+                LOGFILE = BASENAME + "-" + suffix + ".txt";
+                LOGSUCCESSFILE = BASENAME + "-" + suffix + ".csv";
+                LOGSTATS =  BASENAME + "-" + suffix + ".txt";
+				
+				log("Tester;" + TEAM_NAMES[0]);
+				log("Collection;" + filepath);
+				log("Target;" + filename);				
+				
 				play(filename,wait);
-                
-                
+												
 			}
 		}
 		
@@ -361,7 +379,8 @@ public class VBSServer {
             file = new FileWriter(VBSServer.LOGSTATS, true);
             PrintWriter out = new PrintWriter(file);
             for (int i=0; i < VBSServer.TEAMS; i++) {
-            	out.println(System.currentTimeMillis() + "\tTeam=" + (i+1) + "\tCurrentscore=" + SCORE[i]);
+            	//out.println(System.currentTimeMillis() + "\tTeam=" + (i+1) + "\tCurrentscore=" + SCORE[i]);
+				out.println(System.currentTimeMillis() + ";" + SCORE[i]);
 	            if (console)
 	            	System.out.println("Team=" + (i+1) + "\tCurrentscore=" + SCORE[i]);
             }
@@ -391,15 +410,15 @@ public class VBSServer {
             PrintWriter out = new PrintWriter(file);
             
             StringBuilder sb = new StringBuilder("1;");
-            sb.append(System.currentTimeMillis()); sb.append(";");
-            sb.append(sub.team); sb.append(";");
+            sb.append(System.currentTimeMillis() - TASK_START_TIME); sb.append(";");
+            //sb.append(sub.team); sb.append(";");
             sb.append(sub.media); sb.append(";");
 			//sb.append(sub.video); sb.append(";");
             sb.append(sub.time); sb.append(";");
             /*sb.append(sub.start); sb.append(";");
             sb.append(sub.stop); sb.append(";");*/
-            sb.append(sub.score); sb.append(";");
-            sb.append(inputLine);
+            sb.append(sub.score); //sb.append(";");
+            //sb.append(inputLine);
             
             out.println(sb.toString());
             out.close();
@@ -417,15 +436,15 @@ public class VBSServer {
             PrintWriter out = new PrintWriter(file);
             
             StringBuilder sb = new StringBuilder("0;");
-            sb.append(System.currentTimeMillis()); sb.append(";");
-            sb.append(sub.team); sb.append(";");
+            sb.append(System.currentTimeMillis() - TASK_START_TIME); sb.append(";");
+            //sb.append(sub.team); sb.append(";");
             sb.append(sub.media); sb.append(";");
 			//sb.append(sub.video); sb.append(";");
             sb.append(sub.time); sb.append(";");
             /*sb.append(sub.start); sb.append(";");
             sb.append(sub.stop); sb.append(";");*/
-            sb.append(sub.score); sb.append(";");
-            sb.append(inputLine);
+            sb.append(sub.score); //sb.append(";");
+            //sb.append(inputLine);
             
             out.println(sb.toString());
             out.close();
@@ -439,16 +458,42 @@ public class VBSServer {
 		try {
 			//Process p = Runtime.getRuntime().exec(command);
 			Process p = new ProcessBuilder("/opt/local/bin/ffplay","-autoexit","-nodisp",filename).start();
-			//Process p = new ProcessBuilder("/usr/bin/afplay",filename).start();
+			//Process p = new ProcessBuilder("/opt/local/bin/mplayer","-endpos 2",filename).start();
+			//Process p = new ProcessBuilder("/usr/bin/afplay -t 3",filename).start();
 			//System.out.println("\tplaying " + command);
             System.out.println("\tplaying " + filename);
 			//Thread.sleep(22000);
 			//Thread.sleep(sleepTime);
 			Thread.sleep(3000);
+			p.destroy();
+			//try
+//			{
+//				Process myProcess = new ProcessBuilder("killall", "ffplay").start();
+//				System.out.println("\tstoping " + filename);
+//			}
+//			catch(IOException e)
+//			{
+//				// Handle error.
+//				e.printStackTrace();
+//			}
             //VBSServer.readGroundTruth(filename + ".txt");
 			VBSServer.readGroundTruth(filename);
-			p.destroy();
 			//p.waitFor();
+			
+
+						
+			try
+			{
+				Process myProcess = new ProcessBuilder("osascript -e 'tell application \"KnownItemSearchCycle\" to activate'").start();
+				System.out.println("\tactivating KnownItemSearchCycle");
+			}
+			catch(IOException e)
+			{
+				// Handle error.
+				e.printStackTrace();
+			}
+			
+			
 			Thread.sleep((int)(MAX_TASK_SOLVE_TIME));
 		} catch (IOException e) {
 			//System.out.println("CANNOT EXECUTE: " + command);

@@ -1,9 +1,9 @@
 /*
- *  ACAudioCycleKIS.cpp
+ *  ACKnownItemSearchTimerQt.h
  *  MediaCycle
  *
  *  @author Christian Frisson
- *  @date 24/09/13
+ *  @date 18/10/2013
  *  @copyright (c) 2013 – UMONS - Numediart
  *  
  *  MediaCycle of University of Mons – Numediart institute is 
@@ -32,37 +32,33 @@
  *
  */
 
-#ifndef _ACAudioCycleKIS
-#define _ACAudioCycleKIS
+#ifndef HEADER_ACKnownItemSearchTimerQt
+#define HEADER_ACKnownItemSearchTimerQt
 
-#include "ACMediaCycleOsgQt.h"
-#include <vector>
-#include <string>
 
-class ACAudioCycleKIS: public ACMediaCycleOsgQt {
-    Q_OBJECT
-public slots:
-    void openNextLibrary();
-    void finishedHearing();
+#include <QtGui>
 
-public:
-    ACAudioCycleKIS();
-    ~ACAudioCycleKIS();
-    /// This will be run right after the default config has been loaded
-    virtual void postLoadDefaultConfig();
-    void startLoopXML();
-    virtual void postLoadXML();
-    virtual void commandLine(int argc, char *argv[]);
-    virtual void mediaActionPerformed(std::string action, long int mediaId, std::vector<boost::any> arguments=std::vector<boost::any>());
+#include <QLCDNumber>
 
-protected:
-    bool parseXMLlist(std::string filename);
+ class ACKnownItemSearchTimerQt : public QLCDNumber
+ {
+     Q_OBJECT
 
-private:
-    int count, attente;
-    std::vector <std::string> XMLfiles;
-    QTimer *task_timer;
-    QTimer *hear_timer;
-    long int currentId;
-};
-#endif // _ACAudioCycleKIS
+ public:
+     ACKnownItemSearchTimerQt(QWidget *parent = 0);
+     void stop();
+     void start();
+     void reset();
+     void success();
+     void fail();
+
+ private slots:
+     void showTime();
+ protected:
+     QTimer *timer;
+     int deadline;
+     int countdown;
+     QPalette* lcdpalette;
+ };
+
+#endif
