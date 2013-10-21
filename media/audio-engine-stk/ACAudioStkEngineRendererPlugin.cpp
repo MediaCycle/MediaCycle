@@ -376,6 +376,8 @@ void ACAudioStkEngineRendererPlugin::justReadFrames(long int mediaId, int nFrame
             media_cycle->setCurrentFrame(mediaId, input_current_frames[n]);
             //std::cout << "ACAudioStkEngineRendererPlugin::justReadFrames " << mediaId << " " << current_frames[mediaId] << "(" << loop->second->channelsOut() <<" channels)"<< std::endl;
 
+            if(inputs[n]->isFinished())
+                this->stopSource(mediaId);
         }
     }
 }

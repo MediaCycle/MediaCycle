@@ -1,8 +1,18 @@
 <?xml version="1.0" ?>
 <KIS>
-    <File>/Volumes/data/Datasets/xml/KIS/olpc-metal-tsne.xml</File>
-    <File>/Volumes/data/Datasets/xml/KIS/olpc-metal-grid.xml</File>
-    <File>/Volumes/data/Datasets/xml/KIS/olpc-water-tsne.xml</File>
-    <File>/Volumes/data/Datasets/xml/KIS/olpc-water-grid.xml</File>
-
+<Sequential>/Volumes/data/Datasets/xml/KIS/olpc-riff-grid.xml</Sequential>
+<Sequential>/Volumes/data/Datasets/xml/KIS/olpc-explosion-grid.xml</Sequential>
+<Sequential>/Volumes/data/Datasets/xml/KIS/olpc-explosion-tsne.xml</Sequential>
+<Sequential>/Volumes/data/Datasets/xml/KIS/olpc-drill-grid.xml</Sequential>
+<Sequential>/Volumes/data/Datasets/xml/KIS/olpc-drill-tsne.xml</Sequential>
+<Sequential>/Volumes/data/Datasets/xml/KIS/olpc-lick-grid.xml</Sequential>
+<Sequential>/Volumes/data/Datasets/xml/KIS/olpc-lick-tsne.xml</Sequential>
+    <Random>/Volumes/data/Datasets/xml/KIS/olpc-glass-tsne.xml</Random>
+    <Random>/Volumes/data/Datasets/xml/KIS/olpc-glass-grid.xml</Random>
+    <Random>/Volumes/data/Datasets/xml/KIS/olpc-guitar-tsne.xml</Random>
+    <Random>/Volumes/data/Datasets/xml/KIS/olpc-guitar-grid.xml</Random>
+    <Random>/Volumes/data/Datasets/xml/KIS/olpc-metal-tsne.xml</Random>
+    <Random>/Volumes/data/Datasets/xml/KIS/olpc-metal-grid.xml</Random>
+    <Random>/Volumes/data/Datasets/xml/KIS/olpc-water-tsne.xml</Random>
+    <Random>/Volumes/data/Datasets/xml/KIS/olpc-water-grid.xml</Random>
 </KIS>

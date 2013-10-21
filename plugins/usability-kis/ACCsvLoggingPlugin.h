@@ -31,12 +31,14 @@
 
 #include <MediaCycle.h>
 #include "ACPlugin.h"
-
+#include <ACPluginQt.h>
 
 #ifndef _ACCsvLoggingPlugin_
 #define _ACCsvLoggingPlugin_
 
-class ACCsvLoggingPlugin : public ACClientPlugin {
+class ACCsvLoggingPlugin : public QObject, public ACPluginQt, virtual public ACClientPlugin{
+    Q_OBJECT
+    Q_INTERFACES(ACPluginQt)
 public:
     ACCsvLoggingPlugin();
     ~ACCsvLoggingPlugin();

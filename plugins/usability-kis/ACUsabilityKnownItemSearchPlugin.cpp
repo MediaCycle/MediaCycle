@@ -67,12 +67,21 @@ ACUsabilityKnownItemSearchPlugin::ACUsabilityKnownItemSearchPlugin() : QObject()
 
     submitAction = new ACInputActionQt(tr("Submit the file"), this);
     submitAction->setToolTip(tr("Submit the file"));
-    submitAction->setShortcut(Qt::Key_Space);
+    submitAction->setShortcut(Qt::Key_Alt);
     submitAction->setKeyEventType(QEvent::KeyPress);
     //CFsubmitAction->setMouseEventType(QEvent::MouseButtonRelease);
     //submitAction->setDeviceName(device);
     //submitAction->setDeviceEvent("button 09 pressed");
     connect(submitAction, SIGNAL(triggered()), this, SLOT(submitCallback()));
+
+    replayAction = new ACInputActionQt(tr("Replay the file"), this);
+    replayAction->setToolTip(tr("Replay the file"));
+    replayAction->setShortcut(Qt::Key_Space);
+    replayAction->setKeyEventType(QEvent::KeyPress);
+    //replayAction->setMouseEventType(QEvent::MouseButtonRelease);
+    //replayAction->setDeviceName(device);
+    //replayAction->setDeviceEvent("button 09 pressed");
+    connect(replayAction, SIGNAL(triggered()), this, SLOT(replayCallback()));
 
     triggerMediaHoverAction = new ACInputActionQt(tr("Trigger Media Hover"), this);
     triggerMediaHoverAction->setShortcut(Qt::Key_L);
@@ -162,13 +171,16 @@ void ACUsabilityKnownItemSearchPlugin::hid_loop(){
                 }
                 else if(buttons == 1){
                     button_left = true;
+                    this->replayCallback();
                 }
                 else if(buttons == 2){
                     button_right = true;
+                    this->replayCallback();
                 }
                 else if(buttons == 3){
                     button_left = true;
                     button_right = true;
+                    this->replayCallback();
                 }
 
             }
@@ -248,6 +260,16 @@ void ACUsabilityKnownItemSearchPlugin::submitCallback(){
 
 }
 
+void ACUsabilityKnownItemSearchPlugin::replayCallback(){
+    std::cout << "ACUsabilityKnownItemSearchPlugin::replayCallback" << std::endl;
+    if(!media_cycle){
+        std::cerr << "ACUsabilityKnownItemSearchPlugin::performActionOnMedia: mediacycle instance not set" << std::endl;
+        return;
+    }
+
+    media_cycle->performActionOnMedia("replay",-1);
+}
+
 void ACUsabilityKnownItemSearchPlugin::triggerMediaHover(bool trigger){
     if (media_cycle == 0) return;
     //std::cout << "Trigger Media hover " << trigger << std::endl;
@@ -299,6 +321,7 @@ bool ACUsabilityKnownItemSearchPlugin::performActionOnMedia(std::string action, 
 std::map<std::string,ACMediaType> ACUsabilityKnownItemSearchPlugin::availableMediaActions(){
     std::map<std::string,ACMediaType> media_actions;
     media_actions["submit"] = MEDIA_TYPE_ALL;
+    media_actions["replay"] = MEDIA_TYPE_ALL;
     return media_actions;
 }
 
@@ -306,6 +329,7 @@ std::vector<ACInputActionQt*> ACUsabilityKnownItemSearchPlugin::providesInputAct
 {
     std::vector<ACInputActionQt*> actions;
     actions.push_back(submitAction);
+    actions.push_back(replayAction);
     actions.push_back(triggerMediaHoverAction);
     return actions;
 }

@@ -60,9 +60,10 @@ protected:
 
 private:
     int count, attente;
-    std::vector <std::string> XMLfiles;
+    std::vector <std::string> randomizedFiles, sequentialFiles;
     QTimer *task_timer;
     QTimer *hear_timer;
     long int currentId;
+    int sequence;
 };
 #endif // _ACAudioCycleKIS

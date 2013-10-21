@@ -39,7 +39,7 @@ namespace fs = boost::filesystem;
 
 using namespace std;
 
-ACCsvLoggingPlugin::ACCsvLoggingPlugin() : ACClientPlugin()
+ACCsvLoggingPlugin::ACCsvLoggingPlugin() : QObject(), ACPluginQt(), ACClientPlugin()
 {
     //vars herited from ACPlugin
     this->mMediaType = MEDIA_TYPE_ALL;
@@ -100,7 +100,7 @@ bool ACCsvLoggingPlugin::performActionOnMedia(std::string action, long int media
 
         openLibrary(pointers_file,pointers_filepath);
         //pointers_file << "\"Time\"" << delim << "\"Action\"" << delim << "\"ID\"" << delim << "\"x\"" << delim << "\"y\"" << std::endl;
-        pointers_file << "\"Time\"" << delim << "\"x\"" << delim << "\"y\"" << std::endl;
+        pointers_file << "\"h\"" << delim << "\"min\"" << delim << "\"s\"" << delim << "\"ms\"" << delim << "\"x\"" << delim << "\"y\"" << std::endl;
     }
     if(!isLibraryOpened(actions_file)){
 
@@ -113,7 +113,7 @@ bool ACCsvLoggingPlugin::performActionOnMedia(std::string action, long int media
 
         openLibrary(actions_file,actions_filepath);
         //actions_file << "\"Time\"" << delim << "\"Action\"" << delim << "\"Media ID\"" << delim << "\"Arguments\"" << delim << "\"1\"" << delim << "\"2\"" << delim << "\"3\"" << std::endl;
-        actions_file << "\"Time\"" << delim << "\"Action\"" << delim << "\"Media ID\"" << std::endl;
+        actions_file << "\"h\"" << delim << "\"min\"" << delim << "\"s\"" << delim << "\"ms\"" << delim<< "\"Action\"" << delim << "\"Media ID\"" << std::endl;
     }
     if(!isLibraryOpened(positions_file)){
 
@@ -145,7 +145,7 @@ bool ACCsvLoggingPlugin::performActionOnMedia(std::string action, long int media
         }
 
         positions_file << "xml" << delim << filename << delim << 0 << delim << 0 << std::endl;
-        actions_file << now->tm_hour << '-' << now->tm_min << '-' << now->tm_sec << '-' << tv.tv_usec/1000.0f << delim << "xml loaded" << delim << filename << std::endl;
+        actions_file << now->tm_hour << delim << now->tm_min << delim << now->tm_sec << delim << tv.tv_usec/1000.0f << delim << "xml loaded" << delim << filename << std::endl;
         pointer_valid = false;
     }
 
@@ -190,15 +190,19 @@ bool ACCsvLoggingPlugin::performActionOnMedia(std::string action, long int media
                 for (int i=0; i<ids.size(); i++){
                     ACMediaNode* node = media_cycle->getMediaNode(i);
                     std::string filename = media_cycle->getMediaFileName(i);
+                    ACPoint pos = node->getCurrentPosition();
+                    if(this->browser_renderer){
+                        pos = this->browser_renderer->getScreenCoordinates(pos);
+                    }
                     if(node){
-                        positions_file << node->getMediaId() << delim << filename << delim << node->getCurrentPosition().x << delim << node->getCurrentPosition().y << std::endl;
+                        positions_file << node->getMediaId() << delim << filename << delim << pos.x << delim << pos.y << std::endl;
                     }
                 }
             }
             pointer_valid = true;
         }
         if(pointer_valid){
-            pointers_file << now->tm_hour << '-' << now->tm_min << '-' << now->tm_sec << '-' << tv.tv_usec/1000.0f;
+            pointers_file << now->tm_hour << delim << now->tm_min << delim << now->tm_sec << delim << tv.tv_usec/1000.0f;
             //pointers_file << delim << action;
             pointers_file << delim << args[1];
             pointers_file << delim << args[2];
@@ -211,7 +215,7 @@ bool ACCsvLoggingPlugin::performActionOnMedia(std::string action, long int media
         if(action != "loop" && action != "hear" && action != "submit"  && action != "target"  && action != "success")
             return true;
 
-        actions_file << now->tm_hour << '-' << now->tm_min << '-' << now->tm_sec << '-' << tv.tv_usec/1000.0f << delim;
+        actions_file << now->tm_hour << delim << now->tm_min << delim << now->tm_sec << delim << tv.tv_usec/1000.0f << delim;
         actions_file << action << delim << mediaId;
 		/*actions_file << delim;
         actions_file << arguments.size();

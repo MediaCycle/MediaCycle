@@ -58,6 +58,7 @@ public slots:
     void changePort();
     void changeTeam();
     void submitCallback();
+    void replayCallback();
     void triggerMediaHover(bool trigger); // audio hover, image/video ... -> need a panel to configure the behaviour of hover
 
 protected:
@@ -65,6 +66,7 @@ protected:
 
 private:
     ACInputActionQt* submitAction;
+    ACInputActionQt* replayAction;
     ACInputActionQt* triggerMediaHoverAction;
     std::string url;
     int port;
