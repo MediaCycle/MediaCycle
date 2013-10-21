@@ -33,6 +33,8 @@
 #include "Armadillo-utils.h"
 #include "ACPosPlugImportGrid.h"
 
+#include <algorithm>
+
 using namespace arma;
 using namespace std;
 
@@ -43,10 +45,18 @@ ACPosPlugImportGrid::ACPosPlugImportGrid() : ACClusterPositionsPlugin()
     this->mName = "MediaCycle Import Grid";
     this->mDescription = "Visualization plugin ordering media nodes in a grid from their import rank";
     this->mId = "";
+
+    this->addNumberParameter("Randomize",1,0,1,1,"Randomize the order of nodes",boost::bind(&ACPosPlugImportGrid::randomize,this));
 }
 
 ACPosPlugImportGrid::~ACPosPlugImportGrid()
 {
+    if(media_cycle)
+        this->updateNextPositions(media_cycle->getBrowser());
+}
+
+void ACPosPlugImportGrid::randomize(){
+
 }
 
 void ACPosPlugImportGrid::updateNextPositions(ACMediaBrowser* mediaBrowser){
@@ -69,6 +79,12 @@ void ACPosPlugImportGrid::updateNextPositions(ACMediaBrowser* mediaBrowser){
     ACPoint p;
     int row = 0;
     float osg = 0.33f;
+
+    bool random = this->getNumberParameterValue("Randomize");
+    if(random){
+        std::random_shuffle ( ids.begin(), ids.end() );
+    }
+
     for (int i=0; i<ids.size(); i++){
         //mediaBrowser->setMediaNodeDisplayed(ids[i], true);
         if(i%gridSize==0){

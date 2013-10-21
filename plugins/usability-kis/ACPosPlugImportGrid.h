@@ -44,6 +44,7 @@ public:
     ACPosPlugImportGrid();
     ~ACPosPlugImportGrid();
     virtual void updateNextPositions(ACMediaBrowser* );
+    void randomize();
 };
 
 #endif	/* _ACPosPlugImportGrid_ */
