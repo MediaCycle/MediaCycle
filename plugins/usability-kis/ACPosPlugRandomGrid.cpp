@@ -1,5 +1,5 @@
 /**
- * @brief Plugin for ordering nodes in a grid from their import rank, a non content-based approach
+ * @brief Plugin for ordering nodes in a grid in a random order, a non content-based approach
  * @author Christian Frisson
  * @date 14/05/2013
  * @copyright (c) 2013 – UMONS - Numediart
@@ -31,29 +31,35 @@
 
 #include <armadillo>
 #include "Armadillo-utils.h"
-#include "ACPosPlugImportGrid.h"
+#include "ACPosPlugRandomGrid.h"
 
 #include <algorithm>
 
 using namespace arma;
 using namespace std;
 
-ACPosPlugImportGrid::ACPosPlugImportGrid() : ACClusterPositionsPlugin()
+ACPosPlugRandomGrid::ACPosPlugRandomGrid() : ACClusterPositionsPlugin()
 {
     //vars herited from ACPlugin
     this->mMediaType = MEDIA_TYPE_ALL;
-    this->mName = "MediaCycle Import Grid";
-    this->mDescription = "Visualization plugin ordering media nodes in a grid from their import rank";
+    this->mName = "MediaCycle Random Grid";
+    this->mDescription = "Visualization plugin ordering media nodes in a grid in a random order";
     this->mId = "";
+
+    this->addNumberParameter("Randomize",1,0,1,1,"Randomize the order of nodes",boost::bind(&ACPosPlugRandomGrid::randomize,this));
 }
 
-ACPosPlugImportGrid::~ACPosPlugImportGrid()
+ACPosPlugRandomGrid::~ACPosPlugRandomGrid()
 {
     if(media_cycle)
         this->updateNextPositions(media_cycle->getBrowser());
 }
 
-void ACPosPlugImportGrid::updateNextPositions(ACMediaBrowser* mediaBrowser){
+void ACPosPlugRandomGrid::randomize(){
+
+}
+
+void ACPosPlugRandomGrid::updateNextPositions(ACMediaBrowser* mediaBrowser){
     if(!media_cycle) return;
     if(media_cycle->getLibrarySize()==0) return;
 
@@ -62,7 +68,7 @@ void ACPosPlugImportGrid::updateNextPositions(ACMediaBrowser* mediaBrowser){
     std::vector<long> ids = mediaBrowser->getLibrary()->getAllMediaIds();
 
     if(libSize != ids.size())
-        std::cout << "ACPosPlugImportGrid::updateNextPositions: warning, lib size and number of accessible media ids don't match"<< std::endl;
+        std::cout << "ACPosPlugRandomGrid::updateNextPositions: warning, lib size and number of accessible media ids don't match"<< std::endl;
 
     int gridSize = ceil(sqrt(libSize));
     if(gridSize == 0)
@@ -74,6 +80,11 @@ void ACPosPlugImportGrid::updateNextPositions(ACMediaBrowser* mediaBrowser){
     int row = 0;
     float osg = 0.33f;
 
+    bool random = this->getNumberParameterValue("Randomize");
+    if(random){
+        std::random_shuffle ( ids.begin(), ids.end() );
+    }
+
     for (int i=0; i<ids.size(); i++){
         //mediaBrowser->setMediaNodeDisplayed(ids[i], true);
         if(i%gridSize==0){
@@ -83,6 +94,6 @@ void ACPosPlugImportGrid::updateNextPositions(ACMediaBrowser* mediaBrowser){
         p.y = osg -2*osg*(float)row/(float)gridSize;
         p.z = 0;
         mediaBrowser->setNodeNextPosition(ids[i], p);
-        std::cout << "ACPosPlugImportGrid::updateNextPositions: media " << ids[i] << " i%gridSize " << i%gridSize << " x " << p.x << " y " << p.y << std::endl;
+        std::cout << "ACPosPlugRandomGrid::updateNextPositions: media " << ids[i] << " i%gridSize " << i%gridSize << " x " << p.x << " y " << p.y << std::endl;
     }
 }

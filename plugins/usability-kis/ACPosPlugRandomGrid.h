@@ -1,5 +1,5 @@
 /**
- * @brief Plugin for ordering nodes in a grid from their import rank, a non content-based approach
+ * @brief Plugin for ordering nodes in a grid in a random order, a non content-based approach
  * @author Christian Frisson
  * @date 14/05/2013
  * @copyright (c) 2013 – UMONS - Numediart
@@ -36,16 +36,17 @@
 #include "ACMediaBrowser.h"
 #include "ACMediaTimedFeature.h"
 
-#ifndef _ACPosPlugImportGrid_
-#define _ACPosPlugImportGrid_
+#ifndef _ACPosPlugRandomGrid_
+#define _ACPosPlugRandomGrid_
 
-class ACPosPlugImportGrid : public ACClusterPositionsPlugin {
+class ACPosPlugRandomGrid : public ACClusterPositionsPlugin {
 public:
-    ACPosPlugImportGrid();
-    ~ACPosPlugImportGrid();
+    ACPosPlugRandomGrid();
+    ~ACPosPlugRandomGrid();
     virtual void updateNextPositions(ACMediaBrowser* );
+    void randomize();
 };
 
-#endif	/* _ACPosPlugImportGrid_ */
+#endif	/* _ACPosPlugRandomGrid_ */
 
 
