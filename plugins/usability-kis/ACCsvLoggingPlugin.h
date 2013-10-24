@@ -57,6 +57,9 @@ protected:
     std::string positions_filepath;
     std::string delim;
     bool pointer_valid;
+
+    std::string formatFileNameDate();
+    std::string formatTimeLog();
 };
 
 #endif	/* _ACCsvLoggingPlugin_ */

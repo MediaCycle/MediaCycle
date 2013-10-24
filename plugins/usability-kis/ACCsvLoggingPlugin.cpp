@@ -80,6 +80,52 @@ bool ACCsvLoggingPlugin::isLibraryOpened(std::ofstream& file){
     return file.is_open();
 }
 
+std::string ACCsvLoggingPlugin::formatFileNameDate(){
+    std::stringstream filetag;
+    time_t t = time(0);
+    struct tm * now = localtime( & t );
+    struct timeval tv = {0, 0};
+    struct timezone tz = {0, 0};
+    gettimeofday(&tv, &tz);
+    filetag << (now->tm_year + 1900) << '-';
+    if(now->tm_mon + 1 < 10)
+        filetag << "0";
+    filetag << (now->tm_mon + 1) << '-';
+    if(now->tm_mday < 10)
+        filetag << "0";
+    filetag << now->tm_mday << '-';
+    if(now->tm_hour < 10)
+        filetag << "0";
+    filetag<< now->tm_hour << '-';
+    if(now->tm_min < 10)
+        filetag << "0";
+    filetag<< now->tm_min << '-';
+    if(now->tm_sec < 10)
+        filetag << "0";
+    filetag<< now->tm_sec;
+    return filetag.str();
+}
+
+std::string ACCsvLoggingPlugin::formatTimeLog(){
+    std::stringstream formatedTime;
+    time_t t = time(0);
+    struct tm * now = localtime( & t );
+    struct timeval tv = {0, 0};
+    struct timezone tz = {0, 0};
+    gettimeofday(&tv, &tz);
+    //if(now->tm_hour<10)
+    //    formatedTime << "0";
+    formatedTime << now->tm_hour << delim;
+    //if(now->tm_min<10)
+    //    formatedTime << "0";
+    formatedTime << now->tm_min << delim;
+    //if(now->tm_sec<10)
+    //    formatedTime << "0";
+    formatedTime << now->tm_sec << delim;
+    formatedTime << tv.tv_usec/1000.0f;
+    return formatedTime.str();
+}
+
 bool ACCsvLoggingPlugin::performActionOnMedia(std::string action, long int mediaId, std::vector<boost::any> arguments)
 {
     if(action == "reset"){
@@ -90,11 +136,8 @@ bool ACCsvLoggingPlugin::performActionOnMedia(std::string action, long int media
     }
 
     if(!isLibraryOpened(pointers_file)){
-
-        time_t t = time(0);
-        struct tm * now = localtime( & t );
         std::stringstream filename;
-        filename << getExecutablePath() << "MediaCyclePointersLog-" << (now->tm_year + 1900) << '-' << (now->tm_mon + 1) << '-' << now->tm_mday << '-' << now->tm_hour << '-' << now->tm_min << '-' << now->tm_sec << ".csv";
+        filename << getExecutablePath() << "MediaCyclePointersLog-" << formatFileNameDate() << ".csv";
         pointers_filepath = filename.str();
         std::cout << "Logging pointers on file: " << pointers_filepath << std::endl;
 
@@ -103,11 +146,8 @@ bool ACCsvLoggingPlugin::performActionOnMedia(std::string action, long int media
         pointers_file << "\"h\"" << delim << "\"min\"" << delim << "\"s\"" << delim << "\"ms\"" << delim << "\"x\"" << delim << "\"y\"" << std::endl;
     }
     if(!isLibraryOpened(actions_file)){
-
-        time_t t = time(0);
-        struct tm * now = localtime( & t );
         std::stringstream filename;
-        filename << getExecutablePath() << "MediaCycleActionsLog-" << (now->tm_year + 1900) << '-' << (now->tm_mon + 1) << '-' << now->tm_mday << '-' << now->tm_hour << '-' << now->tm_min << '-' << now->tm_sec << ".csv";
+        filename << getExecutablePath() << "MediaCycleActionsLog-" << formatFileNameDate() << ".csv";
         actions_filepath = filename.str();
         std::cout << "Logging actions on file: " << actions_filepath << std::endl;
 
@@ -116,23 +156,14 @@ bool ACCsvLoggingPlugin::performActionOnMedia(std::string action, long int media
         actions_file << "\"h\"" << delim << "\"min\"" << delim << "\"s\"" << delim << "\"ms\"" << delim<< "\"Action\"" << delim << "\"Media ID\"" << std::endl;
     }
     if(!isLibraryOpened(positions_file)){
-
-        time_t t = time(0);
-        struct tm * now = localtime( & t );
         std::stringstream filename;
-        filename << getExecutablePath() << "MediaCyclePositionsLog-" << (now->tm_year + 1900) << '-' << (now->tm_mon + 1) << '-' << now->tm_mday << '-' << now->tm_hour << '-' << now->tm_min << '-' << now->tm_sec << ".csv";
+        filename << getExecutablePath() << "MediaCyclePositionsLog-" << formatFileNameDate() << ".csv";
         positions_filepath = filename.str();
         std::cout << "Logging positions on file: " << positions_filepath << std::endl;
 
         openLibrary(positions_file,positions_filepath);
         positions_file << "\"Media ID\"" << delim << "\"Filename\"" << delim << "\"x\"" << delim << "\"y\"" << std::endl;
     }
-
-    time_t t = time(0);
-    struct tm * now = localtime( & t );
-    struct timeval tv = {0, 0};
-    struct timezone tz = {0, 0};
-    gettimeofday(&tv, &tz);
 
     if(action == "xml loaded"){
         std::string filename = "";
@@ -145,7 +176,7 @@ bool ACCsvLoggingPlugin::performActionOnMedia(std::string action, long int media
         }
 
         positions_file << "xml" << delim << filename << delim << 0 << delim << 0 << std::endl;
-        actions_file << now->tm_hour << delim << now->tm_min << delim << now->tm_sec << delim << tv.tv_usec/1000.0f << delim << "xml loaded" << delim << filename << std::endl;
+        actions_file << formatTimeLog() << delim << "xml loaded" << delim << filename << std::endl;
         pointer_valid = false;
     }
 
@@ -202,7 +233,7 @@ bool ACCsvLoggingPlugin::performActionOnMedia(std::string action, long int media
             pointer_valid = true;
         }
         if(pointer_valid){
-            pointers_file << now->tm_hour << delim << now->tm_min << delim << now->tm_sec << delim << tv.tv_usec/1000.0f;
+            pointers_file << formatTimeLog();
             //pointers_file << delim << action;
             pointers_file << delim << args[1];
             pointers_file << delim << args[2];
@@ -215,7 +246,7 @@ bool ACCsvLoggingPlugin::performActionOnMedia(std::string action, long int media
         if(action != "loop" && action != "hear" && action != "submit"  && action != "target"  && action != "success")
             return true;
 
-        actions_file << now->tm_hour << delim << now->tm_min << delim << now->tm_sec << delim << tv.tv_usec/1000.0f << delim;
+        actions_file << formatTimeLog() << delim;
         actions_file << action << delim << mediaId;
 		/*actions_file << delim;
         actions_file << arguments.size();
