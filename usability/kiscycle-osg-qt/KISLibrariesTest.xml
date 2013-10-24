@@ -1,0 +1,9 @@
+<?xml version="1.0" ?>
+<KIS>
+    <Sequential Target="10">/Volumes/data/Datasets/xml/KIS/Fixed/olpc-ball-grid.xml</Sequential>
+    <Sequential Target="20">/Volumes/data/Datasets/xml/KIS/Fixed/olpc-bell-tsne.xml</Sequential>
+    <Sequential Target="30">/Volumes/data/Datasets/xml/KIS/Fixed/olpc-glass-grid.xml</Sequential>
+    <Sequential Target="40">/Volumes/data/Datasets/xml/KIS/Fixed/olpc-metal-tsne.xml</Sequential>
+    <Sequential Target="50">/Volumes/data/Datasets/xml/KIS/Fixed/olpc-scrape-grid.xml</Sequential>
+    <Sequential Target="60">/Volumes/data/Datasets/xml/KIS/Fixed/olpc-water-tsne.xml</Sequential>
+</KIS>

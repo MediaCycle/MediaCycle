@@ -61,6 +61,7 @@ protected:
 private:
     int count, attente;
     std::vector <std::string> randomizedFiles, sequentialFiles;
+    std::vector <int> randomizedFilesTargets, sequentialFilesTargets;
     QTimer *task_timer;
     QTimer *hear_timer;
     long int currentId;

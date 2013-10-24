@@ -998,7 +998,7 @@ void ACMediaCycleOsgQt::on_actionEdit_Profile_triggered(bool checked) {
 }
 
 void ACMediaCycleOsgQt::on_actionFullscreen_triggered(bool checked) {
-    if (compositeOsgView->isFullScreen() || this->isFullScreen()){
+    if (!checked || compositeOsgView->isFullScreen() || this->isFullScreen()){
         std::cout << "Not fullscreen" << std::endl;
         this->showNormal();
         compositeOsgView->showNormal();

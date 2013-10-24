@@ -48,16 +48,18 @@ ACAudioCycleKIS::ACAudioCycleKIS() : ACMediaCycleOsgQt(), task_timer(0), hear_ti
 
     this->addAction(actionNextLibrary);
     connect(actionNextLibrary, SIGNAL(triggered()), this, SLOT(openNextLibrary()));
-    this->addAction(actionNextLibrary);
-
+    
+    
     // Qt 4.8+ Enables application to receive multimedia key events (play, next, previous etc).
     //QCoreApplication::setAttribute(Qt::AA_CaptureMultimediaKeys);
+    this->on_actionFullscreen_triggered(true);
 }
 
 void ACAudioCycleKIS::postLoadDefaultConfig(){
 
-    this->parseXMLlist("KISLibraries.xml");
-
+    if(!this->parseXMLlist("KISLibraries.xml"))
+        return;
+    
     task_timer = new QTimer(this);
     connect( task_timer, SIGNAL(timeout()), this, SLOT(openNextLibrary()) );
     hear_timer = new QTimer(this);
@@ -117,7 +119,7 @@ bool ACAudioCycleKIS::parseXMLlist(std::string filename){
     TiXmlHandle docHandle(&doc);
     TiXmlHandle rootHandle = docHandle.FirstChildElement( "KIS" );
     TiXmlElement* randomizedNode=rootHandle.FirstChild( "Random" ).Element();
-    //std::cout << "randomizedNode " << randomizedNode << std::endl;
+    if(randomizedNode){
     try {
         for( randomizedNode; randomizedNode; randomizedNode=randomizedNode->NextSiblingElement()) {
             TiXmlText* fileName = randomizedNode->FirstChild()->ToText();
@@ -126,14 +128,24 @@ bool ACAudioCycleKIS::parseXMLlist(std::string filename){
             std::cout << "File '" << file << "'" << std::endl;
             //if(!file.empty())
             randomizedFiles.push_back(file);
+            if(randomizedNode->Attribute("Target")){
+                std::stringstream strm;
+                strm << randomizedNode->Attribute("Target");
+                int _target(-1);
+                strm >> _target;
+                randomizedFilesTargets.push_back(_target);
+            }
+            else
+                randomizedFilesTargets.push_back(-1);
         }
     }
     catch (const exception& e) {
         cout << e.what( ) << endl;
         return false;//EXIT_FAILURE;
     }
+    }
     TiXmlElement* sequentialNode=rootHandle.FirstChild( "Sequential" ).Element();
-    //std::cout << "sequentialNode " << sequentialNode << std::endl;
+    if(sequentialNode){
     try {
         for( sequentialNode; sequentialNode; sequentialNode=sequentialNode->NextSiblingElement()) {
             TiXmlText* fileName = sequentialNode->FirstChild()->ToText();
@@ -142,6 +154,15 @@ bool ACAudioCycleKIS::parseXMLlist(std::string filename){
             std::cout << "File '" << file << "'" << std::endl;
             //if(!file.empty())
             sequentialFiles.push_back(file);
+            if(sequentialNode->Attribute("Target")){
+                std::stringstream strm;
+                strm << sequentialNode->Attribute("Target");
+                int _target(-1);
+                strm >> _target;
+                sequentialFilesTargets.push_back(_target);
+            }
+            else
+                sequentialFilesTargets.push_back(-1);
             sequence++;
         }
     }
@@ -149,12 +170,10 @@ bool ACAudioCycleKIS::parseXMLlist(std::string filename){
         cout << e.what( ) << endl;
         return false;//EXIT_FAILURE;
     }
-
-    std::cout << "Filelist size "  << randomizedFiles.size() << std::endl;
-
-    if(randomizedFiles.empty())
-        return false;
-
+    }
+    if(randomizedFiles.size()==0 && sequentialFiles.size()==0)
+       return false;
+    
     return true;
 }
 
@@ -172,21 +191,31 @@ void ACAudioCycleKIS::openNextLibrary(){
 
     cout << "closing library" << endl;
     if(task_timer) task_timer->stop();
+
+    int item = 0;
+    int target = -1;
+    std::string filename("");
+    if(sequence>0){
+        item = sequentialFiles.size()-sequence;
+        filename = sequentialFiles[item];
+        target = sequentialFilesTargets[item];
+        sequence--;
+    }
+    else if(randomizedFiles.size()>0){
+        int a = qrand();
+        item  = a % randomizedFiles.size();
+        filename = randomizedFiles[item];
+        target = randomizedFilesTargets[item];
+    }
+    else{
+        exit(1);
+    }
+
     media_cycle->muteAllSources();
     this->clean(true);
 
-
-    std::string filename("");
-    if(sequence>0){
-        filename = sequentialFiles[sequentialFiles.size()-sequence];
-        sequence--;
-    }
-    else{
-        int a = qrand();
-        int item  = a % randomizedFiles.size();
-        filename = randomizedFiles[item];
-    }
     this->readXMLConfig(filename);
+
     std::vector<boost::any> arguments;
     arguments.push_back(filename);
     media_cycle->performActionOnMedia("xml loaded",-1,arguments);
@@ -196,9 +225,15 @@ void ACAudioCycleKIS::openNextLibrary(){
         std::cerr << "Library empty "<< std::endl;
     }
 
-    int b = qrand();
+    if(target == -1){
+        int b = qrand();
+        currentId = b % librarySize;
+    }
+    else
+        currentId = target;
 
-    currentId = b % librarySize;
+    QCursor *cur = new QCursor;
+    cur->setPos(40,450);
 
     media_cycle->performActionOnMedia("hear",currentId);
 
@@ -211,12 +246,14 @@ void ACAudioCycleKIS::finishedHearing(){
     media_cycle->performActionOnMedia("target",currentId);
     media_cycle->muteAllSources();
 
-    QPixmap originalPixmap = QPixmap::grabWindow(QApplication::desktop()->winId()); // QPixmap::grabWidget(this);//
+    QPixmap originalPixmap = QPixmap::grabWindow(QApplication::desktop()->winId()); //sQPixmap::grabWidget(this);//
 
-    QString format = "png";
+    QString format = "jpg";
     QTime time = QTime::currentTime();
+    QDate date = QDate::currentDate();
     QString timetag = time.toString("hh-mm-ss");
-    QString fileName = QString(getExecutablePath().c_str()) + "/" + "MediaCycleKIS-Screenshot-" + timetag + "." + format;
+    QString datetag = date.toString("yy-MM-dd");
+    QString fileName = QString(getExecutablePath().c_str()) + "/" + "MediaCycleScreenshot-" + datetag +"-"+ timetag + "." + format;
     originalPixmap.save(fileName, format.toAscii());
 
     if(task_timer) task_timer->start(attente);
