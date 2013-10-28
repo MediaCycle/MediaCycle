@@ -454,7 +454,7 @@ void ACOsgVideoRenderer::prepareNodes() {
 
     video_stream->seek(this->media->getStart()); // to start with the correct frame, especially for segments
 
-    //this->changeThumbnail(node_thumbnail);
+    //this->changeNodeThumbnail(node_thumbnail);
 }
 
 void ACOsgVideoRenderer::updateNodes(double ratio) {
@@ -641,7 +641,7 @@ void ACOsgVideoRenderer::updateNodes(double ratio) {
     media_changed = false;
 }
 
-void ACOsgVideoRenderer::changeThumbnail(std::string thumbnail){
+void ACOsgVideoRenderer::changeNodeThumbnail(std::string thumbnail){
     this->node_thumbnail = thumbnail;
 
     if(!media)

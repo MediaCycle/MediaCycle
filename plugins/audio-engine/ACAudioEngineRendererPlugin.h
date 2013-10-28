@@ -59,6 +59,8 @@ public:
     void updateScaleMode();
     void updatePreset();
     void muteAll();
+    virtual void disable(){active = false; this->muteAll();}
+    virtual void enable(){active = true;}
 protected:
     ACAudioEngine* audio_engine;
     std::vector<std::string> synchro_modes, scale_modes, presets;
@@ -75,7 +77,7 @@ protected:
     ACInputActionQt* playClickedNodeAction;
     ACInputActionQt* loopClickedNodeAction;
     ACInputActionQt* muteAllNodesAction;
-
+    bool active;
     std::map<std::string,ACMediaActionParameters> action_parameters;
 };
 

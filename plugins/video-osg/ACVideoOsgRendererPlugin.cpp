@@ -63,7 +63,7 @@ ACVideoOsgRendererPlugin::ACVideoOsgRendererPlugin() : ACOsgRendererPlugin(){
     browser_node_thumbnails.push_back("None");
     browser_node_thumbnails.push_back("Slit-scan");
     browser_node_thumbnails.push_back("Circular slit-scan");
-    this->addStringParameter("Browser node", browser_node_thumbnails.front(), browser_node_thumbnails, "Browser node",boost::bind(&ACOsgRendererPlugin::changeBrowserThumbnail,this));
+    this->addStringParameter("Browser node", browser_node_thumbnails.front(), browser_node_thumbnails, "Browser node",boost::bind(&ACOsgRendererPlugin::changeBrowserNodeThumbnail,this));
 
     timeline_selection_thumbnails.push_back("None");
     timeline_selection_thumbnails.push_back("Keyframes");

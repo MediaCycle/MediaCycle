@@ -55,11 +55,18 @@ void ACOsgRendererPlugin::setTimelineRenderer(ACOsgTimelineRenderer* _timeline)
     this->timeline=_timeline;
 }
 
-void ACOsgRendererPlugin::changeBrowserThumbnail(){
+void ACOsgRendererPlugin::changeBrowserNodeThumbnail(){
     std::string thumbnail_name = this->getStringParameterValue("Browser node");
-    std::cout << "ACOsgRendererPlugin::changeBrowserThumbnail: " << thumbnail_name << std::endl;
+    std::cout << "ACOsgRendererPlugin::changeBrowserNodeThumbnail: " << thumbnail_name << std::endl;
     if(this->browser)
-        this->browser->changeAllNodesThumbnail(thumbnail_name);
+        this->browser->changeAllNodeThumbnails(thumbnail_name);
+}
+
+void ACOsgRendererPlugin::changeBrowserPlaybackThumbnail(){
+    std::string thumbnail_name = this->getStringParameterValue("Browser playback");
+    std::cout << "ACOsgRendererPlugin::changeBrowserPlaybackThumbnail: " << thumbnail_name << std::endl;
+    if(this->browser)
+        this->browser->changeAllPlaybackThumbnails(thumbnail_name);
 }
 
 void ACOsgRendererPlugin::changeTimelinePlaybackThumbnail(){

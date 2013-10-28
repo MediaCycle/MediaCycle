@@ -52,6 +52,7 @@ ACOsgMediaRenderer::ACOsgMediaRenderer() : ACOsgBaseRenderer() {
     media_node = new MatrixTransform();
 #endif
     node_thumbnail = "";
+    playback_thumbnail = "";
     node_color = Vec4(1,1,0.5,1); //CF seminal yellow
     cluster_colors.push_back(osg::Vec4(1,1,0.5,1));//yello<
     cluster_colors.push_back(osg::Vec4(1,0.5,1,1));//
@@ -270,6 +271,28 @@ ACOsgMediaThumbnail* ACOsgMediaRenderer::getNodeThumbnail()
     ACOsgMediaThumbnail* thumbnail = dynamic_cast<ACOsgMediaThumbnail*>(this->media->getThumbnail(this->node_thumbnail));
     if(thumbnail == 0){
         std::cerr << "ACOsgBaseRenderer::getNodeThumbnail: node thumbnail isn't an osg media thumbnail" << std::endl;
+        return 0;
+    }
+    return thumbnail;
+}
+
+ACOsgMediaThumbnail* ACOsgMediaRenderer::getPlaybackThumbnail()
+{
+    if(this->media == 0){
+        std::cerr << "ACOsgBaseRenderer::getPlaybackThumbnail: no media set" << std::endl;
+        return 0;
+    }
+    if(this->playback_thumbnail == ""){
+        std::cerr << "ACOsgBaseRenderer::getPlaybackThumbnail: no playback thumbnail name set" << std::endl;
+        return 0;
+    }
+    if(this->media->getThumbnail(this->playback_thumbnail)==0){
+        std::cerr << "ACOsgBaseRenderer::getPlaybackThumbnail: no playback thumbnail available" << std::endl;
+        return 0;
+    }
+    ACOsgMediaThumbnail* thumbnail = dynamic_cast<ACOsgMediaThumbnail*>(this->media->getThumbnail(this->playback_thumbnail));
+    if(thumbnail == 0){
+        std::cerr << "ACOsgBaseRenderer::getPlaybackThumbnail: playback thumbnail isn't an osg media thumbnail" << std::endl;
         return 0;
     }
     return thumbnail;

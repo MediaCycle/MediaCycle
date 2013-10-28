@@ -43,6 +43,7 @@ ACAudioEngineRendererPlugin::ACAudioEngineRendererPlugin() : QObject(), ACPlugin
     this->mMediaType = MEDIA_TYPE_AUDIO | MEDIA_TYPE_MIXED;
 
     audio_engine = 0;
+    this->active = false;
 
 #ifdef USE_DEBUG
     stringToAudioEngineSynchroModeMap::const_iterator synchro_mode = stringToAudioEngineSynchroMode.begin();
@@ -187,6 +188,7 @@ bool ACAudioEngineRendererPlugin::performActionOnMedia(std::string action, long 
     }
 
     if(action == "mute all" || action == "kill all"){
+        if(!active) return false;
         this->muteAll();
         return true;
     }

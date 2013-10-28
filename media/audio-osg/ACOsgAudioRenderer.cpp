@@ -264,7 +264,7 @@ void ACOsgAudioRenderer::prepareNodes() {
     if (media && media_cycle->getNodeFromMedia(media)==0){
         cout<<"test Error"<<endl;
     }
-    this->changeThumbnail(node_thumbnail);
+    this->changeNodeThumbnail(node_thumbnail);
 }
 
 void ACOsgAudioRenderer::setEntryGeodeVisible(bool visibility){
@@ -455,27 +455,28 @@ void ACOsgAudioRenderer::updateNodes(double ratio) {
             if(media->isDiscarded())
                 current_color = osg::Vec4(0,0,0,1);
 
-        if (user_defined_color)
-            current_color = node_color;
-
         //CF KIS tests
         if(waveform_type == AC_BROWSER_AUDIO_WAVEFORM_NONE){
             current_color = osg::Vec4(1,1,1,1);
-
-            osg::ref_ptr<osg::Vec4Array> current_color_array = new Vec4Array(1);
-            (*current_color_array)[0] = current_color;
-            if (node_geometry){
-                node_geometry->setColorArray(current_color_array);
-            }
-            if( waveform_geometry){
-                waveform_geometry->setColorArray(current_color_array);
-            }
-            if(node_shape_drawable){
-                node_shape_drawable->setColor(current_color);
-            }
-
-            T =  Matrix::rotate(-media_cycle_angle,Vec3(0.0,0.0,1.0)) * Matrix::scale(localscale/media_cycle_zoom,localscale/media_cycle_zoom,localscale/media_cycle_zoom) * T;
         }
+
+        if (user_defined_color)
+            current_color = node_color;
+
+        osg::ref_ptr<osg::Vec4Array> current_color_array = new Vec4Array(1);
+        (*current_color_array)[0] = current_color;
+        if (node_geometry){
+            node_geometry->setColorArray(current_color_array);
+        }
+        if( waveform_geometry){
+            waveform_geometry->setColorArray(current_color_array);
+        }
+        if(node_shape_drawable){
+            node_shape_drawable->setColor(current_color);
+        }
+
+        T =  Matrix::rotate(-media_cycle_angle,Vec3(0.0,0.0,1.0)) * Matrix::scale(localscale/media_cycle_zoom,localscale/media_cycle_zoom,localscale/media_cycle_zoom) * T;
+        //}
 
         if(attribute->getNavigationLevel() >= media_cycle->getNavigationLevel()) {
             if (aura_geode)
@@ -536,7 +537,7 @@ void ACOsgAudioRenderer::updateWaveformType(ACBrowserAudioWaveformType _type)
     }
 }
 
-void ACOsgAudioRenderer::changeThumbnail(std::string thumbnail){
+void ACOsgAudioRenderer::changeNodeThumbnail(std::string thumbnail){
     this->node_thumbnail = thumbnail;
 
     if(!media)
@@ -569,6 +570,16 @@ void ACOsgAudioRenderer::changeThumbnail(std::string thumbnail){
         entryGeode();
     entry_transform->addChild(entry_geode);
     media_node->addChild(entry_transform);
+}
+
+void ACOsgAudioRenderer::changePlaybackThumbnail(std::string thumbnail){
+    if(thumbnail == "Waveform"){
+        waveform_type = AC_BROWSER_AUDIO_WAVEFORM_CLASSIC;
+    }
+    else{
+        waveform_type = AC_BROWSER_AUDIO_WAVEFORM_NONE;
+    }
+    this->updateNodes();
 }
 
 void ACOsgAudioRenderer::changeNodeSize(double _size){

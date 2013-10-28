@@ -66,11 +66,18 @@ ACAudioOsgRendererPlugin::ACAudioOsgRendererPlugin() : ACOsgRendererPlugin(){
     browser_node_thumbnails.push_back("None");
     browser_node_thumbnails.push_back("Circular browser waveform");
     browser_node_thumbnails.push_back("Classic browser waveform");
-    this->addStringParameter("Browser node", browser_node_thumbnails.front(), browser_node_thumbnails, "Browser node",boost::bind(&ACOsgRendererPlugin::changeBrowserThumbnail,this));
+    browser_node_thumbnails.push_back("Ring browser waveform");
+    this->addStringParameter("Browser node", browser_node_thumbnails.front(), browser_node_thumbnails, "Browser node",boost::bind(&ACOsgRendererPlugin::changeBrowserNodeThumbnail,this));
+
+    browser_playback_thumbnails.push_back("Waveform");
+    browser_playback_thumbnails.push_back("None");
+    this->addStringParameter("Browser playback", browser_playback_thumbnails.front(), browser_playback_thumbnails, "Browser playback",boost::bind(&ACOsgRendererPlugin::changeBrowserPlaybackThumbnail,this));
 
     browser_node_color_mapping.push_back("Clusters");
     browser_node_color_mapping.push_back("None");
     this->addStringParameter("Browser node color",browser_node_color_mapping.front(),browser_node_color_mapping,"Browser node color",boost::bind(&ACOsgRendererPlugin::changeBrowserNodeColor,this));
+
+    this->addNumberParameter("Browser node size",1.0,0.01,10.0,0.01,"Browser node size",boost::bind(&ACOsgRendererPlugin::changeBrowserNodeSize,this));
 
     this->updateStringParameterCallback("Timeline playback",boost::bind(&ACAudioOsgRendererPlugin::changeTimelinePlaybackThumbnail,this));
     this->updateStringParameterCallback("Timeline summary",boost::bind(&ACAudioOsgRendererPlugin::changeTimelineSummaryThumbnail,this));
@@ -82,8 +89,6 @@ ACAudioOsgRendererPlugin::ACAudioOsgRendererPlugin() : ACOsgRendererPlugin(){
     timeline_summary_thumbnails.push_back("None");
     timeline_summary_thumbnails.push_back("Classic timeline waveform");
     this->addStringParameter("Timeline summary",timeline_summary_thumbnails.front(),timeline_summary_thumbnails,"Timeline summary",boost::bind(&ACOsgRendererPlugin::changeTimelineSummaryThumbnail,this));
-
-    this->addNumberParameter("Browser node size",1.0,0.01,10.0,0.01,"Browser node size",boost::bind(&ACOsgRendererPlugin::changeBrowserNodeSize,this));
 }
 
 ACAudioOsgRendererPlugin::~ACAudioOsgRendererPlugin(){

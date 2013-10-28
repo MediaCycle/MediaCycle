@@ -65,12 +65,14 @@ public:
     virtual std::vector<ACMediaType> getSupportedMediaTypes(){return std::vector<ACMediaType>();}//=0;
     void setBrowserRenderer(ACOsgBrowserRenderer* _browser);
     void setTimelineRenderer(ACOsgTimelineRenderer* _timeline);
-    void changeBrowserThumbnail();
+    void changeBrowserNodeThumbnail();
+    void changeBrowserPlaybackThumbnail();
+    void changeBrowserNodeColor();
+    void changeBrowserNodeSize();
     void changeTimelinePlaybackThumbnail();
     void changeTimelineSelectionThumbnail();
     void changeTimelineSummaryThumbnail();
-    void changeBrowserNodeColor();
-    void changeBrowserNodeSize();
+
 protected:
     ACOsgBrowserRenderer* browser;
     ACOsgTimelineRenderer* timeline;

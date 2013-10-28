@@ -69,7 +69,7 @@ public:
     void updateNodes(double ratio=0.0);
     virtual osg::ref_ptr<osg::Geode> getMainGeode() { return video_geode;}
 
-    virtual void changeThumbnail(std::string thumbnail);
+    virtual void changeNodeThumbnail(std::string thumbnail);
     virtual void changeNodeSize(double _size);
 };
 

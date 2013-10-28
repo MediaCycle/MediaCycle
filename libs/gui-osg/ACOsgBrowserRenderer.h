@@ -134,13 +134,17 @@ public:
     void resetAllNodesColor();
 
     void changeNodeThumbnail(int _node, std::string thumbnail);
-    void changeAllNodesThumbnail(std::string thumbnail);
+    void changeAllNodeThumbnails(std::string thumbnail);
 
     void changeNodeSize(int _node, double _size);
     void changeAllNodesSize(double _size);
 
+    void changePlaybackThumbnail(int _node, std::string thumbnail);
+    void changeAllPlaybackThumbnails(std::string thumbnail);
+
 protected:
     std::string node_thumbnail;
+    std::string playback_thumbnail;
     osg::Vec4 node_color;
     double node_size;
     bool user_defined_node_color;

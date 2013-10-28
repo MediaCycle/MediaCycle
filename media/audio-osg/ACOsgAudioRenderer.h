@@ -85,7 +85,8 @@ public:
     virtual void changeSetting(ACSettingType _setting);
     void setEntryGeodeVisible(bool visibility);
 
-    virtual void changeThumbnail(std::string thumbnail);
+    virtual void changeNodeThumbnail(std::string thumbnail);
+    virtual void changePlaybackThumbnail(std::string thumbnail);
     virtual void changeNodeSize(double _size);
 };
 #endif

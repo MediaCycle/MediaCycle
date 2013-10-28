@@ -49,7 +49,7 @@ public:
     virtual ACOsgTrackRenderer* createTrackRenderer(ACMediaType media_type);
     virtual std::vector<ACMediaType> getSupportedMediaTypes();
 protected:
-    std::vector<std::string> browser_node_thumbnails, timeline_playback_thumbnails, timeline_summary_thumbnails;
+    std::vector<std::string> browser_node_thumbnails, browser_playback_thumbnails, timeline_playback_thumbnails, timeline_summary_thumbnails;
     std::vector<std::string> browser_node_color_mapping;
 };
 

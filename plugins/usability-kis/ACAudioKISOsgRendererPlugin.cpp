@@ -64,7 +64,7 @@ ACAudioKISOsgRendererPlugin::ACAudioKISOsgRendererPlugin() : ACOsgRendererPlugin
     this->mMediaType = MEDIA_TYPE_AUDIO | MEDIA_TYPE_MIXED;
 
     browser_node_thumbnails.push_back("None");
-    this->addStringParameter("Browser node", browser_node_thumbnails.front(), browser_node_thumbnails, "Browser node",boost::bind(&ACOsgRendererPlugin::changeBrowserThumbnail,this));
+    this->addStringParameter("Browser node", browser_node_thumbnails.front(), browser_node_thumbnails, "Browser node",boost::bind(&ACOsgRendererPlugin::changeBrowserNodeThumbnail,this));
 
     browser_node_color_mapping.push_back("None");
     this->addStringParameter("Browser node color",browser_node_color_mapping.front(),browser_node_color_mapping,"Browser node color",boost::bind(&ACOsgRendererPlugin::changeBrowserNodeColor,this));

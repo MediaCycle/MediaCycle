@@ -83,6 +83,7 @@ ACOsgBrowserRenderer::ACOsgBrowserRenderer()
     //  pthread_mutex_init(&activity_update_mutex, &activity_update_mutex_attr);
     //  pthread_mutexattr_destroy(&activity_update_mutex_attr);
     node_thumbnail = "None";
+    playback_thumbnail = "None";
     node_color = osg::Vec4(1.0f,1.0f,1.0f,1.0f);
     user_defined_node_color = false;
     node_size = 1.0f;
@@ -759,7 +760,8 @@ bool ACOsgBrowserRenderer::addNode(long int _id){//private method
         renderer->setNodeIndex(_id);
         renderer->setFont(font);
         renderer->setSharedThumbnailName(shared_thumbnail_name);
-        renderer->changeThumbnail(node_thumbnail);
+        renderer->changeNodeThumbnail(node_thumbnail);
+        renderer->changePlaybackThumbnail(playback_thumbnail);
         renderer->changeSetting(this->setting);
         renderer->changeNodeSize(node_size);
         if(user_defined_node_color)
@@ -969,17 +971,34 @@ void ACOsgBrowserRenderer::resetAllNodesColor(){
 void ACOsgBrowserRenderer::changeNodeThumbnail(int _node, std::string thumbnail)
 {
     activity_update_mutex.lock();
-    node_renderers[_node]->changeThumbnail(thumbnail);
+    node_renderers[_node]->changeNodeThumbnail(thumbnail);
     activity_update_mutex.unlock();
 }
 
-void ACOsgBrowserRenderer::changeAllNodesThumbnail(std::string thumbnail)
+void ACOsgBrowserRenderer::changeAllNodeThumbnails(std::string thumbnail)
 {
     activity_update_mutex.lock();
     for(ACOsgMediaRenderers::iterator node_renderer = node_renderers.begin();node_renderer!=node_renderers.end();node_renderer++){
-        node_renderer->second->changeThumbnail(thumbnail);
+        node_renderer->second->changeNodeThumbnail(thumbnail);
     }
     node_thumbnail = thumbnail;
+    activity_update_mutex.unlock();
+}
+
+void ACOsgBrowserRenderer::changePlaybackThumbnail(int _node, std::string thumbnail)
+{
+    activity_update_mutex.lock();
+    node_renderers[_node]->changePlaybackThumbnail(thumbnail);
+    activity_update_mutex.unlock();
+}
+
+void ACOsgBrowserRenderer::changeAllPlaybackThumbnails(std::string thumbnail)
+{
+    activity_update_mutex.lock();
+    for(ACOsgMediaRenderers::iterator node_renderer = node_renderers.begin();node_renderer!=node_renderers.end();node_renderer++){
+        node_renderer->second->changePlaybackThumbnail(thumbnail);
+    }
+    playback_thumbnail = thumbnail;
     activity_update_mutex.unlock();
 }
 

@@ -111,14 +111,18 @@ public:
     virtual void changeNodeSize(double _size){}
 
     /// This virtual function is called by ACOsgBrowserRenderer::changeNodeThumbnail
-    virtual void changeThumbnail(std::string thumbnail){}
+    virtual void changeNodeThumbnail(std::string thumbnail){}
+    /// This virtual function is called by ACOsgBrowserRenderer::changePlaybackThumbnail
+    virtual void changePlaybackThumbnail(std::string thumbnail){}
 
     ACOsgMediaThumbnail* getNodeThumbnail();
     osg::ref_ptr<osg::Image> getNodeThumbnailImage();
     osg::ref_ptr<osg::Texture2D> getNodeThumbnailTexture();
     osg::ref_ptr<osg::ImageStream> getNodeThumbnailStream();
+    ACOsgMediaThumbnail* getPlaybackThumbnail();
 protected:
     std::string node_thumbnail;
+    std::string playback_thumbnail;
 
 public:
     void setDeltaTime(double media_cycle_deltatime);
