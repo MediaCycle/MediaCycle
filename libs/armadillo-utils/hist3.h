@@ -1,8 +1,8 @@
 /**
  * @brief hist3.h
- * @author Xavier Siebert
- * @date 31/01/2011
- * @copyright (c) 2011 – UMONS - Numediart
+ * @author Christian Frisson
+ * @date 28/10/2013
+ * @copyright (c) 2013 – UMONS - Numediart
  * 
  * MediaCycle of University of Mons – Numediart institute is 
  * licensed under the GNU AFFERO GENERAL PUBLIC LICENSE Version 3 
@@ -83,9 +83,9 @@ arma::umat hist3(const arma::Mat<eT>& A_m, int nbrBin0, int nbrBin1, float minE0
   
   for (int iRows=0;iRows<A_m.n_rows;iRows++){   //for each value in the data file
     for (int iBin0=0;iBin0<nbrBin0;iBin0++){
-      if ((A_m(iRows,0) >= binEdge0(iBin0) && A_m(iRows,0) < binEdge0(iBin0+1)) | (iBin0==nbrBin0-1 & A_m(iRows,0) == binEdge0(nbrBin0))){
+      if ((A_m(iRows,0) >= binEdge0(iBin0) && A_m(iRows,0) < binEdge0(iBin0+1)) | ((iBin0==nbrBin0-1) & (A_m(iRows,0) == binEdge0(nbrBin0)))){
 	for (int iBin1=0;iBin1<nbrBin1;iBin1++){
-	  if ( (A_m(iRows,1) >= binEdge1(iBin1) && A_m(iRows,1) < binEdge1(iBin1+1)) | (iBin1==nbrBin1-1 & A_m(iRows,1) == binEdge1(nbrBin1))){
+      if ( (A_m(iRows,1) >= binEdge1(iBin1) && A_m(iRows,1) < binEdge1(iBin1+1)) | ((iBin1==nbrBin1-1) & (A_m(iRows,1) == binEdge1(nbrBin1)))){
 	    resultHist(iBin0,iBin1) += 1;   //value included between the two bin edge values
 	    iBin0 = nbrBin0; // break equivalent;
 	    iBin1 = nbrBin1; // break equivalent

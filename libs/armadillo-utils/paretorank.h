@@ -1,8 +1,8 @@
 /**
  * @brief paretorank.h
  * @author Christian Frisson
- * @date 10/04/2011
- * @copyright (c) 2011 – UMONS - Numediart
+ * @date 28/10/2013
+ * @copyright (c) 2013 – UMONS - Numediart
  * 
  * MediaCycle of University of Mons – Numediart institute is 
  * licensed under the GNU AFFERO GENERAL PUBLIC LICENSE Version 3 
@@ -58,7 +58,7 @@ arma::ucolvec paretorank(arma::Mat<eT> X, int maxRank, int minNbItems){
 	if (minNbItems == 0)
 		minNbItems = row+1;
 
-	while (X.n_elem > 0 & itemRanked < minNbItems){
+    while ((X.n_elem > 0) & (itemRanked < minNbItems)){
 		front_v = paretofront(X);
 		for (int iFront=0; iFront < front_v.n_rows; iFront++){
 			if (front_v(iFront) == 1) 
