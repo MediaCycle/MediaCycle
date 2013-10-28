@@ -102,6 +102,16 @@ void circular_waveform(ACAudioWaveformThumbnailSpecs& _specs)
                         );
 }
 
+void ring_waveform(ACAudioWaveformThumbnailSpecs& _specs)
+{
+    float top = max(_specs.top_v,abs(_specs.down_v));
+    float angle = -1.0f*(float)(_specs.index)/(float)(_specs.length)*2*ACPi + 0.5f*ACPi;
+    _specs.top_p << Point(
+                        _specs.offset_x + (0.1f*_specs.width * (0.1+0.25f*top))*cos(angle),
+                        _specs.offset_y + (0.1f*_specs.height * (0.1+0.25f*top))*sin(angle)
+                        );
+}
+
 std::vector<ACMediaThumbnail*> ACAudioSvgWaveformThumbnailerPlugin::summarize(ACMedia* media){
     float start_time = getTime();
     std::vector<ACMediaThumbnail*> thumbnails;
@@ -230,6 +240,17 @@ std::vector<ACMediaThumbnail*> ACAudioSvgWaveformThumbnailerPlugin::summarize(AC
                 true, /*circular*/
                 circular_waveform
                 );
+    this->thumbnails_specs["Ring browser waveform"] = ACAudioWaveformThumbnailSpecs(
+                "Ring browser waveform" /*name*/,
+                filename, /*media filename*/
+                400 /*width*/,
+                400 /*height*/,
+                360 /*length*/,
+                (float)(media->getEnd()-media->getStart()) / 360.0f * sample_rate /*hop samples*/,
+                true, /*circular*/
+                ring_waveform
+                );
+
 
     if(thumbnails_exist){
         for(std::map<std::string,ACAudioWaveformThumbnailSpecs>::iterator thumbnail_specs = thumbnails_specs.begin(); thumbnail_specs != thumbnails_specs.end(); ++ thumbnail_specs){
@@ -361,6 +382,7 @@ std::vector<std::string> ACAudioSvgWaveformThumbnailerPlugin::getThumbnailNames(
     names.push_back("Classic browser waveform");
     names.push_back("Classic timeline waveform");
     names.push_back("Circular browser waveform");
+    names.push_back("Ring browser waveform");
     return names;
 }
 
@@ -369,6 +391,7 @@ std::map<std::string,std::string> ACAudioSvgWaveformThumbnailerPlugin::getThumbn
     extensions["Classic browser waveform"] = ".svg";
     extensions["Classic timeline waveform"] = ".svg";
     extensions["Circular browser waveform"] = ".svg";
+    extensions["Ring browser waveform"] = ".svg";
     return extensions;
 }
 
@@ -377,6 +400,7 @@ std::map<std::string,ACMediaType> ACAudioSvgWaveformThumbnailerPlugin::getThumbn
     thumbnail_types["Classic browser waveform"] = MEDIA_TYPE_IMAGE;
     thumbnail_types["Classic timeline waveform"] = MEDIA_TYPE_IMAGE;
     thumbnail_types["Circular browser waveform"] = MEDIA_TYPE_IMAGE;
+    thumbnail_types["Ring browser waveform"] = MEDIA_TYPE_IMAGE;
     return thumbnail_types;
 }
 
@@ -385,5 +409,6 @@ std::map<std::string,std::string> ACAudioSvgWaveformThumbnailerPlugin::getThumbn
     thumbnail_descriptions["Classic browser waveform"] = "Classic browser waveform";
     thumbnail_descriptions["Classic timeline waveform"] = "Classic timeline waveform";
     thumbnail_descriptions["Circular browser waveform"] = "Circular browser waveform";
+    thumbnail_descriptions["Ring browser waveform"] = "Ring browser waveform";
     return thumbnail_descriptions;
 }
