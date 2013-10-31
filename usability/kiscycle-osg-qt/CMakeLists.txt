@@ -6,11 +6,11 @@ IF ( SUPPORT_AUDIO AND USE_QT4 AND USE_OSG )
         SET(FULLSCREEN ON)
         SET(SETTING_INSTALLATION OFF)
         SET(HIDE_INFORMATION ON)
-        SET(FORGET_THUMBNAILS ON)
+        SET(FORGET_THUMBNAILS OFF)
         SET(MC_PLUGINS_STATIC ON)
 
 	SET(MEDIA_TYPE "MEDIA_TYPE_AUDIO")
-        SET(MC_PLUGINS "usability-kis;audio-engine-stk-sounddesign;audio-features-yaafe;audio-reader-sndfile;audio-thumbnailer-waveform-svg;visualisation;media-thumbnailer-feature-mapper;io-osc")#visualisation-advanced
+        SET(MC_PLUGINS "usability-kis;audio-engine-stk-sounddesign;audio-features-yaafe;audio-reader-sndfile;audio-osg;audio-thumbnailer-waveform-svg;audio-thumbnailer-features-svg;visualisation;media-thumbnailer-feature-mapper;io-osc")#visualisation-advanced
 	IF(USE_FALCON)
 		LIST(APPEND MC_PLUGINS "io-novint-falcon")
 	ENDIF()

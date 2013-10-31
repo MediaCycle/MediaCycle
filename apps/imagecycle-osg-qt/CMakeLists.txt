@@ -2,13 +2,13 @@ SET(TARGET_NAME "ImageCycle")
 IF ( BUILD_IMAGECYCLE_APP AND SUPPORT_IMAGE AND USE_QT4 AND USE_OSG AND USE_OSC )
 
 	SET(MEDIA_TYPE "MEDIA_TYPE_IMAGE")
-        SET(MC_PLUGINS "file;image-features-color;image-features-contours;image-features-faces;image-features-shape;image-features-texture;image-osg;pcapreprocess;visualisation;visualisation-advanced;visualisation-tagging")
+        SET(MC_PLUGINS "file;image-features-color;image-features-contours;image-features-shape;image-features-texture;image-osg;pcapreprocess;visualisation;visualisation-advanced;visualisation-tagging")#image-features-faces;
         SET(MC_PLUGINS_STATIC ON)
-        IF(APPLE)
-            SET(OSG_PLUGINS "osgdb_imageio")
-        ELSE()
+        #IF(APPLE)
+        #    SET(OSG_PLUGINS "osgdb_imageio")
+        #ELSE()
             SET(OSG_PLUGINS "osgdb_bmp;osgdb_jpeg;osgdb_png")#;osgdb_tiff
-        ENDIF()
+        #ENDIF()
         SET(DESCRIPTION "ImageCycle allows to organize image files by similarity.")
 
 	INCLUDE (${CMAKE_SOURCE_DIR}/cmake/CreateDefaultConfig.cmake)

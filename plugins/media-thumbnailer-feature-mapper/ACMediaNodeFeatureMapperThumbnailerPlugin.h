@@ -81,7 +81,10 @@ public:
     void assignedFeaturesChanged();
     virtual void mediaCycleSet();
     virtual void pluginLoaded(std::string plugin_name);
+    virtual void mediaLoaded(int n,int nTot,int mId);
+    virtual void mediasLoaded(int n,int nTot,std::vector<int> mIds);
 
+    virtual std::vector<ACMediaType> getSupportedMediaTypes();
     virtual std::map<std::string, ACMediaType> getSupportedExtensions(ACMediaType media_type = MEDIA_TYPE_ALL){return std::map<std::string, ACMediaType>();}
 
 protected:

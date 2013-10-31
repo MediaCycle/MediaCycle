@@ -36,7 +36,7 @@ ACMediaNodeFeatureMapperThumbnailerPlugin::ACMediaNodeFeatureMapperThumbnailerPl
 {
     this->mName = "Feature Mapper Thumbnailer";
     this->mDescription ="Plugin for creating media node thumbnails in SVG based on features";
-    this->mMediaType = MEDIA_TYPE_ALL;
+    this->mMediaType = MEDIA_TYPE_AUDIO;
 
     //visual_variables.push_back("Color Hue");
     //visual_variables.push_back("Color Saturation");
@@ -78,7 +78,7 @@ void ACMediaNodeFeatureMapperThumbnailerPlugin::mediaCycleSet(){
         if(plugin){
             ACFeatureDimensions featdims = plugin->getFeaturesDimensions();
             for(ACFeatureDimensions::iterator featdim = featdims.begin(); featdim != featdims.end();featdim++){
-                //std::cout << "ACVisPlugin2Desc: feature: " << featdim->first << " of dim " << featdim->second << std::endl;
+                std::cout << "ACMediaNodeFeatureMapperThumbnailerPlugin: feature: " << featdim->first << " of dim " << featdim->second << std::endl;
                 if(featdim->second == 1)
                     feature_names.push_back(featdim->first);
                 // Disabling from the drop-down list all features with dimensions different than 1 for now (waiting for dimension reduction solutions)
@@ -92,7 +92,7 @@ void ACMediaNodeFeatureMapperThumbnailerPlugin::mediaCycleSet(){
             }
         }
     }
-    if(size != feature_names.size())
+    //if(size != feature_names.size())
         this->updateAvailableFeatures();
 }
 
@@ -130,13 +130,27 @@ void ACMediaNodeFeatureMapperThumbnailerPlugin::pluginLoaded(std::string plugin_
     }
 }
 
+void ACMediaNodeFeatureMapperThumbnailerPlugin::mediaLoaded(int n,int nTot,int mId){
+    if(n==nTot){
+        this->assignedFeaturesChanged();
+        std::cout << "ACMediaNodeFeatureMapperThumbnailerPlugin::mediaLoaded" << std::endl;
+    }
+}
+
+void ACMediaNodeFeatureMapperThumbnailerPlugin::mediasLoaded(int n,int nTot,std::vector<int> mIds){
+    //if(n==nTot){
+        this->assignedFeaturesChanged();
+        std::cout << "ACMediaNodeFeatureMapperThumbnailerPlugin::mediasLoaded" << std::endl;
+    //}
+}
+
 bool ACMediaNodeFeatureMapperThumbnailerPlugin::updateAvailableFeatures(){
     if(feature_names.size()>=1){
         std::vector<std::string> _feature_names(feature_names);
         _feature_names.push_back("None");
         for(std::vector<std::string>::iterator visual_variable = visual_variables.begin(); visual_variable != visual_variables.end(); visual_variable++){
             if(this->hasStringParameterNamed(*visual_variable))
-                this->updateStringParameter(*visual_variable,_feature_names.back(),_feature_names);
+                this->updateStringParameter(*visual_variable,_feature_names.back(),_feature_names,*visual_variable,boost::bind(&ACMediaNodeFeatureMapperThumbnailerPlugin::assignedFeaturesChanged,this));
             else
                 this->addStringParameter(*visual_variable,_feature_names.back(),_feature_names,*visual_variable,boost::bind(&ACMediaNodeFeatureMapperThumbnailerPlugin::assignedFeaturesChanged,this));
         }
@@ -167,7 +181,7 @@ hsv rgb2hsv(rgb in)
     double h = 0.0f;
     double s = c/cmax;
     if(c==0){
-        std::cerr << "rgb2hsv: hue undefined"<< std::endl;
+        //std::cerr << "rgb2hsv: hue undefined"<< std::endl;
         s = 0.0f;
     }
     else if (cmax == in.r){
@@ -303,11 +317,17 @@ void ACMediaNodeFeatureMapperThumbnailerPlugin::assignedFeaturesChanged(){
 
         rgb rgb2 = hsv2rgb(hsvc);
 
-        if(color_b_feature){
+        /*if(color_b_feature){
             std::cout << "Media " << media->first << " feature " << color_b_feature_name << " value " << color_b_feature->getFeatureElement(color_b_feature_dim) << " -> " << hsvc.v << " HSV ("<< hsvc.h << ";" << hsvc.s << ";" << hsvc.v << ") RGB (" << rgb2.r << ";" << rgb2.g << ";" << rgb2.b << ")" << std::endl;
-        }
+        }*/
         browser->changeNodeColor(media->first,osg::Vec4(rgb2.r,rgb2.g,rgb2.b,1.0f));
     }
     media_cycle->updateDisplay(true);
     media_cycle->setNeedsDisplay(true);
+}
+
+std::vector<ACMediaType> ACMediaNodeFeatureMapperThumbnailerPlugin::getSupportedMediaTypes(){
+    std::vector<ACMediaType> media_types;
+    media_types.push_back(MEDIA_TYPE_AUDIO);
+    return media_types;
 }

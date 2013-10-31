@@ -163,6 +163,8 @@ void ACOsgBrowserRenderer::mediaImported(int n, int nTot,int mId){
     
     int nodes = node_renderers.size();
 
+    //ACOsgRendererFactory::getInstance().mediaImported(n,nTot,mId);
+
     if(n==0){
         std::cout << "ACOsgBrowserRenderer::mediaImported: creating renderers for " << nTot << " medias " << "(currently " << nodes << " renderers)" << std::endl;
         return;
@@ -185,7 +187,6 @@ void ACOsgBrowserRenderer::mediaImported(int n, int nTot,int mId){
     }
     if(n==nTot&&mId!=-1){
         std::cout << "ACOsgBrowserRenderer::mediaImported: last node importing" << "(currently " << nodes << " renderers)" << std::endl;
-
     }
     
 #ifndef __MINGW32__
@@ -234,7 +235,7 @@ void ACOsgBrowserRenderer::mediasImported(int n, int nTot,vector<int> mIds){
                 std::cerr << "ACOsgBrowserRenderer::mediasImported: media id " << id << " ("<< n << "/" << nTot << ") not accessible" << std::endl;
                 return;
             }
-            std::cout << "ACOsgBrowserRenderer::mediasImported adding to " << node_renderers.size() << " renderers the renderer for media id " << id << " ("<< n << "/" << nTot << ") " << std::endl;
+            //std::cout << "ACOsgBrowserRenderer::mediasImported adding to " << node_renderers.size() << " renderers the renderer for media id " << id << " ("<< n << "/" << nTot << ") " << std::endl;
             for (int i=0;i<100;i++){
                 if (media_cycle->getMediaNode(id)!=0)
                     break;
@@ -253,6 +254,8 @@ void ACOsgBrowserRenderer::mediasImported(int n, int nTot,vector<int> mIds){
 #ifndef __MINGW32__
     activity_update_mutex.unlock();
 #endif
+
+    //ACOsgRendererFactory::getInstance().mediaImported(n,nTot,mIds);
 }
 
 void ACOsgBrowserRenderer::libraryCleaned(){
@@ -936,7 +939,8 @@ void ACOsgBrowserRenderer::changeSetting(ACSettingType _setting)
 void ACOsgBrowserRenderer::changeNodeColor(int _node, osg::Vec4 _color)
 {
     activity_update_mutex.lock();
-    node_renderers[_node]->changeNodeColor(_color);
+    if(node_renderers[_node])
+        node_renderers[_node]->changeNodeColor(_color);
     activity_update_mutex.unlock();
 }
 
@@ -944,7 +948,7 @@ void ACOsgBrowserRenderer::resetNodeColor(int _node)
 {
     activity_update_mutex.lock();
     if (node_renderers[_node])
-    node_renderers[_node]->resetNodeColor();
+        node_renderers[_node]->resetNodeColor();
     activity_update_mutex.unlock();
 }
 
@@ -971,7 +975,8 @@ void ACOsgBrowserRenderer::resetAllNodesColor(){
 void ACOsgBrowserRenderer::changeNodeThumbnail(int _node, std::string thumbnail)
 {
     activity_update_mutex.lock();
-    node_renderers[_node]->changeNodeThumbnail(thumbnail);
+    if(node_renderers[_node])
+        node_renderers[_node]->changeNodeThumbnail(thumbnail);
     activity_update_mutex.unlock();
 }
 
@@ -988,7 +993,8 @@ void ACOsgBrowserRenderer::changeAllNodeThumbnails(std::string thumbnail)
 void ACOsgBrowserRenderer::changePlaybackThumbnail(int _node, std::string thumbnail)
 {
     activity_update_mutex.lock();
-    node_renderers[_node]->changePlaybackThumbnail(thumbnail);
+    if(node_renderers[_node])
+        node_renderers[_node]->changePlaybackThumbnail(thumbnail);
     activity_update_mutex.unlock();
 }
 
@@ -1005,7 +1011,8 @@ void ACOsgBrowserRenderer::changeAllPlaybackThumbnails(std::string thumbnail)
 void ACOsgBrowserRenderer::changeNodeSize(int _node, double _size)
 {
     activity_update_mutex.lock();
-    node_renderers[_node]->changeNodeSize(_size);
+    if(node_renderers[_node])
+        node_renderers[_node]->changeNodeSize(_size);
     activity_update_mutex.unlock();
 }
 

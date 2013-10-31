@@ -67,6 +67,9 @@ ACAudioOsgRendererPlugin::ACAudioOsgRendererPlugin() : ACOsgRendererPlugin(){
     browser_node_thumbnails.push_back("Circular browser waveform");
     browser_node_thumbnails.push_back("Classic browser waveform");
     browser_node_thumbnails.push_back("Ring browser waveform");
+    browser_node_thumbnails.push_back("Spectral Skewness Ring");//
+    browser_node_thumbnails.push_back("Perceptual Sharpness Ring");//
+    browser_node_thumbnails.push_back("Spectral Flatness Ring");//
     this->addStringParameter("Browser node", browser_node_thumbnails.front(), browser_node_thumbnails, "Browser node",boost::bind(&ACOsgRendererPlugin::changeBrowserNodeThumbnail,this));
 
     browser_playback_thumbnails.push_back("Waveform");

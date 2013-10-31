@@ -120,6 +120,47 @@ void ACOsgRendererFactory::pluginLoaded(std::string name){
     }
 }
 
+void ACOsgRendererFactory::mediaImported(int n,int nTot,int mId){
+    if(!media_cycle){
+        std::cerr << "ACOsgRendererFactory::mediaImported: mediacycle instance not set" << std::endl;
+        return;
+    }
+
+    ACOsgRendererTypes::iterator iter = renderer_types.begin();
+    for(;iter != renderer_types.end();iter++){
+        //if(iter->second == media_type){
+            ACPlugin* plugin = media_cycle->getPluginManager()->getPlugin(iter->first);
+            if(plugin){
+                ACOsgRendererPlugin* renderer_plugin = dynamic_cast<ACOsgRendererPlugin*>(plugin);
+                if(renderer_plugin){
+                    std::cout << "ACOsgRendererFactory::mediaImported " << iter->first << std::endl;
+                    renderer_plugin->mediaLoaded(n,nTot,mId);
+                }
+            }
+        //}
+    }
+}
+
+void ACOsgRendererFactory::mediasImported(int n,int nTot,std::vector<int> mIds){
+    if(!media_cycle){
+        std::cerr << "ACOsgRendererFactory::mediaImported: mediacycle instance not set" << std::endl;
+        return;
+    }
+
+    ACOsgRendererTypes::iterator iter = renderer_types.begin();
+    for(;iter != renderer_types.end();iter++){
+        //if(iter->second == media_type){
+            ACPlugin* plugin = media_cycle->getPluginManager()->getPlugin(iter->first);
+            if(plugin){
+                ACOsgRendererPlugin* renderer_plugin = dynamic_cast<ACOsgRendererPlugin*>(plugin);
+                if(renderer_plugin){
+                    renderer_plugin->mediasLoaded(n,nTot,mIds);
+                }
+            }
+        //}
+    }
+}
+
 std::string ACOsgRendererFactory::sharedThumbnailName(ACMediaType media_type){
     std::string media_type_string("");
     media_type_string = ACMediaFactory::getInstance().getNormalCaseStringFromMediaType(media_type);
@@ -185,7 +226,7 @@ ACMediaThumbnail* ACOsgRendererFactory::createSharedThumbnail(ACMedia* media){
             break;
     }
     if( iter == renderer_types.end() ) {
-        std::cerr << "ACOsgRendererFactory::createSharedThumbnail: could not find any media renderer supporting media type "<< media_type_string << std::endl;
+        //std::cerr << "ACOsgRendererFactory::createSharedThumbnail: could not find any media renderer supporting media type "<< media_type_string << std::endl;
         return 0;
     }
 
@@ -202,7 +243,7 @@ ACMediaThumbnail* ACOsgRendererFactory::createSharedThumbnail(ACMedia* media){
     }
     ACMediaThumbnail* shared_thumbnail = renderer_plugin->createSharedThumbnail(media);
     if(!shared_thumbnail){
-        std::cerr << "ACOsgRendererFactory::createSharedThumbnail: plugin "<< iter->first << " couldn't create an OSG shared thumbnail of type " << media_type_string << std::endl;
+        //std::cerr << "ACOsgRendererFactory::createSharedThumbnail: plugin "<< iter->first << " couldn't create an OSG shared thumbnail of type " << media_type_string << std::endl;
     }
     return shared_thumbnail;
 }
@@ -220,12 +261,12 @@ ACOsgMediaRenderer* ACOsgRendererFactory::createMediaRenderer(ACMediaType media_
         return 0;
     }
 
-    #if defined (SUPPORT_MULTIMEDIA)
+#if defined (SUPPORT_MULTIMEDIA)
     if(media_type == MEDIA_TYPE_MIXED){
         ACOsgMediaRenderer* renderer = new ACOsgMediaDocumentRenderer();
         return renderer;
     }
-    #endif
+#endif
 
     ACOsgRendererTypes::iterator iter = renderer_types.begin();
     for(;iter != renderer_types.end();iter++){
@@ -253,6 +294,7 @@ ACOsgMediaRenderer* ACOsgRendererFactory::createMediaRenderer(ACMediaType media_
     if(!renderer){
         std::cerr << "ACOsgRendererFactory::createMediaRenderer: plugin "<< iter->first << " couldn't create an OSG media renderer of type " << media_type_string << std::endl;
     }
+
     return renderer;
 }
 

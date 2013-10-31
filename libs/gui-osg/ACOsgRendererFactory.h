@@ -102,6 +102,8 @@ public:
     void setTimelineRenderer(ACOsgTimelineRenderer* _timeline);
     //Callbacks
     void pluginLoaded(std::string name);
+    virtual void mediaImported(int n,int nTot,int mId);
+    virtual void mediasImported(int n,int nTot,std::vector<int> mIds);
 
     /// This thumbnail generator allows to share an image(stream) or texture between the browser and the timeline
     std::string sharedThumbnailName(ACMediaType media_type);

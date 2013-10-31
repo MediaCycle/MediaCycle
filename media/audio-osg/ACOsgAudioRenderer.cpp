@@ -234,16 +234,11 @@ void ACOsgAudioRenderer::auraGeode()
 
 void ACOsgAudioRenderer::prepareNodes() {
 
-    if(media_node->containsNode(entry_transform))
-        media_node->removeChild(entry_transform);
-
     waveform_geode = 0;
     curser_transform = 0;
     curser_geode = 0;
-    entry_geode = 0;
-    entry_transform = 0;
+
     metadata_geode = 0;
-    node_geometry = 0;
     waveform_geometry = 0;
     node_shape_drawable = 0;
 
@@ -538,6 +533,8 @@ void ACOsgAudioRenderer::updateWaveformType(ACBrowserAudioWaveformType _type)
 }
 
 void ACOsgAudioRenderer::changeNodeThumbnail(std::string thumbnail){
+    if(this->node_thumbnail == thumbnail)
+        return;
     this->node_thumbnail = thumbnail;
 
     if(!media)
@@ -548,6 +545,9 @@ void ACOsgAudioRenderer::changeNodeThumbnail(std::string thumbnail){
 
     if(media_node->containsNode(entry_transform))
         media_node->removeChild(entry_transform);
+    entry_transform = 0;
+    node_geometry = 0;
+    entry_geode = 0;
 
     entry_transform=0;
 #ifdef AUTO_TRANSFORM
