@@ -89,15 +89,15 @@ std::vector<ACMedia*> ACAudioSegmentationPlugin::segment(ACMedia* theMedia) {
 
     switch (method){
     case 0:{ //AudioGarden
-		desc_mf = theMedia->getTimedFeatures("Energy");
+        desc_mf = theMedia->getTimedFeature("Energy");
         break;
     }
     case 1:{
-        desc_mf = theMedia->getTimedFeatures("Spectral Flux");
+        desc_mf = theMedia->getTimedFeature("Spectral Flux");
         break;
     }
     case 2:{ //FASTBIC
-        desc_mf = theMedia->getTimedFeatures("MFCC");
+        desc_mf = theMedia->getTimedFeature("MFCC");
         break;
     }
     default:

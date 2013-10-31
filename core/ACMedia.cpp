@@ -906,6 +906,8 @@ std::string ACMedia::getThumbnailFileName(std::string name){
     _thumbnail = this->getThumbnail(name);
     if(_thumbnail)
         filename = _thumbnail->getFileName();
+    else
+        std::cerr << "ACMedia::getThumbnailFileName: couldn't load thumbnail named " << name  << " among " << this->getNumberOfThumbnails() << " thumbnail(s)" << std::endl;
     return filename;
 }
 
@@ -1171,11 +1173,12 @@ ACMediaTimedFeature* ACMedia::getTimedFeatures() {
         }
     }
     return output;
+
 }
 
 // CPL 25/06
 // get only one TimedFeature
-ACMediaTimedFeature* ACMedia::getTimedFeatures(string feature_name) {
+ACMediaTimedFeature* ACMedia::getTimedFeature(string feature_name) {
     bool _binary=false;//true
     ACMediaType mediaType=this->getType();
     ACMediaTimedFeature* mtf_from_file = 0;
@@ -1184,11 +1187,12 @@ ACMediaTimedFeature* ACMedia::getTimedFeatures(string feature_name) {
 
     // First try by name:
     std::vector<std::string>::iterator iter_vec;
-    for (iter_vec=mtf_files_names.begin(); iter_vec != mtf_files_names.end(); iter_vec++) {
+    for (iter_vec=mtf_files_names.begin(); iter_vec != mtf_files_names.end(); iter_vec++) { 
         size_t n2= iter_vec->find_last_of ( string("_") )-1;
-        size_t n1=iter_vec->find_last_of ( string("_"),n2 );
+        size_t n1=this->getFileName().find_last_of ( string(".") );//iter_vec->find_last_of ( string("_"),n2 );
         string locFeatureName=iter_vec->substr(n1+1,n2-n1);
-        if(feature_name != locFeatureName) {
+        std::replace( locFeatureName.begin(), locFeatureName.end(), '_', ' ');
+        if(feature_name == locFeatureName) {
             std::cout << "ACMedia::getTimedFeatures: found matching mtf by filename from file " << *iter_vec << std::endl;
             break;
         }

@@ -262,10 +262,10 @@ void ACAudioYaafeCorePlugin::loadDataflow(){
         std::cerr << "ACAudioYaafeCorePlugin::loadDataflow: plugin path not available" << std::endl;
         return;
     }
-       
+
     boost::filesystem::path dataflow_path ( _path + slash + this->dataflowFilename());
     dataflow_file = dataflow_path.string();
-     
+
 #endif
 #else
 #ifdef __APPLE__
@@ -311,7 +311,7 @@ void ACAudioYaafeCorePlugin::loadDataflow(){
     if(!factoriesRegistered)
         this->registerFactories();
     if(!factoriesRegistered)
-        return;    
+        return;
 }
 
 ACFeatureDimensions ACAudioYaafeCorePlugin::getFeaturesDimensions(){
@@ -373,6 +373,10 @@ ACFeatureDimensions ACAudioYaafeCorePlugin::getFeaturesDimensions(){
                 name = name.replace(underscore,1," ");
             }
         }
+
+        if(std::find(readableTimedFeatureNames.begin(),readableTimedFeatureNames.end(),name) == readableTimedFeatureNames.end())
+            readableTimedFeatureNames.push_back(name);
+
         //std::cout << "ACAudioYaafeCorePlugin: adding descriptor: '" << name << "'" << std::endl;
         //std::cout << "ACAudioYaafeCorePlugin: feature " << *output << " has a dimension of " << dim << std::endl;
 
@@ -482,6 +486,80 @@ ACFeatureDimensions ACAudioYaafeCorePlugin::getFeaturesDimensions(){
                 }
             }
         }*/
+    }
+    featureDimensions = featdims;
+    return featdims;
+}
+
+ACFeatureDimensions ACAudioYaafeCorePlugin::getTimedFeaturesDimensions(){
+    ACFeatureDimensions featdims;
+
+    if(!factoriesRegistered){
+        factoriesRegistered = this->registerFactories();
+        if(!factoriesRegistered){
+            std::cerr << "ACAudioYaafeCorePlugin::getFeaturesDimensions: couldn't register factories " << std::endl;
+            return featdims;
+        }
+    }
+
+    if(!dataflowLoaded){
+        this->loadDataflow();
+        if(!dataflowLoaded){
+            std::cerr << "ACAudioYaafeCorePlugin::getFeaturesDimensions: couldn't load dataflow " << this->dataflowFilename() << std::endl;
+            return featdims;
+        }
+    }
+
+    //std::cout << "ACAudioYaafeCorePlugin: outputs" << std::endl;
+    std::vector<std::string> outputs = engine.getOutputs();
+    for (std::vector<std::string>::iterator output = outputs.begin();output!=outputs.end();output++){
+        //std::cout << "Output: " << (*output) << std::endl;
+        ParameterMap outputparams = engine.getOutputParams(*output);
+        /*for(ParameterMap::iterator outputparam = outputparams.begin();outputparam!=outputparams.end();outputparam++){
+            std::cout << "ACAudioYaafeCorePlugin: " << *output << ": '" << outputparam->first << "' '" << outputparam->second << "'" << std::endl;
+        }*/
+
+        std::string name = (*output);
+
+        int dim = 0;
+        std::string dimensions = outputparams["dimensions"];
+        if(dimensions == ""){
+            std::cerr << "ACAudioYaafeCorePlugin::loadDataflow: dataflow malformed, feature " << name << " dimensions are not set " << std::endl;
+            featdims.clear();
+            return featdims;
+        }
+        else{
+            std::stringstream _dims;
+            _dims << dimensions;
+            _dims >> dim;
+        }
+
+        if(dim<=0){
+            std::cerr << "ACAudioYaafeCorePlugin::loadDataflow: dataflow malformed, feature " << name << " dimension is null " << std::endl;
+            featdims.clear();
+            return featdims;
+        }
+
+        if(std::find(timedFeatureNames.begin(),timedFeatureNames.end(),name) == timedFeatureNames.end())
+            timedFeatureNames.push_back(name);
+
+        size_t underscore = 0;
+        while(underscore != std::string::npos){
+            underscore = name.find_first_of("_",underscore);
+            if(underscore != std::string::npos){
+                name = name.replace(underscore,1," ");
+            }
+        }
+
+        if(std::find(readableTimedFeatureNames.begin(),readableTimedFeatureNames.end(),name) == readableTimedFeatureNames.end())
+            readableTimedFeatureNames.push_back(name);
+
+        //std::cout << "ACAudioYaafeCorePlugin: adding descriptor: '" << name << "'" << std::endl;
+        //std::cout << "ACAudioYaafeCorePlugin: feature " << *output << " has a dimension of " << dim << std::endl;
+
+
+
+        featdims[name] = dim;
     }
     featureDimensions = featdims;
     return featdims;
@@ -655,7 +733,7 @@ std::vector<ACMediaFeatures*> ACAudioYaafeCorePlugin::calculate(ACMedia* theMedi
 
     // Trying to open previously-computed files for parent files (TODO should test/compare parameters and plugin versions)
     bool featuresAvailable = false;
-#ifdef USE_DEBUG
+//#ifdef USE_DEBUG
     _save_timed_feat = true; // forcing saving features so that we don't have to calculate them all the time
     int feature_length = -1;
     if(theMedia->getParentId()==-1){
@@ -720,7 +798,7 @@ std::vector<ACMediaFeatures*> ACAudioYaafeCorePlugin::calculate(ACMedia* theMedi
             std::cerr << "ACAudioYaafeCorePlugin: error while loading features, now recalculating them..." << std::endl;
         }
     }
-#endif
+//#endif
     // CF TODO check if the features length matches the expected length based on the file length and block/step sizes and resample rate
     // CF TODO if some features weren't previously calcultated, only recalculate these
 
@@ -818,7 +896,7 @@ std::vector<ACMediaFeatures*> ACAudioYaafeCorePlugin::calculate(ACMedia* theMedi
     }
 
     // saving timed features on disk if _save_timed_feat flag is on and if not loaded from files (should check if parameters changed)
-    if (theMedia->getParentId()==-1 && _save_timed_feat && !featuresAvailable) {
+    if (theMedia->getParentId()==-1 && _save_timed_feat) {
         for(mf=descmf.begin();mf!=descmf.end();mf++){
 
             std::string featureName((*mf).second->getName());
@@ -832,9 +910,11 @@ std::vector<ACMediaFeatures*> ACAudioYaafeCorePlugin::calculate(ACMedia* theMedi
             }
             mtf_file_name = aFileName_noext + "_" + featureName  + file_ext;
             std::cout << "ACAudioYaafeCorePlugin: trying to save feature named '" << mtf_file_name << "'... " << std::endl;
-            bool saved = (*mf).second->saveInFile(mtf_file_name, save_binary);
-            if(!saved)
-                std::cerr << "ACAudioYaafeCorePlugin: couldn't save feature named '" << mtf_file_name << "'" << std::endl;
+            if(!featuresAvailable){
+                bool saved = (*mf).second->saveInFile(mtf_file_name, save_binary);
+                if(!saved)
+                    std::cerr << "ACAudioYaafeCorePlugin: couldn't save feature named '" << mtf_file_name << "'" << std::endl;
+            }
             theMedia->addTimedFileNames(mtf_file_name);
             //mtf_file_names.push_back(mtf_file_name); // keep track of saved features
         }

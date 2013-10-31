@@ -62,6 +62,7 @@ public:
     bool isMediaTimedFeatureStored(std::string name, std::string file);
     ACMediaTimedFeature* getMediaTimedFeatureStored(std::string name, std::string file);
     virtual ACFeatureDimensions getFeaturesDimensions();
+    virtual ACFeatureDimensions getTimedFeaturesDimensions();
 
 protected:
     void loadDataflow();
@@ -80,6 +81,7 @@ private:
     bool factoriesRegistered;
     ACFeatureDimensions featureDimensions;
     std::vector<std::string> timedFeatureNames;
+    std::vector<std::string> readableTimedFeatureNames;
     std::map<std::string,ACStatType> featuresStats;
 };
 

@@ -257,7 +257,7 @@ public:
     void addTimedFileNames(std::string mtf_file_name){mtf_file_names.push_back(mtf_file_name);}
     std::vector<std::string> getTimedFileNames(){return mtf_file_names;}
     ACMediaTimedFeature* getTimedFeatures();
-    ACMediaTimedFeature* getTimedFeatures(std::string feature_name);
+    ACMediaTimedFeature* getTimedFeature(std::string feature_name);
     void setTaggedClassId(int pId){taggedClassId=pId;}
     int getTaggedClassId(void){ return taggedClassId;}
     bool isTagged(){return (taggedClassId>-1);}
