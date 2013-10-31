@@ -39,7 +39,7 @@ public:
     StatisticalIntegrator();
     virtual ~StatisticalIntegrator();
 
-    virtual const std::string getIdentifier() const { return STATISTICALINTEGRATOR_ID;};
+    virtual const std::string getIdentifier() const { return STATISTICALINTEGRATOR_ID;}
 
     virtual ParameterDescriptorList getParameterDescriptorList() const;
 

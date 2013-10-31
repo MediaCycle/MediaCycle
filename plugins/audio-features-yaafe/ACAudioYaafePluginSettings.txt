@@ -45,7 +45,12 @@ nFFTAbsSqr > nLoudness
 
 nLoudnessNormalized := Normalize NNorm="Sum"
 nLoudnessSharpness := LoudnessSharpness
-Perceptual_Sharpness := Output normalize="-1" version="v0.6" yaafedefinition="PerceptualSharpness blockSize=512 stepSize=256" dimensions="1" statistics="min,mean,max"
+Perceptual_Sharpness := Output normalize="-1" version="v0.6" yaafedefinition="PerceptualSharpness blockSize=512 stepSize=256" dimensions="1" statistics="mean"
 nLoudness > nLoudnessNormalized
 nLoudnessNormalized > nLoudnessSharpness
 nLoudnessSharpness > Perceptual_Sharpness
+
+nSpectralSkewness := ShapeStatistics output="skewness"
+Spectral_Skewness := Output normalize="-1" version="v0.6" yaafedefinition="ShapeStatistics blockSize=512 stepSize=256" statistics="mean" dimensions="1"
+nFFTAbs > nSpectralSkewness
+nSpectralSkewness > Spectral_Skewness

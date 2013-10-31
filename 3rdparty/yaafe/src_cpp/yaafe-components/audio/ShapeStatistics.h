@@ -38,10 +38,18 @@ public:
     ShapeStatistics();
     virtual ~ShapeStatistics();
 
-    virtual const std::string getIdentifier() const { return SHAPESTATISTICS_ID;};
+    virtual const std::string getIdentifier() const { return SHAPESTATISTICS_ID;}
+
+    virtual ParameterDescriptorList getParameterDescriptorList() const;
 
     virtual bool init(const ParameterMap& params, const Ports<StreamInfo>& in);
     virtual bool process(Ports<InputBuffer*>& in, Ports<OutputBuffer*>& out);
+
+private:
+    bool m_outputCentroid;
+    bool m_outputSpread;
+    bool m_outputSkewness;
+    bool m_outputKurtosis;
 };
 
 }

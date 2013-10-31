@@ -33,10 +33,27 @@ namespace YAAFE
 
 ShapeStatistics::ShapeStatistics()
 {
+    m_outputCentroid = true;
+    m_outputSpread = true;
+    m_outputSkewness = true;
+    m_outputKurtosis = true;
 }
 
 ShapeStatistics::~ShapeStatistics()
 {
+}
+
+ParameterDescriptorList ShapeStatistics::getParameterDescriptorList() const
+{
+    ParameterDescriptorList pList;
+    ParameterDescriptor p;
+
+    p.m_identifier = "output";
+    p.m_description = "List of statistics to output (default order and value: centroid,spread,skewness,kurtosis)";
+    p.m_defaultValue = "centroid,spread,skewness,kurtosis";
+    pList.push_back(p);
+
+    return pList;
 }
 
 bool ShapeStatistics::init(const ParameterMap& params, const Ports<StreamInfo>& inp)
@@ -44,7 +61,21 @@ bool ShapeStatistics::init(const ParameterMap& params, const Ports<StreamInfo>& 
 	assert(inp.size()==1);
 	const StreamInfo& in = inp[0].data;
 
-	outStreamInfo().add(StreamInfo(in,4));
+    string str = getStringParam("output",params);
+    if(str!=""){
+        m_outputCentroid = (str.find("centroid") != string::npos);
+        m_outputSpread = (str.find("spread") != string::npos);
+        m_outputSkewness = (str.find("skewness") != string::npos);
+        m_outputKurtosis = (str.find("kurtosis") != string::npos);
+    }
+
+    int ports = 0;
+    if(m_outputCentroid) ports++;
+    if(m_outputSpread) ports++;
+    if(m_outputSkewness) ports++;
+    if(m_outputKurtosis) ports++;
+
+    outStreamInfo().add(StreamInfo(in,ports));
     return true;
 }
 
@@ -86,20 +117,31 @@ bool ShapeStatistics::process(Ports<InputBuffer*>& inp, Ports<OutputBuffer*>& ou
 			moments[3] /= dataSum;
     	}
 
+        int o=0;
+
         double* output = out->writeToken();
     	// centroid
-        output[0] = moments[0];
+
+        double centroid = moments[0];
+        if(m_outputCentroid)
+            output[o++] = centroid;
         // spread
-        output[1] = sqrt(moments[1] - pow2(moments[0]));
-        if (output[1] == 0)
-            output[1] = EPS;
+        double spread = sqrt(moments[1] - pow2(moments[0]));
+        if (spread == 0)
+            spread = EPS;
+        if(m_outputSpread)
+            output[o++] = spread;
         // skewness
-        output[2] = (2 * pow3(moments[0]) - 3 * moments[0]
-                * moments[1] + moments[2]) / pow3(output[1]);
+        double skewness = (2 * pow3(moments[0]) - 3 * moments[0]
+                * moments[1] + moments[2]) / pow3(spread);
+        if(m_outputSkewness)
+            output[o++] = skewness;
         // kurtosis
-        output[3] = (-3 * pow4(moments[0]) + 6 * moments[0]
+        double kurtosis = (-3 * pow4(moments[0]) + 6 * moments[0]
                 * moments[1] - 4 * moments[0] * moments[2] + moments[3])
-                / pow4(output[1]) - 3;
+                / pow4(spread) - 3;
+        if(m_outputKurtosis)
+            output[o++] = kurtosis;
 
         in->consumeToken();
     }
