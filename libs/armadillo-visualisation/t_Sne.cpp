@@ -167,8 +167,8 @@ arma::mat t_Sne::compute(int ndim,arma::mat yInit){
             costMin=cost;
             yfinal=ydata;
         }
-        if (iter%10==0)
-            cout<<"Iteration "<<iter<<": error is "<<cost<<endl;
+        //if (iter%10==0)
+        //    cout<<"Iteration "<<iter<<": error is "<<cost<<endl;
     }
     ydata=ydata-ones(n,1)*mean(ydata);
     ydata=ydata/(ones(n,1)*stddev(ydata));

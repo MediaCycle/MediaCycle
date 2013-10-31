@@ -1,7 +1,7 @@
 /**
  * @brief ACArmaVisPlugin.cpp
- * @author Thierry Ravet
- * @date 01/05/2013
+ * @author Christian Frisson
+ * @date 31/10/2013
  * @copyright (c) 2013 – UMONS - Numediart
  * 
  * MediaCycle of University of Mons – Numediart institute is 
@@ -230,7 +230,7 @@ void ACArmaVisPlugin::updateNextPositions(ACMediaBrowser* mediaBrowser){
     int locRefNode=-1;
     
     for (int i=0; i<ids.size(); i++){
-        if (mediaBrowser->getMediaNode(ids[i])->isDisplayed()&&cpt<desc_m.n_rows){
+        if (mediaBrowser->getMediaNode(ids[i]) && mediaBrowser->getMediaNode(ids[i])->isDisplayed()&&cpt<desc_m.n_rows){
             if (mediaBrowser->getReferenceNode()==ids[i])
                 locRefNode=cpt;
             cpt++;
@@ -250,7 +250,7 @@ void ACArmaVisPlugin::updateNextPositions(ACMediaBrowser* mediaBrowser){
         mTot=1;
    // mTot=1;
     for (int i=0; i<ids.size(); i++){
-        if (mediaBrowser->getMediaNode(ids[i])->isDisplayed()&&cpt<desc_m.n_rows){
+        if (mediaBrowser->getMediaNode(ids[i]) && mediaBrowser->getMediaNode(ids[i])->isDisplayed()&&cpt<desc_m.n_rows){
             //mediaBrowser->setMediaNodeDisplayed(ids[i], true);
             // TODO: make sure you meant next
             p.x = posDisp_m(cpt,0)/mTot;
@@ -289,7 +289,7 @@ void ACArmaVisPlugin::extractDescMatrix(ACMediaBrowser* mediaBrowser, mat& desc_
     }
     int cpt=0;
     for (long i=0; i<ids.size(); i++){
-        if (mediaBrowser->getMediaNode(ids[i])->isDisplayed()){
+        if (mediaBrowser->getMediaNode(ids[i]) && mediaBrowser->getMediaNode(ids[i])->isDisplayed()){
             cpt++;
         }
     }
@@ -299,7 +299,7 @@ void ACArmaVisPlugin::extractDescMatrix(ACMediaBrowser* mediaBrowser, mat& desc_
     int tmpIdy=0;
     for(int i=0; i<nbMedia; i++) {
         int tmpIdx = 0;
-        if (!(mediaBrowser->getMediaNode(ids[i])->isDisplayed()))
+        if (mediaBrowser->getMediaNode(ids[i]) && !(mediaBrowser->getMediaNode(ids[i])->isDisplayed()))
             continue;
 
         for(int f=0; f< nbFeature; f++){
@@ -331,14 +331,14 @@ void ACArmaVisPlugin::catchCurrentPosition(ACMediaBrowser* mediaBrowser, mat& po
     int nbMedia = medias.size();
     int cpt=0;
     for (long i=0; i<ids.size(); i++){
-        if (mediaBrowser->getMediaNode(ids[i])->isDisplayed()){
+        if (mediaBrowser->getMediaNode(ids[i]) && mediaBrowser->getMediaNode(ids[i])->isDisplayed()){
             cpt++;
         }
     }
     pos_m.set_size(cpt,2);
     int tmpIdy=0;
     for(int i=0; i<ids.size(); i++) {
-        if (!(mediaBrowser->getMediaNode(ids[i])->isDisplayed()))
+        if (mediaBrowser->getMediaNode(ids[i]) && !(mediaBrowser->getMediaNode(ids[i])->isDisplayed()))
             continue;
         ACPoint p=mediaBrowser->getMediaNode(ids[i])->getNextPosition();
         pos_m(tmpIdy,0)=p.x;
