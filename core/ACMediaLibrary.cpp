@@ -787,11 +787,11 @@ TiXmlElement* ACMediaLibrary::openNextMediaFromXMLLibrary(TiXmlElement* pMediaNo
 
     /*}
         // consistency check (XS TODO quits the app -> exceptions )
-        /*if (cnt != n_medias){
-            cerr << "<ACMediaLibrary::openXMLLibrary>: inconsistent number of media"<< endl;
-            cerr << "n_medias = " << n_medias << "; cnt = " << cnt << endl;
-            return -1;
-        }*/
+        //if (cnt != n_medias){
+        //    cerr << "<ACMediaLibrary::openXMLLibrary>: inconsistent number of media"<< endl;
+        //    cerr << "n_medias = " << n_medias << "; cnt = " << cnt << endl;
+        //    return -1;
+        //}
     /*}
     return n_medias;*/
     // if(files_processed == files_to_import){
@@ -844,11 +844,11 @@ int ACMediaLibrary::saveXMLLibrary(std::string _path){
     TiXmlElement* MC_e_medias = new TiXmlElement(media_identifier);
     MC_e_root->LinkEndChild( MC_e_medias );
 
-    this->saveCoreXMLLibrary(MC_e_root, MC_e_medias);
+    int result = this->saveCoreXMLLibrary(MC_e_root, MC_e_medias);
 
     // normalize features again
     //normalizeFeatures();
-    MC_doc.SaveFile( _path.c_str());
+    return MC_doc.SaveFile( _path.c_str());
 }
 
 // no headers, just media information
@@ -917,6 +917,7 @@ int ACMediaLibrary::saveCoreXMLLibrary( TiXmlElement* _MC_e_root, TiXmlElement* 
             }
         }
     }
+    return 1;
 }
 
 //CF 31/05/2010 temporary MediaCycle Segmented Library (MCSL) for AudioGarden, adding a parentID for segments to the initial ACL, awaiting approval
@@ -1499,6 +1500,7 @@ int ACMediaLibrary::setActiveMediaType(std::string mediaName, ACPluginManager *a
         this->setPreProcessPlugin(0);
     if (media_library.size()>1&&(static_cast<ACMediaDocument*> (this->getFirstMedia()))->getActiveMediaKey()==mediaName)
         return 1;
+    return 0;
 }
 
 std::string ACMediaLibrary::getMediaDocumentIdentifier(){
@@ -1541,8 +1543,7 @@ bool ACMediaLibrary::containsMediaDocumentsOfIdentifier(std::string identifier){
     }
     boost::to_lower(identifier);
     boost::to_lower(_identifier);
-    if(identifier == _identifier)
-        return true;
+    return (identifier == _identifier);
 }
 #endif//def SUPPORT_MULTIMEDIA
 

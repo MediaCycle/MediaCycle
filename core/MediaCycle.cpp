@@ -1439,7 +1439,8 @@ void MediaCycle::setCurrentFrame(int lid, int frame_pos) {
 void MediaCycle::muteAllSources(){
     if(mediaBrowser){
         mediaBrowser->muteAllSources();
-        this->performActionOnMedia("mute all",-1);
+        if(this->getLibrarySize()>0)
+            this->performActionOnMedia("mute all",-1);
     }
 }
 
@@ -1459,7 +1460,7 @@ int MediaCycle::getNumberOfPointers() {
 ACPointer* MediaCycle::getPointerFromIndex(int i) {
     // Block media actions while importing
     if(this->importing)
-        return false;
+        return 0;
     if(mediaBrowser){
         return mediaBrowser->getPointerFromIndex(i);
     }
@@ -1878,17 +1879,17 @@ int MediaCycle::readXMLConfigFilePlugins(TiXmlHandle _rootHandle) {
     //if (!this->pluginManager) this->pluginManager = new ACPluginManager();
     this->pluginManager->setMediaCycle(this);
 
-    TiXmlElement* MC_e_features_plugin_manager = _rootHandle.FirstChild("PluginsManager").ToElement();
+    TiXmlElement* MC_e_plugin_manager = _rootHandle.FirstChild("PluginsManager").ToElement();
     int nb_plugins_lib=0;
-    if (MC_e_features_plugin_manager!=0){
-        MC_e_features_plugin_manager->QueryIntAttribute("NumberOfPluginsLibraries", &nb_plugins_lib);
+    if (MC_e_plugin_manager!=0){
+        MC_e_plugin_manager->QueryIntAttribute("NumberOfPluginsLibraries", &nb_plugins_lib);
 
         //this->pluginManager->clean();
         //this->pluginManager->setMediaCycle(this);
         //this->mediaBrowser->changeClustersMethodPlugin( this->pluginManager->getPlugin("MediaCycle KMeans") );
         //this->mediaBrowser->changeClustersPositionsPlugin( this->pluginManager->getPlugin("MediaCycle Propeller") );
 
-        TiXmlElement* pluginLibraryNode=MC_e_features_plugin_manager->FirstChild()->ToElement();
+        TiXmlElement* pluginLibraryNode=MC_e_plugin_manager->FirstChild()->ToElement();
         for( pluginLibraryNode; pluginLibraryNode; pluginLibraryNode=pluginLibraryNode->NextSiblingElement()) {
             string libraryName("");
             if(pluginLibraryNode->Attribute("LibraryPath"))
@@ -1899,20 +1900,67 @@ int MediaCycle::readXMLConfigFilePlugins(TiXmlHandle _rootHandle) {
                 int lib_size=0;
                 pluginLibraryNode->QueryIntAttribute("NumberOfPlugins", &lib_size);
                 std::vector<std::string> plugins_names;
-#if defined(__APPLE__) && !defined(DEBUG)
+                //#if defined(__APPLE__) && !defined(DEBUG)
                 std::cout << "Trying to load bundled plugin " << fs::basename(libraryName) << std::endl;
-                plugins_names = this->pluginManager->addLibrary( this->getPluginPathFromBaseName(fs::basename(libraryName)));
-#else
-                plugins_names = this->pluginManager->addLibrary(libraryName);
-                if(plugins_names.size() == 0)
-                    plugins_names = this->pluginManager->addLibrary( this->getPluginPathFromBaseName(fs::basename(libraryName)));
-#endif
-                for(std::vector<std::string>::iterator plugin_name = plugins_names.begin();plugin_name!=plugins_names.end();plugin_name++){
-                    eventManager->sig_pluginLoaded(*plugin_name);
-                }
+                this->pluginManager->addLibrary( this->getPluginPathFromBaseName(fs::basename(libraryName)));
+                //plugins_names = this->pluginManager->getLibraryPluginNames(fs::basename(libraryName));
+                //#else
+                //                plugins_names = this->pluginManager->addLibrary(libraryName);
+                //if(plugins_names.size() == 0){
+                //    plugins_names = this->pluginManager->addLibrary( this->getPluginPathFromBaseName(fs::basename(libraryName)));
+                //#endif
+                //if(plugins_names.size()>0){
+
+                    TiXmlElement* pluginNode=pluginLibraryNode->FirstChild()->ToElement();
+                    for( pluginNode; pluginNode; pluginNode=pluginNode->NextSiblingElement()) {
+                        string pluginName("");
+                        if(pluginNode->Attribute("Name")){
+                            std::string _plugin_name = pluginNode->Attribute("Name");
+                            ACPlugin* _plugin = this->pluginManager->getPlugin(_plugin_name);
+                            if(_plugin){
+                                TiXmlNode* numberParametersNode=pluginNode->FirstChild("NumberParameters");
+                                if(numberParametersNode){
+                                    TiXmlElement* numberParameters=pluginNode->FirstChild("NumberParameters")->ToElement();
+                                    TiXmlElement* numberParameter=numberParameters->FirstChild()->ToElement();
+                                    for( numberParameter; numberParameter; numberParameter=numberParameter->NextSiblingElement()) {
+                                        if(numberParameter->Attribute("Name") && numberParameter->Attribute("Value")){
+                                            double value = -1;
+                                            bool success = (numberParameter->QueryDoubleAttribute("Value",&value) == TIXML_SUCCESS);
+                                            if(success && _plugin->getNumberParameterValue(numberParameter->Attribute("Name"))!= value)
+                                                _plugin->setNumberParameterValue(numberParameter->Attribute("Name"),value);
+                                        }
+                                    }
+                                }
+                                TiXmlNode* stringParametersNode=pluginNode->FirstChild("StringParameters");
+                                if(stringParametersNode){
+                                    TiXmlElement* stringParameters=pluginNode->FirstChild("StringParameters")->ToElement();
+                                    TiXmlElement* stringParameter=stringParameters->FirstChild()->ToElement();
+                                    for( stringParameter; stringParameter; stringParameter=stringParameter->NextSiblingElement()) {
+                                        if(stringParameter->Attribute("Name") && stringParameter->Attribute("Value")){
+                                            string _name = stringParameter->Attribute("Name");
+                                            string _value = stringParameter->Attribute("Value");
+                                            if(_plugin->getStringParameterValue(_name) != _value)
+                                                _plugin->setStringParameterValue(_name,_value);
+                                            std::cout << "Plugin " << _plugin_name << " parameter " << stringParameter->Attribute("Name") << " value " << stringParameter->Attribute("Value") << std::endl;
+                                        }
+                                    }
+                                }
+                                eventManager->sig_pluginLoaded(_plugin_name);
+                            }
+                        }
+
+                        //#if defined(__APPLE__) && !defined(DEBUG)
+                        //#else
+                        //}
+                        //#endif
+                        //
+                        //for(std::vector<std::string>::iterator plugin_name = plugins_names.begin();plugin_name!=plugins_names.end();plugin_name++){
+                        //    eventManager->sig_pluginLoaded(*plugin_name);
+                        //}
+                    }
+                //}
             }
         }
-
         if(this->getLibrarySize()==0){
             TiXmlElement* MC_e_active_plugins = _rootHandle.FirstChild("ActivePlugins").Element();
             if(MC_e_active_plugins){
@@ -1937,6 +1985,7 @@ int MediaCycle::readXMLConfigFilePlugins(TiXmlHandle _rootHandle) {
                     }
                 }
             }
+
         }
     }
 }
@@ -2099,23 +2148,53 @@ TiXmlElement* MediaCycle::saveXMLConfigFile(string _fname) {
     // "plugins"
     // XS TODO put this in a method getPluginsNames(blabla)
     if (pluginManager) {
-        TiXmlElement* MC_e_features_plugin_manager = new TiXmlElement( "PluginsManager" );
-        MC_e_root->LinkEndChild( MC_e_features_plugin_manager );
+        TiXmlElement* MC_e_plugin_manager = new TiXmlElement( "PluginsManager" );
+        MC_e_root->LinkEndChild( MC_e_plugin_manager );
         int n_librarires = pluginManager->getSize();
-        MC_e_features_plugin_manager->SetAttribute("NumberOfPluginsLibraries", n_librarires);
+        MC_e_plugin_manager->SetAttribute("NumberOfPluginsLibraries", n_librarires);
         for (int i=0; i<n_librarires; i++) {
-            TiXmlElement* MC_e_features_plugin_library = new TiXmlElement( "PluginLibrary" );
-            MC_e_features_plugin_manager->LinkEndChild( MC_e_features_plugin_library );
+            TiXmlElement* MC_e_plugin_library = new TiXmlElement( "PluginLibrary" );
+            MC_e_plugin_manager->LinkEndChild( MC_e_plugin_library );
             int n_plugins = pluginManager->getPluginLibrary(i)->getSize();
-            MC_e_features_plugin_library->SetAttribute("NumberOfPlugins", n_plugins);
-            MC_e_features_plugin_library->SetAttribute("LibraryPath", pluginManager->getPluginLibrary(i)->getLibraryPath());
+            MC_e_plugin_library->SetAttribute("NumberOfPlugins", n_plugins);
+            MC_e_plugin_library->SetAttribute("LibraryPath", pluginManager->getPluginLibrary(i)->getLibraryPath());
             for (int j=0; j<n_plugins; j++) {
-                TiXmlElement* MC_e_features_plugin = new TiXmlElement( "FeaturesPlugin" );
-                MC_e_features_plugin_library->LinkEndChild( MC_e_features_plugin );
-                std::stringstream tmp_p;
-                tmp_p << pluginManager->getPluginLibrary(i)->getPlugin(j)->getName() ;
-                TiXmlText* MC_t_pm = new TiXmlText( tmp_p.str() );
-                MC_e_features_plugin->LinkEndChild( MC_t_pm );
+                ACPlugin* _plugin = pluginManager->getPluginLibrary(i)->getPlugin(j);
+                if(_plugin){
+                    TiXmlElement* MC_e_plugin = new TiXmlElement( "Plugin" );
+                    MC_e_plugin_library->LinkEndChild( MC_e_plugin );
+                    MC_e_plugin->SetAttribute("Name",_plugin->getName());
+                    /*std::stringstream tmp_p;
+                    tmp_p << _plugin->getName() ;
+                    TiXmlText* MC_t_pm = new TiXmlText( tmp_p.str() );
+                    MC_e_plugin->LinkEndChild( MC_t_pm );*/
+
+                    std::vector<std::string> number_param_names = _plugin->getNumberParametersNames();
+                    if(number_param_names.size()>0){
+                        TiXmlElement* MC_e_number_params = new TiXmlElement( "NumberParameters" );
+                        MC_e_number_params->SetAttribute("Size",number_param_names.size());
+                        MC_e_plugin->LinkEndChild( MC_e_number_params );
+                        for (std::vector<std::string>::iterator number_param_name=number_param_names.begin();number_param_name!=number_param_names.end();number_param_name++){
+                            TiXmlElement* MC_e_number_param = new TiXmlElement( "NumberParameter" );
+                            MC_e_number_params->LinkEndChild( MC_e_number_param );
+                            MC_e_number_param->SetAttribute("Name",*number_param_name);
+                            MC_e_number_param->SetDoubleAttribute("Value",_plugin->getNumberParameterValue(*number_param_name));
+                        }
+                    }
+
+                    std::vector<std::string> string_param_names = _plugin->getStringParametersNames();
+                    if(string_param_names.size()>0){
+                        TiXmlElement* MC_e_string_params = new TiXmlElement( "StringParameters" );
+                        MC_e_string_params->SetAttribute("Size",string_param_names.size());
+                        MC_e_plugin->LinkEndChild( MC_e_string_params );
+                        for (std::vector<std::string>::iterator string_param_name=string_param_names.begin();string_param_name!=string_param_names.end();string_param_name++){
+                            TiXmlElement* MC_e_string_param = new TiXmlElement( "StringParameter" );
+                            MC_e_string_params->LinkEndChild( MC_e_string_param );
+                            MC_e_string_param->SetAttribute("Name",*string_param_name);
+                            MC_e_string_param->SetAttribute("Value",_plugin->getStringParameterValue(*string_param_name));
+                        }
+                    }
+                }
             }
         }
         TiXmlElement* MC_e_active_plugins = new TiXmlElement( "ActivePlugins" );
@@ -2252,18 +2331,18 @@ void MediaCycle::testLabels(){
 }
 
 void MediaCycle::mediaImported(int n,int nTot,int mId){
-     if(n < nTot){
-          this->importing = true;
-     }
-     else if(n==nTot && mId==-1){
-         this->importing = false;
-         std::vector<std::string> renderer_plugins = pluginManager->getAvailablePluginsNames(PLUGIN_TYPE_MEDIARENDERER, this->getMediaType());
-         for(std::vector<std::string>::iterator renderer_plugin = renderer_plugins.begin();renderer_plugin!=renderer_plugins.end();renderer_plugin++){
-             ACMediaRendererPlugin* plugin = dynamic_cast<ACMediaRendererPlugin*>(pluginManager->getPlugin(*renderer_plugin));
-             if(plugin)
-                 plugin->enable();
-         }
-     }
+    if(n < nTot){
+        this->importing = true;
+    }
+    else if(n==nTot && mId==-1){
+        this->importing = false;
+        std::vector<std::string> renderer_plugins = pluginManager->getAvailablePluginsNames(PLUGIN_TYPE_MEDIARENDERER, this->getMediaType());
+        for(std::vector<std::string>::iterator renderer_plugin = renderer_plugins.begin();renderer_plugin!=renderer_plugins.end();renderer_plugin++){
+            ACMediaRendererPlugin* plugin = dynamic_cast<ACMediaRendererPlugin*>(pluginManager->getPlugin(*renderer_plugin));
+            if(plugin)
+                plugin->enable();
+        }
+    }
     std::cout << "MediaCycle::mediaImported media id " << mId << " ("<< n << "/" << nTot << ")" << std::endl;
     eventManager->sig_mediaImported(n,nTot,mId);
 }

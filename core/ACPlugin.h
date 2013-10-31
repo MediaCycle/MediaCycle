@@ -314,6 +314,7 @@ protected:
 public:
     //std::vector<std::string> getSavedFileName(){return mtf_file_name;}
     virtual ACMediaTimedFeature* getTimedFeatures(std::string mtf_file_name);
+    virtual ACFeatureDimensions getTimedFeaturesDimensions(){return ACFeatureDimensions();}
     std::string saveTimedFeatures(ACMediaTimedFeature* mtf=0, std::string aFileName="", bool _save_timed_feat = true, bool _save_binary = true);
 };
 

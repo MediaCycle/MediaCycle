@@ -73,10 +73,10 @@ public:
     void testService();
     virtual void mediaImported(int n,int nTot,int mId){
         std::cout<<"ACEventListener::mediaImported"<<std::endl;
-    };
+    }
     virtual void mediasImported(int n,int nTot,std::vector<int> mIds){
         std::cout<<"ACEventListener::mediasImported"<<std::endl;
-    };
+    }
     virtual void pluginProgress(std::string plugin_name,int n,int nTot,int mId){
         std::cout << "ACEventListener::pluginProgress: plugin '" << plugin_name << "' "<< n << "/" << nTot << " for media of id: " << mId << std::endl;
     }

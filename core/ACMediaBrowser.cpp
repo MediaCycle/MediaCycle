@@ -1690,8 +1690,8 @@ bool ACMediaBrowser::removeNeighborNode(long int _id){
     }
     else{
         std::cerr << "ACMediaBrowser::removeNeighborNode: currently nodes can be removed only in neighbors mode." << std::endl;
-        return false;
     }
+    return false;
 }
 
 bool ACMediaBrowser::removeChildrenNeighborNodes(long int _id){

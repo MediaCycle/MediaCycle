@@ -368,7 +368,7 @@ float FeaturesVector::distance(const FeaturesVector &ae){
 		default:
 			break;
 	} */
-};
+}
 
 
 float FeaturesVector::distance( const FeaturesVector *ae){
@@ -527,8 +527,9 @@ float FeaturesVector::distance( const FeaturesVector *ae){
 			
 		default:
 			break;
-	} 
-};
+    }
+    return 0.0;
+}
 
 
 FeaturesVector & FeaturesVector::meanAdd( const FeaturesVector &ae){

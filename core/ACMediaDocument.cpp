@@ -129,6 +129,7 @@ int ACMediaDocument::import(std::string _filename, int _mid, ACPluginManager *ac
 		//activeMedia=(*(mediaContainer.begin())).second;
 		this->setActiveSubMedia((*(mediaContainer.begin())).first);
 	}
+    return 0;
 }
 
 int ACMediaDocument::addMedia(std::string stringKey, ACMedia* media){

@@ -110,6 +110,21 @@ std::vector<std::string> ACPluginManager::addLibrary(ACPluginLibrary *acpl){
     return plugins_names;
 }
 
+std::vector<std::string> ACPluginManager::getLibraryPluginNames(std::string aPluginLibraryPath){
+    std::vector<std::string> plugins_names;
+    for (vector<ACPluginLibrary *>::iterator it=mPluginLibrary.begin();it!=mPluginLibrary.end();it++){
+        if (aPluginLibraryPath==(*it)->getLibraryPath()) {
+            std::vector<ACPlugin*> plugins = (*it)->getPlugins();
+            for(std::vector<ACPlugin*>::iterator plugin=plugins.begin();plugin!=plugins.end();plugin++){
+                plugins_names.push_back((*plugin)->getName());
+            }
+            return plugins_names;
+
+        }
+    }
+    return plugins_names;
+}
+
 std::vector<std::string> ACPluginManager::addLibrary(std::string aPluginLibraryPath) {
     std::vector<std::string> plugins_names;
     for (vector<ACPluginLibrary *>::iterator it=mPluginLibrary.begin();it!=mPluginLibrary.end();it++){
