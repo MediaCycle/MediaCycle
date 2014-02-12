@@ -33,7 +33,7 @@
 
 #include <osgDB/ReadFile>
 #include <osgDB/WriteFile>
-
+#include <osg/Version>
 using namespace osg;
 
 ACOsgTrackRenderer::ACOsgTrackRenderer()
@@ -302,8 +302,12 @@ void ACOsgTrackRenderer::boxTransform(osg::ref_ptr<osg::MatrixTransform>& _trans
     line_p->push_back(3);
     _geometry->addPrimitiveSet(line_p);
 
+#if OSG_MIN_VERSION_REQUIRED(3,2,0)
+    _geometry->setColorArray(colors, osg::Array::BIND_OVERALL);
+#else
     _geometry->setColorArray(colors);
     _geometry->setColorBinding(Geometry::BIND_OVERALL);
+#endif
 
     // set the normal in the same way color.
     osg::Vec3Array* normals = new osg::Vec3Array;

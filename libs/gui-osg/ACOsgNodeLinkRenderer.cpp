@@ -34,7 +34,7 @@
  */
 
 #include "ACOsgNodeLinkRenderer.h"
-
+#include <osg/Version>
 using namespace osg;
 
 ACOsgNodeLinkRenderer::ACOsgNodeLinkRenderer(){
@@ -102,8 +102,12 @@ void ACOsgNodeLinkRenderer::linkGeode(double to_x, double to_y) {
     }
 
     link_geometry->addPrimitiveSet(line_p);
+#if OSG_MIN_VERSION_REQUIRED(3,2,0)
+    link_geometry->setColorArray(colors, osg::Array::BIND_OVERALL);
+#else
     link_geometry->setColorArray(colors);
     link_geometry->setColorBinding(Geometry::BIND_OVERALL);
+#endif
 
     state = link_geode->getOrCreateStateSet();
     state->setMode(GL_LIGHTING, osg::StateAttribute::PROTECTED | osg::StateAttribute::OFF );
@@ -140,8 +144,12 @@ void ACOsgNodeLinkRenderer::linkGeode(double to_x, double to_y) {
     }
     
     link_geometry->addPrimitiveSet(line_p);
+#if OSG_MIN_VERSION_REQUIRED(3,2,0)
+    link_geometry->setColorArray(colors, osg::Array::BIND_OVERALL);
+#else
     link_geometry->setColorArray(colors);
     link_geometry->setColorBinding(Geometry::BIND_OVERALL);
+#endif
     
     state = link_geode->getOrCreateStateSet();
     state->setMode(GL_LIGHTING, osg::StateAttribute::PROTECTED | osg::StateAttribute::OFF );

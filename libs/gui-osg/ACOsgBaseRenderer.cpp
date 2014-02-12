@@ -199,9 +199,6 @@ osg::ref_ptr<osg::Geometry> ACOsgBaseRenderer::thumbnailGeometry(std::string _th
     //            osgUtil::TriStripVisitor tsv;
     //               tsv. stripify( *thumbnail_geometry );
 
-    /*osg::ref_ptr<osg::Vec4Array> colors = new Vec4Array(1);
-    (*colors)[0] = node_color;
-    thumbnail_geometry->setColorArray(colors);*/
     if(!transparent){
         osg::ref_ptr<osg::Vec4Array> colors = new osg::Vec4Array;
         colors->push_back(Vec4(1.0f, 1.0f, 1.0f, 0.9f));
@@ -326,9 +323,6 @@ osg::ref_ptr<osg::Geometry> ACOsgBaseRenderer::imageGeometry(std::string thumbna
     //            osgUtil::TriStripVisitor tsv;
     //               tsv. stripify( *thumbnail_geometry );
 
-    /*osg::ref_ptr<osg::Vec4Array> colors = new Vec4Array(1);
-    (*colors)[0] = node_color;
-    thumbnail_geometry->setColorArray(colors);*/
     if(!transparent){
         osg::ref_ptr<osg::Vec4Array> colors = new osg::Vec4Array;
         colors->push_back(Vec4(1.0f, 1.0f, 1.0f, 0.9f));

@@ -224,10 +224,7 @@ void ACOsgLibraryRenderer::imageGeode(ACOsgLibraryImageRenderer& _renderer) {
         state = image_geometry->getOrCreateStateSet();
         state->setTextureAttribute(0, image_texture);
         state->setTextureMode(0, GL_TEXTURE_2D, osg::StateAttribute::ON);
-        osg::ref_ptr<osg::Vec4Array> colors = new Vec4Array(1);
-        (*colors)[0] = node_color;
-        //image_geometry->setColorArray(colors);
-        //image_geometry->setColorBinding(Geometry::BIND_OVERALL);
+
         image_geode->addDrawable(image_geometry);
         _renderer.transform->addChild(image_geode);
         //image_transform->setUserData(new ACRefId(node_index));
