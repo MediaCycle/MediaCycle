@@ -14,49 +14,54 @@ class FFmpegParameters;
 
 class FormatContextPtr
 {
-public:
+    public:
     
-    typedef AVFormatContext T;
+        typedef AVFormatContext T;
     
-    explicit FormatContextPtr() : _ptr(0) {}
-    explicit FormatContextPtr(T* ptr) : _ptr(ptr) {}
-
-    ~FormatContextPtr()
-    {
-        cleanup();
-    }
-
-    T* get() const { return _ptr; }
-
-    operator bool() const { return _ptr != 0; }
-
-    T * operator-> () const // never throws
-    {
-        return _ptr;
-    }
-
-    void reset(T* ptr)
-    {
-        if (ptr==_ptr) return;
-        cleanup();
-        _ptr = ptr;
-    }
-
-    void cleanup()
-    {
-        if (_ptr)
+        explicit FormatContextPtr() : _ptr(0) {}
+        explicit FormatContextPtr(T* ptr) : _ptr(ptr) {}
+        
+        ~FormatContextPtr()
         {
-            OSG_NOTICE<<"Calling av_close_input_file("<<_ptr<<")"<<std::endl;
-            av_close_input_file(_ptr);
+            cleanup();
         }
-        _ptr = 0;
-    }
+        
+        T* get() { return _ptr; }
 
+        operator bool() const { return _ptr != 0; }
 
+        T * operator-> () const // never throws
+        {
+            return _ptr;
+        }
 
-protected:
+        void reset(T* ptr) 
+        {
+            if (ptr==_ptr) return;
+            cleanup();
+            _ptr = ptr;
+        }
+
+        void cleanup()
+        {
+            if (_ptr) 
+            {
+#if LIBAVCODEC_VERSION_INT >= AV_VERSION_INT(53, 17, 0)
+                OSG_NOTICE<<"Calling avformat_close_input("<<&_ptr<<")"<<std::endl;
+                avformat_close_input(&_ptr);
+#else
+                OSG_NOTICE<<"Calling av_close_input_file("<<_ptr<<")"<<std::endl;
+                av_close_input_file(_ptr);
+#endif
+            }
+            _ptr = 0;
+        }
+        
+        
+
+    protected:
     
-    T* _ptr;
+        T* _ptr;
 };
 
 
@@ -100,8 +105,6 @@ protected:
 
     typedef BoundedMessageQueue<FFmpegPacket> PacketQueue;
 
-    void findAudioStream();
-    void findVideoStream();
     void flushAudioQueue();
     void flushVideoQueue();
     bool readNextPacketNormal();
@@ -113,7 +116,6 @@ protected:
     void seekButDontFlushQueues(double time);
 
     FormatContextPtr    m_format_context;
-
     AVStream *          m_audio_stream;
     AVStream *          m_video_stream;
 
@@ -152,21 +154,8 @@ inline bool FFmpegDecoder::loop() const
 
 inline double FFmpegDecoder::creation_time() const
 {
-    if(m_format_context) {
-#if LIBAVFORMAT_VERSION_INT < AV_VERSION_INT(54, 6, 0)
-        return m_format_context->timestamp;
-#else
-        // CF timestamp is not longer a member of ACFormatContext since FFmpeg 0.11
-        OSG_WARN << "FFmpegDecoder::creation_time: getting timestamp not yet implemented correctly for FFmpeg >= 0.11" << std::endl;
-        return av_get_output_timestamp(m_format_context.get(),
-                                       0, //int stream,
-                                       0, //int64_t *dts,
-                                       0 //int64_t *wall
-                                       );
-#endif
-    }
-    else
-        return HUGE_VAL;
+   if(m_format_context) return m_format_context->start_time;
+   else return HUGE_VAL;
 }
 
 inline double FFmpegDecoder::duration() const
@@ -176,7 +165,7 @@ inline double FFmpegDecoder::duration() const
 
 inline double FFmpegDecoder::reference()
 {
-    return m_clocks.getCurrentTime();
+    return m_clocks.getCurrentTime();    
 }
 
 

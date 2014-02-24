@@ -43,7 +43,7 @@ FFmpegImageStream::~FFmpegImageStream()
     OSG_INFO<<"Destructing FFmpegImageStream..."<<std::endl;
 
     quit(true);
-    
+
     OSG_INFO<<"Have done quit"<<std::endl;
 
     // release athe audio streams to make sure that the decoder doesn't retain any external
@@ -69,9 +69,9 @@ bool FFmpegImageStream::open(const std::string & filename, FFmpegParameters* par
         return false;
 
     setImage(
-        m_decoder->video_decoder().width(), m_decoder->video_decoder().height(), 1, GL_RGBA, GL_BGRA, GL_UNSIGNED_BYTE,
+        m_decoder->video_decoder().width(), m_decoder->video_decoder().height(), 1, GL_RGB, GL_RGB, GL_UNSIGNED_BYTE,
         const_cast<unsigned char *>(m_decoder->video_decoder().image()), NO_DELETE
-    );
+    );//CF GL_RGBA?
 
 
     setPixelAspectRatio(m_decoder->video_decoder().pixelAspectRatio());
@@ -169,8 +169,8 @@ double FFmpegImageStream::getCreationTime() const
 }
 
 double FFmpegImageStream::getLength() const
-{ 
-    return m_decoder->duration(); 
+{
+    return m_decoder->duration();
 }
 
 
@@ -184,16 +184,18 @@ double FFmpegImageStream::getCurrentTime() const
     return m_decoder->reference();
 }
 
+
+
 double FFmpegImageStream::getFrameRate() const
-{ 
-    return m_decoder->video_decoder().frameRate(); 
+{
+    return m_decoder->video_decoder().frameRate();
 }
 
 
 
-bool FFmpegImageStream::isImageTranslucent() const 
-{ 
-    return m_decoder->video_decoder().alphaChannel(); 
+bool FFmpegImageStream::isImageTranslucent() const
+{
+    return m_decoder->video_decoder().alphaChannel();
 }
 
 
@@ -234,7 +236,7 @@ void FFmpegImageStream::run()
     {
         OSG_WARN << "FFmpegImageStream::run : unhandled exception" << std::endl;
     }
-    
+
     OSG_NOTICE<<"Finished FFmpegImageStream::run()"<<std::endl;
 }
 
@@ -315,7 +317,7 @@ void FFmpegImageStream::cmdRewind()
     m_decoder->rewind();
 }
 
-void FFmpegImageStream::cmdSeek(double time) 
+void FFmpegImageStream::cmdSeek(double time)
 {
     m_decoder->seek(time);
 }
@@ -327,7 +329,7 @@ void FFmpegImageStream::publishNewFrame(const FFmpegDecoderVideo &, void * user_
 
 #if 1
     this_->setImage(
-        this_->m_decoder->video_decoder().width(), this_->m_decoder->video_decoder().height(), 1, GL_RGBA, GL_BGRA, GL_UNSIGNED_BYTE,
+        this_->m_decoder->video_decoder().width(), this_->m_decoder->video_decoder().height(), 1, GL_RGB, GL_RGB, GL_UNSIGNED_BYTE,
         const_cast<unsigned char *>(this_->m_decoder->video_decoder().image()), NO_DELETE
     );
 #else

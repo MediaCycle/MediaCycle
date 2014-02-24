@@ -9,6 +9,11 @@
 //#include <iostream>
 
 
+#ifndef AVCODEC_MAX_AUDIO_FRAME_SIZE
+#define AVCODEC_MAX_AUDIO_FRAME_SIZE 192000
+#endif
+
+
 
 namespace osgFFmpeg {
 
@@ -72,19 +77,22 @@ void FFmpegDecoderAudio::open(AVStream * const stream)
 
         m_frequency = m_context->sample_rate;
         m_nb_channels = m_context->channels;
-        switch (m_context->sample_fmt) 
+        switch (m_context->sample_fmt)
         {
         case AV_SAMPLE_FMT_NONE:
             throw std::runtime_error("invalid audio format AV_SAMPLE_FMT_NONE");
         case AV_SAMPLE_FMT_U8:
             m_sample_format = osg::AudioStream::SAMPLE_FORMAT_U8;
             break;
+        case AV_SAMPLE_FMT_S16P:
         case AV_SAMPLE_FMT_S16:
             m_sample_format = osg::AudioStream::SAMPLE_FORMAT_S16;
             break;
+        case AV_SAMPLE_FMT_S32P:
         case AV_SAMPLE_FMT_S32:
             m_sample_format = osg::AudioStream::SAMPLE_FORMAT_S32;
             break;
+        case AV_SAMPLE_FMT_FLTP:
         case AV_SAMPLE_FMT_FLT:
             m_sample_format = osg::AudioStream::SAMPLE_FORMAT_F32;
             break;
@@ -109,7 +117,7 @@ void FFmpegDecoderAudio::open(AVStream * const stream)
         //    m_context->flags |= CODEC_FLAG_TRUNCATED;
 
         // Open codec
-        if (avcodec_open(m_context, p_codec) < 0)
+        if (avcodec_open2(m_context, p_codec, NULL) < 0)
             throw std::runtime_error("avcodec_open() failed");
     }
 
@@ -231,7 +239,7 @@ void FFmpegDecoderAudio::fillBuffer(void * const buffer, size_t size)
 void FFmpegDecoderAudio::decodeLoop()
 {
     const bool skip_audio = ! validContext() || ! m_audio_sink.valid();
-    
+
     if (! skip_audio && ! m_audio_sink->playing())
     {
         m_clocks.audioSetDelay(m_audio_sink->getDelay());
@@ -339,7 +347,7 @@ size_t FFmpegDecoderAudio::decodeFrame(void * const buffer, const size_t size)
 
             // If we have some data, return it and come back for more later.
             if (data_size > 0)
-                return data_size; 
+                return data_size;
         }
 
         // Get next packet
