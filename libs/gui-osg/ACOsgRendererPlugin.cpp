@@ -112,6 +112,15 @@ void ACOsgRendererPlugin::changeBrowserNodeSize(){
     }
 }
 
+void ACOsgRendererPlugin::changePlaybackVolume(){
+    double volume = this->getNumberParameterValue("Volume");
+    if(!this->timeline)
+        return;
+    if(!this->timeline->getTrack(0))
+        return;
+    this->timeline->getTrack(0)->changeVolume(volume);
+}
+
 /*void ACOsgRendererPlugin::mediaCycleSet(){
 
     if(this->hasCallbackNamed("Stop all"))

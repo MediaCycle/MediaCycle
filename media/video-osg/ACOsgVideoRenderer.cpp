@@ -194,11 +194,6 @@ void ACOsgVideoRenderer::videoGeode(bool flip, float sizemul, float zoomin) {
         state->setTextureMode(0, GL_TEXTURE_2D, osg::StateAttribute::ON);
         /// CF do not set GL_BLEND to ON otherwise the video might be transparent!
 
-        osg::ref_ptr<osg::Vec4Array> colors = new Vec4Array(1);
-        (*colors)[0] = node_color;
-        //video_geometry->setColorArray(colors);
-        //video_geometry->setColorBinding(Geometry::BIND_OVERALL);
-
         video_geode->addDrawable(video_geometry);
 
         video_transform->addChild(video_geode);
@@ -360,11 +355,6 @@ void ACOsgVideoRenderer::auraVideoGeode(bool flip, float sizemul, float zoomin) 
         state->setTextureMode(0, GL_TEXTURE_2D, osg::StateAttribute::ON);
 
         state->setMode(GL_BLEND, osg::StateAttribute::ON);
-
-        osg::ref_ptr<osg::Vec4Array> colors = new Vec4Array(1);
-        (*colors)[0] = node_color;
-        //video_geometry->setColorArray(colors);
-        //video_geometry->setColorBinding(Geometry::BIND_OVERALL);
 
         video_geode->addDrawable(video_geometry);
 
@@ -588,13 +578,13 @@ void ACOsgVideoRenderer::updateNodes(double ratio) {
 #ifdef AUTO_TRANSFORM
     media_node->setPosition(Vec3(x,y,z));
     media_node->setRotation(Quat(0.0, 0.0, 1.0, -media_cycle_angle));
-    media_node->setScale(Vec3(node_size*localscale/media_cycle_zoom,localscale/media_cycle_zoom,localscale/media_cycle_zoom));
+    media_node->setScale(Vec3(node_size*localscale/media_cycle_zoom,node_size*localscale/media_cycle_zoom,node_size*localscale/media_cycle_zoom));
 #else
 
     Matrix T;
     T.makeTranslate(Vec3(x, y, z)); // omr*p.z + ratio*p2.z));
     T =  Matrix::rotate(-media_cycle_angle,Vec3(0.0,0.0,1.0))
-            * Matrix::scale(node_size*localscale/media_cycle_zoom,localscale/media_cycle_zoom,localscale/media_cycle_zoom)
+            * Matrix::scale(node_size*localscale/media_cycle_zoom,node_size*localscale/media_cycle_zoom,node_size*localscale/media_cycle_zoom)
             * T;
     media_node->setMatrix(T);
 #endif //AUTO_TRANSFORM

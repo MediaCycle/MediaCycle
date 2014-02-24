@@ -36,6 +36,7 @@
 #include "ACOsgImageRenderer.h"
 #include <ACImage.h>
 
+#include <osg/Version>
 using namespace osg;
 
 #define IMAGE_BORDER
@@ -183,12 +184,7 @@ void ACOsgImageRenderer::imageGeode(bool flip, float sizemul, float zoomin) {
         state->setTextureMode(0, GL_TEXTURE_2D, osg::StateAttribute::ON);
         
         state->setMode(GL_BLEND, osg::StateAttribute::ON);
-        
-        osg::ref_ptr<osg::Vec4Array> colors = new Vec4Array(1);
-        (*colors)[0] = node_color;
-        //image_geometry->setColorArray(colors);
-        //image_geometry->setColorBinding(Geometry::BIND_OVERALL);
-        
+              
         image_geode->addDrawable(image_geometry);
         
         image_transform->addChild(image_geode);
@@ -232,11 +228,7 @@ void ACOsgImageRenderer::imageGeode(bool flip, float sizemul, float zoomin) {
          (*line_p)[2*i+1] = i+1;
          }
          border_geometry->addPrimitiveSet(line_p);
-         
-         border_geometry->setColorArray(colors);
-         border_geometry->setColorBinding(Geometry::BIND_OVERALL);
-         border_geode->addDrawable(border_geometry);
-         
+                 
          state = border_geometry->getOrCreateStateSet();
          state->setAttribute(new LineWidth(2.0));//
          //}+/
@@ -410,12 +402,7 @@ void ACOsgImageRenderer::auraImageGeode(bool flip, float sizemul, float zoomin) 
         state->setTextureMode(0, GL_TEXTURE_2D, osg::StateAttribute::ON);
         
         state->setMode(GL_BLEND, osg::StateAttribute::ON);
-        
-        osg::ref_ptr<osg::Vec4Array> colors = new Vec4Array(1);
-        (*colors)[0] = node_color;
-        //image_geometry->setColorArray(colors);
-        //image_geometry->setColorBinding(Geometry::BIND_OVERALL);
-        
+
         image_geode->addDrawable(image_geometry);
         
         image_transform->addChild(image_geode);
@@ -460,8 +447,12 @@ void ACOsgImageRenderer::auraImageGeode(bool flip, float sizemul, float zoomin) 
          }
          border_geometry->addPrimitiveSet(line_p);
          
+#if OSG_MIN_VERSION_REQUIRED(3,2,0)
+         border_geometry->setColorArray(colors, osg::Array::BIND_OVERALL);
+#else
          border_geometry->setColorArray(colors);
-         border_geometry->setColorBinding(Geometry::BIND_OVERALL);
+         border_geometry->setColorBinding(osg::Geometry::BIND_OVERALL);
+#endif
          border_geode->addDrawable(border_geometry);
          
          state = border_geometry->getOrCreateStateSet();

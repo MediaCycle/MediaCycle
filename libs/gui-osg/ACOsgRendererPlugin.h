@@ -72,6 +72,7 @@ public:
     void changeTimelinePlaybackThumbnail();
     void changeTimelineSelectionThumbnail();
     void changeTimelineSummaryThumbnail();
+    void changePlaybackVolume();
     virtual void mediaLoaded(int n,int nTot,int mId){}
     virtual void mediasLoaded(int n,int nTot,std::vector<int> mIds){}
 

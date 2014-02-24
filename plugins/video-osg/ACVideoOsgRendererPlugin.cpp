@@ -1,4 +1,4 @@
-/*
+'/*
  *  ACVideoOsgRendererPlugin.cpp
  *  MediaCycle
  *
@@ -58,12 +58,16 @@ ACVideoOsgRendererPlugin::ACVideoOsgRendererPlugin() : ACOsgRendererPlugin(){
     this->mDescription ="Plugin for rendering Video files with OpenSceneGraph";
     this->mMediaType = MEDIA_TYPE_VIDEO;
 
-    this->addCallback("Timeline playback","Timeline playback",boost::bind(&ACOsgRendererPlugin::changeTimelinePlaybackThumbnail,this));
+    timeline_playback_thumbnails.push_back("None");
+    timeline_playback_thumbnails.push_back("Video");
+    this->addStringParameter("Timeline playback",timeline_playback_thumbnails.back(),timeline_playback_thumbnails,"Timeline playback",boost::bind(&ACOsgRendererPlugin::changeTimelinePlaybackThumbnail,this));
 
     browser_node_thumbnails.push_back("None");
     browser_node_thumbnails.push_back("Slit-scan");
     browser_node_thumbnails.push_back("Circular slit-scan");
     this->addStringParameter("Browser node", browser_node_thumbnails.front(), browser_node_thumbnails, "Browser node",boost::bind(&ACOsgRendererPlugin::changeBrowserNodeThumbnail,this));
+
+    this->addNumberParameter("Browser node size",1.0,0.01,10.0,0.01,"Browser node size",boost::bind(&ACOsgRendererPlugin::changeBrowserNodeSize,this));
 
     timeline_selection_thumbnails.push_back("None");
     timeline_selection_thumbnails.push_back("Keyframes");
@@ -72,6 +76,8 @@ ACVideoOsgRendererPlugin::ACVideoOsgRendererPlugin() : ACOsgRendererPlugin(){
     timeline_summary_thumbnails.push_back("None");
     timeline_summary_thumbnails.push_back("Keyframes");
     this->addStringParameter("Timeline summary",timeline_summary_thumbnails.back(),timeline_summary_thumbnails,"Timeline summary",boost::bind(&ACOsgRendererPlugin::changeTimelineSummaryThumbnail,this));
+
+    this->addNumberParameter("Volume",0.0f,0.0f,2.0f,0.1f,"Playback volume",boost::bind(&ACOsgRendererPlugin::changePlaybackVolume,this));
 }
 
 ACVideoOsgRendererPlugin::~ACVideoOsgRendererPlugin(){

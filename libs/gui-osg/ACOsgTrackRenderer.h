@@ -102,6 +102,8 @@ public:
     /// This virtual function is called by ACOsgTimelineRenderer::changeTrackSelectionThumbnail
     virtual void changeSelectionThumbnail(std::string _thumbnail){}
 
+    virtual void changeVolume(double _volume){}
+
 protected:
     void createDummySegments();
     void boxTransform(osg::ref_ptr<osg::MatrixTransform>& _transform, float _width, osg::Vec4 _color, std::string _name);

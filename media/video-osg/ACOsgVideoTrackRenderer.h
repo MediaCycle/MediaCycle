@@ -97,6 +97,8 @@ public:
     /// This virtual function is called by ACOsgTimelineRenderer::changeTrackSummaryThumbnail
     virtual void changeSummaryThumbnail(std::string _thumbnail);
 
+    virtual void changeVolume(double _volume);
+
 protected:
 
     osg::ref_ptr<osg::MatrixTransform> selection_transform, summary_transform, playback_transform;
@@ -193,6 +195,8 @@ protected:
     std::string resized_thumbnail_filename;
 
     int corresponding_segment_index;
+
+    double volume;
 
 public:
     // Using std::string instead of typedefs for faster serialization, but less error-proof

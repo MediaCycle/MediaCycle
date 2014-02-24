@@ -143,8 +143,12 @@ void ACOsgAudioRenderer::curserGeode() {
     Vec4 curser_color(0.2f, 0.9f, 0.2f, 0.9f);
     osg::ref_ptr<osg::Vec4Array> curser_colors = new Vec4Array;
     curser_colors->push_back(curser_color);
+#if OSG_MIN_VERSION_REQUIRED(3,2,0)
+    curser_geometry->setColorArray(curser_colors, osg::Array::BIND_OVERALL);
+#else
     curser_geometry->setColorArray(curser_colors);
     curser_geometry->setColorBinding(Geometry::BIND_OVERALL);
+#endif
 
     state = curser_geode->getOrCreateStateSet();
     state->setMode(GL_BLEND, StateAttribute::ON);
@@ -455,16 +459,26 @@ void ACOsgAudioRenderer::updateNodes(double ratio) {
             current_color = osg::Vec4(1,1,1,1);
         }
 
-        if (user_defined_color)
-            current_color = node_color;
+        //if (user_defined_color)
+        current_color = node_color;
 
         osg::ref_ptr<osg::Vec4Array> current_color_array = new Vec4Array(1);
         (*current_color_array)[0] = current_color;
         if (node_geometry){
+#if OSG_MIN_VERSION_REQUIRED(3,2,0)
+            node_geometry->setColorArray(current_color_array, osg::Array::BIND_OVERALL);
+#else
             node_geometry->setColorArray(current_color_array);
+            node_geometry->setColorBinding(osg::Geometry::BIND_OVERALL);
+#endif
         }
         if( waveform_geometry){
+#if OSG_MIN_VERSION_REQUIRED(3,2,0)
+            waveform_geometry->setColorArray(current_color_array, osg::Array::BIND_OVERALL);
+#else
             waveform_geometry->setColorArray(current_color_array);
+            waveform_geometry->setColorBinding(osg::Geometry::BIND_OVERALL);
+#endif
         }
         if(node_shape_drawable){
             node_shape_drawable->setColor(current_color);

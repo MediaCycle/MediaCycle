@@ -107,7 +107,12 @@ void ACOsgAudioTrackRenderer::selectionWaveformGeode() {
 
     osg::ref_ptr<osg::Vec4Array> colors = new Vec4Array(1);
     (*colors)[0] = Vec4(1.0,1.0,1.0,1.0);
-    summary_waveform_geometry->setColorArray(colors);
+#if OSG_MIN_VERSION_REQUIRED(3,2,0)
+    summary_waveform_geometry->setColorArray(colors, osg::Array::BIND_OVERALL);
+#else
+    summary_waveform_geometry->setColorArray(current_color_array);
+    summary_waveform_geometry->setColorBinding(osg::Geometry::BIND_OVERALL);
+#endif
 
     if(summary_waveform_geometry){
         summary_waveform_geode->addDrawable(summary_waveform_geometry);
@@ -152,7 +157,12 @@ void ACOsgAudioTrackRenderer::playbackWaveformGeode() {
 
     osg::ref_ptr<osg::Vec4Array> colors = new Vec4Array(1);
     (*colors)[0] = Vec4(1.0,1.0,1.0,1.0);
-    playback_waveform_geometry->setColorArray(colors);
+#if OSG_MIN_VERSION_REQUIRED(3,2,0)
+    playback_waveform_geometry->setColorArray(colors, osg::Array::BIND_OVERALL);
+#else
+    playback_waveform_geometry->setColorArray(current_color_array);
+    playback_waveform_geometry->setColorBinding(osg::Geometry::BIND_OVERALL);
+#endif
 
     if(playback_waveform_geometry){ 
         playback_waveform_geode->addDrawable(playback_waveform_geometry);

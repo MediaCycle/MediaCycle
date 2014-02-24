@@ -30,10 +30,10 @@
  */
 
 // ----------- uncomment this to use selection videos to be sync'd by thread (as opposed as sync'd in updateTracks)
-//#define SYNC_SELECTION_VIDEOS_BY_THREAD
+#define SYNC_SELECTION_VIDEOS_BY_THREAD
 
 // ----------- uncomment this to use one thread per selection video sync (as opposed to one thread for all), per side (left+right), requires SYNC_SELECTION_VIDEOS_BY_THREAD
-//#define SYNC_THREAD_PER_SELECTION_VIDEO
+#define SYNC_THREAD_PER_SELECTION_VIDEO
 
 // ----------- uncomment this to test the selection video sync (without time skip based on the selection width)
 //#define TEST_SYNC_WITHOUT_TIME_SKIP
@@ -211,6 +211,8 @@ ACOsgVideoTrackRenderer::ACOsgVideoTrackRenderer() : ACOsgTrackRenderer() {
     summary_frame_min_width = 32;
     selection_frame_min_width = 64;
 
+    volume = 0.0f;
+
     this->initTrack();
 }
 
@@ -384,6 +386,20 @@ void ACOsgVideoTrackRenderer::changeSummaryThumbnail(std::string _thumbnail){
     }
 }
 
+void ACOsgVideoTrackRenderer::changeVolume(double _volume){
+    if(_volume == volume)
+        return;
+
+    if(_volume < 0.0f) _volume = 0.0f;
+    //if(_volume > 1.0f) _volume = 1.0f;
+
+    volume = _volume;
+
+    if(this->getSharedThumbnailStream())
+        this->getSharedThumbnailStream()->setVolume(volume);
+
+}
+
 void ACOsgVideoTrackRenderer::selectionZoneTransform() {
     this->boxTransform(selection_zone_transform, 1, osg::Vec4(0.0f, 0.0f, 1.0f, 0.2f), "track selection zone");
 }
@@ -474,8 +490,12 @@ void ACOsgVideoTrackRenderer::playbackVideoTransform() {
         state->setTextureMode(0, GL_TEXTURE_2D, osg::StateAttribute::ON);
         osg::ref_ptr<osg::Vec4Array> colors = new osg::Vec4Array;
         colors->push_back(Vec4(1.0f, 1.0f, 1.0f, 0.9f));
+#if OSG_MIN_VERSION_REQUIRED(3,2,0)
+        playback_geometry->setColorArray(colors, osg::Array::BIND_OVERALL);
+#else
         playback_geometry->setColorArray(colors);
-        playback_geometry->setColorBinding(Geometry::BIND_OVERALL);
+        playback_geometry->setColorBinding(osg::Geometry::BIND_OVERALL);
+#endif
         playback_geode->addDrawable(playback_geometry);
         playback_video_transform->addChild(playback_geode);
         playback_geode->setUserData(new ACRefId(track_index,"video track playback"));
@@ -550,8 +570,12 @@ void ACOsgVideoTrackRenderer::selectionCenterFrameTransform() {
         state->setTextureMode(0, GL_TEXTURE_2D, osg::StateAttribute::ON);
         osg::ref_ptr<osg::Vec4Array> colors = new osg::Vec4Array;
         colors->push_back(Vec4(1.0f, 1.0f, 1.0f, 0.9f));
+#if OSG_MIN_VERSION_REQUIRED(3,2,0)
+        selection_center_frame_geometry->setColorArray(colors, osg::Array::BIND_OVERALL);
+#else
         selection_center_frame_geometry->setColorArray(colors);
-        selection_center_frame_geometry->setColorBinding(Geometry::BIND_OVERALL);
+        selection_center_frame_geometry->setColorBinding(osg::Geometry::BIND_OVERALL);
+#endif
         selection_center_frame_geode->addDrawable(selection_center_frame_geometry);
         selection_center_frame_transform->addChild(selection_center_frame_geode);
         selection_center_frame_geode->setUserData(new ACRefId(track_index,"video track selection center frame"));
@@ -723,8 +747,12 @@ void ACOsgVideoTrackRenderer::updateSelectionVideos(
             state->setTextureMode(0, GL_TEXTURE_2D, osg::StateAttribute::ON);
             osg::ref_ptr<osg::Vec4Array> colors = new osg::Vec4Array;
             colors->push_back(Vec4(1.0f, 1.0f, 1.0f, 0.9f));
+#if OSG_MIN_VERSION_REQUIRED(3,2,0)
+            video_geometry->setColorArray(colors, osg::Array::BIND_OVERALL);
+#else
             video_geometry->setColorArray(colors);
-            video_geometry->setColorBinding(Geometry::BIND_OVERALL);
+            video_geometry->setColorBinding(osg::Geometry::BIND_OVERALL);
+#endif
             video_geode->addDrawable(video_geometry);
             //_selection_video_transform->addChild(video_geode);
             _selection_video_transforms[m]->addChild(video_geode);
@@ -800,6 +828,12 @@ void ACOsgVideoTrackRenderer::slitScanTransform() {
     //        state->setTextureMode(0, GL_TEXTURE_2D, osg::StateAttribute::ON);
     //        osg::ref_ptr<osg::Vec4Array> colors = new osg::Vec4Array;
     //        colors->push_back(Vec4(1.0f, 1.0f, 1.0f, 0.9f));
+    //        #if OSG_MIN_VERSION_REQUIRED(3,2,0)
+    //        slit_scan_geometry->setColorArray(colors, osg::Array::BIND_OVERALL);
+    //        #else
+    //        slit_scan_geometry->setColorArray(colors);
+    //        slit_scan_geometry->setColorBinding(osg::Geometry::BIND_OVERALL);
+    //        #endif
     //        slit_scan_geometry->setColorArray(colors);
     //        slit_scan_geometry->setColorBinding(Geometry::BIND_OVERALL);
     //        slit_scan_geode->addDrawable(slit_scan_geometry);
@@ -1035,8 +1069,12 @@ void ACOsgVideoTrackRenderer::framesTransform() {
         state->setTextureMode(0, GL_TEXTURE_2D, osg::StateAttribute::ON);
         osg::ref_ptr<osg::Vec4Array> colors = new osg::Vec4Array;
         colors->push_back(Vec4(1.0f, 1.0f, 1.0f, 0.9f));
+#if OSG_MIN_VERSION_REQUIRED(3,2,0)
+        summary_frame_geometry->setColorArray(colors, osg::Array::BIND_OVERALL);
+#else
         summary_frame_geometry->setColorArray(colors);
-        summary_frame_geometry->setColorBinding(Geometry::BIND_OVERALL);
+        summary_frame_geometry->setColorBinding(osg::Geometry::BIND_OVERALL);
+#endif
         summary_frame_geode->addDrawable(summary_frame_geometry);
         summary_frame_geode->setUserData(new ACRefId(track_index,"video track summary frames"));
 
@@ -1137,6 +1175,8 @@ void ACOsgVideoTrackRenderer::updateTracks(double ratio)
 
             video_stream = osg_thumbnail->getStream();
             std::cout << getTime()-video_stream_in << " sec." << std::endl;
+            if(video_stream)
+                video_stream->setVolume(volume);
 
             // Optional, for testing the segment visualization without segmentation
             //this->createDummySegments();
