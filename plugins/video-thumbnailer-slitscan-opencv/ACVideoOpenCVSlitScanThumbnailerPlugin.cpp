@@ -192,7 +192,7 @@ std::vector<ACMediaThumbnail*> ACVideoOpenCVSlitScanThumbnailerPlugin::computeSl
 
             cv::Mat transparent_frame(current_frame.size(), CV_8UC4);
 
-            cv::cvtColor(current_frame, transparent_frame, CV_BGR2RGBA, 4);
+            cv::cvtColor(current_frame, transparent_frame, CV_RGB2RGBA, 4);
 
             cv::Mat slit(transparent_frame, cv::Rect((int)(0.5f*width), 0, 1, height));
 
