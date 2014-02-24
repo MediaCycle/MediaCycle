@@ -5,14 +5,23 @@ IF ( BUILD_AUDIOCYCLE_APP AND SUPPORT_AUDIO AND USE_QT4 AND USE_OSG AND USE_OSC 
 	SET(WITH_OSC ON)
 
 	SET(MEDIA_TYPE "MEDIA_TYPE_AUDIO")
+        SET(MC_PLUGINS "audio-features-yaafe;audio-engine-stk-sounddesign;audio-osg;audio-reader-sndfile;audio-segmentation;audio-thumbnailer-waveform-svg;audio-thumbnailer-features-svg;media-thumbnailer-feature-mapper;io-osc;pcapreprocess;segmentation;visualisation")
 	IF(USE_DEBUG)
-                SET(MC_PLUGINS "audio-features-yaafe;audio-engine-stk-sounddesign;audio-osg;audio-reader-sndfile;audio-segmentation;audio-thumbnailer-waveform-svg;audio-thumbnailer-features-svg;media-thumbnailer-feature-mapper;io-osc;pcapreprocess;segmentation;io-apple-trackpad-autoplay;visualisation;visualisation-advanced;visualisation-tagging")
-        	SET(OSG_PLUGINS "osgdb_svg") #required by audio-thumbnailer-waveform-svg
-	ELSE()
-        	SET(MC_PLUGINS "audio-engine-stk-sounddesign;audio-features-yaafe;audio-osg;audio-reader-sndfile;audio-segmentation;audio-thumbnailer-waveform-svg;audio-thumbnailer-features-svg;media-thumbnailer-feature-mapper;io-osc;segmentation;visualisation")
-        	SET(OSG_PLUGINS "osgdb_svg") #required by audio-thumbnailer-waveform-svg
+                LIST(APPEND MC_PLUGINS "visualisation-advanced;visualisation-tagging")
 	ENDIF()
+        IF(MLPACK_FOUND)
+            IF(USE_DEBUG)
+                LIST(APPEND MC_PLUGINS "visualisation-advanced-mlpack")
+            ENDIF()
+        ENDIF()
+        IF(USE_FALCON AND LIBNIFALCON_FOUND AND LIBUSB_FOUND)
+                LIST(APPEND MC_PLUGINS "io-novint-falcon")
+        ENDIF()
+
+        SET(OSG_PLUGINS "osgdb_svg") #required by audio-thumbnailer-waveform-svg
+
         SET(DESCRIPTION "AudioCycle allows to organize audio files by similarity.")
+        SET(FILTERING "Proximity Grid")
 
 	INCLUDE (${CMAKE_SOURCE_DIR}/cmake/CreateDefaultConfig.cmake)
 	CREATE_DEFAULT_CONFIG(${TARGET_NAME})

@@ -1,15 +1,26 @@
 SET(TARGET_NAME "VideoCycle")
 IF ( BUILD_VIDEOCYCLE_APP AND SUPPORT_VIDEO AND USE_QT4 AND USE_OSG AND USE_OSC AND USE_FFMPEG )
 
-	SET(WITH_SEGMENTATION ON)
+        SET(WITH_SEGMENTATION OFF)
 	SET(WITH_OSC ON)
 
 	SET(MEDIA_TYPE "MEDIA_TYPE_VIDEO")
-        SET(MC_PLUGINS "video;file;video-reader-opencv;video-osg;video-thumbnailer-resize;video-thumbnailer-slitscan-opencv;segmentation;video-segmentation;visualisation;visualisation-advanced;visualisation-tagging")
-        #pcapreprocess;io-osc
-	#SET(CLUSTERS_METHOD "MediaCycle Child KMeans")
+        SET(MC_PLUGINS "video;file;video-reader-opencv;video-osg;video-thumbnailer-resize;video-thumbnailer-slitscan-opencv;visualisation;io-osc")
+        #pcapreprocess;segmentation;video-segmentation;
+        IF(USE_DEBUG)
+                LIST(APPEND MC_PLUGINS "visualisation-advanced;visualisation-tagging")
+        ENDIF()
+        IF(MLPACK_FOUND)
+            IF(USE_DEBUG)
+                LIST(APPEND MC_PLUGINS "visualisation-advanced-mlpack")
+            ENDIF()
+        ENDIF()
+        IF(OpenCV_FOUND AND LIBUSB_FOUND)
+                LIST(APPEND MC_PLUGINS "io-grayfish-squidget")
+        ENDIF()
         SET(OSG_PLUGINS "osgdb_ffmpeg")
         SET(DESCRIPTION "VideoCycle allows to visually organize video files by similarity.")
+        #SET(CLUSTERS_METHOD "MediaCycle Child KMeans")
 
         INCLUDE (${CMAKE_SOURCE_DIR}/cmake/CreateDefaultConfig.cmake)
 	CREATE_DEFAULT_CONFIG(${TARGET_NAME})
