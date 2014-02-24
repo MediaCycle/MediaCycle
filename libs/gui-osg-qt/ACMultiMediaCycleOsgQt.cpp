@@ -258,6 +258,9 @@ ACMultiMediaCycleOsgQt::ACMultiMediaCycleOsgQt(QWidget *parent)
     this->addActions(ui.menuHelp->actions());
     //this->addActions(compositeOsgView->actions());
 
+#ifdef __APPLE__
+    ui.toolbar->hide();
+#endif
     this->setAcceptDrops(true); // for drag and drop
 
     // Must be the last lines of the constructor
@@ -996,7 +999,9 @@ void ACMultiMediaCycleOsgQt::on_actionFullscreen_triggered(bool checked) {
         if(this->setting != AC_SETTING_INSTALLATION){
             ui.menubar->show();
             ui.statusbar->show();
+            #ifndef __APPLE__
             ui.toolbar->show();
+            #endif
         }
         this->readQSettings();
     }
