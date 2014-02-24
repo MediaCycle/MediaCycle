@@ -71,4 +71,14 @@ macro(ADD_QT_EXECUTABLE TARGET_NAME)
       			COMMAND cp -R ${QT_PLUGINS_DIR}/imageformats ${CMAKE_CURRENT_BINARY_DIR}${EXTRA_PATH}/${TARGET_NAME}.app/Contents/plugins
 		)
 	ENDIF()
+	IF(APPLE)
+			IF(XCODE AND USE_DEBUG)
+				SET(EXTRA_PATH "/Debug")
+			ENDIF()
+			# Proper resolution for retina displays
+			ADD_CUSTOM_COMMAND( TARGET ${TARGET_NAME} POST_BUILD
+				COMMAND sed -i '' 's/<\\/dict>/<key>NSPrincipalClass<\\/key>\\\n<string>NSApplication<\\/string>\\\n<key>NSHighResolutionCapable<\\/key>\\\n<true\\/>\\\n<\\/dict>/' ${CMAKE_CURRENT_BINARY_DIR}${EXTRA_PATH}/${TARGET_NAME}.app/Contents/Info.plist
+			)
+	ENDIF()
+
 endmacro(ADD_QT_EXECUTABLE TARGET_NAME)
