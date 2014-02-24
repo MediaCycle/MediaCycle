@@ -1,8 +1,8 @@
 /**
  * @brief ifft2.cpp
  * @author Christian Frisson
- * @date 24/02/2011
- * @copyright (c) 2011 – UMONS - Numediart
+ * @date 24/02/2014
+ * @copyright (c) 2014 – UMONS - Numediart
  * 
  * MediaCycle of University of Mons – Numediart institute is 
  * licensed under the GNU AFFERO GENERAL PUBLIC LICENSE Version 3 
@@ -29,7 +29,12 @@
  * <mailto:avre@umons.ac.be>
 */
 
+
+
 #include "ifft2.h"
+
+#if (ARMA_VERSION_MAJOR<=3&&ARMA_VERSION_MINOR<=920&&ARMA_VERSION_PATCH<3)
+
 using namespace arma;
 /////////////////////////////////////
 // IFFT2
@@ -132,3 +137,5 @@ mat ifft2(cx_mat x_m, int nrows, int ncols){
 mat ifft2(cx_mat x_m){
   return ifft2(x_m, x_m.n_rows, x_m.n_cols);
 }
+
+#endif

@@ -5,10 +5,10 @@ PortSystem                      1.0
 PortGroup                       cmake 1.0
 
 name                            mlpack
-version                         1.0.6
+version                         1.0.8
 categories                      science
 platforms                       darwin
-maintainers                     gmail.com:thierry.ravet openmaintainer
+maintainers                     gmail.com:thierry.ravet gmail.com:christian.frisson openmaintainer
 license                         LGPL-3+
 
 description                     mlpack is a C++ machine learning library 
@@ -22,8 +22,8 @@ long_description                mlpack is a C++ machine learning library with em
 homepage                        http://www.mlpack.org/
 master_sites                    ${homepage}files/
 
-checksums                       rmd160  be45104765498c45fd1363554f4a62a4cb773486 \
-                                sha256  c977a4b5728724a4f27b011438c090e0fa808e1c5421ed6b0bd48721e1cfdb96
+checksums                       rmd160  8bd889efdb68c17a2106136c5e68b2b131d7933f \
+				sha256  fadd4e40cb05fb059bd5024663a4785cdf3ecc758a57e335e83823a09d09ba00
 
 depends_build           	port:cmake
 depends_build-append            port:pkgconfig
@@ -33,4 +33,5 @@ depends_lib-append              port:boost \
 				port:armadillo \
                                 port:hdf5-18
 
-livecheck.regex                 /${name}-(\[0-9.\]+)${extract.suffix}
+livecheck.url                   ${homepage}/index.html
+livecheck.regex                 /${name}\-(\[0-9.\]+)${extract.suffix}

@@ -1,8 +1,8 @@
 /**
  * @brief ifft2.h
- * @author Xavier Siebert
- * @date 31/01/2011
- * @copyright (c) 2011 – UMONS - Numediart
+ * @author Christian Frisson
+ * @date 24/02/2014
+ * @copyright (c) 2014 – UMONS - Numediart
  * 
  * MediaCycle of University of Mons – Numediart institute is 
  * licensed under the GNU AFFERO GENERAL PUBLIC LICENSE Version 3 
@@ -35,6 +35,9 @@
 
 #include "Armadillo-utils.h"
 //#include "fftsg_h.c"
+
+#if (ARMA_VERSION_MAJOR<=3&&ARMA_VERSION_MINOR<=920&&ARMA_VERSION_PATCH<3)
+
 #include <fftsg2d.h>
 
 /////////////////////////////////////
@@ -44,4 +47,5 @@
 arma::mat ifft2(arma::cx_mat x_m, int nrows, int ncols);
 arma::mat ifft2(arma::cx_mat x_m);
 
+#endif
 #endif
