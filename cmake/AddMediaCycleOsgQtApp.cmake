@@ -300,7 +300,7 @@ IF(MC_PLUGINS_STATIC)
     LIST(LENGTH TOTAL_CLASHES TOTAL_CLASHES_COUNT)
     IF(TOTAL_CLASHES_COUNT GREATER 0)
         string(REPLACE ";" ", and " TOTAL_CLASHES "${TOTAL_CLASHES}")
-        MESSAGE(FATAL_ERROR "Target ${TARGET_NAME} won't link due to clashes between ${TOTAL_CLASHES}. Disable the required options or the target and re-run CMake.")
+        #MESSAGE(FATAL_ERROR "Target ${TARGET_NAME} won't link due to clashes between ${TOTAL_CLASHES}. Disable the required options or the target and re-run CMake.")
     ENDIF()
 ENDIF()
 

@@ -33,6 +33,7 @@
 #include <ACAudioData.h>
 #include <ACMedia.h>
 #include <iostream>
+#include <rsvg-convert.h>
 
 #ifndef ACPi
 #define	ACPi		3.14159265358979323846  /* pi */
@@ -121,13 +122,16 @@ std::vector<ACMediaThumbnail*> ACAudioSvgWaveformThumbnailerPlugin::summarize(AC
         return thumbnails;
     }
 
+    std::string filename = media->getFileName();
+
     // Checking if thumbnails already exist:
     bool thumbnails_exist = true;
-    std::map<std::string,std::string> thumbnail_extensions = this->getThumbnailExtensions();
-    for(std::map<std::string,std::string>::iterator thumbnail_extension = thumbnail_extensions.begin(); thumbnail_extension != thumbnail_extensions.end();thumbnail_extension++){
-        std::string _filename = generateThumbnailName(media->getFileName(),thumbnail_extension->first, thumbnail_extension->second);
+    std::vector<std::string> thumbnail_names = this->getThumbnailNames();
+    for(std::vector<std::string>::iterator thumbnail_name = thumbnail_names.begin(); thumbnail_name != thumbnail_names.end();thumbnail_name++){
+        std::string svg_filename = generateThumbnailName(media->getFileName(),*thumbnail_name, ".svg");
+        std::string png_filename = generateThumbnailName(media->getFileName(),*thumbnail_name, ".png");
 
-        fs::path p( _filename.c_str());// , fs::native );
+        fs::path p( svg_filename.c_str());// , fs::native );
         if ( fs::exists( p ) )
         {
             //std::cout << "ACAudioSvgWaveformThumbnailerPlugin::summarize: the expected thumbnail already exists as file: " << _filename << std::endl;
@@ -185,8 +189,6 @@ std::vector<ACMediaThumbnail*> ACAudioSvgWaveformThumbnailerPlugin::summarize(AC
     else{
         last_frame = (int)((sample_rate)*(media->getEnd()-media->getStart()))-1;
     }
-
-    std::string filename = media->getFileName();
 
     // Define waveforms to compute
 
@@ -252,96 +254,86 @@ std::vector<ACMediaThumbnail*> ACAudioSvgWaveformThumbnailerPlugin::summarize(AC
                 );
 
 
-    if(thumbnails_exist){
-        for(std::map<std::string,ACAudioWaveformThumbnailSpecs>::iterator thumbnail_specs = thumbnails_specs.begin(); thumbnail_specs != thumbnails_specs.end(); ++ thumbnail_specs){
-            ACMediaThumbnail* thumbnail = new ACMediaThumbnail(MEDIA_TYPE_IMAGE);
-            thumbnail->setFileName(thumbnail_specs->second.filename);
-            thumbnail->setName(thumbnail_specs->second.name);
-            thumbnail->setWidth(thumbnail_specs->second.width);
-            thumbnail->setHeight(thumbnail_specs->second.height);
-            thumbnail->setLength(thumbnail_specs->second.length);
-            thumbnail->setCircular(thumbnail_specs->second.circular);
-            thumbnails.push_back(thumbnail);
-        }
-        thumbnails_specs.clear();
-        std::cout << "ACAudioSvgWaveformThumbnailerPlugin::summarize: reusing thumbnails took " << getTime() - start_time << std::endl;
-        return thumbnails;
-    }
+    if(!thumbnails_exist){
+        // Loop on the audio frames using a buffer of bufsize
+        while ( current_frame < last_frame && s<last_frame )
+        {
+            // Access to the buffer with consistency checks
+            ACMediaDataContainer* data_container = audio_data->getBuffer(current_frame, bufsize, 0);
+            if(!data_container){
+                std::cerr << "ACAudioSvgWaveformThumbnailerPlugin::summarize: couldn't get buffer at frame " << current_frame << " with buf size " << bufsize << std::endl;
+                break;//return 0;
+            }
+            ACAudioFloatPtrDataContainer* float_data = dynamic_cast<ACAudioFloatPtrDataContainer*>(data_container);
+            if(!float_data){
+                std::cerr << "ACAudioSvgWaveformThumbnailerPlugin::summarize: couldn't convert buffer at frame " << current_frame << " with buf size " << bufsize << std::endl;
+                break;//return 0;
+            }
+            buffer = float_data->getData();
+            readcount = float_data->getNumberOfFrames();
+            if(!buffer)
+                std::cerr << "ACAudioSvgWaveformThumbnailerPlugin::summarize: couldn't access data at current frame " << current_frame << std::endl;
+            current_frame += bufsize;
 
-    // Loop on the audio frames using a buffer of bufsize
-    while ( current_frame < last_frame && s<last_frame )
-    {
-        // Access to the buffer with consistency checks
-        ACMediaDataContainer* data_container = audio_data->getBuffer(current_frame, bufsize, 0);
-        if(!data_container){
-            std::cerr << "ACAudioSvgWaveformThumbnailerPlugin::summarize: couldn't get buffer at frame " << current_frame << " with buf size " << bufsize << std::endl;
-            break;//return 0;
-        }
-        ACAudioFloatPtrDataContainer* float_data = dynamic_cast<ACAudioFloatPtrDataContainer*>(data_container);
-        if(!float_data){
-            std::cerr << "ACAudioSvgWaveformThumbnailerPlugin::summarize: couldn't convert buffer at frame " << current_frame << " with buf size " << bufsize << std::endl;
-            break;//return 0;
-        }
-        buffer = float_data->getData();
-        readcount = float_data->getNumberOfFrames();
-        if(!buffer)
-            std::cerr << "ACAudioSvgWaveformThumbnailerPlugin::summarize: couldn't access data at current frame " << current_frame << std::endl;
-        current_frame += bufsize;
+            // Draw an initial origin point
+            for(std::map<std::string,ACAudioWaveformThumbnailSpecs>::iterator thumbnail_specs = thumbnails_specs.begin(); thumbnail_specs != thumbnails_specs.end(); ++ thumbnail_specs){
+                if(thumbnail_specs->second.callback){
+                    thumbnail_specs->second.callback(thumbnail_specs->second);
+                }
+            }
 
-        // Draw an initial origin point
+            // Loop on all the buffer samples to match waveform points depending on their hop sizes
+            for (k = 0 ; k < readcount ; k++)
+            {
+                int m = 0; // channel id
+                for(std::map<std::string,ACAudioWaveformThumbnailSpecs>::iterator thumbnail_specs = thumbnails_specs.begin(); thumbnail_specs != thumbnails_specs.end(); ++ thumbnail_specs){
+                    // Produce coordinates of a reached waveform point, using the waveform specs callback
+                    if(s % thumbnail_specs->second.hop_samples == 0){
+                        if(thumbnail_specs->second.callback){
+                            thumbnail_specs->second.callback(thumbnail_specs->second);
+                        }
+                        ++(thumbnail_specs->second.index);
+
+                        thumbnail_specs->second.down_v = buffer[k * channels + m];
+                        thumbnail_specs->second.top_v = buffer[k * channels + m];
+                    }
+                    // Compute and store min/max values along the buffer
+                    else{
+                        if ( buffer[k * channels + m] < thumbnail_specs->second.down_v ) {
+                            thumbnail_specs->second.down_v = buffer[k * channels + m];
+                        }
+                        if ((buffer[k * channels + m])> thumbnail_specs->second.top_v ) {
+                            thumbnail_specs->second.top_v = buffer[k * channels + m];
+                        }
+                    }
+                }
+                s++;
+            }
+
+            delete buffer;
+            buffer = 0;
+        }
+
+
+
+        // Draw a terminating point
         for(std::map<std::string,ACAudioWaveformThumbnailSpecs>::iterator thumbnail_specs = thumbnails_specs.begin(); thumbnail_specs != thumbnails_specs.end(); ++ thumbnail_specs){
+            thumbnail_specs->second.top_v = 0;
+            thumbnail_specs->second.down_v = 0;
             if(thumbnail_specs->second.callback){
                 thumbnail_specs->second.callback(thumbnail_specs->second);
             }
         }
 
-        // Loop on all the buffer samples to match waveform points depending on their hop sizes
-        for (k = 0 ; k < readcount ; k++)
-        {
-            int m = 0; // channel id
-            for(std::map<std::string,ACAudioWaveformThumbnailSpecs>::iterator thumbnail_specs = thumbnails_specs.begin(); thumbnail_specs != thumbnails_specs.end(); ++ thumbnail_specs){
-                // Produce coordinates of a reached waveform point, using the waveform specs callback               
-                if(s % thumbnail_specs->second.hop_samples == 0){
-                    if(thumbnail_specs->second.callback){
-                        thumbnail_specs->second.callback(thumbnail_specs->second);
-                    }
-                    ++(thumbnail_specs->second.index);
+        // Save the waveforms as svg files and add them as media thumbnails
+        for(std::map<std::string,ACAudioWaveformThumbnailSpecs>::iterator thumbnail_specs = thumbnails_specs.begin(); thumbnail_specs != thumbnails_specs.end(); ++ thumbnail_specs){
+            //thumbnail_specs->second.document.save();
+            std::string svg_filename = generateThumbnailName(media->getFileName(),thumbnail_specs->second.name, ".svg");
+            std::string png_filename = generateThumbnailName(media->getFileName(),thumbnail_specs->second.name, ".png");
 
-                    thumbnail_specs->second.down_v = buffer[k * channels + m];
-                    thumbnail_specs->second.top_v = buffer[k * channels + m];
-                }
-                // Compute and store min/max values along the buffer
-                else{
-                    if ( buffer[k * channels + m] < thumbnail_specs->second.down_v ) {
-                        thumbnail_specs->second.down_v = buffer[k * channels + m];
-                    }
-                    if ((buffer[k * channels + m])> thumbnail_specs->second.top_v ) {
-                        thumbnail_specs->second.top_v = buffer[k * channels + m];
-                    }
-                }
-            }
-            s++;
-        }
+            Document doc(svg_filename, Layout(thumbnail_specs->second.dimensions, Layout::BottomLeft));
 
-        delete buffer;
-        buffer = 0;
-    }
-
-    // Draw a terminating point
-    for(std::map<std::string,ACAudioWaveformThumbnailSpecs>::iterator thumbnail_specs = thumbnails_specs.begin(); thumbnail_specs != thumbnails_specs.end(); ++ thumbnail_specs){
-        thumbnail_specs->second.top_v = 0;
-        thumbnail_specs->second.down_v = 0;
-        if(thumbnail_specs->second.callback){
-            thumbnail_specs->second.callback(thumbnail_specs->second);
-        }
-    }
-
-    // Save the waveforms as svg files and add them as media thumbnails
-    for(std::map<std::string,ACAudioWaveformThumbnailSpecs>::iterator thumbnail_specs = thumbnails_specs.begin(); thumbnail_specs != thumbnails_specs.end(); ++ thumbnail_specs){
-        //thumbnail_specs->second.document.save();
-        Document doc(thumbnail_specs->second.filename, Layout(thumbnail_specs->second.dimensions, Layout::BottomLeft));
-
-        /*if(thumbnail_specs->second.circular){
+            /*if(thumbnail_specs->second.circular){
             Circle circle (Point( thumbnail_specs->second.offset_x, thumbnail_specs->second.offset_y),
                           thumbnail_specs->second.width/2.0f,
                           Fill(Color::Transparent),
@@ -350,24 +342,63 @@ std::vector<ACMediaThumbnail*> ACAudioSvgWaveformThumbnailerPlugin::summarize(AC
             doc << circle;
         }*/
 
-        //doc << thumbnail_specs->second.top_p;
-        //doc << thumbnail_specs->second.down_p;
-        thumbnail_specs->second.top_p.addPoints( thumbnail_specs->second.down_p.getPoints() );
-        doc << thumbnail_specs->second.top_p;
+            //doc << thumbnail_specs->second.top_p;
+            //doc << thumbnail_specs->second.down_p;
+            thumbnail_specs->second.top_p.addPoints( thumbnail_specs->second.down_p.getPoints() );
+            doc << thumbnail_specs->second.top_p;
 
-        bool saved = doc.save();
-        if(!saved)
-            std::cerr << "ACAudioSvgWaveformThumbnailerPlugin::summarize: couldn't save thumbnail " << thumbnail_specs->second.filename << std::endl;
-
-        ACMediaThumbnail* thumbnail = new ACMediaThumbnail(MEDIA_TYPE_IMAGE);
-        thumbnail->setFileName(thumbnail_specs->second.filename);
-        thumbnail->setName(thumbnail_specs->second.name);
-        thumbnail->setWidth(thumbnail_specs->second.width);
-        thumbnail->setHeight(thumbnail_specs->second.height);
-        thumbnail->setLength(thumbnail_specs->second.length);
-        thumbnail->setCircular(thumbnail_specs->second.circular);
-        thumbnails.push_back(thumbnail);
+            bool saved = doc.save();
+            if(!saved)
+                std::cerr << "ACAudioSvgWaveformThumbnailerPlugin::summarize: couldn't save thumbnail " << thumbnail_specs->second.filename << std::endl;
+        }
     }
+
+    for(std::map<std::string,ACAudioWaveformThumbnailSpecs>::iterator thumbnail_specs = thumbnails_specs.begin(); thumbnail_specs != thumbnails_specs.end(); ++ thumbnail_specs){
+
+        std::string svg_filename = generateThumbnailName(media->getFileName(),thumbnail_specs->second.name, ".svg");
+        std::string png_filename = generateThumbnailName(media->getFileName(),thumbnail_specs->second.name, ".png");
+
+        rsvg_convert(svg_filename.c_str(),png_filename.c_str(),"png");
+
+        bool png_thumbnail_exists = true;
+        fs::path png_path( png_filename.c_str());// , fs::native );
+        if ( fs::exists( png_path ) )
+        {
+            //std::cout << "ACAudioSvgFeaturesThumbnailerPlugin::summarize: the expected thumbnail already exists as file: " << _filename << std::endl;
+            if ( fs::is_regular( png_path ) )
+            {
+                //std::cout << "ACAudioSvgFeaturesThumbnailerPlugin::summarize: file is regular: " << _filename << std::endl;
+                if(fs::file_size( png_path ) > 0 ){
+                    //std::cout << "ACAudioSvgFeaturesThumbnailerPlugin::summarize: size of " << _filename << " is non-zero, not recomputing "<< std::endl;
+                }
+                else
+                    png_thumbnail_exists = false;
+            }
+            else
+                png_thumbnail_exists = false;
+        }
+        else
+            png_thumbnail_exists = false;
+
+        if(png_thumbnail_exists){
+
+            // Consistency checks for the provided media instance (media data, start/end)
+            ACMediaThumbnail* thumbnail = new ACMediaThumbnail(MEDIA_TYPE_IMAGE);
+            thumbnail->setName(thumbnail_specs->second.name);
+            thumbnail->setFileName(png_filename);
+            thumbnail->setWidth(thumbnail_specs->second.width);
+            thumbnail->setHeight(thumbnail_specs->second.height);
+            thumbnail->setLength(thumbnail_specs->second.length);
+            thumbnail->setCircular(thumbnail_specs->second.circular);
+            thumbnails.push_back(thumbnail);
+        }
+        else{
+            std::cerr << "ACAudioSvgFeaturesThumbnailerPlugin: couldn't convert thumbnail from svg to png for file "  << png_filename << std::endl;
+        }
+    }
+    thumbnails_specs.clear();
+    std::cout << "ACAudioSvgWaveformThumbnailerPlugin::summarize: reusing thumbnails took " << getTime() - start_time << std::endl;
+    return thumbnails;
 
     std::cout << "ACAudioSvgWaveformThumbnailerPlugin::summarize: done computing waveform(s) for " << filename << " in " << getTime()-waveform_in << " sec." << std::endl;
     progress = 1.0f;
@@ -388,10 +419,10 @@ std::vector<std::string> ACAudioSvgWaveformThumbnailerPlugin::getThumbnailNames(
 
 std::map<std::string,std::string> ACAudioSvgWaveformThumbnailerPlugin::getThumbnailExtensions(){
     std::map<std::string,std::string> extensions;
-    extensions["Classic browser waveform"] = ".svg";
-    extensions["Classic timeline waveform"] = ".svg";
-    extensions["Circular browser waveform"] = ".svg";
-    extensions["Ring browser waveform"] = ".svg";
+    extensions["Classic browser waveform"] = ext;
+    extensions["Classic timeline waveform"] = ext;
+    extensions["Circular browser waveform"] = ext;
+    extensions["Ring browser waveform"] = ext;
     return extensions;
 }
 

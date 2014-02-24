@@ -43,6 +43,8 @@
 #include "boost/filesystem.hpp"
 #include "boost/algorithm/string.hpp"
 
+static std::string ext(".png");
+
 static std::string generateThumbnailName(std::string filename, std::string thumbnail_name, std::string extension);
 
 struct ACAudioFeaturesThumbnailSpecs{
@@ -72,7 +74,7 @@ struct ACAudioFeaturesThumbnailSpecs{
             hop_samples = 1;
         else
             hop_samples= _hop_samples;
-        filename = generateThumbnailName(_media_filename,_name,".svg");
+        filename = generateThumbnailName(_media_filename,_name,"");
         dimensions = svg::Dimensions(_width,_height);
     }
     ~ACAudioFeaturesThumbnailSpecs(){callback = 0;}

@@ -1,6 +1,6 @@
 /* -*-c++-*- Copyright (C) 2008 Miguel Escriva Gregori
  *
- * This library is open source and may be redistributed and/or modified under 
+ * This library is open source and may be redistributed and/or modified under
  * the terms of the OpenSceneGraph Public License (OSGPL) version 0.0 or
  * (at your option) any later version.  The full license is in LICENSE file
  * included with this distribution, and on the openscenegraph.org website.
@@ -23,7 +23,6 @@
 
 extern "C" {
         #include <librsvg/rsvg.h>
-        #include <librsvg/rsvg-cairo.h>
 }
 
 class ReaderWriterSVG : public osgDB::ReaderWriter
@@ -32,8 +31,7 @@ class ReaderWriterSVG : public osgDB::ReaderWriter
 
         ReaderWriterSVG()
         {
-                supportsExtension("svg","Scalar Vector Graphics format");        
-                rsvg_init();
+                supportsExtension("svg","Scalar Vector Graphics format");
         }
 
         virtual const char* className() const { return "SVG Image Reader"; }
@@ -59,7 +57,7 @@ class ReaderWriterSVG : public osgDB::ReaderWriter
                 if (options)
                 {
                         unsigned int w=0, h=0;
-                        std::string op = options->getOptionString();                        
+                        std::string op = options->getOptionString();
                         size_t i = op.find("x");
 
                         std::stringstream ss1(op.substr(0, i));
@@ -76,7 +74,7 @@ class ReaderWriterSVG : public osgDB::ReaderWriter
                 else{
                         image = createImage(handle, dimensionData.width, dimensionData.height);
                 }
-                rsvg_handle_free(handle);
+                g_object_unref(handle);
                 image->setFileName(file);
                 return image;
         }
@@ -100,9 +98,9 @@ class ReaderWriterSVG : public osgDB::ReaderWriter
                 cairo_t *cr = cairo_create(cairo_surface);
                 cairo_scale(cr,((float)width)/dimensionData.width, ((float)height)/dimensionData.height);
                 rsvg_handle_render_cairo(handle, cr);
-                        
+
                 cairo_destroy(cr);
-                free(cairo_surface);
+                cairo_surface_destroy(cairo_surface);
 
                 image->flipVertical();
                 return image;
@@ -110,7 +108,7 @@ class ReaderWriterSVG : public osgDB::ReaderWriter
     protected:
         virtual ~ReaderWriterSVG()
         {
-                rsvg_term();
+                rsvg_cleanup();
         }
 };
 

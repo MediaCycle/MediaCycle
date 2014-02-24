@@ -33,6 +33,7 @@
 #include <ACAudioData.h>
 #include <ACMedia.h>
 #include <iostream>
+#include <rsvg-convert.h>
 
 #ifndef ACPi
 #define	ACPi		3.14159265358979323846  /* pi */
@@ -139,6 +140,8 @@ std::vector<ACMediaThumbnail*> ACAudioSvgFeaturesThumbnailerPlugin::summarize(AC
                     std::string _featname = featdim->first;
                     std::string _thumbname = _featname + " Ring";
                     feature_names.push_back(_thumbname);
+                    std::string svg_filename = generateThumbnailName(media->getFileName(),_thumbname, ".svg");
+                    std::string png_filename = generateThumbnailName(media->getFileName(),_thumbname, ".png");
 
                     ACMediaTimedFeature* tf = media->getTimedFeature(_featname);
                     if(tf){
@@ -155,45 +158,32 @@ std::vector<ACMediaThumbnail*> ACAudioSvgFeaturesThumbnailerPlugin::summarize(AC
                                     );
 
                         // Checking if thumbnails already exist:
-                        std::string _filename = generateThumbnailName(media->getFileName(),_thumbname, ".svg");
 
-                        bool thumbnails_exist = true;
-                        fs::path p( _filename.c_str());// , fs::native );
-                        if ( fs::exists( p ) )
+                        bool svg_thumbnail_exists = true;
+                        fs::path svg_path( svg_filename.c_str());// , fs::native );
+                        if ( fs::exists( svg_path ) )
                         {
                             //std::cout << "ACAudioSvgFeaturesThumbnailerPlugin::summarize: the expected thumbnail already exists as file: " << _filename << std::endl;
-                            if ( fs::is_regular( p ) )
+                            if ( fs::is_regular( svg_path ) )
                             {
                                 //std::cout << "ACAudioSvgFeaturesThumbnailerPlugin::summarize: file is regular: " << _filename << std::endl;
-                                if(fs::file_size( p ) > 0 ){
+                                if(fs::file_size( svg_path ) > 0 ){
                                     //std::cout << "ACAudioSvgFeaturesThumbnailerPlugin::summarize: size of " << _filename << " is non-zero, not recomputing "<< std::endl;
                                 }
                                 else
-                                    thumbnails_exist = false;
+                                    svg_thumbnail_exists = false;
                             }
                             else
-                                thumbnails_exist = false;
+                                svg_thumbnail_exists = false;
                         }
                         else
-                            thumbnails_exist = false;
+                            svg_thumbnail_exists = false;
 
-                        if(thumbnails_exist){
-                            // Consistency checks for the provided media instance (media data, start/end)
-                            ACMediaThumbnail* thumbnail = new ACMediaThumbnail(MEDIA_TYPE_IMAGE);
-                            thumbnail->setFileName(thumbnails_specs[_thumbname].filename);
-                            thumbnail->setName(thumbnails_specs[_thumbname].name);
-                            thumbnail->setWidth(thumbnails_specs[_thumbname].width);
-                            thumbnail->setHeight(thumbnails_specs[_thumbname].height);
-                            thumbnail->setLength(thumbnails_specs[_thumbname].length);
-                            thumbnail->setCircular(thumbnails_specs[_thumbname].circular);
-                            thumbnails.push_back(thumbnail);
+                        if(svg_thumbnail_exists){
                             std::cout << "ACAudioSvgFeaturesThumbnailerPlugin::summarize: reusing thumbnails took " << getTime() - start_time << std::endl;
                             //return thumbnails;
                         }
                         else{
-
-
-
                             std::cout << "Feature: " << _featname << " Length " << tf->getLength() << std::endl;
                             std::cout << "Feature: " << _featname << " Dim " << tf->getDim() << std::endl;
 
@@ -210,7 +200,7 @@ std::vector<ACMediaThumbnail*> ACAudioSvgFeaturesThumbnailerPlugin::summarize(AC
                             this->thumbnails_specs[_thumbname].down_v = 0;
                             this->thumbnails_specs[_thumbname].callback(this->thumbnails_specs[_thumbname]);
 
-                            Document doc(thumbnails_specs[_thumbname].filename, Layout(thumbnails_specs[_thumbname].dimensions, Layout::BottomLeft));
+                            Document doc(/*thumbnails_specs[_thumbname].*/svg_filename, Layout(thumbnails_specs[_thumbname].dimensions, Layout::BottomLeft));
                             thumbnails_specs[_thumbname].top_p.addPoints( thumbnails_specs[_thumbname].down_p.getPoints() );
                             doc << thumbnails_specs[_thumbname].top_p;
 
@@ -218,8 +208,35 @@ std::vector<ACMediaThumbnail*> ACAudioSvgFeaturesThumbnailerPlugin::summarize(AC
                             if(!saved)
                                 std::cerr << "ACAudioSvgFeaturesThumbnailerPlugin::summarize: couldn't save thumbnail " << thumbnails_specs[_thumbname].filename << std::endl;
 
+                        }
+
+                        rsvg_convert(svg_filename.c_str(),png_filename.c_str(),"png");
+
+                        bool png_thumbnail_exists = true;
+                        fs::path png_path( png_filename.c_str());// , fs::native );
+                        if ( fs::exists( png_path ) )
+                        {
+                            //std::cout << "ACAudioSvgFeaturesThumbnailerPlugin::summarize: the expected thumbnail already exists as file: " << _filename << std::endl;
+                            if ( fs::is_regular( png_path ) )
+                            {
+                                //std::cout << "ACAudioSvgFeaturesThumbnailerPlugin::summarize: file is regular: " << _filename << std::endl;
+                                if(fs::file_size( png_path ) > 0 ){
+                                    //std::cout << "ACAudioSvgFeaturesThumbnailerPlugin::summarize: size of " << _filename << " is non-zero, not recomputing "<< std::endl;
+                                }
+                                else
+                                    png_thumbnail_exists = false;
+                            }
+                            else
+                                png_thumbnail_exists = false;
+                        }
+                        else
+                            png_thumbnail_exists = false;
+
+                        if(png_thumbnail_exists){
+
+                            // Consistency checks for the provided media instance (media data, start/end)
                             ACMediaThumbnail* thumbnail = new ACMediaThumbnail(MEDIA_TYPE_IMAGE);
-                            thumbnail->setFileName(thumbnails_specs[_thumbname].filename);
+                            thumbnail->setFileName(png_filename);
                             thumbnail->setName(thumbnails_specs[_thumbname].name);
                             thumbnail->setWidth(thumbnails_specs[_thumbname].width);
                             thumbnail->setHeight(thumbnails_specs[_thumbname].height);
@@ -228,6 +245,11 @@ std::vector<ACMediaThumbnail*> ACAudioSvgFeaturesThumbnailerPlugin::summarize(AC
                             thumbnails.push_back(thumbnail);
 
                         }
+                        else{
+                            std::cerr << "ACAudioSvgFeaturesThumbnailerPlugin: couldn't convert thumbnail from svg to png for file "  << png_filename << std::endl;
+                        }
+
+
                     }
                     delete tf;
                 }
@@ -252,7 +274,7 @@ std::vector<std::string> ACAudioSvgFeaturesThumbnailerPlugin::getThumbnailNames(
 std::map<std::string,std::string> ACAudioSvgFeaturesThumbnailerPlugin::getThumbnailExtensions(){
     std::map<std::string,std::string> extensions;
     for(std::vector<std::string>::iterator feature_name = feature_names.begin();feature_name!=feature_names.end();feature_name++)
-        extensions[*feature_name] = ".svg";
+        extensions[*feature_name] = ext;
     return extensions;
 }
 
