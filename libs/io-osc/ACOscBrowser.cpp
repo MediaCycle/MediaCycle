@@ -295,16 +295,15 @@ int ACOscBrowser::process_mess(const char *path, const char *types, lo_arg **arg
                 if (media_cycle->getLibrary()->getSize() > 0) {
                     media_cycle->setAutoPlay(1);
 
-                    //CF required for force-feedback, to restore (need to move "distancemouse" calculation in the core)
-                    /*int closest_node = media_cycle->getClosestNode();
-                    float distance = this->getOsgView()->getBrowserRenderer()->getDistanceMouse()[closest_node];
+                    int closest_node = media_cycle->getClosestNode(id);
+                    float distance = media_cycle->getClosestDistance(id); //media_cycle->getBrowser()->getDistanceMouse()[closest_node];
                     if (osc_feedback)
                     {
                         osc_feedback->messageBegin("/mediacycle/closest_node_at");
                         osc_feedback->messageAppendFloat(distance);
                         osc_feedback->messageEnd();
                         osc_feedback->messageSend();
-                    }*/
+                    }
                 }
                 //media_cycle->setNeedsDisplay(true);
             }

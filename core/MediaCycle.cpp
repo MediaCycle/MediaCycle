@@ -231,6 +231,8 @@ void MediaCycle::loadDefaultConfig(std::string name){
         this->changeActivePlugin(PLUGIN_TYPE_LIBRARY_READER,config->libraryReaderPlugin());
     if(config->libraryWriterPlugin() != "")
         this->changeActivePlugin(PLUGIN_TYPE_LIBRARY_WRITER,config->libraryWriterPlugin());
+    if(config->filteringPlugin() != "")
+        this->changeActivePlugin(PLUGIN_TYPE_FILTERING,config->filteringPlugin());
 
 #if defined (SUPPORT_MULTIMEDIA)
     mediaLibrary->setActiveMediaType( config->activeMediaType(), this->pluginManager );
@@ -871,6 +873,10 @@ bool MediaCycle::changeActivePlugin(ACPluginType pluginType, std::string pluginN
         this->getBrowser()->changeNeighborsPositionsPlugin(plugin);
         ok = true;
     }
+    if(plugin->implementsPluginType(PLUGIN_TYPE_FILTERING)){
+        this->getBrowser()->changeFilteringPlugin(plugin);
+        ok = true;
+    }
     if(plugin->implementsPluginType(PLUGIN_TYPE_SEGMENTATION)){
         this->getPluginManager()->setActiveSegmentPlugin(pluginName);
         ok = true;
@@ -922,6 +928,9 @@ std::vector<std::string> MediaCycle::getActivePluginNames(ACPluginType pluginTyp
         break;
     case PLUGIN_TYPE_PREPROCESS:
         plugin = this->getLibrary()->getPreProcessPlugin();
+        break;
+    case PLUGIN_TYPE_FILTERING:
+        plugin = this->getBrowser()->getFilteringPlugin();
         break;
     default:
         names = this->getPluginManager()->getAvailablePluginsNames(pluginType,mediaType);
@@ -1220,6 +1229,7 @@ void MediaCycle::setClosestNode(int i,int p_index) {
         this->performActionOnMedia("hover closest node",i,arguments);
     }
 }
+
 int MediaCycle::getClosestNode(int p_index){
     // Block media actions while importing
     if(this->importing)
@@ -1230,6 +1240,14 @@ int MediaCycle::getClosestNode(int p_index){
     else{
         return -1;
     }
+}
+
+void MediaCycle::setClosestDistance(float d,int p_index){
+    mediaBrowser->setClosestDistance(d,p_index);
+}
+
+float MediaCycle::getClosestDistance(int p_index){
+    return mediaBrowser->getClosestDistance(p_index);
 }
 
 int	MediaCycle::getLastSelectedNode(){

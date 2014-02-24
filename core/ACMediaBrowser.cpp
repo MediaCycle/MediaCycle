@@ -109,6 +109,7 @@ ACMediaBrowser::ACMediaBrowser() {
     mClustersPosPlugin = 0;
     mNeighborsPosPlugin = 0;
     mNoMethodPosPlugin = 0;
+    mFilteringPlugin = 0;
 
     mNeighborsManager = new ACNeighborsManager();
 
@@ -148,6 +149,7 @@ void ACMediaBrowser::clean(){
     mClustersPosPlugin = 0;
     mNeighborsMethodPlugin = 0;
     mNeighborsPosPlugin = 0;
+    mFilteringPlugin = 0;
 
     mLabelAttributes.clear(); // XS leave it like this or also make a tree ?
     nbDisplayedLabels = 0;
@@ -440,6 +442,17 @@ int ACMediaBrowser::getClosestNode(int p_index)
     return closestNode;
 }
 
+float ACMediaBrowser::getClosestDistance(int p_index)
+{
+    float closestDistance = -1;
+    ACPointer* pointer = getPointerFromIndex(p_index);
+    if(pointer)
+        closestDistance = pointer->getClosestDistance();
+    else
+        std::cerr << "ACMediaBrowser::getClosestDistance: couldn't access pointer of index " << p_index << std::endl;
+    return closestDistance;
+}
+
 void ACMediaBrowser::setClickedLabel(int ilabel){
     if (ilabel < -1 || ilabel >= this->getNumberOfLabels())
         cerr << "<ACMediaBrowser::setClickedLabel> : index " << ilabel << "out of bounds" << endl;
@@ -451,7 +464,8 @@ void ACMediaBrowser::setClickedLabel(int ilabel){
 void ACMediaBrowser::setNodeNextPosition(int node_id, ACPoint p){
     double t = getTime();
     if (node_id>=0 ){//&& node_id < this->getNumberOfMediaNodes()) {
-        this->getMediaNode(node_id)->setNextPosition(p,t);
+        if(this->getMediaNode(node_id))
+            this->getMediaNode(node_id)->setNextPosition(p,t);
     }
     else {
         cerr << "ACMediaBrowser::setNodeNextPosition : wrong node ID:" << node_id << endl;
@@ -1375,6 +1389,15 @@ std::map<long int,int> ACMediaBrowser::setClosestNode(int _node_id, int p_index)
     return nodeActivities;
 }
 
+void ACMediaBrowser::setClosestDistance(float distance, int p_index){
+    ACPointer* p = 0;
+    p = this->getPointerFromIndex(p_index);
+    if(p)
+        p->setClosestDistance(distance);
+    else
+        std::cerr << "ACMediaBrowser::setClosestDistance: couldn't access pointer with index " << p_index << std::endl;
+}
+
 // XS TODO iterator + return value makes no sense
 int ACMediaBrowser::muteAllSources()
 {
@@ -1808,6 +1831,7 @@ void ACMediaBrowser::updateDisplay(bool animate, int needsCluster) {
         cerr << "unknown browser mode: " << mMode << endl;
         break;
     }
+
     this->setNeedsDisplay(true);
 
     // TODO: SD/XS check this
@@ -1939,6 +1963,11 @@ void ACMediaBrowser::setNeighborsPositionsPlugin(ACPlugin* acpl)
 void ACMediaBrowser::setVisualisationPlugin(ACPlugin* acpl)
 {
     mNoMethodPosPlugin=dynamic_cast<ACNoMethodPositionsPlugin*> (acpl);
+}
+
+void ACMediaBrowser::setFilteringPlugin(ACPlugin *acpl)
+{
+    mFilteringPlugin=dynamic_cast<ACFilteringPlugin*> (acpl);
 }
 
 bool ACMediaBrowser::changeClustersMethodPlugin(ACPlugin* acpl)
@@ -2087,6 +2116,13 @@ bool ACMediaBrowser::changeNeighborsPositionsPlugin(ACPlugin* acpl)
     return success;
 }
 
+bool ACMediaBrowser::changeFilteringPlugin(ACPlugin* acpl)
+{
+    if(acpl)
+        this->setFilteringPlugin(acpl);
+    this->updateDisplay(true);
+}
+
 /*
 bool ACMediaBrowser::changeVisualisationPlugin(ACPlugin* acpl)
 {
@@ -2202,6 +2238,9 @@ void ACMediaBrowser::normalizePositions()
 
 void ACMediaBrowser::commitPositions()
 {
+    if(mFilteringPlugin)
+        mFilteringPlugin->filter();
+
 	//this->normalizePositions();
     for (ACMediaNodes::iterator node = mMediaNodes.begin(); node != mMediaNodes.end(); ++node){
         node->second->commitPosition();

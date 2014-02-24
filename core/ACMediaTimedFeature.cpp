@@ -101,7 +101,7 @@ ACMediaTimedFeature::ACMediaTimedFeature( const vector<float> &time, const vecto
 	if (time.size() != value.size()) {
 		cerr << "<ACMediaTimedFeature::ACMediaTimedFeature> Time and value vectors do not have the same size" << endl;
 		cerr << "time : " << time.size() << " --- " << "value : " << value.size() << endl;
-		exit(-1);
+        return;//exit(-1);
 	}
 	this->time_v = fcolvec(time.size());
 	this->value_m = fmat((int) value.size(), (int) value[0].size());

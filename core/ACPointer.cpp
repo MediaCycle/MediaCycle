@@ -42,63 +42,71 @@ static double getTime()
 {
     struct timeval tv = {0, 0};
     struct timezone tz = {0, 0};
-	
+
     gettimeofday(&tv, &tz);
-	
+
     return (double)tv.tv_sec + tv.tv_usec / 1000000.0;
 }
 
 ACPointer::ACPointer(std::string _text,ACPointerType _pointerType)
-	: text(""),timeTag(getTime()),closestNode(-1),pointerType(AC_POINTER_UNKNOWN){
-	currentPos.x = 0.0f;
-	currentPos.y = 0.0f;
-	currentPos.z = 0.0f;
-	pointerType = _pointerType;
-	text = _text;
+    : text(""),timeTag(getTime()),closestNode(-1),closestDistance(-1),pointerType(AC_POINTER_UNKNOWN){
+    currentPos.x = 0.0f;
+    currentPos.y = 0.0f;
+    currentPos.z = 0.0f;
+    pointerType = _pointerType;
+    text = _text;
 }
 
 void ACPointer::setCurrentPosition(ACPoint p){
-	currentPos = p;
+    currentPos = p;
 }
 void ACPointer::setCurrentPosition(double xx,double yy){
-	
-	ACPoint p;
-	p.x = xx; p.y = yy; p.z = 0.0;
-	this->setCurrentPosition(p);
+
+    ACPoint p;
+    p.x = xx; p.y = yy; p.z = 0.0;
+    this->setCurrentPosition(p);
 }
 
 ACPoint ACPointer::getCurrentPosition(){
-	return this->currentPos;
+    return this->currentPos;
 }
 
 void ACPointer::setText(string t){
-	this->text = t;
+    this->text = t;
 }
 
 string ACPointer::getText(){
-	return this->text;
+    return this->text;
 }
 
 double ACPointer::getTimeTag(){
-	return this->timeTag;
+    return this->timeTag;
 }
 
 void ACPointer::resetTimeTag(){
-	this->timeTag = getTime();
+    this->timeTag = getTime();
 }
 
 int ACPointer::getClosestNode(){
-	return this->closestNode;
+    return this->closestNode;
 }
 
 void ACPointer::setClosestNode(int _closestNode){ 
-	this->closestNode = _closestNode;
+    this->closestNode = _closestNode;
+}
+
+float ACPointer::getClosestDistance(){
+    return this->closestDistance;
+}
+
+void ACPointer::setClosestDistance(float _closestDistance){
+    this->closestDistance = _closestDistance;
 }
 
 ACPointerType ACPointer::getType(){ 
-	return this->pointerType;
+    return this->pointerType;
 }
 
 void ACPointer::setType(ACPointerType _type){ 
-	this->pointerType = _type;
+    this->pointerType = _type;
 }

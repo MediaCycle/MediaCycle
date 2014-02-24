@@ -136,6 +136,7 @@ const ACPluginType	PLUGIN_TYPE_MEDIA_ANALYSIS		=	0x20000;/// plugin type for fun
 const ACPluginType	PLUGIN_TYPE_LIBRARY_FILE		=	0x40000;/// plugin type for library file management, shared by readers and writers
 const ACPluginType	PLUGIN_TYPE_LIBRARY_READER		=	0x80000;/// plugin type for library file reading
 const ACPluginType	PLUGIN_TYPE_LIBRARY_WRITER		=	0x100000;/// plugin type for library file writing
+const ACPluginType  PLUGIN_TYPE_FILTERING           =   0x200000;/// plugin type for filtering the view after positions are computed
 
 // From http://cottonvibes.blogspot.be/2010/07/maxmin-values-for-signed-and-unsigned.html
 // u8, u16, u32... mean unsigned int of 8, 16, and 32 bits respectively
@@ -386,6 +387,12 @@ public:
     virtual preProcessInfo update(ACMedias media_library)=0;
     virtual std::vector<ACMediaFeatures*> apply(preProcessInfo info,ACMedia* theMedia)=0;
     virtual void freePreProcessInfo(preProcessInfo &info)=0;
+};
+
+class ACFilteringPlugin : virtual public ACPlugin {
+public:
+    ACFilteringPlugin();
+    virtual void filter()=0;
 };
 
 class ACClientPlugin : virtual public ACPlugin {

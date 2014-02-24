@@ -202,6 +202,8 @@ public:
     void setClickedNode(int i);
     void setClosestNode(int i,int p_index = 0);
     int getClosestNode(int p_index = 0);
+    void setClosestDistance(float d,int p_index = 0);
+    float getClosestDistance(int p_index = 0);
     int	getLastSelectedNode();
 
     /// Cluster Display

@@ -55,6 +55,7 @@ private:
 	std::string text;
 	double timeTag;
 	int closestNode;
+    float closestDistance;
 	ACPointerType pointerType;
 	
 public:
@@ -70,6 +71,8 @@ public:
 	void resetTimeTag();
 	int getClosestNode();
 	void setClosestNode(int _closestNode);
+    float getClosestDistance();
+    void setClosestDistance(float _closestDistance);
 	ACPointerType getType();
 	void setType(ACPointerType _type);
 };

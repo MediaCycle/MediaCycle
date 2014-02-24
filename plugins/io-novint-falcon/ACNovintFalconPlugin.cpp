@@ -72,6 +72,7 @@ ACNovintFalconPlugin::ACNovintFalconPlugin()
       m_runClickCount(0),
       m_buttonDown(false),
       m_stiffness(1000),
+      m_distance(0.03),
       m_radius(0.024),
       m_plusButtonDown(false),
       m_minusButtonDown(false),
@@ -428,23 +429,24 @@ void ACNovintFalconPlugin::nifalcon_update_loop()
             }
             else{
 
+                float scale = 25;
                 float x(0.0f),y(0.0f);
                 if(media_cycle){
                     media_cycle->setAutoPlay(1);
                     if(this->getStringParameterValue("Layout") == "Desktop"){
                         // Falcon x,y -> Screen x,y : Desktop
-                        x = 20*pos[0];
-                        y = 20*pos[1];
+                        x = scale*pos[0];
+                        y = scale*pos[1];
                     }
                     else if(this->getStringParameterValue("Layout") == "Left-handed starfish eNTERFACE"){
                         // Falcon y, -x -> Screen x,y : Left-handed starfish eNTERFACE
-                        x = 20*pos[1];
-                        y = -20*pos[0];
+                        x = scale*pos[1];
+                        y = -scale*pos[0];
                     }
                     else /*if(this->getStringParameterValue("Layout") == "Right-handed starfish eNTERFACE")*/{
                         // Falcon -y, x -> Screen x,y : Right-handed starfish eNTERFACE
-                        x = -20*pos[1];
-                        y = 20*pos[0];
+                        x = -scale*pos[1];
+                        y = scale*pos[0];
                     }
                     if(media_cycle->hasBrowser()) media_cycle->getBrowser()->removeMousePointer();
                     media_cycle->hoverWithPointerId(x,y,0);
@@ -479,7 +481,7 @@ void ACNovintFalconPlugin::nifalcon_update_loop()
                     force[closest] = -m_plane_stiffness*plane_dist;
 
                 if(media_cycle){
-                    if(media_cycle->getLibrarySize()>0 && this->getBrowserRenderer()){
+                    if(media_cycle->getLibrarySize()>0 && this->getBrowserRenderer() && media_cycle->getClosestNode(0) > -1){
                         ACMediaNode* node = media_cycle->getMediaNode( media_cycle->getClosestNode(0) );
                         if(node){
                             ACPoint p = node->getCurrentPosition(); // getNextPosition();//
@@ -487,14 +489,14 @@ void ACNovintFalconPlugin::nifalcon_update_loop()
                             if( this->getBrowserRenderer())
                                 distance = this->getBrowserRenderer()->getDistanceMouse()[media_cycle->getClosestNode(0)];
 
-                            if(distance < 0.03){
+                            if(distance < m_distance){
 
                                 //CF: node friction from libnifalcon FalconSphereTest
 
                                 //make sphere soft radius or "slippery"
                                 //m_stiffness = -300.0;//attraction
-                                //m_stiffness = 500.0;//friction
-                                m_stiffness = 0.225;
+                                //m_stiffness = 500.0;//repulsion
+                                m_stiffness = -0.225;//0.225;
 
                                 if(this->getStringParameterValue("Layout") == "Desktop"){
                                     // Falcon x,y -> Screen x,y : Desktop

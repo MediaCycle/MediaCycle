@@ -164,6 +164,7 @@ private:
     bool m_buttonDown;
 
     double m_stiffness;
+    double m_distance;
     double m_radius;
     bool m_plusButtonDown;
     bool m_minusButtonDown;

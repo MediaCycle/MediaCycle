@@ -49,6 +49,7 @@ enum ACBrowserMode {
 
 #include <boost/thread.hpp>
 #include <boost/asio.hpp>
+#include <boost/any.hpp>
 #include <iostream>
 
 #endif//(Q_MOC_RUN)

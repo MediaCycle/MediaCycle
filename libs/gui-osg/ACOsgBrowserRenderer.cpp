@@ -142,6 +142,8 @@ void ACOsgBrowserRenderer::clean(){
     media_index = -1;
     prev_media_index = -1;
     media_cycle_filename = "";
+    if(this->media_cycle && this->media_cycle->getBrowser())
+        this->media_cycle->getBrowser()->getDistanceMouse().clear();
     distance_mouse.clear();
     nodes_prepared = 0;
     this->removeNodes();
@@ -668,7 +670,7 @@ int ACOsgBrowserRenderer::computeScreenCoordinates(osgViewer::View* view, double
 
                 // compute distance between mouse and media element in view
                 distance_mouse[i] = sqrt((screenPoint[0]-mx)*(screenPoint[0]-mx)+(screenPoint[1]-my)*(screenPoint[1]-my));
-
+                this->media_cycle->getBrowser()->getDistanceMouse()[i] = distance_mouse[i];
                 node_renderer->second->setDistanceMouse(MIN(distance_mouse[i],node_renderer->second->getDistanceMouse()));
 
                 if (distance_mouse[i]<closest_distance) {
@@ -678,6 +680,7 @@ int ACOsgBrowserRenderer::computeScreenCoordinates(osgViewer::View* view, double
             }
         }
         media_cycle->setClosestNode(closest_node,p_index);
+        media_cycle->setClosestDistance(closest_distance,p_index);
         media_cycle->hoverWithPointerIndex(mx,my,p_index);
     }
     

@@ -118,8 +118,8 @@ public:
 
     void clean();
 
-    void setLibrary(ACMediaLibrary *lib) { mLibrary = lib; };
-    ACMediaLibrary *getLibrary() { return mLibrary; };
+    void setLibrary(ACMediaLibrary *lib) { mLibrary = lib; }
+    ACMediaLibrary *getLibrary() { return mLibrary; }
 
     // call this when the number of nodes changes in the library
     void libraryContentChanged(int needsCluster=1);
@@ -200,6 +200,9 @@ public:
     set<int>& getSelectedNodes(){return mSelectedNodes;}
     void unselectNodes();
     int getClosestNode(int p_index = 0);
+    std::map<long int,int> setClosestNode(int node_id, int p_index); // returns a map of media id and activity
+    float getClosestDistance(int p_index = 0);
+    void setClosestDistance(float distance, int p_index);
     int	getLastSelectedNode(){return mLastSelectedNode;}
     void setReferenceNode(int index);
     int getReferenceNode(){return mReferenceNode;}
@@ -229,13 +232,16 @@ public:
     void removeMousePointer();
     bool hasMousePointer();
 
+    std::map<long int, float>& getDistanceMouse(){return distance_mouse;}
+    void setDistanceMouse(std::map<long int, float>& _distance_mouse){distance_mouse = _distance_mouse;}
+
     // == Labels
     void setClickedLabel(int ilabel);
-    int getClickedLabel(){return mClickedLabel; };
+    int getClickedLabel(){return mClickedLabel; }
 
     // = States : AC_ IDLE or AC_CHANGING (i.e., from current to next position)
     double getFrac() const {return mFrac;} // fraction between current and next position
-    ACBrowserState getState() const {return mState;};
+    ACBrowserState getState() const {return mState;}
     void setState(ACBrowserState state);
     void updateState();
 
@@ -251,7 +257,6 @@ public:
     void setMode(ACBrowserMode _mode);
 
     // Quick Browser
-    std::map<long int,int> setClosestNode(int node_id, int p_index); // returns a map of media id and activity
     void setAutoPlay(int auto_play) { this->auto_play = auto_play; }
     bool getAutoPlay() { return this->auto_play; }
     void setAutoDiscard(bool status) { this->auto_discard = status; }
@@ -304,6 +309,9 @@ public:
     //bool changeVisualisationPlugin(ACPlugin* acpl);//CF we need to sort out first what a VisualisationPlugin can contain vs Clusters/Neighbors Method/Positions plugins
 
     // NB: Proximity Grid moved to plugin
+    ACFilteringPlugin* getFilteringPlugin(){return mFilteringPlugin;}
+    void setFilteringPlugin(ACPlugin* acpl);
+    bool changeFilteringPlugin(ACPlugin* acpl);
 
     // == Neighbors
     //ACNeighborsManager* getUserLog(); // forbidden, the neighbor manager only manages neighbor ids, not ACMediaNodes
@@ -341,6 +349,7 @@ private: // better not let the ouside world know about internal cooking
     void resetNavigationLevels(int l=0);
     void resetCamera();
 	void normalizePositions();
+public:
     // next positions -> current positions
     void commitPositions();
 
@@ -401,6 +410,8 @@ protected:
     ACPointers mPointers;
     int mPointersActiveNumber;
 
+    std::map<long int, float> distance_mouse;
+
     int nbDisplayedNodes;
 
     ACLabels mLabelAttributes;
@@ -427,6 +438,8 @@ protected:
     ACClusterPositionsPlugin* mClustersPosPlugin;
     ACNeighborPositionsPlugin* mNeighborsPosPlugin;
     ACNoMethodPositionsPlugin* mNoMethodPosPlugin;
+
+    ACFilteringPlugin* mFilteringPlugin;
 
     ACNeighborsManager* mNeighborsManager;
 

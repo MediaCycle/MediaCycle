@@ -706,6 +706,10 @@ ACPreProcessPlugin::ACPreProcessPlugin() : ACPlugin() {
     this->mPluginType = mPluginType | PLUGIN_TYPE_PREPROCESS;
 }
 
+ACFilteringPlugin::ACFilteringPlugin() : ACPlugin() {
+    this->mPluginType = mPluginType | PLUGIN_TYPE_FILTERING;
+}
+
 ACClientPlugin::ACClientPlugin() : ACPlugin() {
     this->mPluginType = mPluginType | PLUGIN_TYPE_CLIENT;
 }

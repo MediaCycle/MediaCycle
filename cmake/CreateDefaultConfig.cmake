@@ -11,10 +11,11 @@
 #  BROWSER_MODE: example: SET(BROWSER_MODE "AC_MODE_CLUSTERS"), otherwise defaults to clusters mode
 #  CLUSTERS_METHOD: example: SET(CLUSTERS_METHOD "MediaCycle KMeans")
 #  CLUSTERS_POSITIONS: example: SET(CLUSTERS_POSITIONS "MediaCycle Propeller")
-#  NEIGHBORS_METHOD
-#  NEIGHBORS_POSITIONS
-#  PREPROCESS
-#  SEGMENTATION
+#  NEIGHBORS_METHOD: example: SET(NEIGHBORS_METHOD "Pareto")
+#  NEIGHBORS_POSITIONS: example: SET(NEIGHBORS_POSITIONS "Radial Tree")
+#  PREPROCESS: example: SET(PREPROCESS "PCA Preprocess")
+#  SEGMENTATION: example: SET(SEGMENTATION "BIC")
+#  FILTERING: example: SET(FILTERING "Proximity Grid")
 #  WITH_SEGMENTATION: example: SET(WITH_SEGMENTATION ON)
 #  WITHOUT_NEIGHBORS: example: SET(WITHOUT_NEIGHBORS ON)
 #  MEDIA_READER: example: SET(MEDIA_READER "Archipel Reader")
@@ -192,6 +193,7 @@ file(APPEND ${CMAKE_CURRENT_BINARY_DIR}/${CLASS_NAME}.h "
 	virtual std::string segmentationPlugin(){return \"${SEGMENTATION}\";}
         virtual std::string libraryReaderPlugin(){return \"${LIBRARY_READER}\";}
         virtual std::string libraryWriterPlugin(){return \"${LIBRARY_WRITER}\";}
+        virtual std::string filteringPlugin(){return \"${FILTERING}\";}
 ")
 
 IF(FORGET_THUMBNAILS)
