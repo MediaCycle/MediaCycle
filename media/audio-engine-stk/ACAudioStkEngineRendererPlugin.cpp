@@ -62,6 +62,12 @@ ACAudioStkEngineRendererPlugin::ACAudioStkEngineRendererPlugin() : QObject(), AC
     dac = new RtAudio();
     midi_in = 0;
     midi_out = 0;
+    // Behringer BCF 2000 motorized faders assignation
+    //midi_in_port = "BCF2000 Port 1";
+    //midi_out_port = "BCF2000 Port 1";
+    // iCON iControls_Pro V1.02 motorized faders assignation
+    midi_in_port = "iCON iControls_Pro V1.02 Port 1";
+    midi_out_port = "iCON iControls_Pro V1.02 Port 1";
     mutex = new stk::Mutex();
 
     inputs.resize(STK_PLAY_BUFFERS);
@@ -240,11 +246,13 @@ void ACAudioStkEngineRendererPlugin::useMotorizedFaders(){
 
     // make this function callable once
 
-    //    this->with_faders = true;
+    this->with_faders = true;
 
     // to replace by a callback probing for the device
 
     // Behringer BCF 2000 motorized faders assignation
+    //midi_in_port = "BCF2000 Port 1";
+    //midi_out_port = "BCF2000 Port 1";
 
     //    fader_effect.push_back("reverb mix");
     //    fader_effect.push_back("reverb room size");
@@ -255,57 +263,68 @@ void ACAudioStkEngineRendererPlugin::useMotorizedFaders(){
     //    fader_effect.push_back("playback volume");
     //    fader_effect.push_back("master volume");
 
-    //    this->midi_in = new RtMidiIn();
-    //    int in_port_count = this->midi_in->getPortCount();
-    //    bool in_port_found = false;
-    //    midi_in_ports.push_back("None");
-    //    for (int port = 0; port < in_port_count; port++){
-    //        std::cout << "ACAudioStkEngineRendererPlugin::ACAudioStkEngineRendererPlugin(): midi in port " << port << " name " << this->midi_in->getPortName(port) << " is available " << std::endl;
-    //        midi_in_ports.push_back(midi_in->getPortName(port));
-    //        if(midi_in->getPortName(port) == "BCF2000 Port 1"){
-    //            midi_in->openPort(port);
-    //            midi_in->setCallback(&ACAudioStkEngineRendererPlugin::midiInCallbackWrapper,this);
-    //            in_port_found = true;
-    //        }
-    //    }
-    //    if(!in_port_found){
-    //        delete midi_in;
-    //        midi_in = 0;
-    //    }
+    // iCON iControls_Pro V1.02 motorized faders assignation
+    midi_in_port = "iCON iControls_Pro V1.02 Port 1";
+    midi_out_port = "iCON iControls_Pro V1.02 Port 1";
 
-    //    this->midi_out = new RtMidiOut();
-    //    int out_port_count = this->midi_out->getPortCount();
-    //    bool out_port_found = false;
-    //    midi_out_ports.push_back("None");
-    //    for (int port = 0; port < out_port_count; port++){
-    //        std::cout << "ACAudioStkEngineRendererPlugin::ACAudioStkEngineRendererPlugin(): midi out port " << port << " name " << this->midi_out->getPortName(port) << " is available " << std::endl;
-    //        midi_out_ports.push_back(midi_out->getPortName(port));
-    //        if(midi_out->getPortName(port) == "BCF2000 Port 1"){
-    //            midi_out->openPort(port);
-    //            out_port_found = true;
-    //        }
-    //    }
-    //    if(!out_port_found){
-    //        delete midi_out;
-    //        midi_out = 0;
-    //    }
+    fader_effect.push_back("reverb mix");
+    fader_effect.push_back("reverb room size");
+    fader_effect.push_back("reverb damping");
+    fader_effect.push_back("playback speed");
+    fader_effect.push_back("playback pan");
+    fader_effect.push_back("playback volume");
+    fader_effect.push_back("master volume");
 
+    this->midi_in = new RtMidiIn();
+    int in_port_count = this->midi_in->getPortCount();
+    bool in_port_found = false;
+    midi_in_ports.push_back("None");
+    for (int port = 0; port < in_port_count; port++){
+        std::cout << "ACAudioStkEngineRendererPlugin::ACAudioStkEngineRendererPlugin(): midi in port " << port << " name " << this->midi_in->getPortName(port) << " is available " << std::endl;
+        midi_in_ports.push_back(midi_in->getPortName(port));
+        if(midi_in->getPortName(port) == midi_in_port){
+            midi_in->openPort(port);
+            midi_in->setCallback(&ACAudioStkEngineRendererPlugin::midiInCallbackWrapper,this);
+            in_port_found = true;
+        }
+    }
+    if(!in_port_found){
+        delete midi_in;
+        midi_in = 0;
+    }
 
-    //    if(with_faders){
-    //        std::vector<std::string> available_effects;
-    //        for(std::map<std::string,ACMediaActionParameters>::iterator action = action_parameters.begin(); action != action_parameters.end(); action++){
-    //            if(action->second.size()>0){
-    //                std::cout << "Adding action " << action->first << std::endl;
-    //                available_effects.push_back(action->first);
-    //            }
+    this->midi_out = new RtMidiOut();
+    int out_port_count = this->midi_out->getPortCount();
+    bool out_port_found = false;
+    midi_out_ports.push_back("None");
+    for (int port = 0; port < out_port_count; port++){
+        std::cout << "ACAudioStkEngineRendererPlugin::ACAudioStkEngineRendererPlugin(): midi out port " << port << " name " << this->midi_out->getPortName(port) << " is available " << std::endl;
+        midi_out_ports.push_back(midi_out->getPortName(port));
+        if(midi_out->getPortName(port) == midi_out_port){
+            midi_out->openPort(port);
+            out_port_found = true;
+        }
+    }
+    if(!out_port_found){
+        delete midi_out;
+        midi_out = 0;
+    }
 
-    //        }
-    //        for(int fader = 1; fader<=8; fader++){
-    //            std::stringstream _fader;
-    //            _fader << fader;
-    //            this->addStringParameter("Fader " + _fader.str(),fader_effect[fader-1],available_effects,"Assign fader " + _fader.str() + " to an effect parameter " ,boost::bind(&ACAudioStkEngineRendererPlugin::updateFaderEffect,this,fader));
-    //        }
-    //    }
+    if(with_faders){
+        std::vector<std::string> available_effects;
+        for(std::map<std::string,ACMediaActionParameters>::iterator action = action_parameters.begin(); action != action_parameters.end(); action++){
+            if(action->second.size()>0){
+                std::cout << "Adding action " << action->first << std::endl;
+                available_effects.push_back(action->first);
+            }
+
+        }
+        for(int fader = 1; fader<=fader_effect.size(); fader++){
+            std::stringstream _fader;
+            _fader << fader;
+            this->addStringParameter("Fader " + _fader.str(),fader_effect[fader-1],available_effects,"Assign fader " + _fader.str() + " to an effect parameter " ,boost::bind(&ACAudioStkEngineRendererPlugin::updateFaderEffect,this,fader));
+        }
+    }
 }
 
 ACAudioStkEngineRendererPlugin::~ACAudioStkEngineRendererPlugin(){
@@ -594,23 +613,42 @@ void ACAudioStkEngineRendererPlugin::midiInCallback( double timeStamp, std::vect
     int mediaId = media_cycle->getClosestNode(); // warning, mono-pointer
 
     // The following is specific to the BFC2000
-    if(fader_effect.size()!=8){
-        std::cerr << "ACAudioStkEngineRendererPlugin: wrong BFC2000 mapping, size doesn't match" << std::endl;
-        return;
-    }
-    if(number >= 81 && number <= 88){
-        int fader = number - 81;
-        std::string parameter = fader_effect[fader];
-        float min(0.0f), max(1.0f);
-        /*if(parameter == "master volume"){
+    if(midi_in_port == "BCF2000 Port 1"){
+        if(fader_effect.size()!=8){
+            std::cerr << "ACAudioStkEngineRendererPlugin: wrong BFC2000 mapping, size doesn't match" << std::endl;
+            return;
+        }
+        if(number >= 81 && number <= 88){
+            int fader = number - 81;
+            std::string parameter = fader_effect[fader];
+            float min(0.0f), max(1.0f);
+            /*if(parameter == "master volume"){
             value = this->master_volume;
         }
         else{*/
-        min = this->getNumberParameterMin(parameter);
-        max = this->getNumberParameterMax(parameter);
-        //}
-        std::cout << "ACAudioStkEngineRendererPlugin::midiInCallback: " << parameter << " on media Id " << mediaId << " value " << min + (float)(value)/127.0f * (max-min) << std::endl;
-        media_cycle->performActionOnMedia(parameter,mediaId,min + (float)(value)/127.0f * (max-min)); // through media cycle for logging
+            min = this->getNumberParameterMin(parameter);
+            max = this->getNumberParameterMax(parameter);
+            //}
+            std::cout << "ACAudioStkEngineRendererPlugin::midiInCallback: " << parameter << " on media Id " << mediaId << " value " << min + (float)(value)/127.0f * (max-min) << std::endl;
+            media_cycle->performActionOnMedia(parameter,mediaId,min + (float)(value)/127.0f * (max-min)); // through media cycle for logging
+        }
+    }
+    else if(midi_in_port == "iCON iControls_Pro V1.02 Port 1"){
+        std::cout << "iCON iControls_Pro V1.02 Port 1 input" << std::endl;
+        if(number >= 32 && number <= 39 && number-32 < fader_effect.size() ){
+            int fader = number-32;
+            std::string parameter = fader_effect[fader];
+            float min(0.0f), max(1.0f);
+            /*if(parameter == "master volume"){
+            value = this->master_volume;
+        }
+        else{*/
+            min = this->getNumberParameterMin(parameter);
+            max = this->getNumberParameterMax(parameter);
+            //}
+            std::cout << "ACAudioStkEngineRendererPlugin::midiInCallback: " << parameter << " on media Id " << mediaId << " value " << min + (float)(value)/127.0f * (max-min) << std::endl;
+            media_cycle->performActionOnMedia(parameter,mediaId,min + (float)(value)/127.0f * (max-min)); // through media cycle for logging
+        }
     }
 }
 
@@ -1060,7 +1098,7 @@ bool ACAudioStkEngineRendererPlugin::performActionOnMedia(std::string action, lo
             }
 
             // The following is specific to the BFC2000
-            if(midi_out && current_closest_node != mediaId && midi_out->getPortName() == "BCF2000 Port 1" && fader_effect.size()==8){
+            if(midi_out && current_closest_node != mediaId){
                 int fader = 0;
                 current_closest_node = mediaId;
                 for(std::vector<std::string>::iterator effect = fader_effect.begin(); effect != fader_effect.end(); effect++){
@@ -1082,7 +1120,7 @@ bool ACAudioStkEngineRendererPlugin::performActionOnMedia(std::string action, lo
                         // + inputs
 
                         if(parameter == "playback speed"){
-                            if(looping) value = loops[*loop_id]->getRate();
+                            if(looping && *loop_id < loops.size() && loops[*loop_id]) value = loops[*loop_id]->getRate();
                         }
                         else if(parameter == "playback volume"){
                             if(looping) value = loop_gains[*loop_id];
@@ -1140,9 +1178,18 @@ bool ACAudioStkEngineRendererPlugin::performActionOnMedia(std::string action, lo
                             value = min;
                     }
                     std::vector<unsigned char> message;
-                    message.push_back((unsigned char)(176)); // typechan
-                    message.push_back((unsigned char)(81+fader)); // cc number
-                    message.push_back((unsigned char)( (value-min)/(max-min) * 127) ); // value
+
+                    if(midi_out->getPortName() == "BCF2000 Port 1" && fader_effect.size()==8){
+                        message.push_back((unsigned char)(176)); // typechan (176+chan)
+                        message.push_back((unsigned char)(81+fader)); // cc number
+                        message.push_back((unsigned char)( (value-min)/(max-min) * 127) ); // value
+                    }
+                    else if(midi_out->getPortName() == "iCON iControls_Pro V1.02 Port 1"){
+                        message.push_back((unsigned char)(176)); // typechan (176+chan)
+                        message.push_back((unsigned char)(fader)); // cc number
+                        message.push_back((unsigned char)( (value-min)/(max-min) * 127) ); // value
+                    }
+
                     midi_out->sendMessage(&message);
                     //std::cout << "ACAudioStkEngineRendererPlugin::performActionOnMedia: audio hover midi out parameter " << parameter << " cc " << 81+fader << " value " << (value-min)/(max-min) * 127 << std::endl;
                     fader++;
@@ -1250,9 +1297,9 @@ bool ACAudioStkEngineRendererPlugin::createGenerator(std::string action, long in
 
         // "play" identifies the corresponding node visually, "hear" doesn't
         if(action == "play"){
-        ACMediaNode* node = media_cycle->getMediaNode(mediaId);
-        if(node)
-            node->setActivity(1);
+            ACMediaNode* node = media_cycle->getMediaNode(mediaId);
+            if(node)
+                node->setActivity(1);
         }
         //std::cout << "ACAudioStkEngineRendererPlugin::performActionOnMedia: action " << action << " media id " << mediaId << " done" << std::endl;
     }

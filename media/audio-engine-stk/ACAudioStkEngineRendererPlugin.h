@@ -80,10 +80,10 @@ public:
     void updateMasterVolume();
     void updatePlaybackSpeed();
 
-//    void updateGrainVoices();
-//    void updateGrainRandomness();
-//    void updateGrainStretch();
-//    void updateGrainParameters();
+    //    void updateGrainVoices();
+    //    void updateGrainRandomness();
+    //    void updateGrainStretch();
+    //    void updateGrainParameters();
 
     //! Update the reverb effect mix [0 = mostly dry, 1 = mostly wet].
     void updateReverbEffectMix();
@@ -158,6 +158,8 @@ protected:
 
     RtMidiIn* midi_in;
     RtMidiOut* midi_out;
+    std::string midi_in_port;
+    std::string midi_out_port;
 
     std::vector<std::string> fader_effect;
 
@@ -169,18 +171,18 @@ public:
     virtual std::vector<ACInputActionQt*> providesInputActions();
 
 public slots:
-//    void playClickedNode();
+    //    void playClickedNode();
     void loopClickedNode();
-//    void granulateClickedNode();
+    //    void granulateClickedNode();
     void muteAllNodes();
-//    void triggerClickedNode();
+    //    void triggerClickedNode();
 
 protected:
-//    ACInputActionQt* playClickedNodeAction;
+    //    ACInputActionQt* playClickedNodeAction;
     ACInputActionQt* loopClickedNodeAction;
-//    ACInputActionQt* granulateClickedNodeAction;
+    //    ACInputActionQt* granulateClickedNodeAction;
     ACInputActionQt* muteAllNodesAction;
-//    ACInputActionQt* triggerClickedNodeAction;
+    //    ACInputActionQt* triggerClickedNodeAction;
 
     std::map<std::string,ACMediaActionParameters> action_parameters;
     std::vector<std::string> active_targets;
