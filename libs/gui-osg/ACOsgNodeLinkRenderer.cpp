@@ -40,18 +40,22 @@ using namespace osg;
 ACOsgNodeLinkRenderer::ACOsgNodeLinkRenderer(){
     link_node = new MatrixTransform();
     link_geode = 0;
+    link_geometry = 0;
     node_in = 0;
     node_out = 0;
     link_color = Vec4(1,1,1,1);
     media_cycle = 0;
+    width = 1;
 }
 
 ACOsgNodeLinkRenderer::~ACOsgNodeLinkRenderer(){
     link_node = 0;
     link_geode = 0;
+    link_geometry = 0;
     node_in = 0;
     node_out = 0;
     media_cycle = 0;
+    width = 1;
 }
 
 void ACOsgNodeLinkRenderer::setMediaCycle(MediaCycle *_media_cycle)
@@ -123,7 +127,7 @@ void ACOsgNodeLinkRenderer::linkGeode(double to_x, double to_y) {
     StateSet *state;
     Vec3Array* vertices;
     osg::ref_ptr<DrawElementsUInt> line_p;
-    osg::ref_ptr<Geometry> link_geometry;
+    //osg::ref_ptr<Geometry> link_geometry;
     
     link_geode = new Geode();
     link_geometry = new Geometry();
@@ -157,12 +161,13 @@ void ACOsgNodeLinkRenderer::linkGeode(double to_x, double to_y) {
 #if !defined (APPLE_IOS)
     state->setMode(GL_LINE_SMOOTH, StateAttribute::ON);
 #endif//CF APPLE_IOS
-    state->setAttribute(new LineWidth(0.5));
+    state->setAttribute(new LineWidth(width));
     link_geode->addDrawable(link_geometry);
 }
 
 void ACOsgNodeLinkRenderer::prepareLinks() {
     link_geode = 0;
+    link_geometry = 0;
    /* if ( node_in && node_out && node_in->getIsDisplayed() && node_out->getIsDisplayed()){
         
         Matrix T,Tt,Tr,Ts;
@@ -183,6 +188,30 @@ void ACOsgNodeLinkRenderer::prepareLinks() {
         T=Ts*Tr*Tt;
         link_node->setMatrix(T);
     }*/
+}
+
+void ACOsgNodeLinkRenderer::setWidth(float _width){
+    this->width = _width;
+    if(!link_geode)
+        return;
+    StateSet *state = link_geode->getOrCreateStateSet();
+    state->setAttribute(new LineWidth(width));
+}
+
+void ACOsgNodeLinkRenderer::setColor(osg::Vec4 _color){
+    this->link_color = _color;
+    if(!link_geometry)
+        return;
+
+    osg::ref_ptr<osg::Vec4Array> colors = new Vec4Array;
+    colors->push_back(link_color);
+#if OSG_MIN_VERSION_REQUIRED(3,2,0)
+    link_geometry->setColorArray(colors, osg::Array::BIND_OVERALL);
+#else
+    link_geometry->setColorArray(colors);
+    link_geometry->setColorBinding(Geometry::BIND_OVERALL);
+#endif
+
 }
 
 void ACOsgNodeLinkRenderer::updateLinks(){

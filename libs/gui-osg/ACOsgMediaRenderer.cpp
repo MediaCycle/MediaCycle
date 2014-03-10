@@ -168,7 +168,9 @@ void ACOsgMediaRenderer::metadataGeode() {
     metadata->setDrawMode(osgText::Text::TEXT);// osgText::Text::BOUNDINGBOX, osgText::Text::ALIGNMENT
 
     std::stringstream content;
-    content << fs::basename(media->getFileName());
+    content << media->getId();
+    /*content << ": ";
+    content << fs::basename(media->getFileName());*/
     //CPL
     if (media->getParentId()>-1)// in case of segments
         content << "(segment with media ID" << media->getId() << ")";

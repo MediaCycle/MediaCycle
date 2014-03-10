@@ -152,12 +152,13 @@ protected:
 public:
 
     void changeSetting(ACSettingType _setting);
+    bool addLink(long in, long out, float width, osg::Vec4 color = osg::Vec4(1.0f,1.0f,1.0f,1.0f));
+    bool removeLinks();
 
 private:
     bool removeNodes();
     bool addNode(long int _id);
     bool addLink(long int _id);
-    bool removeLinks();
     bool removeLinks(int _first, int _last);
     bool removeLabels(int _first=0, int _last=0);
     bool addLabels(int _first=0, int _last=0);

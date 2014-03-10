@@ -58,6 +58,8 @@ public:
     ~ACOsgNodeLinkRenderer();
     void prepareLinks();
     void updateLinks();
+    void setWidth(float _width);
+    void setColor(osg::Vec4 _color);
 protected:
     MediaCycle* media_cycle;
     osg::ref_ptr<osg::MatrixTransform> link_node;
@@ -65,5 +67,7 @@ protected:
     void linkGeode(double to_x, double to_y);
     ACOsgMediaRenderer* node_in, *node_out;
     osg::Vec4 link_color;
+    float width;
+    osg::ref_ptr<osg::Geometry> link_geometry;
 };
 #endif

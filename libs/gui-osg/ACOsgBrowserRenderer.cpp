@@ -310,12 +310,11 @@ void ACOsgBrowserRenderer::updateNodes(double ratio) {
 
     int n = media_cycle->getLibrarySize();
 
-    if(media_cycle->getBrowserMode() == AC_MODE_NEIGHBORS){
+    if (media_cycle->getBrowser()->getLayout() == AC_LAYOUT_TYPE_NODELINK /*&&media_cycle->getBrowser()->getNeedsDisplay()*/) {
 
         int m=link_renderers.size();
         // Create new nodelinks if the layout requires them
-        if (media_cycle->getBrowser()->getLayout() == AC_LAYOUT_TYPE_NODELINK&&media_cycle->getBrowser()->getNeedsDisplay()) {
-            
+        if(media_cycle->getBrowserMode() == AC_MODE_NEIGHBORS){
             
             std::list<long int> nodeIds=media_cycle->getBrowser()->getNeighborNodeIds();
             
@@ -786,6 +785,38 @@ bool ACOsgBrowserRenderer::addNode(long int _id){//private method
     else
         std::cerr << "ACOsgBrowserRenderer::addNode: couldn't create a renderer for id "<< _id << ", media type unsupported" << std::endl;
     return false;
+}
+bool ACOsgBrowserRenderer::addLink(long in, long out, float width, osg::Vec4 color){
+    bool ok = false;
+
+    int id = link_renderers.size();
+
+    // Create new nodelinks if the layout requires them
+    if (media_cycle->getBrowser()->getLayout() == AC_LAYOUT_TYPE_NODELINK) {
+
+        /*if(link_renderers.find(in) != link_renderers.end()&&link_renderers[in]!=0){
+            std::cerr << "ACOsgBrowserRenderer::addLink: link renderer for id "<< in << " is already present, overriding." << std::endl;
+        }
+        else*/
+            link_renderers[id] = new ACOsgNodeLinkRenderer();
+
+        if (link_renderers[id]) {
+            link_renderers[id]->setMediaCycle(media_cycle);
+            /*if (node_renderers[id] == 0){
+                std::cerr << "ACOsgBrowserRenderer::addLink: associated node for link renderer of id "<< in << " doesn't exist" << std::endl;
+                return false;
+            }
+            node_index = node_renderers[id]->getNodeIndex();*/
+            link_renderers[id]->setNodeIn(node_renderers[in]);
+            link_renderers[id]->setNodeOut(node_renderers[out]);
+            link_renderers[id]->setWidth(width);
+            link_renderers[id]->setColor(color);
+            link_renderers[id]->prepareLinks();
+            link_group->addChild(link_renderers[id]->getLink());
+            ok = true;
+        }
+    }
+    return ok;
 }
 
 bool ACOsgBrowserRenderer::addLink(long int _id){
