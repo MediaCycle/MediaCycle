@@ -2120,7 +2120,8 @@ bool ACMediaBrowser::changeFilteringPlugin(ACPlugin* acpl)
 {
     if(acpl)
         this->setFilteringPlugin(acpl);
-    this->updateDisplay(true);
+    this->commitPositions();
+    this->setNeedsDisplay(true);
 }
 
 /*

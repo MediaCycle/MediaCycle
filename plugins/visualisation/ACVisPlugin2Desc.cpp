@@ -1,8 +1,8 @@
 /**
  * @brief ACVisPlugin2Desc.cpp
  * @author Christian Frisson
- * @date 12/05/2013
- * @copyright (c) 2013 – UMONS - Numediart
+ * @date 10/03/2014
+ * @copyright (c) 2014 – UMONS - Numediart
  * 
  * MediaCycle of University of Mons – Numediart institute is 
  * licensed under the GNU AFFERO GENERAL PUBLIC LICENSE Version 3 
@@ -64,7 +64,7 @@ void ACVisPlugin2Desc::pluginLoaded(std::string plugin_name){
 
 void ACVisPlugin2Desc::assignedFeaturesChanged(){
     if(!this->media_cycle) return;
-    media_cycle->updateDisplay(true);
+    //media_cycle->updateDisplay(true);
     media_cycle->setNeedsDisplay(true);
 }
 
