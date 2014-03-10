@@ -1,0 +1,58 @@
+
+The LinearTimeNeRV software package implements lineartimeNeRV, a nonlinear dimensionality reduction algorithm for visualization that works in linear time O(N) with respect to the number of data points N.  
+
+LinearTimeNeRV was developed as a modification of the original NeRV algorithm ("dredviz" software package), in order to reduce the O(N^2) computational complexity of that original algorithm. LinearTimeNeRV is developed by the Statistical Machine Learning and Bioinformatics group at the Department of Information and Computer Science, Aalto University (http://www.cis.hut.fi/projects/mi/sdm). See REFERENCES at the end of this file for a list of relevant publications. 
+
+LinearTimeNeRV is currently maintained by Konstantinos Georgatzis (konstantinos.georgatzis@aalto.fi) and Jaakko Peltonen (jaakko.peltonen@aalto.fi). 
+
+
+LICENSE
+
+All the code by Konstantinos Georgatzis, Kristian Nybo, Jaakko Peltonen and Jarkko Venna (ie., everything outside of the subdirectory 'newmat') is released under the Lesser GNU Public License; see the file LICENSE for more information. Parts of LinearTimeNeRV use the newmat 10 library by Robert Davies (http://www.robertnz.net/nm10). For convenience, an unmodified copy of newmat 10 is distributed along with LinearTimeNeRV inside a subdirectory called 'newmat'. Robert Davies places no restrictions on the use of newmat; for details, see the file COPYING in the newmat subdirectory. 
+
+
+USING LINEARTIMENERV
+
+To compile the software, simply type 'make linearnerv' in the source directory. You should end up with the "linearnerv" binary:
+
+To project a data set with LinearTimeNeRV, just change into the directory where the binary is (by default the source directory) and type
+
+linearnerv --inputfile infilename --outputfile outfilename
+
+where 'infilename' is the name of the file that contains the data vectors. The program will store the projection of your data set in the file specified by 'outfilename'.
+
+Your data set should be in SOM_PAK format; see below for an example. Lines beginning with a '#' are treated as comments and ignored. The first line in the file that is not a comment line specifies the dimension of the data set as a positive integer, '3' in the example. The rest of the file contains the actual data, with each line containing the coordinates of one data point as decimal numbers separated by whitespace.
+
+#sample SOM_PAK file
+#a three-dimensional data set consisting of four points
+3
+1.0 2.0 3.0
+4.0 5.0 6.0
+7.0 8.0 9.0
+0.0 1.1 2.2
+#end sample SOM_PAK file
+
+The output file will also be in SOM_PAK format.
+
+
+In addition to the required commandline switches --inputfile and --outputfile, each program supports a number of other optional switches. For LinearTimeNeRV, interesting switches for the end-user are: 
+
+--lambda 
+which allows the user to control the tradeoff between smoothed precision and smoothed recall. A lambda value close to 0 will emphasize precision, whereas a lambda value close to 1 will emphasize recall. Default value is 0.1.
+
+--nexactpercentage 
+which is the percentage of the data that will be treated with their exact coordinates. The rest of the data will be taken into account through the cluster statistics to which each data point belongs. A 100% value is practically equivalent to running the original NeRV (no speedup, maximum performance); a 0% value means that all data points are treated indirectly through their clusters (maximun speedup, inferior performance). Default value is 0% (fastest version)
+
+--nclusters
+which is the number of clusters in which the data will be partitioned. Default value is 20.
+
+There are further switches that affect the number of iterations of the algorithm, neighborhood sizes etc. For a complete list of supported switches, run the relevant program with the switch --help.
+
+
+
+REFERENCES
+
+[Venna2010]: Jarkko Venna, Jaakko Peltonen, Kristian Nybo, Helena Aidos, and Samuel Kaski. Information Retrieval Perspective to Nonlinear Dimensionality Reduction for Data Visualization. Journal of Machine Learning Research, 11:451-490, 2010.
+[Venna2007]: Jarkko Venna and Samuel Kaski. Nonlinear Dimensionality Reduction as Information Retrieval. In Marina Meila and Xiaotong Shen, editors, Proceedings of AISTATS 2007, the 11th International Conference on Artificial Intelligence and Statistics. Omnipress, 2007. JMLR Workshop and Conference Proceedings, Volume 2: AISTATS 2007.
+[Venna2006]: Jarkko Venna and Samuel Kaski. Local multidimensional scaling. Neural Networks, 19, pp 889--899, 2006.
+[Kaski2003]: Samuel Kaski, Janne Nikkilä, Merja Oja, Jarkko Venna, Petri Törönen, and Eero Castren. Trustworthiness and metrics in visualizing similarity of gene expression. BMC Bioinformatics, 4:48, 2003.
