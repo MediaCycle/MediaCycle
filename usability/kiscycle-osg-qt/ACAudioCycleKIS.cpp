@@ -37,7 +37,8 @@
 ACAudioCycleKIS::ACAudioCycleKIS() : ACMediaCycleOsgQt(), task_timer(0), hear_timer(0), currentId(-1), sequence(0) {
     count = 0;
     // delay after which we change media_files (if it's ok)
-    attente = 1*60*1000; // in ms
+    attente = 2*60*1000; // in ms
+    grace = 10*1000; // in ms
 
     this->useSegmentationByDefault(false);
 
@@ -262,17 +263,27 @@ void ACAudioCycleKIS::finishedHearing(){
 }
 
 void ACAudioCycleKIS::mediaActionPerformed(std::string action, long int mediaId, std::vector<boost::any> arguments){
+    if(currentId == -1)
+        return;
     if(action == "submit"){
         std::cout << "Submitted media " << mediaId << std::endl;
         if(mediaId == currentId){
             this->getTimer()->success();
             media_cycle->performActionOnMedia("success",currentId);
+            //std::cout << "Current " << this->getScore()->value() << " attente "<< attente<< " timer "<< this->getTimer()->value() <<std::endl;
+            this->getScore()->display( this->getScore()->value() + this->getTimer()->value() );
+            this->currentId = -1; // disable submissions
         }
-        else
+        else{
             this->getTimer()->fail();
+            this->getScore()->display( this->getScore()->value() - 10 );
+        }
     }
     else if(action == "replay"){
         media_cycle->performActionOnMedia("hear",currentId);
+        if(this->getTimer()->value() < 0.001f*(attente - grace)){
+            this->getScore()->display( this->getScore()->value() - 10 );
+        }
     }
 }
 

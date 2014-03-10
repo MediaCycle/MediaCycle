@@ -35,7 +35,7 @@
 #include "ACKnownItemSearchTimerQt.h"
 
 ACKnownItemSearchTimerQt::ACKnownItemSearchTimerQt(QWidget *parent)
-    : QLCDNumber(parent),deadline(60)
+    : QLCDNumber(parent),deadline(120)
 {
     setSegmentStyle(Filled);
     // Outline, Filled, Flat
@@ -50,7 +50,7 @@ ACKnownItemSearchTimerQt::ACKnownItemSearchTimerQt(QWidget *parent)
 
     this->setPalette(*lcdpalette);
 
-    this->setDigitCount(2);
+    //this->setDigitCount(3);
 
     countdown = deadline;
     timer = new QTimer(this);
@@ -60,7 +60,7 @@ ACKnownItemSearchTimerQt::ACKnownItemSearchTimerQt(QWidget *parent)
     //showTime();
 
     setWindowTitle(tr("Known Item Search Timer"));
-    resize(150, 60);
+    //resize(150, 60);
 
 }
 

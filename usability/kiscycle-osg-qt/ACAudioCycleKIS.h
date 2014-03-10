@@ -59,7 +59,7 @@ protected:
     bool parseXMLlist(std::string filename);
 
 private:
-    int count, attente;
+    int count,attente,grace;
     std::vector <std::string> randomizedFiles, sequentialFiles;
     std::vector <int> randomizedFilesTargets, sequentialFilesTargets;
     QTimer *task_timer;

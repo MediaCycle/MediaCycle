@@ -200,8 +200,27 @@ ACMediaCycleOsgQt::ACMediaCycleOsgQt(QWidget *parent)
     osgViewDockLayout->setContentsMargins(0,0,0,0);// no unnecessary corners in the osg view dock widget (this supersedes the OS theme defaults)
     osgViewDockWidget->setLayout(osgViewDockLayout);
 
+    QWidget* stackWidget = new QWidget; // it seems this intermediary widget is required to set a layout to a dock widget
+    QVBoxLayout *stackLayout = new QVBoxLayout();
+    stackLayout->setSpacing(0); // no blank space between the progress bar and the osg view
+    stackLayout->setContentsMargins(0,0,0,0);// no unnecessary corners in the osg view dock widget (this supersedes the OS theme defaults)
+    stackWidget->setLayout(stackLayout);
+
+
+    kisScore = new QLCDNumber();
+    QPalette* lcdpalette = new QPalette;
+    kisScore->setAutoFillBackground(true);
+    lcdpalette->setColor(QPalette::Background, QColor(0, 0, 0));
+    lcdpalette->setColor(QPalette::Base, QColor(0, 0, 0));
+    lcdpalette->setColor(QPalette::AlternateBase, QColor(0, 0, 0));
+    kisScore->setPalette(*lcdpalette);
+
+    stackLayout->addWidget(kisScore);
     kisTimer = new ACKnownItemSearchTimerQt();
-    osgViewDockLayout->addWidget(kisTimer);
+    stackLayout->addWidget(kisTimer);
+
+    osgViewDockLayout->addWidget(stackWidget);
+    //osgViewDockLayout->addWidget(kisTimer);
 
     compositeOsgView = new ACOsgCompositeViewQt();
     compositeOsgView->setSizePolicy ( QSizePolicy::MinimumExpanding, QSizePolicy::MinimumExpanding );

@@ -216,8 +216,10 @@ private:
     QHBoxLayout *osgViewDockLayout;
     //ACQProgressBar* progressBar;
     ACKnownItemSearchTimerQt* kisTimer;
+    QLCDNumber* kisScore;
 public:
     ACKnownItemSearchTimerQt* getTimer(){return this->kisTimer;}
+    QLCDNumber* getScore() {return this->kisScore;}
 
 
 protected:
