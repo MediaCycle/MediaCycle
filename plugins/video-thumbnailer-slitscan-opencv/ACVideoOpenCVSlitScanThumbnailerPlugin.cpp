@@ -162,14 +162,14 @@ std::vector<ACMediaThumbnail*> ACVideoOpenCVSlitScanThumbnailerPlugin::computeSl
     //int fps     = (int) capture->get(CV_CAP_PROP_FPS);
     int total_frames = (int) capture->get(CV_CAP_PROP_FRAME_COUNT)-1; // XS -1 seems necessary in OpenCV 2.3
 
-    cv::Mat circular_slit_scan(2*height, 2*height, CV_8UC4);
-    //cv::Mat circular_slit_scan(4*height, 4*height, CV_8UC4);
+    //cv::Mat circular_slit_scan(2*height, 2*height, CV_8UC4);
+    cv::Mat circular_slit_scan(4*height, 4*height, CV_8UC4);
 
     cv::Mat slit_scan(height, total_frames, CV_8UC4);
     cv::Mat current_frame;
 
     if(!abort){
-        double angle = 360.0f/(float)(total_frames-1);
+        double angle = 0.5;/*360.0f/(float)(total_frames-1)*/;
         cv::Point2f src_center( 0.5f*circular_slit_scan.cols, 0.5f*circular_slit_scan.rows );
 
         double border = tan(angle/180.f*CV_PI)*height;
@@ -181,118 +181,187 @@ std::vector<ACMediaThumbnail*> ACVideoOpenCVSlitScanThumbnailerPlugin::computeSl
             int c = (int)(capture->get(CV_CAP_PROP_POS_FRAMES));
             *capture >> current_frame;
 
-            if (!current_frame.data) {
-                if(compute["Circular Slit-scan"]){
-                    cv::Mat rot_mat = cv::getRotationMatrix2D( src_center, angle, 1.0 );
-                    cv::warpAffine( circular_slit_scan/*src*/, circular_slit_scan/*out*/, rot_mat, circular_slit_scan.size(), /*flags*/ cv::INTER_LINEAR, /*borderMode*/ cv::BORDER_TRANSPARENT, /*borderValue*/ 0);
-                }
-                std::cerr << "ACVideoOpenCVSlitScanThumbnailerPlugin::computeSlitScan: frame " << f << " ("<< c <<") " << "/" << total_frames << " lost" << std::endl;
-                break;
-            }
+            if (current_frame.data) {
 
-            cv::Mat transparent_frame(current_frame.size(), CV_8UC4);
-
-            cv::cvtColor(current_frame, transparent_frame, CV_RGB2RGBA, 4);
-
-            cv::Mat slit(transparent_frame, cv::Rect((int)(0.5f*width), 0, 1, height));
-
-            if(compute["Slit-scan"]){
-                cv::Mat slit_scan_part = slit_scan(cv::Rect(f, 0, 1, height));
-                slit.copyTo(slit_scan_part,slit);
-            }
-
-            //        From opencv2 2.4.3 imgproc.hpp:
-            //
-            //        BORDER_REPLICATE=IPL_BORDER_REPLICATE, BORDER_CONSTANT=IPL_BORDER_CONSTANT,
-            //        BORDER_REFLECT=IPL_BORDER_REFLECT, BORDER_WRAP=IPL_BORDER_WRAP,
-            //        BORDER_REFLECT_101=IPL_BORDER_REFLECT_101, BORDER_REFLECT101=BORDER_REFLECT_101,
-            //        BORDER_TRANSPARENT=IPL_BORDER_TRANSPARENT,
-            //        BORDER_DEFAULT=BORDER_REFLECT_101, BORDER_ISOLATED=16
-            //
-            //        INTER_NEAREST=CV_INTER_NN, //!< nearest neighbor interpolation
-            //        INTER_LINEAR=CV_INTER_LINEAR, //!< bilinear interpolation
-            //        INTER_CUBIC=CV_INTER_CUBIC, //!< bicubic interpolation
-            //        INTER_AREA=CV_INTER_AREA, //!< area-based (or super) interpolation
-            //        INTER_LANCZOS4=CV_INTER_LANCZOS4, //!< Lanczos interpolation over 8x8 neighborhood
-            //        INTER_MAX=7,
-            //        WARP_INVERSE_MAP=CV_WARP_INVERSE_MAP
-
-            if(compute["Circular slit-scan"]){
-                // Circ slit scan, copying the slit to the thumbnail then rotating, very smeared
-                cv::Mat slice(transparent_frame, cv::Rect((int)(0.5f*width)-sliced, 0, 2*sliced, height));
-                cv::Mat rot_mat = cv::getRotationMatrix2D( src_center, angle, 1.0 );
-                if(fills>1){
-                    cv::warpAffine( circular_slit_scan/*src*/, circular_slit_scan/*out*/, rot_mat, circular_slit_scan.size(),/*flags*/ cv::INTER_AREA, /*borderMode*/ cv::BORDER_CONSTANT, /*borderValue*/ 0);
-                    // cv::INTER_LINEAR, /*borderMode*/ cv::BORDER_TRANSPARENT -> blurry disc, precise at end of the movie, border blurry, can be octogonal
-                    // cv::INTER_LINEAR, /*borderMode*/ cv::BORDER_CONSTANT -> blurry, precise, border better but blurry, no octogonal
-                    // cv::INTER_NEAREST, /*borderMode*/ cv::BORDER_CONSTANT -> border gritty, egyptian snail effect
-                    // cv::INTER_AREA, /*borderMode*/ cv::BORDER_CONSTANT -> best results
-                    cv::Mat circ_slit_scan_part = circular_slit_scan(cv::Rect(height-sliced, 0, 2*sliced, height));
-                    slice.copyTo(circ_slit_scan_part,slice);
-                }
-                else {
-                    cv::warpAffine( circular_slit_scan/*src*/, circular_slit_scan/*out*/, rot_mat, circular_slit_scan.size(), /*flags*/ cv::INTER_AREA, /*borderMode*/ cv::BORDER_CONSTANT, /*borderValue*/ 0);
-                    // cv::INTER_NEAREST, /*borderMode*/ cv::BORDER_CONSTANT -> just a few pixels scatter, plus 12 o'clock bar
-                    // cv::INTER_LINEAR, /*borderMode*/ cv::BORDER_CONSTANT -> a bit more pixels
-                    cv::Mat circ_slit_scan_part = circular_slit_scan(cv::Rect(height, 0, 1, height));
-                    slit.copyTo(circ_slit_scan_part,slit);
-                }
-                slice.release();
-
-                // Circ slit scan, rotating the slit before adding to the image, lots of white noise
-
-                //                int slice_x = 0;
-                //                int slice_w = 1;
-                //                if(sliced>=1){
-                //                   slice_w = 2*sliced;
-                //                   slice_x = sliced;
-                //               }
-
-                //                cv::Mat slice(transparent_frame, cv::Rect((int)(0.5f*width)-slice_x, 0, slice_w, height));
-                //                cv::Mat transparent_canvas(2*height, 2*height, CV_8UC4);
-                //                cv::Mat transparent_slit(transparent_canvas, cv::Rect((int)(height)-slice_x, 0, slice_w, height));
-                //                slice.copyTo(transparent_slit,slit);
-                //                cv::Mat rotated_canvas(2*height, 2*height, CV_8UC4);
-                //                cv::Mat rot_mat = cv::getRotationMatrix2D( src_center, -(float)f*angle, 1.0 );
-                //                cv::warpAffine( transparent_canvas/*src*/, rotated_canvas/*out*/, rot_mat, transparent_canvas.size(), /*flags*/ cv::INTER_LINEAR, /*borderMode*/ cv::BORDER_TRANSPARENT, /*borderValue*/ 0);
-                //                cv::add(rotated_canvas,circular_slit_scan,circular_slit_scan);
-
-                //                transparent_canvas.release();
-                //                rotated_canvas.release();
-                //                slice.release();
-
-                // Disc slit scan, set the sizes of circular_slit_scan to 4*height above
-
-                //                int slice_x = 0;
-                //                int slice_w = 1;
-                //                if(sliced>=1){
-                //                    slice_w = 2*sliced;
-                //                    slice_x = sliced;
+                //            if (!current_frame.data) {
+                //                if(compute["Circular Slit-scan"]){
+                //                    cv::Mat rot_mat = cv::getRotationMatrix2D( src_center, angle, 1.0 );
+                //                    cv::warpAffine( circular_slit_scan/*src*/, circular_slit_scan/*out*/, rot_mat, circular_slit_scan.size(), /*flags*/ cv::INTER_LINEAR, /*borderMode*/ cv::BORDER_TRANSPARENT, /*borderValue*/ 0);
                 //                }
+                //                std::cerr << "ACVideoOpenCVSlitScanThumbnailerPlugin::computeSlitScan: frame " << f << " ("<< c <<") " << "/" << total_frames << " lost" << std::endl;
+                //                break;
+                //            }
 
-                //                angle = 360.0f/(float)(total_frames);
-                //                cv::Mat slice(transparent_frame, cv::Rect((int)(0.5f*width)-slice_x, 0, slice_w, height));
-                //                cv::Mat transparent_canvas(4*height, 4*height, CV_8UC4);
-                //                cv::Mat transparent_slit(transparent_canvas, cv::Rect((int)(2*height)-slice_x, 0, slice_w, height));
-                //                slice.copyTo(transparent_slit,slit);
-                //                cv::Mat rotated_canvas(4*height, 4*height, CV_8UC4);
-                //                cv::Point2f center( 2*height, 2*height );
-                //                cv::Mat rot_mat = cv::getRotationMatrix2D( center, -(float)f*angle, 1.0 );
-                //                cv::warpAffine( transparent_canvas/*src*/, rotated_canvas/*out*/, rot_mat, transparent_canvas.size(), /*flags*/ cv::INTER_AREA, /*borderMode*/ cv::BORDER_CONSTANT, /*borderValue*/ 0);
-                //                cv::add(rotated_canvas,circular_slit_scan,circular_slit_scan);
+                cv::Mat transparent_frame(current_frame.size(), CV_8UC4);
 
-                //                transparent_canvas.release();
-                //                rotated_canvas.release();
-                //                slice.release();
+                cv::cvtColor(current_frame, transparent_frame, CV_RGB2RGBA, 4);
 
-                // Better version to try, cut non-rectangular slices and skip frames
+                cv::Mat slit(transparent_frame, cv::Rect((int)(0.5f*width), 0, 1, height));
+
+                if(compute["Slit-scan"]){
+                    cv::Mat slit_scan_part = slit_scan(cv::Rect(f, 0, 1, height));
+                    slit.copyTo(slit_scan_part,slit);
+                }
+
+                //        From opencv2 2.4.3 imgproc.hpp:
+                //
+                //        BORDER_REPLICATE=IPL_BORDER_REPLICATE, BORDER_CONSTANT=IPL_BORDER_CONSTANT,
+                //        BORDER_REFLECT=IPL_BORDER_REFLECT, BORDER_WRAP=IPL_BORDER_WRAP,
+                //        BORDER_REFLECT_101=IPL_BORDER_REFLECT_101, BORDER_REFLECT101=BORDER_REFLECT_101,
+                //        BORDER_TRANSPARENT=IPL_BORDER_TRANSPARENT,
+                //        BORDER_DEFAULT=BORDER_REFLECT_101, BORDER_ISOLATED=16
+                //
+                //        INTER_NEAREST=CV_INTER_NN, //!< nearest neighbor interpolation
+                //        INTER_LINEAR=CV_INTER_LINEAR, //!< bilinear interpolation
+                //        INTER_CUBIC=CV_INTER_CUBIC, //!< bicubic interpolation
+                //        INTER_AREA=CV_INTER_AREA, //!< area-based (or super) interpolation
+                //        INTER_LANCZOS4=CV_INTER_LANCZOS4, //!< Lanczos interpolation over 8x8 neighborhood
+                //        INTER_MAX=7,
+                //        WARP_INVERSE_MAP=CV_WARP_INVERSE_MAP
+
+                if(compute["Circular slit-scan"] && f%((int) ((float)total_frames/360.0f*angle)) == 0){
+                    // Circ slit scan, copying the slit to the thumbnail then rotating, very smeared
+
+
+                    //                if( fills>1 ){
+                    //                cv::Mat slice(transparent_frame, cv::Rect((int)(0.5f*width)-sliced, 0, 2*sliced, height));
+                    //                cv::Mat rot_mat = cv::getRotationMatrix2D( src_center, -angle, 1.0 );
+                    //                    cv::warpAffine(circular_slit_scan/*src*/, circular_slit_scan/*out*/, rot_mat, circular_slit_scan.size(),/*flags*/ cv::INTER_AREA, /*borderMode*/ cv::BORDER_TRANSPARENT, /*borderValue*/ 0);
+                    //                    std::cout << "Fils 1" << std::endl;
+                    //                    // cv::INTER_LINEAR, /*borderMode*/ cv::BORDER_TRANSPARENT -> blurry disc, precise at end of the movie, border blurry, can be octogonal
+                    //                    // cv::INTER_LINEAR, /*borderMode*/ cv::BORDER_CONSTANT -> blurry, precise, border better but blurry, no octogonal
+                    //                    // cv::INTER_NEAREST, /*borderMode*/ cv::BORDER_CONSTANT -> border gritty, egyptian snail effect
+                    //                    // cv::INTER_AREA, /*borderMode*/ cv::BORDER_CONSTANT -> best results
+                    //                    cv::Mat circ_slit_scan_part = circular_slit_scan(cv::Rect(height-sliced, 0, 2*sliced, height));
+                    //                    slice.copyTo(circ_slit_scan_part,slice);
+
+
+                    // Circ slit scan, rotating the slit before adding to the image, lots of white noise
+
+                    //                    int slice_x = 0;
+                    //                    int slice_w = 1;
+                    //                    if(sliced>=1){
+                    //                        slice_w = 2*sliced;
+                    //                        slice_x = sliced;
+                    //                    }
+
+                    //                    cv::Mat slice(transparent_frame, cv::Rect((int)(0.5f*width)-slice_x, 0, slice_w, height));
+                    //                    cv::Mat transparent_canvas(2*height, 2*height, CV_8UC4);
+                    //                    cv::Mat transparent_slit(transparent_canvas, cv::Rect((int)(height)-slice_x, 0, slice_w, height));
+                    //                    slice.copyTo(transparent_slit,slit);
+                    //                    cv::Mat rotated_canvas(2*height, 2*height, CV_8UC4);
+
+                    //                    cv::Mat rot_mat = cv::getRotationMatrix2D( src_center, -(float)f/(float)total_frames*360.0f, 1.0 );
+                    //                    cv::warpAffine( transparent_canvas/*src*/, rotated_canvas/*out*/, rot_mat, transparent_canvas.size(), /*flags*/ cv::INTER_LINEAR, /*borderMode*/ cv::BORDER_TRANSPARENT, /*borderValue*/ 0);
+                    //                    cv::add(rotated_canvas,circular_slit_scan,circular_slit_scan);
+
+                    //                    transparent_canvas.release();
+                    //                    rotated_canvas.release();
+
+                    // Disc slit scan, set the sizes of circular_slit_scan to 4*height above
+
+                    int slice_x = 0;
+                    int slice_w = 1;
+                    if(sliced>=1){
+                        slice_w = 2*sliced;
+                        slice_x = sliced;
+                    }
+
+                    cv::Mat slice(transparent_frame, cv::Rect((int)(0.5f*width)-slice_x-1, 0, slice_w+2, height));
+                    cv::Mat transparent_canvas(4*height, 4*height, CV_8UC4);
+                    cv::Mat transparent_slit(transparent_canvas, cv::Rect((int)(2*height)-slice_x-1, 0, slice_w+2, height));
+                    slice.copyTo(transparent_slit,slit);
+                    cv::Mat rotated_canvas(4*height, 4*height, CV_8UC4);
+                    cv::Point2f center( 2*height, 2*height );
+                    cv::Mat rot_mat = cv::getRotationMatrix2D( center, -(float)f/(float)total_frames*360.0f, 1.0 );
+                    cv::warpAffine( transparent_canvas/*src*/, rotated_canvas/*out*/, rot_mat, transparent_canvas.size(), /*flags*/ cv::INTER_AREA, /*borderMode*/ cv::BORDER_TRANSPARENT, /*borderValue*/ 0);
+                    cv::add(rotated_canvas,circular_slit_scan,circular_slit_scan);
+
+                    transparent_canvas.release();
+                    rotated_canvas.release();
+
+                    //                }
+                    //                else {
+                    //                    cv::warpAffine( circular_slit_scan/*src*/, circular_slit_scan/*out*/, rot_mat, circular_slit_scan.size(), /*flags*/ cv::INTER_AREA, /*borderMode*/ cv::BORDER_TRANSPARENT, /*borderValue*/ 0);
+                    //                    // cv::INTER_NEAREST, /*borderMode*/ cv::BORDER_CONSTANT -> just a few pixels scatter, plus 12 o'clock bar
+                    //                    // cv::INTER_LINEAR, /*borderMode*/ cv::BORDER_CONSTANT -> a bit more pixels
+                    //                    cv::Mat circ_slit_scan_part = circular_slit_scan(cv::Rect(height, 0, 1, height));
+                    //                    slit.copyTo(circ_slit_scan_part,slit);
+                    //                }
+                    slice.release();
+
+                    int iteration = ceil((float)f/(float)total_frames*360.0f/angle);
+                    std::cout << "ACVideoOpenCVSlitScanThumbnailerPlugin::computeCircSlitScans: frame " << f << "("<< c <<")" << " / " << total_frames << " angle " <<   ceil((float)f/(float)total_frames*360.0f/angle) << " sliced " << sliced /*<< " border " << border << " fills " << fills*/ << std::endl;
+
+                    //                vector<int> _compression_params;
+                    //                _compression_params.push_back(CV_IMWRITE_PNG_COMPRESSION);
+                    //                _compression_params.push_back(9); // default: 3
+                    //                std::stringstream _circular_name;
+                    //                _circular_name << "Circular slit-scan " << iteration;
+                    //                std::string _circular_thumbnail_filename = this->createFileName(_filename, _circular_name.str());
+                    //                try {
+                    //                    cv::imwrite(_circular_thumbnail_filename.c_str(), circular_slit_scan, _compression_params);
+                    //                }
+                    //                catch (runtime_error& ex) {
+                    //                    std::cerr << "ACVideoOpenCVSlitScanThumbnailerPlugin::computeSlitScans: couldn't save " << _circular_thumbnail_filename << ": " << ex.what() << std::endl;
+                    //                }
+
+
+                    // Circ slit scan, rotating the slit before adding to the image, lots of white noise
+
+                    //                int slice_x = 0;
+                    //                int slice_w = 1;
+                    //                if(sliced>=1){
+                    //                   slice_w = 2*sliced;
+                    //                   slice_x = sliced;
+                    //               }
+
+                    //                cv::Mat slice(transparent_frame, cv::Rect((int)(0.5f*width)-slice_x, 0, slice_w, height));
+                    //                cv::Mat transparent_canvas(2*height, 2*height, CV_8UC4);
+                    //                cv::Mat transparent_slit(transparent_canvas, cv::Rect((int)(height)-slice_x, 0, slice_w, height));
+                    //                slice.copyTo(transparent_slit,slit);
+                    //                cv::Mat rotated_canvas(2*height, 2*height, CV_8UC4);
+                    //                cv::Mat rot_mat = cv::getRotationMatrix2D( src_center, -(float)f*angle, 1.0 );
+                    //                cv::warpAffine( transparent_canvas/*src*/, rotated_canvas/*out*/, rot_mat, transparent_canvas.size(), /*flags*/ cv::INTER_LINEAR, /*borderMode*/ cv::BORDER_TRANSPARENT, /*borderValue*/ 0);
+                    //                cv::add(rotated_canvas,circular_slit_scan,circular_slit_scan);
+
+                    //                transparent_canvas.release();
+                    //                rotated_canvas.release();
+                    //                slice.release();
+
+                    // Disc slit scan, set the sizes of circular_slit_scan to 4*height above
+
+                    //                int slice_x = 0;
+                    //                int slice_w = 1;
+                    //                if(sliced>=1){
+                    //                    slice_w = 2*sliced;
+                    //                    slice_x = sliced;
+                    //                }
+
+                    //                angle = 360.0f/(float)(total_frames);
+                    //                cv::Mat slice(transparent_frame, cv::Rect((int)(0.5f*width)-slice_x, 0, slice_w, height));
+                    //                cv::Mat transparent_canvas(4*height, 4*height, CV_8UC4);
+                    //                cv::Mat transparent_slit(transparent_canvas, cv::Rect((int)(2*height)-slice_x, 0, slice_w, height));
+                    //                slice.copyTo(transparent_slit,slit);
+                    //                cv::Mat rotated_canvas(4*height, 4*height, CV_8UC4);
+                    //                cv::Point2f center( 2*height, 2*height );
+                    //                cv::Mat rot_mat = cv::getRotationMatrix2D( center, -(float)f*angle, 1.0 );
+                    //                cv::warpAffine( transparent_canvas/*src*/, rotated_canvas/*out*/, rot_mat, transparent_canvas.size(), /*flags*/ cv::INTER_AREA, /*borderMode*/ cv::BORDER_CONSTANT, /*borderValue*/ 0);
+                    //                cv::add(rotated_canvas,circular_slit_scan,circular_slit_scan);
+
+                    //                transparent_canvas.release();
+                    //                rotated_canvas.release();
+                    //                slice.release();
+
+                    // Better version to try, cut non-rectangular slices and skip frames
+                }
+
+                slit.release();
+                current_frame.release();
+                transparent_frame.release();
+                //std::cout << "ACVideoOpenCVSlitScanThumbnailerPlugin::computeSlitScans: frame " << f << "("<< c <<")" << " / " << total_frames << " angle " << (float)f*angle << " sliced " << sliced /*<< " border " << border << " fills " << fills*/ << std::endl;
+                this->progress = (float)f/(float)total_frames;
             }
-
-            slit.release();
-            current_frame.release();
-            transparent_frame.release();
-            std::cout << "ACVideoOpenCVSlitScanThumbnailerPlugin::computeSlitScans: frame " << f << "("<< c <<")" << " / " << total_frames << " angle " << (float)f*angle << " sliced " << sliced /*<< " border " << border << " fills " << fills*/ << std::endl;
-            this->progress = (float)f/(float)total_frames;
         }
     }
 

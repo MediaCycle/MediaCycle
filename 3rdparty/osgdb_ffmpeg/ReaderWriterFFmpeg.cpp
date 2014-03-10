@@ -80,6 +80,7 @@ public:
         supportsProtocol("rtp","Read video/audio from rtp using ffmpeg.");
         supportsProtocol("tcp","Read video/audio from tcp using ffmpeg.");
 
+        supportsExtension("mcffmpeg", "");
         supportsExtension("ffmpeg", "");
         supportsExtension("avi",    "");
         supportsExtension("flv",    "Flash video");

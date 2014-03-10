@@ -1,4 +1,4 @@
-'/*
+/*
  *  ACVideoOsgRendererPlugin.cpp
  *  MediaCycle
  *
