@@ -29,13 +29,11 @@
  * <mailto:avre@umons.ac.be>
  */
 
-#ifndef __ACMediaNodeFeatureMapperThumbnailerPlugin_H__
-#define __ACMediaNodeFeatureMapperThumbnailerPlugin_H__
+#ifndef __ACMediaFeatureMapperRendererPlugin_H__
+#define __ACMediaFeatureMapperRendererPlugin_H__
 
 #include <ACPlugin.h>
 #include <ACOsgRendererPlugin.h>
-
-#include <simple_svg.hpp>
 
 #include <boost/any.hpp>
 using boost::any_cast;
@@ -62,12 +60,25 @@ enum ACMediaNodeShape {
     AC_MEDIA_NODE_SHAPE_OVAL
 };
 
+// http://en.wikipedia.org/wiki/HSL_and_HSV
+typedef struct {
+    double r;       // percent
+    double g;       // percent
+    double b;       // percent
+} rgb;
 
-class ACMediaNodeFeatureMapperThumbnailerPlugin : virtual public ACOsgRendererPlugin
+typedef struct {
+    double h;       // angle in degrees [0°;360°]
+    double s;       // percent [0;1]
+    double v;       // percent [0;1]
+} hsv;
+
+class ACMediaFeatureMapperRendererPlugin : virtual public ACOsgRendererPlugin
 {
+
 public:
-    ACMediaNodeFeatureMapperThumbnailerPlugin();
-    virtual ~ACMediaNodeFeatureMapperThumbnailerPlugin(){}
+    ACMediaFeatureMapperRendererPlugin();
+    virtual ~ACMediaFeatureMapperRendererPlugin(){}
     /*virtual std::vector<std::string> getThumbnailNames();
     virtual std::map<std::string,ACMediaType> getThumbnailTypes();
     virtual std::map<std::string,std::string> getThumbnailDescriptions();
@@ -79,6 +90,7 @@ public:
     // bool assignFeatureToVisualVariable(std::string name, ACMediaNodeVisualVariable variable,std::vector<boost::any> arguments);
     // bool assignFeatureToVisualVariable(std::string name, std::string variable,std::vector<boost::any> arguments);
     void assignedFeaturesChanged();
+    void updateLinks();
     virtual void mediaCycleSet();
     virtual void pluginLoaded(std::string plugin_name);
     virtual void mediaLoaded(int n,int nTot,int mId);
@@ -88,12 +100,22 @@ public:
     virtual std::map<std::string, ACMediaType> getSupportedExtensions(ACMediaType media_type = MEDIA_TYPE_ALL){return std::map<std::string, ACMediaType>();}
 
 protected:
+
+
+    hsv rgb2hsv(rgb in);
+    rgb hsv2rgb(hsv in);
+
+    void extractDescMatrix(ACMediaBrowser* mediaBrowser, arma::mat& desc_m, std::vector<std::string> &featureNames);
+
     bool updateAvailableFeatures();
     std::map<ACMediaNodeVisualVariable,std::string> visual_features;
     std::vector<std::string> visual_variables;
     std::vector<std::string> visual_variable_color;
     std::vector<std::string> visual_variable_shape;
     std::vector<std::string> feature_names;
+
+    std::vector<std::string> methods,distances,sortings;
 };
+
 
 #endif
