@@ -1,8 +1,8 @@
 /**
  * @brief ACVisPlugin_t_Sne.cpp
  * @author Christian Frisson
- * @date 31/10/2013
- * @copyright (c) 2013 – UMONS - Numediart
+ * @date 10/03/2014
+ * @copyright (c) 2014 – UMONS - Numediart
  * 
  * MediaCycle of University of Mons – Numediart institute is 
  * licensed under the GNU AFFERO GENERAL PUBLIC LICENSE Version 3 
@@ -44,9 +44,9 @@ ACVisPlugin_t_Sne::ACVisPlugin_t_Sne() : ACArmaVisPlugin(){
     this->mDescription = "dimensionnality reduction resulting from t_Sne";
     this->mId = "";
     perplexity=10;
-    this->addNumberParameter("perplexity",perplexity,1,10000,10,"value of desired perplexity",boost::bind(&ACVisPlugin_t_Sne::perplexityValueChanged,this));
+    this->addNumberParameter("perplexity",perplexity,1,10000,10,"Value of desired perplexity",boost::bind(&ACVisPlugin_t_Sne::perplexityValueChanged,this));
     itMax=2000;
-    this->addNumberParameter("Iteration Number",itMax,10,2000,50,"Number of t-Sne iteration",boost::bind(&ACVisPlugin_t_Sne::itMaxValueChanged,this));
+    this->addNumberParameter("Iteration Number",itMax,1,2000,50,"Number of t-Sne iterations",boost::bind(&ACVisPlugin_t_Sne::itMaxValueChanged,this));
     vector<string> initializeValue;
     initializeValue.push_back("Yes");
     initializeValue.push_back("No");

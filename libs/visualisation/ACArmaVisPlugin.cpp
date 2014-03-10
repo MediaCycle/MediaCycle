@@ -1,8 +1,8 @@
 /**
  * @brief ACArmaVisPlugin.cpp
  * @author Christian Frisson
- * @date 31/10/2013
- * @copyright (c) 2013 – UMONS - Numediart
+ * @date 10/03/2014
+ * @copyright (c) 2014 – UMONS - Numediart
  * 
  * MediaCycle of University of Mons – Numediart institute is 
  * licensed under the GNU AFFERO GENERAL PUBLIC LICENSE Version 3 
@@ -246,6 +246,9 @@ void ACArmaVisPlugin::updateNextPositions(ACMediaBrowser* mediaBrowser){
     float my1=abs(min(posDisp_m.col(1)));
     float my2=max(posDisp_m.col(1));
     float mTot=2*max(max(mx1,my1),max(mx2,my2));
+    float mx3 = min(posDisp_m.col(0));
+    float my3 = min(posDisp_m.col(1));
+    float osg = 0.33f;
     if (mTot==0)
         mTot=1;
    // mTot=1;
@@ -253,8 +256,10 @@ void ACArmaVisPlugin::updateNextPositions(ACMediaBrowser* mediaBrowser){
         if (mediaBrowser->getMediaNode(ids[i]) && mediaBrowser->getMediaNode(ids[i])->isDisplayed()&&cpt<desc_m.n_rows){
             //mediaBrowser->setMediaNodeDisplayed(ids[i], true);
             // TODO: make sure you meant next
-            p.x = posDisp_m(cpt,0)/mTot;
-            p.y = posDisp_m(cpt,1)/mTot;
+            //p.x = posDisp_m(cpt,0)/mTot;
+            //p.y = posDisp_m(cpt,1)/mTot;
+            p.x = -osg + 2*osg*(posDisp_m(cpt,0)-mx3)/(mx2-mx3);
+            p.y = -osg + 2*osg*(posDisp_m(cpt,1)-my3)/(my2-my3);
             p.z = 0;
             mediaBrowser->setNodeNextPosition(ids[i], p);
             cpt++;
@@ -313,8 +318,10 @@ void ACArmaVisPlugin::extractDescMatrix(ACMediaBrowser* mediaBrowser, mat& desc_
                 }
             }
         }
-        tag(tmpIdy)= mediaBrowser->getMediaNode(ids[i])->getClusterId();
-        tmpIdy++;
+        if(mediaBrowser->getMediaNode(ids[i])){
+            tag(tmpIdy)= mediaBrowser->getMediaNode(ids[i])->getClusterId();
+            tmpIdy++;
+        }
     }
     // normalizing features between 0 and 1 ///////////////////////////////////////
     //   rowvec maxDesc_v = max(desc_m);
