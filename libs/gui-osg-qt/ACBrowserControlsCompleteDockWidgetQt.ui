@@ -7,7 +7,7 @@
     <x>0</x>
     <y>0</y>
     <width>250</width>
-    <height>290</height>
+    <height>582</height>
    </rect>
   </property>
   <property name="sizePolicy">
@@ -19,7 +19,7 @@
   <property name="minimumSize">
    <size>
     <width>250</width>
-    <height>290</height>
+    <height>582</height>
    </size>
   </property>
   <property name="maximumSize">
@@ -58,7 +58,7 @@
    <property name="minimumSize">
     <size>
      <width>250</width>
-     <height>264</height>
+     <height>560</height>
     </size>
    </property>
    <property name="maximumSize">
@@ -74,7 +74,16 @@
     </size>
    </property>
    <layout class="QVBoxLayout" name="verticalLayout">
-    <property name="margin">
+    <property name="leftMargin">
+     <number>0</number>
+    </property>
+    <property name="topMargin">
+     <number>0</number>
+    </property>
+    <property name="rightMargin">
+     <number>0</number>
+    </property>
+    <property name="bottomMargin">
      <number>0</number>
     </property>
     <item>
@@ -107,7 +116,16 @@
        <bool>true</bool>
       </property>
       <layout class="QHBoxLayout" name="horizontalLayout_2">
-       <property name="margin">
+       <property name="leftMargin">
+        <number>0</number>
+       </property>
+       <property name="topMargin">
+        <number>0</number>
+       </property>
+       <property name="rightMargin">
+        <number>0</number>
+       </property>
+       <property name="bottomMargin">
         <number>0</number>
        </property>
        <item>
@@ -200,7 +218,7 @@
       <property name="minimumSize">
        <size>
         <width>250</width>
-        <height>160</height>
+        <height>500</height>
        </size>
       </property>
       <property name="maximumSize">
@@ -240,14 +258,23 @@
        <property name="minimumSize">
         <size>
          <width>0</width>
-         <height>130</height>
+         <height>400</height>
         </size>
        </property>
        <attribute name="title">
         <string>Clusters</string>
        </attribute>
        <layout class="QVBoxLayout" name="verticalLayout_8">
-        <property name="margin">
+        <property name="leftMargin">
+         <number>0</number>
+        </property>
+        <property name="topMargin">
+         <number>0</number>
+        </property>
+        <property name="rightMargin">
+         <number>0</number>
+        </property>
+        <property name="bottomMargin">
          <number>0</number>
         </property>
         <item>
@@ -261,7 +288,7 @@
           <property name="minimumSize">
            <size>
             <width>240</width>
-            <height>52</height>
+            <height>96</height>
            </size>
           </property>
           <property name="title">
@@ -300,7 +327,7 @@
           <property name="minimumSize">
            <size>
             <width>240</width>
-            <height>52</height>
+            <height>96</height>
            </size>
           </property>
           <property name="title">
@@ -339,7 +366,7 @@
           <property name="minimumSize">
            <size>
             <width>240</width>
-            <height>52</height>
+            <height>96</height>
            </size>
           </property>
           <property name="title">
@@ -352,6 +379,45 @@
            <bool>true</bool>
           </property>
           <layout class="QVBoxLayout" name="verticalLayoutClustersPositions">
+           <property name="leftMargin">
+            <number>0</number>
+           </property>
+           <property name="topMargin">
+            <number>12</number>
+           </property>
+           <property name="rightMargin">
+            <number>0</number>
+           </property>
+           <property name="bottomMargin">
+            <number>0</number>
+           </property>
+          </layout>
+         </widget>
+        </item>
+        <item>
+         <widget class="QGroupBox" name="groupBoxFiltering">
+          <property name="sizePolicy">
+           <sizepolicy hsizetype="Fixed" vsizetype="MinimumExpanding">
+            <horstretch>0</horstretch>
+            <verstretch>0</verstretch>
+           </sizepolicy>
+          </property>
+          <property name="minimumSize">
+           <size>
+            <width>240</width>
+            <height>96</height>
+           </size>
+          </property>
+          <property name="title">
+           <string>Filtering</string>
+          </property>
+          <property name="alignment">
+           <set>Qt::AlignCenter</set>
+          </property>
+          <property name="flat">
+           <bool>true</bool>
+          </property>
+          <layout class="QVBoxLayout" name="verticalLayoutFiltering">
            <property name="leftMargin">
             <number>0</number>
            </property>
@@ -386,7 +452,16 @@
         <string>Neighbors</string>
        </attribute>
        <layout class="QVBoxLayout" name="verticalLayout_7">
-        <property name="margin">
+        <property name="leftMargin">
+         <number>0</number>
+        </property>
+        <property name="topMargin">
+         <number>0</number>
+        </property>
+        <property name="rightMargin">
+         <number>0</number>
+        </property>
+        <property name="bottomMargin">
          <number>0</number>
         </property>
         <item>

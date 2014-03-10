@@ -81,6 +81,7 @@ protected:
     ACPluginControlsWidgetQt* preProcessControls;
     ACPluginControlsWidgetQt* clustersMethodControls;
     ACPluginControlsWidgetQt* clustersPositionsControls;
+    ACPluginControlsWidgetQt* clustersFilteringControls;
     ACPluginControlsWidgetQt* neighborsMethodControls;
     ACPluginControlsWidgetQt* neighborsPositionsControls;
 };

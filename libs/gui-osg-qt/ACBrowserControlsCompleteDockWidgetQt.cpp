@@ -42,12 +42,14 @@ ACBrowserControlsCompleteDockWidgetQt::ACBrowserControlsCompleteDockWidgetQt(QWi
     preProcessControls = new ACPluginControlsWidgetQt(PLUGIN_TYPE_PREPROCESS);
     clustersMethodControls = new ACPluginControlsWidgetQt(PLUGIN_TYPE_CLUSTERS_METHOD);
     clustersPositionsControls = new ACPluginControlsWidgetQt(PLUGIN_TYPE_CLUSTERS_POSITIONS);
+    clustersFilteringControls = new ACPluginControlsWidgetQt(PLUGIN_TYPE_FILTERING);
     neighborsMethodControls = new ACPluginControlsWidgetQt(PLUGIN_TYPE_NEIGHBORS_METHOD);
     neighborsPositionsControls = new ACPluginControlsWidgetQt(PLUGIN_TYPE_NEIGHBORS_POSITIONS);
 
     ui.groupBoxPreProcess->layout()->addWidget(preProcessControls);
     ui.groupBoxClustersMethod->layout()->addWidget(clustersMethodControls);
     ui.groupBoxClustersPositions->layout()->addWidget(clustersPositionsControls);
+    ui.groupBoxFiltering->layout()->addWidget(clustersFilteringControls);
     ui.groupBoxNeighborsMethod->layout()->addWidget(neighborsMethodControls);
     ui.groupBoxNeighborsPositions->layout()->addWidget(neighborsPositionsControls);
 
@@ -55,6 +57,7 @@ ACBrowserControlsCompleteDockWidgetQt::ACBrowserControlsCompleteDockWidgetQt(QWi
     preProcessControls->setFixedWidth(controlsWidth);
     clustersMethodControls->setFixedWidth(controlsWidth);
     clustersPositionsControls->setFixedWidth(controlsWidth);
+    clustersFilteringControls->setFixedWidth(controlsWidth);
     neighborsMethodControls->setFixedWidth(controlsWidth);
     neighborsPositionsControls->setFixedWidth(controlsWidth);
 
@@ -66,6 +69,7 @@ ACBrowserControlsCompleteDockWidgetQt::ACBrowserControlsCompleteDockWidgetQt(QWi
     connect(preProcessControls,SIGNAL(readjustHeight()),this,SLOT(adjustHeight()));
     connect(clustersMethodControls,SIGNAL(readjustHeight()),this,SLOT(adjustHeight()));
     connect(clustersPositionsControls,SIGNAL(readjustHeight()),this,SLOT(adjustHeight()));
+    connect(clustersFilteringControls,SIGNAL(readjustHeight()),this,SLOT(adjustHeight()));
     connect(neighborsMethodControls,SIGNAL(readjustHeight()),this,SLOT(adjustHeight()));
     connect(neighborsPositionsControls,SIGNAL(readjustHeight()),this,SLOT(adjustHeight()));
 
@@ -146,12 +150,14 @@ void ACBrowserControlsCompleteDockWidgetQt::updatePluginsSettings()
     preProcessControls->setMediaCycle(this->media_cycle);
     clustersMethodControls->setMediaCycle(this->media_cycle);
     clustersPositionsControls->setMediaCycle(this->media_cycle);
+    clustersFilteringControls->setMediaCycle(this->media_cycle);
     neighborsMethodControls->setMediaCycle(this->media_cycle);
     neighborsPositionsControls->setMediaCycle(this->media_cycle);
 
     preProcessControls->updatePluginsSettings();
     clustersMethodControls->updatePluginsSettings();
     clustersPositionsControls->updatePluginsSettings();
+    clustersFilteringControls->updatePluginsSettings();
     neighborsMethodControls->updatePluginsSettings();
     neighborsPositionsControls->updatePluginsSettings();
 
@@ -172,12 +178,14 @@ void ACBrowserControlsCompleteDockWidgetQt::resetPluginsSettings()
     preProcessControls->setMediaCycle(this->media_cycle);
     clustersMethodControls->setMediaCycle(this->media_cycle);
     clustersPositionsControls->setMediaCycle(this->media_cycle);
+    clustersFilteringControls->setMediaCycle(this->media_cycle);
     neighborsMethodControls->setMediaCycle(this->media_cycle);
     neighborsPositionsControls->setMediaCycle(this->media_cycle);
 
     preProcessControls->resetPluginsSettings();
     clustersMethodControls->resetPluginsSettings();
     clustersPositionsControls->resetPluginsSettings();
+    clustersFilteringControls->resetPluginsSettings();
     neighborsMethodControls->resetPluginsSettings();
     neighborsPositionsControls->resetPluginsSettings();
 
@@ -193,12 +201,14 @@ void ACBrowserControlsCompleteDockWidgetQt::changeMediaType(ACMediaType _media_t
     preProcessControls->setMediaCycle(this->media_cycle);
     clustersMethodControls->setMediaCycle(this->media_cycle);
     clustersPositionsControls->setMediaCycle(this->media_cycle);
+    clustersFilteringControls->setMediaCycle(this->media_cycle);
     neighborsMethodControls->setMediaCycle(this->media_cycle);
     neighborsPositionsControls->setMediaCycle(this->media_cycle);
 
     preProcessControls->changeMediaType(_media_type);
     clustersMethodControls->changeMediaType(_media_type);
     clustersPositionsControls->changeMediaType(_media_type);
+    clustersFilteringControls->changeMediaType(_media_type);
     neighborsMethodControls->changeMediaType(_media_type);
     neighborsPositionsControls->changeMediaType(_media_type);
 
@@ -206,6 +216,8 @@ void ACBrowserControlsCompleteDockWidgetQt::changeMediaType(ACMediaType _media_t
 }
 
 void ACBrowserControlsCompleteDockWidgetQt::adjustHeight(){
+    this->adjustSize();
+
     ui.groupBoxPreProcess->setMinimumHeight( preProcessControls->minimumHeight());
     ui.groupBoxClustersMethod->setMinimumHeight( clustersMethodControls->minimumHeight());
     ui.groupBoxClustersPositions->setMinimumHeight( clustersPositionsControls->minimumHeight());
@@ -213,6 +225,8 @@ void ACBrowserControlsCompleteDockWidgetQt::adjustHeight(){
                 ui.groupBoxPreProcess->minimumHeight()
                 + ui.groupBoxClustersMethod->minimumHeight()
                 + ui.groupBoxClustersPositions->minimumHeight()
+                + ui.groupBoxFiltering->minimumHeight()
+                + 128
                 );
 
     ui.groupBoxNeighborsMethod->setMinimumHeight( neighborsMethodControls->minimumHeight());
