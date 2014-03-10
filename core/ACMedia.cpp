@@ -42,6 +42,11 @@
 #include <boost/filesystem/operations.hpp>
 namespace fs = boost::filesystem;
 
+#ifdef USE_CORE_DISPATCH
+#include <dispatch/dispatch.h>
+dispatch_queue_t queue;
+#endif
+
 using namespace std;
 
 ACMedia::ACMedia() { 
@@ -76,6 +81,12 @@ ACMedia::ACMedia() {
     pthread_mutexattr_init(&import_mutex_attr);
     pthread_mutex_init(&import_mutex, &import_mutex_attr);
     pthread_mutexattr_destroy(&import_mutex_attr);
+
+    #ifdef USE_CORE_DISPATCH
+    // Initialize libdispatch
+    queue = dispatch_get_global_queue(DISPATCH_QUEUE_PRIORITY_LOW, 0);
+    #endif
+
 }
 
 ACMedia::ACMedia(const ACMedia& m){
@@ -982,15 +993,26 @@ int ACMedia::extractFeatures(ACPluginManager *acpl, bool _save_timed_feat) {
 
         std::vector<ACFeaturesPlugin*> featuresPlugins = acpl->getAvailableFeaturesPlugins()->getPlugins(this->media_type);
         plugins_per_step[current_step] = featuresPlugins.size();
+
+#ifdef USE_CORE_LIBDISPATCH
+        int i,fps(featuresPlugins.size());
+        vector<ACFeaturesPlugin *> ::iterator iter_vec = featuresPlugins.begin();
+        dispatch_apply(fps, queue, ^(size_t i) {
+            ACFeaturesPlugin* localPlugin = featuresPlugins[i];
+#else
         for (vector<ACFeaturesPlugin *> ::iterator iter_vec = featuresPlugins.begin(); iter_vec != featuresPlugins.end(); iter_vec++) {
             ACFeaturesPlugin* localPlugin = (*iter_vec);
+#endif
+
             vector<ACMediaFeatures*> afv;
             if (localPlugin != NULL){
                 plugin_at_step[current_step] = localPlugin;
                 afv = localPlugin->calculate(this, _save_timed_feat);
                 if (afv.size() == 0) {
                     cerr << "<ACMedia::extractFeatures> failed computing feature from plugin: " << localPlugin->getName() << endl;
+                    #ifndef USE_CORE_LIBDISPATCH
                     return 0;
+                    #endif
                 } else {
                     for (unsigned int Iafv = 0; Iafv < afv.size(); Iafv++)
                         this->features_vectors.push_back(afv[Iafv]);
@@ -1002,6 +1024,9 @@ int ACMedia::extractFeatures(ACPluginManager *acpl, bool _save_timed_feat) {
             import_progress[current_step] += 1.0f/(float)(plugins_per_step[current_step]);
             plugin_at_step[current_step] = 0;
         }
+#ifdef USE_CORE_LIBDISPATCH
+        );
+#endif
         import_progress[current_step] = 1.0f;
 
         // Checking if any of the media features is empty:

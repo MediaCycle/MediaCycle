@@ -166,6 +166,7 @@ OPTION(USE_OPENAL "Use OpenAL" ON)
 OPTION(USE_PORTAUDIO "Use PortAudio" OFF)
 OPTION(USE_STARPU "Use StarPU for CPU/GPU parallel feature extraction" ON)
 OPTION(USE_OPENMP "Use OpenMP" OFF) # doesn't work on Snow Leopard, returns readv failed on Ubuntu 10.04
+OPTION(USE_CORE_DISPATCH "Use Grand Central Dispatch in core" OFF)
 IF ( NOT APPLE_IOS_DEV AND NOT APPLE_IOS_SIM AND NOT APPLE_IOS_XCODE )
 	IF(APPLE)
 		OPTION(USE_COCOA "Use Cocoa" OFF)
@@ -1262,6 +1263,18 @@ IF(SUPPORT_AUDIO AND USE_PORTAUDIO)
 	ENDIF ()
 ENDIF()
 
+# libdispatch
+FIND_PACKAGE( Libdispatch )
+IF(LIBDISPATCH_FOUND)
+	IF(USE_CORE_DISPATCH)
+		ADD_DEFINITIONS(-DUSE_CORE_DISPATCH)
+	ENDIF()
+ELSE()
+	IF( USE_CORE_DISPATCH)
+		MESSAGE(FATAL_ERROR "Couldn't find libdispatch. Install it or turn USE_CORE_DISPATCH off")
+	ENDIF()
+ENDIF()
+
 # Armadillo
 FIND_PACKAGE ( Armadillo 3.810 REQUIRED ) 
 # lowest version tested in April 2011: 0.9.8 (ubuntu maverick 10.10)
@@ -1696,6 +1709,8 @@ IF(USE_FALCON)
 	ENDIF()
 ENDIF()
 
+#Newmat
+FIND_PACKAGE(Newmat)
 
 #########################
 # INTERNAL DEPENDENCIES #
