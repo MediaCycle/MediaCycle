@@ -45,9 +45,15 @@ ACPosPlugImportGrid::ACPosPlugImportGrid() : ACClusterPositionsPlugin()
     this->mName = "MediaCycle Import Grid";
     this->mDescription = "Visualization plugin ordering media nodes in a grid from their import rank";
     this->mId = "";
+
+    this->addNumberParameter("Landmower mode",0,0,1,1,"Landmower mode",boost::bind(&ACPosPlugImportGrid::updateGrid,this));
 }
 
-ACPosPlugImportGrid::~ACPosPlugImportGrid()
+ACPosPlugImportGrid::~ACPosPlugImportGrid(){
+
+}
+
+void ACPosPlugImportGrid::updateGrid()
 {
     if(media_cycle)
         this->updateNextPositions(media_cycle->getBrowser());
@@ -58,6 +64,8 @@ void ACPosPlugImportGrid::updateNextPositions(ACMediaBrowser* mediaBrowser){
     if(media_cycle->getLibrarySize()==0) return;
 
     int libSize = mediaBrowser->getLibrary()->getSize();
+    if(media_cycle->isImporting())
+        libSize += media_cycle->getLibrary()->getNumberOfFilesToImport() - media_cycle->getLibrary()->getNumberOfFilesProcessed();
 
     std::vector<long> ids = mediaBrowser->getLibrary()->getAllMediaIds();
 
@@ -74,15 +82,20 @@ void ACPosPlugImportGrid::updateNextPositions(ACMediaBrowser* mediaBrowser){
     int row = 0;
     float osg = 0.33f;
 
+    bool landmower = this->getNumberParameterValue("Landmower mode");
+
     for (int i=0; i<ids.size(); i++){
         //mediaBrowser->setMediaNodeDisplayed(ids[i], true);
         if(i%gridSize==0){
             row++;
         }
-        p.x = -osg + 2*osg*(float)(i%gridSize)/(float)gridSize;
-        p.y = osg -2*osg*(float)row/(float)gridSize;
+        if(landmower)
+            p.x = (-osg + 2*osg*(float)(i%gridSize)/(float)(gridSize-1))*pow(-1,row+1);
+        else
+            p.x = -osg + 2*osg*(float)(i%gridSize)/(float)(gridSize-1);
+        p.y = osg -2*osg*(float)(row-1)/(float)(gridSize-1);
         p.z = 0;
         mediaBrowser->setNodeNextPosition(ids[i], p);
-        std::cout << "ACPosPlugImportGrid::updateNextPositions: media " << ids[i] << " i%gridSize " << i%gridSize << " x " << p.x << " y " << p.y << std::endl;
+        //std::cout << "ACPosPlugImportGrid::updateNextPositions: media " << ids[i] << " i%gridSize " << i%gridSize << " x " << p.x << " y " << p.y << std::endl;
     }
 }

@@ -43,6 +43,7 @@ class ACPosPlugImportGrid : public ACClusterPositionsPlugin {
 public:
     ACPosPlugImportGrid();
     ~ACPosPlugImportGrid();
+    void updateGrid();
     virtual void updateNextPositions(ACMediaBrowser* );
 };
 
