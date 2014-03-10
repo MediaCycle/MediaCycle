@@ -140,9 +140,30 @@ IF(DIRECTORIES_TO_INCLUDE)
 ENDIF()
 
 file(APPEND ${CMAKE_CURRENT_BINARY_DIR}/main.cpp "
+
+class ACApplicationOsgQt : public QApplication {
+public:
+  ACApplicationOsgQt(int& argc, char ** argv) :
+    QApplication(argc, argv) { }
+  virtual ~ACApplicationOsgQt() { }
+
+  // reimplemented from QApplication so we can throw exceptions in slots
+  virtual bool notify(QObject * receiver, QEvent * event) {
+    try {
+      return QApplication::notify(receiver, event);
+    } catch(std::exception& e) {
+      qCritical() << \"Exception thrown:\" << e.what();
+      const QString qs = QString::fromStdString(e.what());
+      //if(this->setting != AC_SETTING_INSTALLATION)
+      int warn_button = QMessageBox::warning(0,\"Error\", qs,QMessageBox::Ok,QMessageBox::NoButton);
+    }
+    return false;
+  }
+};
+
 int main(int argc, char *argv[])
 {
-	QApplication app(argc, argv);
+        ACApplicationOsgQt app(argc, argv);
 	app.setOrganizationName(\"UMONS/numediart\");
 	app.setOrganizationDomain(\"mediacycle.org\");
 	app.setApplicationName(\"${TARGET_NAME}\");
