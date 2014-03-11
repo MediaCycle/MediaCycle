@@ -727,7 +727,7 @@ void s_hull_del_ray2( std::vector<Shx> &pts, std::vector<Triad> &triads)
 
   }
 
-  std::cerr << "of triangles " << triads.size() << " to be flipped. "<< std::endl;
+  //CF std::cerr << "of triangles " << triads.size() << " to be flipped. "<< std::endl;
  
   //write_Triads(triads, "tris0.mat");
 

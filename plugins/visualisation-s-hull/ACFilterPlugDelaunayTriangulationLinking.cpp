@@ -132,7 +132,7 @@ void ACFilterPlugDelaunayTriangulationLinking::filter() {
             int in = pair->first;
             std::set<int> outs = pair->second;
             for(std::set<int>::iterator out = outs.begin(); out != outs.end(); out++){
-                std::cout << "Edge " << edges++ << " " << in << " " << *out << std::endl;
+                //std::cout << "Edge " << edges++ << " " << in << " " << *out << std::endl;
                 this->browser_renderer->addLink( ids[in], ids[*out], 1.0f);
 
             }
