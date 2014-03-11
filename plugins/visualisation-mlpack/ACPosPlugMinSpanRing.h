@@ -1,8 +1,8 @@
 /**
- * @brief Plugin for filtering nodes positions into a grid
- * @author Stephane Dupont
- * @date 6/11/2009
- * @copyright (c) 2009 – UMONS - Numediart
+ * @brief Plugin for binning nodes in a ring using the Minimum Spanning Tree
+ * @author Christian Frisson
+ * @date 09/03/2014
+ * @copyright (c) 2014 – UMONS - Numediart
  * 
  * MediaCycle of University of Mons – Numediart institute is 
  * licensed under the GNU AFFERO GENERAL PUBLIC LICENSE Version 3 
@@ -33,37 +33,23 @@
 #include "ACPlugin.h"
 #include "ACMediaBrowser.h"
 
-#ifndef _ACPOSITIONSPROXIMITYGRID_
-#define _ACPOSITIONSPROXIMITYGRID_
+#ifndef _ACPosPlugMinSpanRing_
+#define _ACPosPlugMinSpanRing_
 
-class ACPositionProximityGridPlugin : public ACFilteringPlugin {
+class ACPosPlugMinSpanRing : public ACClusterPositionsPlugin {
 public:
-    ACPositionProximityGridPlugin();
-    ~ACPositionProximityGridPlugin();
-    void updateNextPositions(ACMediaBrowser* );
-    virtual void filter();
-protected:
-    ACMediaBrowser* mediaBrowser;
-private:
-    float proxgridstepx;
-    float proxgridstepy;
-    float proxgridaspectratio;
-    int proxgridlx;
-    int proxgridly;
-    float proxgridl;
-    float proxgridr;
-    float proxgridb;
-    float proxgridt;
-    int proxgridmaxdistance;
-    float proxgridjitter;
-    int proxgridboundsset;
-    vector<int> proxgrid;
+    ACPosPlugMinSpanRing();
+    ~ACPosPlugMinSpanRing();
+    void updateGrid();
+    virtual void updateNextPositions(ACMediaBrowser* );
 
-    void setProximityGrid();
-    void setProximityGridQuantize(ACPoint p, ACPoint *pgrid);
-    void setProximityGridUnquantize(ACPoint pgrid, ACPoint *p);
-    void setProximityGridBounds(float l, float r, float b, float t);
-    void setRepulsionEngine();
+protected:
+    void extractDescMatrix(ACMediaBrowser* mediaBrowser, arma::mat& desc_m, std::vector<std::string> &featureNames);
+private:
+    std::map<long,ACPoint> preFilterPositions;
+    arma::mat cell_ids;
+    int gridSize;
+    std::vector<std::string> methods;
 };
 
-#endif // _ACPOSITIONSPROXIMITYGRID_
+#endif // _ACPosPlugMinSpanRing_

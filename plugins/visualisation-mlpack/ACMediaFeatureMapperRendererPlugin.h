@@ -91,6 +91,7 @@ public:
     // bool assignFeatureToVisualVariable(std::string name, std::string variable,std::vector<boost::any> arguments);
     void assignedFeaturesChanged();
     void updateLinks();
+    void clearLinks();
     virtual void mediaCycleSet();
     virtual void pluginLoaded(std::string plugin_name);
     virtual void mediaLoaded(int n,int nTot,int mId);

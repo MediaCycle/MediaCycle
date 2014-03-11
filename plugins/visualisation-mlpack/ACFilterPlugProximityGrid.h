@@ -1,8 +1,8 @@
 /**
- * @brief Plugin for filtering nodes positions into a grid
- * @author Stephane Dupont
- * @date 6/11/2009
- * @copyright (c) 2009 – UMONS - Numediart
+ * @brief Plugin for gridding nodes in a proximity grid
+ * @author Christian Frisson
+ * @date 23/02/2014
+ * @copyright (c) 2014 – UMONS - Numediart
  * 
  * MediaCycle of University of Mons – Numediart institute is 
  * licensed under the GNU AFFERO GENERAL PUBLIC LICENSE Version 3 
@@ -31,39 +31,39 @@
 
 #include "MediaCycle.h"
 #include "ACPlugin.h"
+#include <ACPluginQt.h>
 #include "ACMediaBrowser.h"
 
-#ifndef _ACPOSITIONSPROXIMITYGRID_
-#define _ACPOSITIONSPROXIMITYGRID_
+#ifndef _ACFilterPlugProximityGrid_
+#define _ACFilterPlugProximityGrid_
 
-class ACPositionProximityGridPlugin : public ACFilteringPlugin {
+class ACFilterPlugProximityGrid : public QObject, public ACPluginQt, virtual public ACFilteringPlugin {
+    Q_OBJECT
+    Q_INTERFACES(ACPluginQt)
 public:
-    ACPositionProximityGridPlugin();
-    ~ACPositionProximityGridPlugin();
-    void updateNextPositions(ACMediaBrowser* );
+    ACFilterPlugProximityGrid();
+    ~ACFilterPlugProximityGrid();
+    //virtual void updateNextPositions(ACMediaBrowser* );
     virtual void filter();
-protected:
-    ACMediaBrowser* mediaBrowser;
+    void tighten();
+    void clearLinks();
+    void evalNeighborhoodness();
 private:
-    float proxgridstepx;
-    float proxgridstepy;
-    float proxgridaspectratio;
-    int proxgridlx;
-    int proxgridly;
-    float proxgridl;
-    float proxgridr;
-    float proxgridb;
-    float proxgridt;
-    int proxgridmaxdistance;
-    float proxgridjitter;
-    int proxgridboundsset;
-    vector<int> proxgrid;
-
     void setProximityGrid();
-    void setProximityGridQuantize(ACPoint p, ACPoint *pgrid);
-    void setProximityGridUnquantize(ACPoint pgrid, ACPoint *p);
-    void setProximityGridBounds(float l, float r, float b, float t);
-    void setRepulsionEngine();
+    void spiralSearch(int id, ACPoint p, std::string method);
+
+protected:
+    void extractDescMatrix(ACMediaBrowser* mediaBrowser, arma::mat& desc_m, std::vector<std::string> &featureNames);
+private:
+    std::map<long,ACPoint> preFilterPositions;
+    arma::imat cell_ids;
+    int gridSize;
+    std::vector<std::string> methods,distances,sortings;
+    float min_x,min_y,max_x,max_y;
+    std::map<long,bool> id_celled;
 };
 
-#endif // _ACPOSITIONSPROXIMITYGRID_
+//Wrapper to prevent mlpack::emst duplicate symbols when compiling
+extern arma::mat emst(arma::mat desc_m, bool naive=false, const size_t leafSize=1);
+
+#endif // _ACFilterPlugProximityGrid_

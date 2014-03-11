@@ -65,6 +65,14 @@ ACMediaFeatureMapperRendererPlugin::ACMediaFeatureMapperRendererPlugin()
     this->addNumberParameter("Link Neighbors",1,1,5,1,"Number of closest neighbors to consider when linking");
 
     this->addCallback("Link Update","Update links",boost::bind(&ACMediaFeatureMapperRendererPlugin::updateLinks,this));
+    this->addCallback("Link Clear","Clear links",boost::bind(&ACMediaFeatureMapperRendererPlugin::clearLinks,this));
+
+}
+
+void ACMediaFeatureMapperRendererPlugin::clearLinks() {
+    if(this->browser){
+        this->browser->removeLinks();
+    }
 }
 
 /*std::string ACMediaFeatureMapperRendererPlugin::requiresMediaReaderPlugin()
@@ -449,11 +457,11 @@ void ACMediaFeatureMapperRendererPlugin::updateLinks(){
 
         // Our dataset matrices, which are column-major.
         AllkNN a(desc_m);
-        mlpack::data::Save("./desc_m.csv", desc_m, true);
+        //mlpack::data::Save("./desc_m.csv", desc_m, true);
         a.Search(k, resultingNeighbors, resultingDistances);
-        mlpack::data::Save("./resultingNeighbors.csv", resultingNeighbors, true);
-        mlpack::data::Save("./resultingDistances.csv", resultingDistances, true);
-        //mlpack::data::Save("./mst.csv", mst, true);
+        //mlpack::data::Save("./resultingNeighbors.csv", resultingNeighbors, true);
+        //mlpack::data::Save("./resultingDistances.csv", resultingDistances, true);
+        ////mlpack::data::Save("./mst.csv", mst, true);
         //mst = arma::join_rows(resultingNeighbors,resultingDistances);
     }
     media_cycle->getBrowser()->setLayout(AC_LAYOUT_TYPE_NODELINK);
@@ -523,7 +531,7 @@ void ACMediaFeatureMapperRendererPlugin::updateLinks(){
             in = mst(0,e);
             out = mst(1,e);
             dist = mst(2,e);
-            std::cout << "Edge " << e << " " << in << " " << out << " d " << dist << std::endl;
+            //std::cout << "Edge " << e << " " << in << " " << out << " d " << dist << std::endl;
             if(this->browser){
                 this->browser->addLink( in , out, 10.0f/dist, color );
             }
@@ -533,7 +541,7 @@ void ACMediaFeatureMapperRendererPlugin::updateLinks(){
             for(int n=0;n<k;n++){
                 out = resultingNeighbors(n,e);
                 dist = resultingDistances(n,e);
-                std::cout << "Edge " << e << " " << in << " " << out << " d " << dist << std::endl;
+                //std::cout << "Edge " << e << " " << in << " " << out << " d " << dist << std::endl;
                 if(this->browser){
                     color.a() = 1/(float)(n+1);
                     this->browser->addLink( in , out, 10.0f/dist, color );
