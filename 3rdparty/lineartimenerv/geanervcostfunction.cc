@@ -24,6 +24,8 @@
 #include <newmat.h>
 #include <newmatap.h>
 
+#include <stdexcept>
+
 namespace nm = NEWMAT;
 using namespace NEWMAT;
 

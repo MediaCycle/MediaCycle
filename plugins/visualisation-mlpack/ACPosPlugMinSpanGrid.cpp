@@ -145,7 +145,7 @@ void ACPosPlugMinSpanGrid::updateNextPositions(ACMediaBrowser* mediaBrowser){
                     row++;
                 }
                 if(landmower)
-                    p.x = (-osg + 2*osg*(float)(i%gridSize)/(float)(gridSize-1))*pow(-1,row+1);
+                    p.x = (-osg + 2*osg*(float)(i%gridSize)/(float)(gridSize-1))*pow(-1.0f,row+1);
                 else
                     p.x = -osg + 2*osg*(float)(i%gridSize)/(float)(gridSize-1);
                 p.y = osg -2*osg*(float)(row-1)/(float)(gridSize-1);
