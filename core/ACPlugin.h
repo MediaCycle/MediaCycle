@@ -426,7 +426,7 @@ public:
     virtual std::vector<std::string> filenamesToOpen()=0;
     virtual int numberOfFilesToOpen(){return this->filenamesToOpen().size();}
     virtual ACMedia* importMedia(std::string mediafilepath)=0;
-    virtual std::map<std::string,ACMediaType> requiredMediaReaders();
+    virtual std::map<std::string,ACMediaType> requiredMediaReaders()=0;
 };
 
 class ACMediaLibraryWriterPlugin : virtual public ACMediaLibraryFilePlugin {
