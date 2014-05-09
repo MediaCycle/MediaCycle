@@ -1,8 +1,8 @@
 /**
- * @brief main.cpp
+ * @brief Process to extract video features through MediaCycle commandline interfaces (CLI)
  * @author Christian Frisson
- * @date 11/04/2013
- * @copyright (c) 2013 – UMONS - Numediart
+ * @date 17/12/2012
+ * @copyright (c) 2012 – UMONS - Numediart
  * 
  * MediaCycle of University of Mons – Numediart institute is 
  * licensed under the GNU AFFERO GENERAL PUBLIC LICENSE Version 3 
@@ -27,7 +27,22 @@
  * 
  * Any other additional authorizations may be asked to avre@umons.ac.be 
  * <mailto:avre@umons.ac.be>
-*/
+ */
+
+#include "ACServerProcess.h"
+#include<iostream>
+
+#include <boost/filesystem/operations.hpp>
+namespace fs = boost::filesystem;
+
+ACServerProcess::ACServerProcess(MediaCycle* _media_cycle)
+    : ACAbstractProcessCLI(_media_cycle)
+{
+}
+
+ACServerProcess::~ACServerProcess(){
+}
+
 
 #include "MediaCycle.h"
 
@@ -208,8 +223,7 @@ int processTcpMessageFromClient(MediaCycle *that, char* buffer, int l, char **bu
 	
 	return 0;
 }
-
-int main(int argc, char** argv) {
+void ACServerProcess::run(int argc, char *argv[]){
     
 	MediaCycle *media_cycle;
  
@@ -226,8 +240,10 @@ int main(int argc, char** argv) {
 			break;	
 		case MEDIA_TYPE_AUDIO:
 			smedia="audio";
-            media_cycle->loadPluginLibraryFromBasename("audio-features-yaafe");
+            //media_cycle->loadPluginLibraryFromBasename("audio-features-yaafe");
+            media_cycle->loadPluginLibraryFromBasename("audio-features-armadillo");
             media_cycle->loadPluginLibraryFromBasename("audio-reader-sndfile");
+            media_cycle->loadPluginLibraryFromBasename("laughter-intensity-armadillo");
             //media_cycle->loadPluginLibraryFromBasename("audio-segmentation");
 			break;
 		case MEDIA_TYPE_IMAGE:
@@ -258,5 +274,5 @@ int main(int argc, char** argv) {
 
     delete media_cycle;
 	
-    return (EXIT_SUCCESS);
+    return;// (EXIT_SUCCESS);
 }

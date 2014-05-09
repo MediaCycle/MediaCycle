@@ -173,7 +173,8 @@ public:
     TiXmlElement* openNextMediaFromXMLLibrary(TiXmlElement* pMediaNode, bool with_thumbnails=true);
     int saveXMLLibrary(std::string _path);
     int saveCoreXMLLibrary( TiXmlElement* _MC_e_root, TiXmlElement* _MC_e_medias);
-
+    void getDistanceTypes(); // JU added, so we can write distance types in XML
+    
     //XS special for Thomas Israel
     void saveSorted(std::string ouput_file);
 
@@ -222,6 +223,7 @@ private:
     int files_processed;
     ACMedia* media_at_import;
     bool segmenting;
+    vector <int> mDistanceTypes; // JU added, so we can write distance types in XML
 public:
     /// Useful when granularizing the import process externally, around importFile not aware of the number of files to import
     void addNumberOfFilesToImport(int _number){this->files_to_import += _number;}

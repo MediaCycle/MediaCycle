@@ -652,6 +652,37 @@ int ACMediaLibrary::openXMLLibrary(std::string _path, bool aInitLib){
 
 TiXmlElement* ACMediaLibrary::openCoreXMLLibrary(TiXmlHandle _rootHandle){
 
+    // Distance Types are read from the XML if they exist, so that they can then be used to set the distance type while loading the features in openNextMediaFromXMLLibrary
+    mDistanceTypes.clear();
+    TiXmlText* nLibraryDistanceTypes=_rootHandle.FirstChild( "DistanceTypes" ).FirstChild().Text();
+    TiXmlElement* nLibraryDistanceTypesNode=_rootHandle.FirstChild( "DistanceTypes" ).Element();
+    if(nLibraryDistanceTypesNode){
+        if(nLibraryDistanceTypesNode->Attribute("NumberOfFeatures")) {
+            string Nfeat = nLibraryDistanceTypesNode->Attribute("NumberOfFeatures");
+            stringstream tmp2;
+            tmp2 << Nfeat;
+                int nFeatures;
+                tmp2 >> nFeatures;
+                string distance_types = nLibraryDistanceTypes->ValueStr();
+                size_t pos;
+                int dis;
+                while ((pos = distance_types.find(' ')) != std::string::npos) {
+                    std::stringstream ss(distance_types.substr(0, pos));
+                    ss >> dis;
+                    mDistanceTypes.push_back(dis);
+                    distance_types.erase(0, pos + 1);
+                }
+            std::stringstream ss(distance_types.substr(0, pos));
+            ss >> dis;
+            mDistanceTypes.push_back(dis);
+            
+            if(mDistanceTypes.size()-nFeatures)
+            {
+                std::cout << "Problem in reading distance types. Expected: " << nFeatures << " Actually read: " << mDistanceTypes.size() << std::endl;
+            }
+        }
+    }
+    
     // Library Metadata
     TiXmlText* nLibraryMetadata=_rootHandle.FirstChild( "LibraryMetadata" ).FirstChild().Text();
     TiXmlElement* nLibraryMetadataNode=_rootHandle.FirstChild( "LibraryMetadata" ).Element();
@@ -724,7 +755,7 @@ TiXmlElement* ACMediaLibrary::openNextMediaFromXMLLibrary(TiXmlElement* pMediaNo
         if(!local_media){
             throw runtime_error("Couldn't create the media, no media reader available");
         }
-        local_media->loadXML(pMediaNode,with_thumbnails);
+        local_media->loadXML(pMediaNode,mDistanceTypes,with_thumbnails);
         if (mPreProcessPlugin==NULL)
             local_media->defaultPreProcFeatureInit();
         this->addMedia(local_media);
@@ -819,10 +850,29 @@ int ACMediaLibrary::saveACLLibrary(std::string _path){
     //normalizeFeatures();
 }
 
+void ACMediaLibrary::getDistanceTypes()
+{
+    mDistanceTypes.clear();
+    if(media_library.size()>0){
+        ACMedia *firstMedia=this->getFirstMedia();
+        int n_features = firstMedia->getNumberOfFeaturesVectors();//features_vec.size();
+        if(n_features){
+            std::vector<ACMediaFeatures*> features_vec=firstMedia->getAllFeaturesVectors();
+            
+            for (int i=0; i<n_features; i++) {
+                mDistanceTypes.push_back(features_vec[i]->getDistanceType());
+                //cout << "Feature : " << features_vec[i]->getName() << " Distance: " << features_vec[i]->getDistanceType() << endl;
+            }
+        }
+    }
+    
+}
+
 // XS TODO return value
 // this only saves the equivalent of the ACL config
 // will NOT contain header (browser, plugins, ...) information.
 // (obsolete ? useful ?)
+
 int ACMediaLibrary::saveXMLLibrary(std::string _path){
     // we save UNnormalized features
     //denormalizeFeatures();
@@ -853,8 +903,25 @@ int ACMediaLibrary::saveXMLLibrary(std::string _path){
 
 // no headers, just media information
 // can be called from MediaCycle's saveXML or from the app via mediaCycle
-int ACMediaLibrary::saveCoreXMLLibrary( TiXmlElement* _MC_e_root, TiXmlElement* _MC_e_medias ){
+// JU added storage of distance types
+int ACMediaLibrary::saveCoreXMLLibrary( TiXmlElement* _MC_e_root, TiXmlElement* _MC_e_medias){
+    // JU: add FeaturesWeights AND DistanceTypes;
+         // a) impossible as it would require to pass a _mediaBrowser as argument.
+        // b) Distance Types
+        TiXmlElement* MC_e_distance_types = new TiXmlElement("DistanceTypes");
+        _MC_e_root->LinkEndChild( MC_e_distance_types );
+        getDistanceTypes();
+        MC_e_distance_types->SetAttribute("NumberOfFeatures", mDistanceTypes.size());
 
+        // concatenate feature weights separated by a " "
+        std::string sfw2;
+        std::stringstream tmp2;
+        for (unsigned int j=0; j<mDistanceTypes.size(); j++) {
+            tmp2 << mDistanceTypes[j]<< " " ;
+        }
+        sfw2 = tmp2.str();
+        TiXmlText* MC_t_distance_types = new TiXmlText(sfw2.c_str());
+        MC_e_distance_types->LinkEndChild( MC_t_distance_types );
     // library metadata
     TiXmlElement* MC_e_library_metadata = new TiXmlElement("LibraryMetadata");
     _MC_e_root->LinkEndChild(  MC_e_library_metadata );

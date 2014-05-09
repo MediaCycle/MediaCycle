@@ -445,7 +445,7 @@ float FeaturesVector::distance( const FeaturesVector *ae){
 			
 		}
 			break;
-		case 1://cos distance
+            case Cosinus: // JU: commented: 1://cos distance
 		{
 			double a = 0.0, b= 0.0, ab= 0.0 ;
 			

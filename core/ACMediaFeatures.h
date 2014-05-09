@@ -85,6 +85,10 @@ public:
 	void resize(int new_size) { features_vector.resize(new_size); }
 	int getSize();
 	
+        //JU add distance management
+        void setDistanceType(FeaturesVector::DistanceType distType){features_vector.setDistanceType(distType);};
+        FeaturesVector::DistanceType getDistanceType(){return features_vector.getDistanceType();};
+        
 };
 
 #endif // _ACMEDIAFEATURES_H
