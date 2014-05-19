@@ -816,7 +816,6 @@ void ACMedia::loadXML(TiXmlElement* _pMediaNode, bool with_thumbnails){
             mediaFeatures->setNeedsNormalization(nno);
             features_vectors.push_back(mediaFeatures);
             count_f++;
-            delete mediaFeatures; // JU added
         }
     }
     // consistency check for features
@@ -978,12 +977,8 @@ int ACMedia::replacePreProcFeatures(std::vector<ACMediaFeatures*> newFeatures){
     if (newFeatures.size()!=preproc_features_vectors.size())
         return 0;
     for (int i=0;i<newFeatures.size();i++){
-        ACMediaFeatures* tempPtr=preproc_features_vectors[i];
+        delete preproc_features_vectors[i];
         preproc_features_vectors[i]=newFeatures[i];
-        if (tempPtr!=0) {
-            delete tempPtr;
-            tempPtr=0;
-        }
     }
     return 1;
 }
