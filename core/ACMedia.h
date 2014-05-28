@@ -217,7 +217,7 @@ public:
     void saveXML(TiXmlElement* _medias);
     //int loadACL(std::ifstream &library_file, int mcsl=0);
     int loadACL(std::string media_path, std::ifstream &library_file, int mcsl=0);
-    void loadXML(TiXmlElement* _pMediaNode, vector <int> DistanceTypes, bool with_thumbnails=true); //JU: to set the distance types when loading the features
+    void loadXML(TiXmlElement* _pMediaNode, vector <int> DistanceTypes, vector<std::string>* FeatureNames, bool with_thumbnails=true); //JU: to set the distance types when loading the features
     void loadXML(TiXmlElement* _pMediaNode, bool with_thumbnails=true);
 
     void saveMCSL(std::ofstream &library_file); //CF 31/05/2010 temporary MediaCycle Segmented Library (MCSL) for AudioGarden, adding a parentID for segments to the initial ACL, awaiting approval

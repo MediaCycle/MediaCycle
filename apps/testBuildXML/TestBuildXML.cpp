@@ -246,6 +246,7 @@ void TestBuildXML::run(int argc, char *argv[]){
             media_cycle->loadPluginLibraryFromBasename("audio-features-armadillo");
             media_cycle->loadPluginLibraryFromBasename("laughter-intensity-armadillo");
             media_cycle->loadPluginLibraryFromBasename("laughter-transcription-armadillo");
+            media_cycle->loadPluginLibraryFromBasename("laughter-visual");
             //media_cycle->loadPluginLibraryFromBasename("audio-segmentation");
 			break;
 		case MEDIA_TYPE_IMAGE:
@@ -274,16 +275,29 @@ void TestBuildXML::run(int argc, char *argv[]){
         sleep(30);
     }*/
         
-        /*media_cycle->importDirectory("/media/Data/Data/Ilhaire/databases/Belfast_Storytelling/individual_laugh_segmentation/segmented_audio/",0,true,false,false);
-        media_cycle->saveXMLLibrary("/media/Data/Data/Ilhaire/databases/Belfast_Storytelling/mediacycle_features2.xml");
-*/
+       media_cycle->importDirectory("/media/Data/Data/Ilhaire/databases/Belfast_Storytelling/individual_laugh_segmentation/segmented_audio/",0,true,false,false);
+       media_cycle->saveXMLLibrary("/media/Data/Data/Ilhaire/databases/Belfast_Storytelling/mediacycle_features_all.xml");
+
         
-        media_cycle->importXMLLibrary("/media/Data/Data/Ilhaire/databases/Belfast_Storytelling/mediacycle_features2.xml");
+        media_cycle->cleanLibrary();
+        media_cycle->importXMLLibrary("/media/Data/Data/Ilhaire/databases/Belfast_Storytelling/mediacycle_features_all.xml");
+        media_cycle->initializeFeatureWeights();
+        media_cycle->saveXMLLibrary("/media/Data/Data/Ilhaire/databases/Belfast_Storytelling/mediacycle_features_all2.xml");
         
-        media_cycle->saveXMLLibrary("/media/Data/Data/Ilhaire/databases/Belfast_Storytelling/mediacycle_features3.xml");
+        //ACMediaLibrary* media_lib=media_cycle->getLibrary();
+        //media_lib->getDistanceTypes();
         
-        ACMediaLibrary* media_lib=media_cycle->getLibrary();
-        media_lib->getDistanceTypes();
+        //media_cycle->setWeight("ZCR: Mean",0.7);
+        
+        media_cycle->setWeight("UpperLipRaiser 0.4 JawLowerer 0.1 BrowLowerer 0.6 LipCornerDepressor -1 OuterBrowRaiser 0.9");
+        
+        vector<float> weights=media_cycle->getWeightVector();
+        cout << "Size of weights: "  << weights.size() << endl;
+        int i;
+        for(i=0;i<weights.size();i++)
+        {
+            cout << " " << weights[i];
+        }
         
         //media_lib->
         

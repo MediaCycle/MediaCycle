@@ -164,7 +164,7 @@ std::vector<ACMediaFeatures*> ACLaughterTranscriptionPlugin::_calculate(std::str
     std::vector<ACMediaFeatures*> desc;
     ACMediaFeatures* tmp;
     tmp=new ACMediaFeatures();
-    tmp->setName("Phonetic transcription count");
+    tmp->setName("PhoneticTranscriptionCount");
     tmp->setDistanceType(FeaturesVector::Cosinus);
     tmp->setComputed();
     for(int i=0;i<mnPhones;i++)

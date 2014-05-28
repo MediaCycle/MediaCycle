@@ -654,6 +654,7 @@ TiXmlElement* ACMediaLibrary::openCoreXMLLibrary(TiXmlHandle _rootHandle){
 
     // Distance Types are read from the XML if they exist, so that they can then be used to set the distance type while loading the features in openNextMediaFromXMLLibrary
     mDistanceTypes.clear();
+    mFeatureNames.clear();
     TiXmlText* nLibraryDistanceTypes=_rootHandle.FirstChild( "DistanceTypes" ).FirstChild().Text();
     TiXmlElement* nLibraryDistanceTypesNode=_rootHandle.FirstChild( "DistanceTypes" ).Element();
     if(nLibraryDistanceTypesNode){
@@ -755,7 +756,7 @@ TiXmlElement* ACMediaLibrary::openNextMediaFromXMLLibrary(TiXmlElement* pMediaNo
         if(!local_media){
             throw runtime_error("Couldn't create the media, no media reader available");
         }
-        local_media->loadXML(pMediaNode,mDistanceTypes,with_thumbnails);
+        local_media->loadXML(pMediaNode,mDistanceTypes,&mFeatureNames,with_thumbnails);
         if (mPreProcessPlugin==NULL)
             local_media->defaultPreProcFeatureInit();
         this->addMedia(local_media);
@@ -866,6 +867,19 @@ void ACMediaLibrary::getDistanceTypes()
         }
     }
     
+}
+
+int ACMediaLibrary::getFeatureIndex(std::string FeatureName)
+{
+    int i;
+    for(i=0;i<mFeatureNames.size();i++)
+    {
+        if(!mFeatureNames[i].compare(FeatureName))
+        {
+            return i;
+        }
+    }
+    return -1;
 }
 
 // XS TODO return value

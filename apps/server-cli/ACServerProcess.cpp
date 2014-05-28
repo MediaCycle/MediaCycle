@@ -135,6 +135,7 @@ int processTcpMessageFromClient(MediaCycle *that, char* buffer, int l, char **bu
 		fullpath = path;
 		that->cleanLibrary();
 		that->importXMLLibrary(fullpath);
+                that->initializeFeatureWeights();
 		ret = 1;
 		osstream << "loadlibrary " << ret;
 		sbuffer_send = osstream.str();
@@ -191,6 +192,13 @@ int processTcpMessageFromClient(MediaCycle *that, char* buffer, int l, char **bu
 		*buffer_send = (char*)(sbuffer_send).c_str();
 		*l_send = sbuffer_send.length();
 	}
+        // modify feature weights - to be implemented
+	else if (subbuffer == "setweight") {
+		bufpos1 = bufpos2+1;
+		path = sbuffer.substr(bufpos1);
+                that->setWeight(path);
+	}
+	
 	
 	// TO BE DONE
 	/*
@@ -215,12 +223,7 @@ int processTcpMessageFromClient(MediaCycle *that, char* buffer, int l, char **bu
 		*buffer_send = (char*)(sbuffer_send).c_str();
 		*l_send = sbuffer_send.length();
 	}	
-	// modify feature weights - to be implemented
-	else if (subbuffer == "setweight") {
-		
-	}
 	*/
-	
 	return 0;
 }
 void ACServerProcess::run(int argc, char *argv[]){
@@ -236,29 +239,32 @@ void ACServerProcess::run(int argc, char *argv[]){
 	switch (_media_type) {
 		case MEDIA_TYPE_3DMODEL:
 			smedia="3Dmodel";
-            media_cycle->loadPluginLibraryFromBasename(smedia);
+            //media_cycle->loadPluginLibraryFromBasename(smedia);
 			break;	
 		case MEDIA_TYPE_AUDIO:
 			smedia="audio";
             //media_cycle->loadPluginLibraryFromBasename("audio-features-yaafe");
-            media_cycle->loadPluginLibraryFromBasename("audio-features-armadillo");
+            /*media_cycle->loadPluginLibraryFromBasename("audio-features-armadillo");
             media_cycle->loadPluginLibraryFromBasename("audio-reader-sndfile");
-            media_cycle->loadPluginLibraryFromBasename("laughter-intensity-armadillo");
+            media_cycle->loadPluginLibraryFromBasename("laughter-intensity-armadillo");*/
             //media_cycle->loadPluginLibraryFromBasename("audio-segmentation");
 			break;
 		case MEDIA_TYPE_IMAGE:
 			smedia="image";
-            media_cycle->loadPluginLibraryFromBasename(smedia);
+            //media_cycle->loadPluginLibraryFromBasename(smedia);
 			break;
 		case MEDIA_TYPE_VIDEO:
 			smedia="video";
-            media_cycle->loadPluginLibraryFromBasename(smedia);
+            //media_cycle->loadPluginLibraryFromBasename(smedia);
             //media_cycle->loadPluginLibraryFromBasename("video-segmentation");
 			break;
 		default:
 			break;
 	}
-    media_cycle->loadPluginLibraryFromBasename("visualisation");
+        
+        media_cycle->importXMLLibrary("/media/Data/Data/Ilhaire/databases/Belfast_Storytelling/mediacycle_features4.xml");
+        media_cycle->initializeFeatureWeights();
+        //media_cycle->loadPluginLibraryFromBasename("visualisation");
     //media_cycle->loadPluginLibraryFromBasename("segmentation");
 	
 	// SD - check if needed

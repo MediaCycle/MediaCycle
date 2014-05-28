@@ -458,11 +458,17 @@ void ACMedia::fixWhiteSpace (std::string &str) {
 }
 
 //JU: added set up of distance type while loading the features
-void ACMedia::loadXML(TiXmlElement* _pMediaNode, vector <int> DistanceTypes, bool with_thumbnails){
+void ACMedia::loadXML(TiXmlElement* _pMediaNode, vector <int> DistanceTypes, vector <std::string>* FeatureNames, bool with_thumbnails){
     //  const char *pName=_pMediaNode->Attribute("FileName");
     //  XS: no need for char*; string should work since we defined TIXML_USE_STL
     if (!_pMediaNode)
         throw runtime_error("corrupted XML file");
+    
+    bool fillFeatureNames=false;
+    if(FeatureNames->size()==0)
+    {
+        fillFeatureNames=true;
+    }
 
     string pName ="";
     pName = _pMediaNode->Attribute("FileName");
@@ -540,6 +546,8 @@ void ACMedia::loadXML(TiXmlElement* _pMediaNode, vector <int> DistanceTypes, boo
     else if (nf ==0) // XS could happen without it being an error, for mediadocuments
         cout << "loading media with no features" << endl;
 
+    //string featName;
+    
     TiXmlElement* featureElement = _pMediaNodeHandle.FirstChild( "Features" ).FirstChild( "Feature" ).Element();
     if (!featureElement && nf>0)
         throw runtime_error("corrupted XML file, error reading features");
@@ -551,6 +559,10 @@ void ACMedia::loadXML(TiXmlElement* _pMediaNode, vector <int> DistanceTypes, boo
             int nfe=-1;
             int nno=-1;
             featureElement->QueryIntAttribute("NumberOfFeatureElements", &nfe);
+            if(fillFeatureNames)
+            {
+                FeatureNames->push_back(featureElement->Attribute("FeatureName"));
+            }
             if (nfe < 0)
                 throw runtime_error("corrupted XML file, wrong number of feature elements");
             featureElement->QueryIntAttribute("NeedsNormalization", &nno);
@@ -676,7 +688,7 @@ void ACMedia::loadXML(TiXmlElement* _pMediaNode, vector <int> DistanceTypes, boo
         // consistency check for segments
         for( segmentElement; segmentElement; segmentElement = segmentElement->NextSiblingElement() ) {
             ACMedia* segment_media = ACMediaFactory::getInstance().create(this->getMediaType());
-            segment_media->loadXML(segmentElement,DistanceTypes);
+            segment_media->loadXML(segmentElement,DistanceTypes,FeatureNames);
             segment_media->setParentId(mid);
             this->addSegment(segment_media);
             count_s++;

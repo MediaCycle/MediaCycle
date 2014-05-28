@@ -237,6 +237,8 @@ public:
     void setWeightVector(std::vector<float> fw);
     std::vector<float> getWeightVector();
     float getWeight(int i);
+    int setWeight(std::string FeatureName, float weight);
+    void setWeight(std::string argumentsString);
 
     /// Pointers
     int getNumberOfPointers();

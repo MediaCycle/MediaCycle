@@ -602,6 +602,12 @@ void MediaCycle::saveACLLibrary(string path)
 
 void MediaCycle::saveXMLLibrary(string path)
 {
+    // JU added to store Feature weights and distance types
+    /*if(mediaLibrary&&mediaBrowser){
+        mediaLibrary->saveXMLLibrary(path,mediaBrowser);
+        return;
+    }*/
+    // original function
     if(mediaLibrary){
         mediaLibrary->saveXMLLibrary(path);
     }
@@ -1335,6 +1341,51 @@ void MediaCycle::setClusterNumber(int n) {
 void MediaCycle::setWeight(int i, float weight) {
     if(mediaBrowser){
         mediaBrowser->setWeight(i, weight);
+    }
+}
+
+int MediaCycle::setWeight(std::string featureName, float weight) {
+    int i=mediaLibrary->getFeatureIndex(featureName);
+    cout << "Index of feature to modify: " << i << " ; new weight: " << weight << endl;
+    if(i>=0&&mediaBrowser){
+        mediaBrowser->setWeight(i, weight);
+    }
+    return i;
+}
+
+void MediaCycle::setWeight(std::string argumentsString)
+{
+    std::string featureName, tmp;
+    float weight;
+    size_t pos;
+    while(argumentsString.length())
+    {
+        pos=argumentsString.find_first_of(" ");
+        if(pos==string::npos)
+        {
+            return;
+        }
+        featureName=argumentsString.substr(0,pos);
+        argumentsString.erase(0,pos+1);
+        pos=argumentsString.find_first_of(" ");
+        if(pos==string::npos)
+        {
+            tmp=argumentsString;
+            argumentsString.clear();
+        }
+        else
+        {
+            tmp=argumentsString.substr(0,pos);
+            argumentsString.erase(0,pos+1);
+        }
+        stringstream value;
+        value << tmp;
+        value >> weight;
+        cout << "Featurename: " << featureName << "Weight: " << weight << endl;
+        if(weight>=0&&weight<=1)
+        {
+            this->setWeight(featureName,weight);
+        }
     }
 }
 
@@ -2083,7 +2134,9 @@ std::string MediaCycle::getPluginPathFromBaseName(std::string basename)
     plugins_path = "/usr/lib/"; // or a prefix path from CMake?
     plugin_subfolder = "";
 #else
+    // JU modified for debugging in Netbeans: 
     plugins_path = s_path.parent_path().parent_path().string() + "/plugins/";
+    //plugins_path = s_path.string() + "/Builds/linux-x86/plugins/";
     plugin_subfolder = basename + "/";
 #endif
 #endif
