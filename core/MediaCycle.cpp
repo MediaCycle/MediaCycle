@@ -657,8 +657,19 @@ int MediaCycle::importXMLLibrary(string path) {
     }
     cout << "MediaCycle: importing XML library: " << path << endl;
     int ok = 0;
+    
+    int beginIndex=this->mediaLibrary->getNewestMediaId();
+    
     ok = this->mediaLibrary->openXMLLibrary(path);
     //if (ok>=1) this->mediaLibrary->normalizeFeatures();//CF done by signals
+    normalizeFeatures(1);
+    int lastIndex=this->mediaLibrary->getNewestMediaId();
+
+    for (int newId=beginIndex+1;newId<=lastIndex;newId++){
+        mediaBrowser->initializeNode(newId);
+    }
+    
+    
     this->importing = false;
     return ok;
 
@@ -714,6 +725,14 @@ int MediaCycle::getNumberOfMediaNodes(){
 
 // == Search by Similarity
 
+int MediaCycle::getClustersCenterMedia(vector<int> &ids) {
+    int ret = -1;
+    if (mediaBrowser){
+        ret = this->mediaBrowser->getClustersCenterMedia(ids);
+    }
+    return ret;
+}
+
 int MediaCycle::getKNN(int id, vector<int> &ids, int k) {
     int ret = -1;
     if (mediaBrowser){
@@ -721,6 +740,7 @@ int MediaCycle::getKNN(int id, vector<int> &ids, int k) {
     }
     return ret;
 }
+
 int MediaCycle::getKNN(ACMedia *aMedia, vector<ACMedia *> &result, int k) {
     int ret = -1;
     if (mediaBrowser){

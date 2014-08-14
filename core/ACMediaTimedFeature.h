@@ -123,6 +123,7 @@ public:
 	ACMediaFeatures* mean();
 	ACMediaFeatures* weightedStdDeviation(ACMediaTimedFeature* weight);
 	ACMediaFeatures* std();
+        ACMediaFeatures* meanAndStd();
     ACMediaFeatures* cov(ACMediaTimedFeature* mtf2);
 
 	ACMediaFeatures* hist();

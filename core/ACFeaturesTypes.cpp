@@ -658,3 +658,12 @@ void FeaturesVector::push_back(float elem){
 	
 
 };
+
+void FeaturesVector::print_features()
+{
+    for (int i=0; i<vDense.size(); i++)
+    {
+        cout << vDense[i] << " ";
+    }
+    cout << endl;
+}

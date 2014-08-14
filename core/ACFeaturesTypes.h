@@ -85,6 +85,8 @@ public:
 	float distance( const FeaturesVector *ae);
 	FeaturesVector & meanAdd( const FeaturesVector &ae);
 	void push_back(float elem);
+        float get_first_feature(){return vDense[0];};
+        void print_features();
 };
 //typedef std::vector<double> FeaturesVectorAsDouble;
 // other option : make FeaturesVector a class or a template

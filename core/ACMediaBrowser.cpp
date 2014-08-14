@@ -56,6 +56,25 @@ static double compute_distance(vector<ACMediaFeatures*> &obj1, vector<ACMediaFea
     return dis;
 }
 
+static double compute_distance(vector<FeaturesVector> &obj1, vector<ACMediaFeatures*> &obj2, const vector<float> &weights, bool inverse_features)
+{
+    //assert(obj1.size() == obj2.size() && obj1.size() == weights.size());
+    int feature_count = obj2.size();
+
+    double dis = 0.0;
+
+    for (int f=0; f<feature_count; f++) {
+        //		ACEuclideanDistance* E = new ACEuclideanDistance (obj1[f], obj2[f]);
+        //		dis += E->distance() * (inverse_features?(1.0-weights[f]):weights[f]);
+        float temp=obj1[f].distance(obj2[f]->getFeaturesVector());
+        dis +=temp*temp*(inverse_features?(1.0-weights[f]):weights[f]);
+	//	delete E;
+    }
+    dis = sqrt(dis);
+
+    return dis;
+}
+
 // this one is mostly used
 // e.g., compute_distance(mLibrary->getMedia(i)->getAllPreProcFeaturesVectors(), mClusterCenters[j], mFeatureWeights, false);
 
@@ -814,6 +833,104 @@ int ACMediaBrowser::getKNN(int id, vector<int> &ids, int k) {
     }
 
     return kcount;
+}
+
+int ACMediaBrowser::getKNN(vector<FeaturesVector> &feat, vector<int> &ids, int k) {
+
+    int i, j;
+    int el;
+    int min_pos;
+    double min_distance, max_distance;
+    int kcount;
+
+    if(mLibrary == 0) return -1;
+
+    // XS TODO simplify this
+    //vector<ACMedia*> nodes = mLibrary->getAllMedia();
+    ACMedias medias = mLibrary->getAllMedia();
+    int object_count = medias.size(); if(object_count == 0) return -1;
+    int feature_count = mLibrary->getFirstMedia()->getNumberOfPreProcFeaturesVectors();
+    assert(mFeatureWeights.size() == feature_count);
+
+    double inv_weight = 0.0;
+    //vector<float> distances;
+    map<long,float> distances;
+
+    for(i=0; i<feature_count; i++) {
+        inv_weight += mFeatureWeights[i];
+    }
+    if(inv_weight > 0.0) inv_weight = 1.0 / inv_weight;
+    else return -1;
+
+    //distances.resize(object_count);
+
+    for (i=0; i<object_count; i++) {
+    //for (ACMedias::iterator media=medias.begin(); media!=medias.begin(); media++) {
+        //if(media->second->getType() == mLibrary->getMediaType()){//CF multimedia compatibility
+            distances[i] = compute_distance(feat, medias[i]->getAllFeaturesVectors(), mFeatureWeights, false);
+            if (distances[i]>max_distance) {
+                max_distance = distances[i];
+            }
+        //}
+    }
+    max_distance++;
+    //distances[el] = max_distance;
+
+    kcount = 0;
+    for (j=0;j<k;j++) {
+        min_distance = max_distance;
+        min_pos = -1;
+        /*for (i=0;i<object_count;i++) {
+            if (distances[i]<min_distance) {
+                min_distance = distances[i];
+                min_pos = i;
+            }
+        }*/
+        for(map<long,float>::iterator distance = distances.begin(); distance != distances.end(); distance++) {
+            if (distance->second<min_distance) {
+                min_distance = distance->second;
+                min_pos = distance->first;
+            }
+        }
+
+        if (min_pos>=0) {
+            int tmpid = medias[min_pos]->getId();
+            ids.push_back(tmpid);
+            distances[min_pos] = max_distance;
+            kcount++;
+        }
+        else {
+            break;
+        }
+    }
+
+    return kcount;
+}
+
+int ACMediaBrowser::getClustersCenterMedia(vector<int> &ids) // outputs the id of the closest media to each cluster center
+{
+    vector<vector<FeaturesVector> > centroids = getClusterCenters();
+    vector<int> centro;
+    cout << "centroids size " << centroids.size() << endl;
+    int k;
+    for(int i=0; i<centroids.size(); i++)
+    {
+        for(k=0; k<centroids.at(i).size();k++)
+        {
+            centroids.at(i).at(k).print_features();
+        }
+        //cout << endl;
+        centro.clear();
+        //cout << "This centroid size " << centroids[i].size() << endl;
+        getKNN(centroids.at(i), centro, 1);
+        ids.push_back(centro.at(0));
+        cout << "This centroid size " << centroids[i].size() << " Centro size: " << centro.size() << " Centro: " << centro.at(0) << endl;
+    }
+    if(ids.size()>0)
+    {
+      return ids.at(0);
+    }
+    return -1;
 }
 
 int ACMediaBrowser::getKNN(ACMedia *aMedia, vector<ACMedia *> &result, int k) {

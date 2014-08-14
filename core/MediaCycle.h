@@ -120,6 +120,7 @@ public:
     /// Search by Similarity
     int getKNN(int id, std::vector<int> &ids, int k);
     int getKNN(ACMedia *aMedia, std::vector<ACMedia *> &result, int k);
+    int getClustersCenterMedia(std::vector<int> &ids);
 
     /// Thumbnail
     std::string getThumbnailFileName(int id);

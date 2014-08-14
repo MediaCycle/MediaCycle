@@ -118,8 +118,8 @@ public:
 
     void clean();
 
-    void setLibrary(ACMediaLibrary *lib) { mLibrary = lib; }
-    ACMediaLibrary *getLibrary() { return mLibrary; }
+    void setLibrary(ACMediaLibrary *lib) { mLibrary = lib; };
+    ACMediaLibrary *getLibrary() { return mLibrary; };
 
     // call this when the number of nodes changes in the library
     void libraryContentChanged(int needsCluster=1);
@@ -130,6 +130,8 @@ public:
     // Search by similarity
     int getKNN(int id, vector<int> &ids, int k);
     int getKNN(ACMedia *aMedia, vector<ACMedia *> &result, int k);
+    int getKNN(vector<FeaturesVector> &feat, vector<int> &ids, int k);
+    int getClustersCenterMedia(vector<int> &ids);
 
     // Search on a specific feature (e.g., 10 images most red)
     int getKSortedOnFeature(int k=0, int f=0, int dim=0, bool revert=false);
@@ -343,6 +345,8 @@ public:
     const vector<int> &getIdNodeClusterCenter(){return mIdNodeClusterCenters;}
     void setIdNodeClusterCenter(vector<int> idNodeClusterCenters){mIdNodeClusterCenters=idNodeClusterCenters;}
     void setUpdateMutex(bool value);
+    
+    
 
 private: // better not let the ouside world know about internal cooking
     void resetNavigation();
@@ -427,7 +431,8 @@ protected:
     vector<vector<FeaturesVector> > mClusterCenters; // cluster index, feature index, descriptor index
     vector<int> mIdNodeClusterCenters;
     vector<float> mFeatureWeights; // each value must be in [0,1], important for euclidian distance.
-
+    
+    
     int auto_play;
     int auto_play_toggle;
     bool auto_discard;
