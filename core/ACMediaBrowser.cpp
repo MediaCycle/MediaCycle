@@ -389,12 +389,33 @@ float ACMediaBrowser::getWeight(int i){
     }
 }
 
+int ACMediaBrowser::getClusterNumber()
+{
+    return mClusterCount;
+}
+
 void ACMediaBrowser::setClusterNumber(int n)
 {
     if (n>0)
+    {
         mClusterCount = n;
+        setNeedsNavigationUpdateLock(1);
+        //this->removeAllLabels();
+        if (mClustersMethodPlugin==0 && mNoMethodPosPlugin==0){//CF no plugin set, factory settings
+            std::cerr << "updateClusters : no clustering plugin set" << std::endl;
+        }
+        else{//TR TODO cancel the clustering if needCluster ==0
+            if (mClustersMethodPlugin) { //CF priority on the Clusters Plugin
+                mClustersMethodPlugin->setNumberParameterValue("clusters",mClusterCount);
+            }
+        }
+        setNeedsNavigationUpdateLock(0);
+        cout << " Number of clusters changed to: " << mClusterCount << endl;
+    }
     else
+    {
         std::cerr << "<ACMediaBrowser::setClusterNumber> : n has to be > 0" << std::endl;
+    }
 }
 
 void ACMediaBrowser::setClickedNode(int inode){
@@ -867,7 +888,7 @@ int ACMediaBrowser::getKNN(vector<FeaturesVector> &feat, vector<int> &ids, int k
     for (i=0; i<object_count; i++) {
     //for (ACMedias::iterator media=medias.begin(); media!=medias.begin(); media++) {
         //if(media->second->getType() == mLibrary->getMediaType()){//CF multimedia compatibility
-            distances[i] = compute_distance(feat, medias[i]->getAllFeaturesVectors(), mFeatureWeights, false);
+            distances[i] = compute_distance(feat, medias[i]->getAllPreProcFeaturesVectors(), mFeatureWeights, false);
             if (distances[i]>max_distance) {
                 max_distance = distances[i];
             }

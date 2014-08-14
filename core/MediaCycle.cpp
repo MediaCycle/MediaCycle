@@ -1358,6 +1358,12 @@ void MediaCycle::setClusterNumber(int n) {
     }
 }
 
+int MediaCycle::getClusterNumber() {
+    if(mediaBrowser){
+        return mediaBrowser->getClusterNumber();
+    }
+}
+
 void MediaCycle::setWeight(int i, float weight) {
     if(mediaBrowser){
         mediaBrowser->setWeight(i, weight);

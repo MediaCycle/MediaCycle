@@ -107,6 +107,8 @@ ACKMeansPlugin::~ACKMeansPlugin() {
 void ACKMeansPlugin::updateClusters(ACMediaBrowser* mediaBrowser,bool needsCluster){
     ACMediaLibrary *library=mediaBrowser->getLibrary();
 
+     cout << library->getSize() << endl;
+    
     int clusterCount=this->getNumberParameterValue("clusters");
 
     int i,j,d,f;
@@ -244,7 +246,7 @@ void ACKMeansPlugin::updateClusters(ACMediaBrowser* mediaBrowser,bool needsClust
             {
                 // check if we should include mediaBrowser object
                 // note: the following "if" skips to next i if true.
-                if(mediaBrowser->getMediaNode(currId[i])) continue;
+                if(!mediaBrowser->getMediaNode(currId[i])) continue;
                 if(mediaBrowser->getMediaNode(currId[i])->getNavigationLevel() < mediaBrowser->getNavigationLevel()) continue;
 
                 // compute distance between this object and every cluster
@@ -340,10 +342,12 @@ void ACKMeansPlugin::updateClusters(ACMediaBrowser* mediaBrowser,bool needsClust
 void ACKMeansPlugin::clusterNumberChanged(){
     if(!this->media_cycle) return;
 
-    media_cycle->setClusterNumber( this->getNumberParameterValue("clusters") );
+    if(media_cycle->getClusterNumber()!=this->getNumberParameterValue("clusters")) {
+        media_cycle->setClusterNumber( this->getNumberParameterValue("clusters") );
     // XSCF251003 added this
     media_cycle->updateDisplay(true); //XS 250310 was: media_cycle->updateClusters(true);
     // XS 310310 removed media_cycle->setNeedsDisplay(true); // now in updateDisplay
     //osg_view->updateTransformsFromBrowser(1.0); //CF 29/06/2012, this is called by ACOsgCompositeViewQt::updateGL if mediacycle needs display
     media_cycle->setNeedsDisplay(true);
+    }
 }

@@ -218,6 +218,7 @@ public:
     void goBack();
     void goForward();
     void setClusterNumber(int n);
+    int getClusterNumber();
     void setForwardDown(int i);
     void forwardNextLevel();
     void changeReferenceNode();

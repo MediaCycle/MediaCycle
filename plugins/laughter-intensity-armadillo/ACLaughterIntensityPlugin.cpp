@@ -57,9 +57,9 @@ ACLaughterIntensityPlugin::~ACLaughterIntensityPlugin() {
 
 ACFeatureDimensions ACLaughterIntensityPlugin::getFeaturesDimensions(){
     ACFeatureDimensions featureDimensions;
-    featureDimensions["Global intensity"] = 1;
-    featureDimensions["Continuous intensity: Mean"] = 1;
-    featureDimensions["Continuous intensity: Std"] = 1;
+    featureDimensions["GlobalIntensity"] = 1;
+    featureDimensions["ContinuousIntensity:MeanandStd"] = 2;
+    //featureDimensions["ContinuousIntensity:Std"] = 1;
     return featureDimensions;
 }
 
@@ -113,7 +113,7 @@ std::vector<ACMediaFeatures*> ACLaughterIntensityPlugin::_calculate(std::string 
     ACMediaFeatures *tmp, *tmp2, *tmp3;
     // add global intensity
     tmp=new ACMediaFeatures();
-    tmp->setName("Global intensity");
+    tmp->setName("GlobalIntensity");
     tmp->setDistanceType(FeaturesVector::Euclidean);
     tmp->addFeatureElement(global_intensity.at(0));
     /*tmp->addFeatureElement(10.0);
@@ -127,17 +127,18 @@ std::vector<ACMediaFeatures*> ACLaughterIntensityPlugin::_calculate(std::string 
     
     // add average instantaneous intensity
     tmp2=new ACMediaFeatures();
-    tmp2->setName("Continuous intensity: Mean");
+    tmp2->setName("ContinuousIntensity:MeanAndStd");
     tmp2->setDistanceType(FeaturesVector::Euclidean);
     tmp2->addFeatureElement(arma::mean(continuous_intensity));
+    tmp2->addFeatureElement(arma::stddev(continuous_intensity));
     tmp2->setComputed();
     desc.push_back(tmp2);
     std::cout << "Adding ACmediaFeatures: " << tmp2->getName() << " n_elements: " << tmp2->getFeaturesVector().size() << std::endl;
     //std::cout <<  tmp->getFeaturesVector()->vDense(0) << std::endl;
     
     // add std instantaneous intensity
-    tmp3=new ACMediaFeatures();
-    tmp3->setName("Continuous intensity: Std");
+    /*tmp3=new ACMediaFeatures();
+    tmp3->setName("ContinuousIntensity:Std");
     tmp3->setDistanceType(FeaturesVector::Euclidean);
     tmp3->addFeatureElement(arma::stddev(continuous_intensity));
     tmp3->setComputed();

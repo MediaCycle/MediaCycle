@@ -179,6 +179,7 @@ public:
 
     // == Cluster Mode == (based on features weights)
     void setClusterNumber(int n);
+    int getClusterNumber();
     void setClusterIndex(int mediaIdx,int clusterIdx);
     void setClusterCenter(int clusterIdx, vector<FeaturesVector >);
     void initClusterCenters();
