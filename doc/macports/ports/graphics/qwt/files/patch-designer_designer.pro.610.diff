@@ -1,0 +1,11 @@
+--- designer/designer.pro.orig	2014-03-24 14:31:07.000000000 +0100
++++ designer/designer.pro	2014-03-24 14:32:23.000000000 +0100
+@@ -42,7 +42,7 @@
+ 
+ 
+     TEMPLATE        = lib
+-    TARGET          = qwt_designer_plugin
++    TARGET          = $$qwtLibraryTarget(qwt_designer_plugin)
+ 
+     DESTDIR         = plugins/designer
+ 

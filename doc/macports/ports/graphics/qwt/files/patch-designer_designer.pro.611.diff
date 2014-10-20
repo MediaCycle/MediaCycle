@@ -1,0 +1,29 @@
+--- designer/designer.pro.orig	2014-10-19 17:33:21.000000000 +0200
++++ designer/designer.pro	2014-10-19 17:34:25.000000000 +0200
+@@ -43,7 +43,7 @@
+ 
+ 
+     TEMPLATE        = lib
+-    TARGET          = qwt_designer_plugin
++    TARGET          = $$qwtLibraryTarget(qwt_designer_plugin)
+ 
+     DESTDIR         = plugins/designer
+ 
+@@ -89,14 +89,14 @@
+ 
+         contains(QWT_CONFIG, QwtFramework) {
+ 
+-            LIBS      += -F$${QWT_OUT_ROOT}/lib 
++            LIBS      += -F$${QWT_OUT_ROOT}/lib -framework Qwt
+         }
+         else {
+ 
+-            LIBS      += -L$${QWT_OUT_ROOT}/lib
++            LIBS      += -L$${QWT_OUT_ROOT}/lib -lqwt
+         }
+ 
+-        qwtAddLibrary(qwt)
++        #qwtAddLibrary(qwt)
+ 
+         contains(QWT_CONFIG, QwtDll) {
+ 

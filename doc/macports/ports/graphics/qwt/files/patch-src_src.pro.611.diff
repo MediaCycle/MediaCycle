@@ -1,0 +1,20 @@
+--- src/src.pro.orig	2014-10-19 17:47:08.000000000 +0200
++++ src/src.pro	2014-10-19 17:49:09.000000000 +0200
+@@ -39,7 +39,7 @@
+ 
+ # Install directives
+ 
+-target.path    = $${QWT_INSTALL_LIBS}
++target.path    = $${QWT_INSTALL_PREFIX}/Library/Frameworks
+ INSTALLS       = target 
+ 
+ CONFIG(lib_bundle) {
+@@ -52,7 +52,7 @@
+ else {
+ 
+     headers.files  = $${HEADERS}
+-    headers.path   = $${QWT_INSTALL_HEADERS}
++    headers.path   = $$[QT_INSTALL_HEADERS]
+     INSTALLS += headers
+ }
+ 

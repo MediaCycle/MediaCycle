@@ -1,0 +1,42 @@
+--- qwtfunctions.pri.orig	2014-03-24 14:30:40.000000000 +0100
++++ qwtfunctions.pri	2014-03-24 14:33:39.000000000 +0100
+@@ -34,38 +34,5 @@
+ }
+ 
+ defineTest(qwtAddLibrary) {
+-
+-    LIB_NAME = $$1
+-
+-    unset(LINKAGE)
+-
+-    mac:contains(QWT_CONFIG, QwtFramework) {
+-
+-        LINKAGE = -framework $${LIB_NAME}$${QT_LIBINFIX}
+-    }
+-
+-    isEmpty(LINKAGE) {
+-
+-        if(!debug_and_release|build_pass):CONFIG(debug, debug|release) {
+-
+-            mac:LINKAGE = -l$${LIB_NAME}$${QT_LIBINFIX}_debug
+-            win32:LINKAGE = -l$${LIB_NAME}$${QT_LIBINFIX}d
+-        }
+-    }
+-
+-    isEmpty(LINKAGE) {
+-
+-        LINKAGE = -l$${LIB_NAME}$${QT_LIBINFIX}
+-    }
+-
+-    !isEmpty(QMAKE_LSB) {
+-
+-        QMAKE_LFLAGS *= --lsb-shared-libs=$${LIB_NAME}$${QT_LIBINFIX}
+-    }
+-
+-    LIBS += $$LINKAGE
+-    export(LIBS)
+-    export(QMAKE_LFLAGS)
+-
+-    return(true)
++    qtAddLibrary($$1)
+ }
