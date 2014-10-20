@@ -51,8 +51,8 @@ ACFilterPlugDelaunayTriangulationLinking::~ACFilterPlugDelaunayTriangulationLink
 }
 
 void ACFilterPlugDelaunayTriangulationLinking::clearLinks() {
-    if(this->browser_renderer){
-        this->browser_renderer->removeLinks();
+    if(this->browser){
+        this->browser->removeLinks();
     }
 }
 
@@ -124,16 +124,16 @@ void ACFilterPlugDelaunayTriangulationLinking::filter() {
 
     int edges = 0;
 
-    if(this->browser_renderer){
+    if(this->browser){
         media_cycle->getBrowser()->setLayout(AC_LAYOUT_TYPE_NODELINK);
-        this->browser_renderer->removeLinks();
+        this->browser->removeLinks();
 
         for(std::map<int,std::set<int> >::iterator pair = pairs.begin(); pair != pairs.end(); pair++){
             int in = pair->first;
             std::set<int> outs = pair->second;
             for(std::set<int>::iterator out = outs.begin(); out != outs.end(); out++){
                 //std::cout << "Edge " << edges++ << " " << in << " " << *out << std::endl;
-                this->browser_renderer->addLink( ids[in], ids[*out], 1.0f);
+                this->browser->addLink( ids[in], ids[*out], 1.0f);
 
             }
         }

@@ -2,9 +2,11 @@ IF(USE_OSG)
 	FILE(GLOB mediacycle-osg_SRC *.cpp)
 	FILE(GLOB mediacycle-osg_HDR *.h)
 
+	INCLUDE_DIRECTORIES(${CMAKE_SOURCE_DIR}/libs/gui-core)
+
 	ADD_LIBRARY(mediacycle-osg ${mediacycle-osg_SRC} ${mediacycle-osg_HDR})
-	ADD_DEPENDENCIES(mediacycle-osg mediacycle)
-	TARGET_LINK_LIBRARIES(mediacycle-osg mediacycle)
+	ADD_DEPENDENCIES(mediacycle-osg mediacycle mediacycle-gui-core)
+	TARGET_LINK_LIBRARIES(mediacycle-osg mediacycle mediacycle-gui-core)
 
         #TARGET_LINK_LIBRARIES(mediacycle-osg osgdb_svg)
         IF(CMAKE_TOOLCHAIN_FILE AND MINGW)

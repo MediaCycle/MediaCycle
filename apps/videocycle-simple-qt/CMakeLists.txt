@@ -1,61 +1,24 @@
 SET(TARGET_NAME "videocycle-simple-qt")
-IF(BUILD_IVISIT_APPS AND SUPPORT_VIDEO AND USE_QT4)
+IF(BUILD_IVISIT_APPS AND SUPPORT_VIDEO AND (USE_QT4 OR USE_QT5))
 
-	FILE(GLOB SRC *.cpp)
-	FILE(GLOB HDR *.h)
+	SET(MEDIA_TYPE "MEDIA_TYPE_AUDIO")
+        SET(MC_PLUGINS "video;segmentation")
 
-	IF ( APPLE )
-		SET(APP_TYPE MACOSX_BUNDLE)
-	ENDIF ( APPLE )
+	SET(DESCRIPTION "VideoCycle simplified app.")
 
-	SET(videocycle-simple-qt_SRCS main.cpp VideoCycle.cpp)
-	SET(videocycle-simple-qt_MOC_HDRS VideoCycle.h)
-	SET(videocycle-simple-qt_UIS VideoCycle.ui)
+	INCLUDE (${CMAKE_SOURCE_DIR}/cmake/CreateDefaultConfig.cmake)
+	CREATE_DEFAULT_CONFIG(${TARGET_NAME})
 
-	# Generates ui_VideoCycle.h
-	QT4_WRAP_UI(videocycle-simple-qt_UIS_H ${videocycle-simple-qt_UIS})
+	SET(MAIN_CLASS "VideoCycle")
 
-	# Generates moc_VideoCycle.cxx 
-	QT4_WRAP_CPP(videocycle-simple-qt_MOC_SRCS ${videocycle-simple-qt_MOC_HDRS})
+	INCLUDE (${CMAKE_SOURCE_DIR}/cmake/AddMediaCycleQtApp.cmake)
+	ADD_MC_QT_EXECUTABLE(${TARGET_NAME})
 
-	# Don't forget to include output directory, otherwise
-	# the UI file won't be wrapped!
-	include_directories(${CMAKE_CURRENT_BINARY_DIR})
+	# Add more optional dependencies:
+	#ADD_DEPENDENCIES(${TARGET_NAME} )
+	# Link these dependences:
+	#TARGET_LINK_LIBRARIES(${TARGET_NAME} )
 
-	IF ( WIN32 )
-		ADD_EXECUTABLE(videocycle-simple-qt WIN32 ${videocycle-simple-qt_SRCS} ${videocycle-simple-qt_UIS_H} ${videocycle-simple-qt_MOC_SRCS})
-	ELSE ()
-		#IF ( APPLE )
-		#	ADD_EXECUTABLE(videocycle-simple-qt ${APP_TYPE} ${MACOSX_BUNDLE_INFO_PLIST} ${videocycle-simple-qt_SRCS} ${videocycle-simple-qt_UIS_H} ${videocycle-simple-qt_MOC_SRCS})
-		#ELSE ()
-			ADD_EXECUTABLE(videocycle-simple-qt ${videocycle-simple-qt_SRCS} ${videocycle-simple-qt_UIS_H} ${videocycle-simple-qt_MOC_SRCS} ${videocycle-simple-qt_MOC_HDRS})
-		#ENDIF ()
-	ENDIF ( )
-
-	ADD_DEPENDENCIES(videocycle-simple-qt mc_video)
-	ADD_DEPENDENCIES(videocycle-simple-qt mc_segmentation)
-	ADD_DEPENDENCIES(videocycle-simple-qt mediacycle)
-	ADD_DEPENDENCIES(videocycle-simple-qt mediacycle-osg)
-	ADD_DEPENDENCIES(videocycle-simple-qt mediacycle-osg-qt)
-
-	#IF ( APPLE )
-	#	set_target_properties(videocycle-simple-qt PROPERTIES MACOSX_BUNDLE_INFO_PLIST ${CMAKE_SOURCE_DIR}/gui/osg-qt/Info.plist)
-	#	set_source_files_properties(PROPERTIES MACOSX_PACKAGE_LOCATION Resources)
-	#ENDIF ( APPLE )
-
-	#TARGET_LINK_LIBRARIES(videocycle-simple-qt mc_video)
-	TARGET_LINK_LIBRARIES(videocycle-simple-qt mediacycle)
-	TARGET_LINK_LIBRARIES(videocycle-simple-qt mediacycle-osg)
-	TARGET_LINK_LIBRARIES(videocycle-simple-qt mediacycle-osg-qt)
-	TARGET_LINK_LIBRARIES(videocycle-simple-qt ${OPENSCENEGRAPH_LIBRARIES})
-	TARGET_LINK_LIBRARIES(videocycle-simple-qt ${Boost_SYSTEM_LIBRARY})
-	TARGET_LINK_LIBRARIES(videocycle-simple-qt ${QT_LIBRARIES})
-	TARGET_LINK_LIBRARIES(videocycle-simple-qt ${QT4_LIBRARY} ${QT_QTCORE_LIBRARY} ${QT_QTGUI_LIBRARY} ${QT_QTOPENGL_LIBRARY} )
-	TARGET_LINK_LIBRARIES(videocycle-simple-qt ${OPENGL_LIBRARIES})
-
-	IF ( APPLE )
-		set(CMAKE_EXE_LINKER_FLAGS "-framework CoreVideo -framework AppKit -framework Foundation")
-	ENDIF ( APPLE )
 	SET_TARGET_PROPERTIES(${TARGET_NAME} PROPERTIES FOLDER "${FOLDERNAME}")
 	MESSAGE("[X] ${TARGET_NAME}")
 ELSE()

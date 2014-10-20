@@ -144,7 +144,7 @@ void ACMediaCycleOsgQt::pluginLoaded(std::string plugin_name){
 
 ACMediaCycleOsgQt::ACMediaCycleOsgQt(QWidget *parent)
     : QMainWindow(parent),ACEventListener(),features_known(false),
-      aboutDialog(0),controlsDialog(0),compositeOsgView(0),
+      aboutDialog(0),controlsDialog(0),view(0),
       osgViewDockWidget(0),osgViewDockLayout(0),/*progressBar(0),*/metadataWindow(0),
       dockWidgetsManager(0),
       userProfileWindow(0),segmentationDialog(0),librarySaveDialog(0)
@@ -215,17 +215,19 @@ ACMediaCycleOsgQt::ACMediaCycleOsgQt(QWidget *parent)
     lcdpalette->setColor(QPalette::AlternateBase, QColor(0, 0, 0));
     kisScore->setPalette(*lcdpalette);
 
+
     stackLayout->addWidget(kisScore);
     kisTimer = new ACKnownItemSearchTimerQt();
-    stackLayout->addWidget(kisTimer);
+    // CF for 11/04/2014 test
+    //stackLayout->addWidget(kisTimer);
 
     osgViewDockLayout->addWidget(stackWidget);
     //osgViewDockLayout->addWidget(kisTimer);
 
-    compositeOsgView = new ACOsgCompositeViewQt();
-    compositeOsgView->setSizePolicy ( QSizePolicy::MinimumExpanding, QSizePolicy::MinimumExpanding );
-    osgViewDockLayout->addWidget(compositeOsgView);
-    connect( compositeOsgView, SIGNAL( importDirectoriesThreaded(std::vector<std::string>,bool ) ),
+    view = new ACOsgCompositeViewQt();
+    view->setSizePolicy ( QSizePolicy::MinimumExpanding, QSizePolicy::MinimumExpanding );
+    osgViewDockLayout->addWidget(view);
+    connect( view, SIGNAL( importDirectoriesThreaded(std::vector<std::string>,bool ) ),
              this, SLOT(importDirectoriesThreaded(std::vector<std::string>,bool) ) );
 
     //progressBar = new ACQProgressBar(); //QProgressBar();
@@ -283,7 +285,7 @@ ACMediaCycleOsgQt::ACMediaCycleOsgQt(QWidget *parent)
     this->addActions(ui.menuConfig->actions());
     this->addActions(ui.menuDisplay->actions());
     this->addActions(ui.menuHelp->actions());
-    //this->addActions(compositeOsgView->actions());
+    //this->addActions(view->actions());
 
     this->setAcceptDrops(true); // for drag and drop
 
@@ -300,7 +302,7 @@ ACMediaCycleOsgQt::~ACMediaCycleOsgQt(){
     if(dockWidgetsManager) delete dockWidgetsManager;
     if (aboutDialog) delete aboutDialog;
     if (controlsDialog) delete controlsDialog;
-    if (compositeOsgView) delete compositeOsgView;
+    if (view) delete view;
     //if (progressBar) delete progressBar;
     if (osgViewDockLayout) delete osgViewDockLayout;
     if (osgViewDockWidget) delete osgViewDockWidget;
@@ -394,13 +396,13 @@ void ACMediaCycleOsgQt::createMediaCycle(ACMediaType _media_type, ACBrowserMode 
 void ACMediaCycleOsgQt::init(){
     //media_cycle->setCallback(mediacycle_callback, (void*)this);
     media_cycle->addListener(this);
-    compositeOsgView->setMediaCycle(this->media_cycle);
-    compositeOsgView->prepareFromBrowser();
-    compositeOsgView->prepareFromTimeline();
+    view->setMediaCycle(this->media_cycle);
+    view->prepareFromBrowser();
+    view->prepareFromTimeline();
     aboutDialogFactory->setMediaCycle(media_cycle);
     if(dockWidgetsManager){
         dockWidgetsManager->setMediaCycle(media_cycle);
-        dockWidgetsManager->setOsgView(compositeOsgView);
+        dockWidgetsManager->set View(view);
     }
     metadataWindow->setMediaCycle(media_cycle);
     userProfileWindow->setMediaCycle(media_cycle);
@@ -925,20 +927,20 @@ void ACMediaCycleOsgQt::on_actionEdit_Config_File_triggered(bool checked){
 void ACMediaCycleOsgQt::on_actionEdit_Input_Controls_triggered(bool checked){
 
     if (controlsDialog == 0){
-        //this->addActions(compositeOsgView->actions());
+        //this->addActions(view->actions());
         //std::cout << "this->actions().size() " << this->actions().size() << std::endl;
         ///QList<QAction *> _actions = QList<QAction *> (this->actions());
         //std::cout << "_actions.size() " << _actions.size() << std::endl;
-        ///_actions.append(compositeOsgView->actions());
-        //std::cout << "compositeOsgView->actions().size() " << compositeOsgView->actions().size() << std::endl;
+        ///_actions.append(view->actions());
+        //std::cout << "view->actions().size() " << view->actions().size() << std::endl;
         //std::cout << "_actions.size() " << _actions.size() << std::endl;
         controlsDialog = new ACInputControlsDialogQt(this);
         controlsDialog->addActions(this->actions());
-        controlsDialog->addInputActions(compositeOsgView->getInputActions());
+        controlsDialog->addInputActions(view->getInputActions());
         //controlsDialog = new ACInputControlsDialogQt(this->actions(),this);
     }
     controlsDialog->setMediaCycle(this->media_cycle);
-    controlsDialog->setOsgView(this->compositeOsgView);
+    controlsDialog->set View(this->view);
 
     if(controlsDialog->isVisible()){
         controlsDialog->hide();
@@ -1017,10 +1019,10 @@ void ACMediaCycleOsgQt::on_actionEdit_Profile_triggered(bool checked) {
 }
 
 void ACMediaCycleOsgQt::on_actionFullscreen_triggered(bool checked) {
-    if (!checked || compositeOsgView->isFullScreen() || this->isFullScreen()){
+    if (!checked || view->isFullScreen() || this->isFullScreen()){
         std::cout << "Not fullscreen" << std::endl;
         this->showNormal();
-        compositeOsgView->showNormal();
+        view->showNormal();
         ui.actionToggle_Controls->setChecked(true);
         this->on_actionToggle_Controls_triggered(true);
         /*if(this->setting != AC_SETTING_INSTALLATION){
@@ -1038,12 +1040,12 @@ void ACMediaCycleOsgQt::on_actionFullscreen_triggered(bool checked) {
         ui.menubar->hide();
         ui.statusbar->hide();
         ui.toolbar->hide();
-        compositeOsgView->showFullScreen();
+        view->showFullScreen();
         this->showFullScreen();
 
         std::cout << "Fullscreen" << std::endl;
     }
-    compositeOsgView->setFocus();
+    view->setFocus();
 }
 
 void ACMediaCycleOsgQt::dragEnterEvent(QDragEnterEvent *event)
@@ -1109,13 +1111,13 @@ void ACMediaCycleOsgQt::updateLibrary(){
     // XS TODO updateBrowser()
     media_cycle->getBrowser()->setState(AC_CHANGING);
 
-    compositeOsgView->prepareFromBrowser();
-    compositeOsgView->prepareFromTimeline();
+    view->prepareFromBrowser();
+    view->prepareFromTimeline();
     //browserOsgView->setPlaying(true);
     media_cycle->setNeedsDisplay(true);
     if(dockWidgetsManager)
         dockWidgetsManager->updatePluginsSettings();
-    compositeOsgView->setFocus();
+    view->setFocus();
     metadataWindow->updateLibrary();
     //media_cycle->updateDisplay(true); //CF tried
 }
@@ -1428,8 +1430,8 @@ void ACMediaCycleOsgQt::clean(bool _updategl){
     //progressBar->reset();
     //progressBar->hide();
 
-    compositeOsgView->clean(_updategl);
-    compositeOsgView->setFocus();
+    view->clean(_updategl);
+    view->setFocus();
 }
 
 void ACMediaCycleOsgQt::showError(std::string s){
@@ -1584,8 +1586,8 @@ void ACMediaCycleOsgQt::switchPluginVisualizations(bool _status)
 
 void ACMediaCycleOsgQt::changeSetting(ACSettingType _setting)
 {
-    if(this->compositeOsgView)
-        this->compositeOsgView->changeSetting(_setting);
+    if(this->view)
+        this->view->changeSetting(_setting);
 
     if(this->setting != _setting)
         this->setting = _setting;

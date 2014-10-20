@@ -46,6 +46,14 @@
 #include "mlpack/methods/emst/dtb.hpp"
 #include "mlpack/methods/neighbor_search/neighbor_search.hpp"
 
+#include<limits>
+
+#include <iostream>
+#include <sstream>
+
+#include <boost/filesystem/operations.hpp>
+namespace fs = boost::filesystem;
+
 using namespace arma;
 /*using namespace mlpack;
 using namespace mlpack::emst;
@@ -62,22 +70,26 @@ ACFilterPlugProximityGrid::ACFilterPlugProximityGrid() : QObject(), ACPluginQt()
     this->mId = "";
 
     this->addCallback("Update","Update view",boost::bind(&ACFilterPlugProximityGrid::setProximityGrid,this));
-    //this->addCallback("Tighten","Tighten view",boost::bind(&ACFilterPlugProximityGrid::tighten,this));
     //this->addCallback("Clear","Clear links",boost::bind(&ACFilterPlugProximityGrid::clearLinks,this));
-    //this->addCallback("Cost","Eval neighborhoodness",boost::bind(&ACFilterPlugProximityGrid::evalNeighborhoodness,this));
+    this->addCallback("Cost","Eval neighborhoodness",boost::bind(&ACFilterPlugProximityGrid::evalNeighborhoodness,this));
 
     methods.push_back("Greedy Empty");
     methods.push_back("Greedy Swap");
     methods.push_back("Greedy Bump");
     methods.push_back("Horizontal");
     this->addStringParameter("Method",methods.front(),methods,"Grid allocation method"/*,boost::bind(&ACFilterPlugProximityGrid::setProximityGrid,this)*/);
-    this->addNumberParameter("Grid side",0,0,1,0.01,"Grid side");
+    this->addNumberParameter("Grid side",0,0,FLT_MAX,1,"Grid side"); // don't use DBL_MAX, other classes parsing plugin parameters (such as qwt widgets) might work in float resolution
     distances.push_back("Features");
     distances.push_back("Coordinates");
     this->addStringParameter("Distance",distances.front(),distances,"Dimensions to compute minimum spanning tree");
     sortings.push_back("Closest Neighbor");
     sortings.push_back("Minimum Spanning Tree");
     this->addStringParameter("Sorting",sortings.back(),sortings,"Sorting");
+    this->addNumberParameter("Compact",1,0,1,1,"Compact the grid by removing empty rows and colums. Useful for square views, less progressive for other views.");
+
+#ifdef USE_DEBUG
+    this->addNumberParameter("Save Benchmark",1,0,1,1,"Save benchmark automatically");
+#endif
 }
 
 arma::mat emst(arma::mat desc_m, bool naive, const size_t leafSize){
@@ -100,8 +112,8 @@ ACFilterPlugProximityGrid::~ACFilterPlugProximityGrid() {
 }
 
 void ACFilterPlugProximityGrid::clearLinks() {
-    if(this->browser_renderer){
-        this->browser_renderer->removeLinks();
+    if(this->browser){
+        this->browser->removeLinks();
     }
 }
 
@@ -139,38 +151,149 @@ void ACFilterPlugProximityGrid::evalNeighborhoodness() {
     }
 
 
+    int k = 8; // 2 horizontal, 2 vertical, 4 diagonal
+    if(libSize <= k || libSize <= 1){
+        std::cerr << "Library too small to evaluate neighborhoodness on " << k << " neighbors" << std::endl;
+        return;
+    }
+
     arma::mat desc_m;
     vector<string> featureNames;
     this->extractDescMatrix(this->media_cycle->getBrowser(), desc_m, featureNames);
     desc_m = desc_m.t();//arma::inplace_trans(desc_m); // required but contradictory with the example provided by mlpack
 
-    arma::Mat<size_t> resultingFeatureNeighbors;
-    arma::mat resultingFeatureDistances;
-    AllkNN featKNN(desc_m);
+    arma::Mat<size_t> resultingFeatureNeighbors,resultingPosNeighbors;
+    arma::mat resultingFeatureDistances,resultingPosDistances;
+    AllkNN featKNN(desc_m),posKNN(pos);
     ////mlpack::data::Save("./desc_m.csv", desc_m, true);
     featKNN.Search(1, resultingFeatureNeighbors, resultingFeatureDistances);
+    posKNN.Search(k, resultingPosNeighbors, resultingPosDistances);
 
-    float cumdist = 0;
+    //mlpack::data::Save("./resultingFeatureDistances.csv", resultingFeatureDistances, true);
+    //mlpack::data::Save("./resultingPosNeighbors.csv", resultingPosNeighbors, true);
+    //mlpack::data::Save("./resultingPosDistances.csv", resultingPosDistances, true);
+    //mlpack::data::Save("./pos.csv", pos, true);
+
+    double epsilon = std::numeric_limits < double >::epsilon ();
+
+    double min_2nn_2d = arma::min(resultingPosDistances.row(0)); // the minimal 2d distance to a nearest neighbor in hd
+    int num_min_2nn_2d = 0; // number of times the minimal 2d distance to a first hd nearest neighbor is repeated
+
+    double cumdist = 0; // cumulated 2d distances to each first hd nearest neighbor
+
+    int same_nn_2dvsnd = 0; // number of times the first hd nearest neighbor is the same as the first 2d nearest neighbor
+    int same_nn_2dvsnd_plus = 0; // number of times the first hd nearest neighbor is the among the 4 2d nearest neighbor if they have the same distance (grid)
 
     for(int a=0; a< resultingFeatureNeighbors.n_cols; a++){
-        //std::cout << "Edge " << a << " " << ids[a] << " " << ids[resultingFeatureNeighbors(0,a)] << " d nd " << resultingFeatureDistances(0,a) << std::endl;
-        float d2d = sqrt( pow( pos(0,resultingFeatureNeighbors(0,a)) - pos(0,a) , 2) + pow( pos(1,resultingFeatureNeighbors(0,a)) - pos(1,a) , 2) );
+        int nn_nd = resultingFeatureNeighbors(0,a);
+        int n = 0;
+
+        double d2d = sqrt( pow( pos(0,nn_nd) - pos(0,a) , 2) + pow( pos(1,nn_nd) - pos(1,a) , 2) );
+
         cumdist += d2d;
+
+        if(d2d <= min_2nn_2d+epsilon) num_min_2nn_2d++;
+
+        int nn_2d = resultingPosNeighbors(n,a);
+        //std::cout << "Edge " << a << " " << " id " << ids[a] << " nn_nd " << ids[nn_nd] << "/"<< nn_nd  << " nn_2d " << nn_2d << " d nd " << resultingFeatureDistances(n,a) << " d2d " << d2d << std::endl;
+
+        if(nn_nd == nn_2d){
+            same_nn_2dvsnd++;
+            same_nn_2dvsnd_plus++;
+        }
+        else{
+            n++;
+            double _d2d = resultingPosDistances(n,a); //sqrt( pow( pos(0,nn_2d) - pos(0,a) , 2) + pow( pos(1,nn_2d) - pos(1,a) , 2) );
+            while(n<=4 && n < resultingPosNeighbors.n_rows && nn_2d != nn_nd && abs(_d2d - d2d) < epsilon){
+                nn_2d = resultingPosNeighbors(n,a);
+                //std::cout << "Edge " << a << " " << " id " << ids[a] << " nn_nd " << ids[nn_nd] << "/"<< nn_nd  << " nn_2d " << nn_2d << " d2d " << d2d << " vs "  << _d2d << std::endl;
+                if(nn_nd == nn_2d /*&& _d2d == d2d*/ )
+                    same_nn_2dvsnd_plus++;
+                n++;
+                _d2d = sqrt( pow( pos(0,nn_2d) - pos(0,a) , 2) + pow( pos(1,nn_2d) - pos(1,a) , 2) );
+            }
+
+        }
     }
 
-    float osg = 0.33f;
-    float mincelldist = 2*osg/(float)(minSize-1);
-    float currentcelldist = 2*osg/(float)(currentSize-1);
+    double osg = 0.33f;
+    double mincelldist = 2*osg/(double)(minSize-1);
+    double currentcelldist = 2*osg/(double)(currentSize-1);
 
-    float mincost = cumdist/(mincelldist*libSize);
-    float currentcost = cumdist/(currentcelldist*libSize);
+    double mincost = cumdist/(mincelldist*libSize); // average cell distance factor to reach nearest neighbors, considering the smallest grid
+    double currentcost = cumdist/(currentcelldist*libSize); // average cell distance factor to reach nearest neighbors, considering the current resolution
+
+    std::cout << " min_2nn_2d " << min_2nn_2d << std::endl;
+    std::cout << " num_min_2nn_2d " << num_min_2nn_2d << std::endl;
+    std::cout << " same_nn_2dvsnd " << same_nn_2dvsnd << std::endl;
+    std::cout << " same_nn_2dvsnd_plus " << same_nn_2dvsnd_plus << std::endl;
 
     std::cout << " mincost " << mincost << std::endl;
     std::cout << " currentcost " << currentcost << std::endl;
+
+#ifdef USE_DEBUG
+    int save = this->getNumberParameterValue("Save Benchmark");
+    if(save==1 && !media_cycle->isImporting()){
+        std::ofstream file;
+        std::string library_name = this->media_cycle->getLibrary()->getTitle();
+        if(library_name == ""){
+            library_name = "Test";
+        }
+        /*std::vector<std::string> visualisation_plugins = this->media_cycle->getActivePluginNames(PLUGIN_TYPE_CLUSTERS_POSITIONS,this->media_cycle->getMediaType());// ->getBrowser()->getClustersPositionsPlugin()
+
+        std::string visualisation_plugin ("UnknownViz");
+        if(visualisation_plugins.size() == 1)
+            visualisation_plugin = visualisation_plugins.front();*/
+
+        std::string filepath = "./" + library_name + "-Neighbors.csv";
+        std::cout << "Trying to save to " << filepath << std::endl;
+
+        int compact = this->getNumberParameterValue("Compact");
+
+        file.open(filepath.c_str(), ios_base::out | ios_base::in | ios_base::app | std::ios_base::ate);
+        if(file.is_open()){
+
+            long pos =  file.tellp();
+
+            if(pos == 0){
+                file << "\"Library size\"" <<",";
+                file << "\"Grid side\"" <<",";
+                file << "\"Compact\"" <<",";
+                file << "\"Min 2D dist HD 1nn\"" <<",";
+                file << "\"Min 2D dist HD 1nn repeats\"" <<",";
+                file << "\"Same 2D/HD 1nn\"" <<",";
+                file << "\"Same 2D/HD 1nn/4\"" <<",";
+                file << "\"Nearest cell dist factor for smallest grid\"" <<",";
+                file << "\"Nearest cell dist factor for current grid\"" ;//<<","; // no comma
+                file << std::endl;
+            }
+
+            file << libSize << ",";
+            file << gridSize <<",";
+            file << compact << ",";
+            file << min_2nn_2d << ",";
+            file << num_min_2nn_2d << ",";
+            file << same_nn_2dvsnd << ",";
+            file << same_nn_2dvsnd_plus << ",";
+            file << mincost << ",";
+            file << currentcost;//<< ","; // no comma
+            file << std::endl;
+
+            file.close();
+        }
+        else{
+            std::cerr << "Couldn't open file " << filepath<< std::endl;
+        }
+    }
+#endif
 }
 
 void ACFilterPlugProximityGrid::filter() {
-    //this->setProximityGrid();
+    this->setProximityGrid();
+}
+
+void ACFilterPlugProximityGrid::librarySizeChanged(){
+
     preFilterPositions.clear();
     gridSize = 0;
 
@@ -184,22 +307,29 @@ void ACFilterPlugProximityGrid::filter() {
     this->updateNumberParameter("Grid side",libSize,gridSize,libSize,1);
 }
 
+
 void ACFilterPlugProximityGrid::setProximityGrid() {
 
     if(!media_cycle) return;
     if(media_cycle->getLibrarySize()==0) return;
 
+    if(media_cycle->isImporting())
+        return;
+
     int libSize = media_cycle->getLibrarySize();
 
     std::vector<long> ids = media_cycle->getLibrary()->getAllMediaIds();
 
-    if(libSize != ids.size())
+    if(libSize != ids.size()){
         std::cout << "ACFilterPlugProximityGrid::updateNextPositions: warning, lib size and number of accessible media ids don't match"<< std::endl;
+        return;
+    }
 
+    int minSize = ceil(sqrt(libSize));
     int currentSize = this->getNumberParameterValue("Grid side");
     gridSize = currentSize;
 
-    if(gridSize == 0)
+    if(gridSize <= 1)
         return;
 
     std::cout << "gridSize " << gridSize << " for " << libSize << " elements " << std::endl;
@@ -210,7 +340,7 @@ void ACFilterPlugProximityGrid::setProximityGrid() {
         for (int i=0; i<ids.size(); i++){
             ACMediaNode* node = media_cycle->getMediaNode(ids[i]);
             if(node){
-                preFilterPositions[ids[i]] = node->getCurrentPosition();
+                preFilterPositions[ids[i]] = node->getNextPosition();
             }
         }
     }
@@ -232,7 +362,7 @@ void ACFilterPlugProximityGrid::setProximityGrid() {
         desc_m.set_size(libSize,2);//(2,libSize);
     pos.set_size(2,libSize);
 
-    //float min_x(1),min_y(1),max_x(-1),max_y(-1);
+    //double min_x(1),min_y(1),max_x(-1),max_y(-1);
     min_x = 1;
     min_y = 1;
     max_x = -1;
@@ -252,7 +382,7 @@ void ACFilterPlugProximityGrid::setProximityGrid() {
         pos(1,i) = p.y;
     }
 
-    float t_x(0.0f),t_y(0.0f),z_x(1.0f),z_y(1.0f);
+    double t_x(0.0f),t_y(0.0f),z_x(1.0f),z_y(1.0f);
     t_x = -(max_x+min_x)/2.0f;
     t_y = -(max_y+min_y)/2.0f;
     z_x = 2.0f/(max_x-min_x);
@@ -270,6 +400,10 @@ void ACFilterPlugProximityGrid::setProximityGrid() {
     arma::mat resultingFeatureDistances,resultingPosDistances;
     int k = 2;
     arma::umat sortedDistances;
+
+    // featKNN is required for stats at the end / or for the "Closest Neighbors" mode
+    if(libSize <= k)
+        return;
 
     // Our dataset matrices, which are column-major.
     AllkNN featKNN(desc_m),posKNN(pos);
@@ -319,10 +453,10 @@ void ACFilterPlugProximityGrid::setProximityGrid() {
         //        for(int a=0; a< resultingPosNeighbors.n_cols; a++)
         //            std::cout << "Edge " << a << " " << ids[a] << " " << ids[resultingPosNeighbors(0,a)] << " d 2d " << resultingPosDistances(0,a) << std::endl;
 
-        float min_nn_2d = min(resultingPosDistances.row(0));
-        float max_nn_2d = max(resultingPosDistances.row(0));
-        float min_nn_nd = min(resultingFeatureDistances.row(0));
-        float max_nn_nd = max(resultingFeatureDistances.row(0));
+        double min_nn_2d = min(resultingPosDistances.row(0));
+        double max_nn_2d = max(resultingPosDistances.row(0));
+        double min_nn_nd = min(resultingFeatureDistances.row(0));
+        double max_nn_nd = max(resultingFeatureDistances.row(0));
 
         std::cout << " min_nn_2d " << min_nn_2d << " max_nn_2d " << max_nn_2d << std::endl;
         std::cout << " min_nn_nd " << min_nn_nd << " max_nn_nd " << max_nn_nd << std::endl;
@@ -342,15 +476,15 @@ void ACFilterPlugProximityGrid::setProximityGrid() {
             int n_0 = ids[sortedDistances(a)];
             int n_1 = ids[resultingFeatureNeighbors(0,sortedDistances(a))];
             //std::cout << "Edge " << a << " " << ids[sortedDistances(a)] << "<->" << ids[resultingFeatureNeighbors(0,sortedDistances(a))];
-            float dnd = resultingFeatureDistances(0,sortedDistances(a));
+            double dnd = resultingFeatureDistances(0,sortedDistances(a));
             //std::cout << " dnd " << dnd;
-            float d2d = sqrt( pow( pos(0,resultingFeatureNeighbors(0,sortedDistances(a))) - pos(0,sortedDistances(a)) , 2) + pow( pos(1,resultingFeatureNeighbors(0,sortedDistances(a))) - pos(1,sortedDistances(a)) , 2) );
+            double d2d = sqrt( pow( pos(0,resultingFeatureNeighbors(0,sortedDistances(a))) - pos(0,sortedDistances(a)) , 2) + pow( pos(1,resultingFeatureNeighbors(0,sortedDistances(a))) - pos(1,sortedDistances(a)) , 2) );
             //std::cout << " d2d " << d2d;
 
             // We first adjust the distance between the pair along their high dimensional distance
-            /*float c_x = 0.5f*(pos(0,n_0) + pos(0,n_1));
-            float c_y = 0.5f*(pos(1,n_0) + pos(1,n_1));
-            float nd = dnd/min_nn_nd * min_nn_2d;
+            /*double c_x = 0.5f*(pos(0,n_0) + pos(0,n_1));
+            double c_y = 0.5f*(pos(1,n_0) + pos(1,n_1));
+            double nd = dnd/min_nn_nd * min_nn_2d;
 
             pos(0,n_0) = c_x + 0.5f*(pos(0,n_0)-c_x)*nd/d2d;
             pos(0,n_1) = c_x + 0.5f*(pos(0,n_1)-c_x)*nd/d2d;
@@ -361,10 +495,10 @@ void ACFilterPlugProximityGrid::setProximityGrid() {
             if(k>1){
                 int n_2 = ids[resultingFeatureNeighbors(1,sortedDistances(a))];
                 std::cout << ids[sortedDistances(a)] << "<->" << ids[resultingFeatureNeighbors(1,sortedDistances(a))];
-                float dnd2 = resultingFeatureDistances(1,sortedDistances(a));
+                double dnd2 = resultingFeatureDistances(1,sortedDistances(a));
                 //dnd2 = (dnd2-min_nn_nd)/(max_nn_nd-min_nn_nd);
                 std::cout << " dnd " << dnd2;
-                float d2d2 = sqrt( pow( pos(0,resultingFeatureNeighbors(1,sortedDistances(a))) - pos(0,sortedDistances(a)) , 2) + pow( pos(1,resultingFeatureNeighbors(1,sortedDistances(a))) - pos(1,sortedDistances(a)) , 2) );
+                double d2d2 = sqrt( pow( pos(0,resultingFeatureNeighbors(1,sortedDistances(a))) - pos(0,sortedDistances(a)) , 2) + pow( pos(1,resultingFeatureNeighbors(1,sortedDistances(a))) - pos(1,sortedDistances(a)) , 2) );
                 //d2d2 = (d2d2-min_nn_2d)/(max_nn_2d-min_nn_2d);
                 std::cout << " d2d2 " << d2d2;
 
@@ -372,8 +506,8 @@ void ACFilterPlugProximityGrid::setProximityGrid() {
                 int cn_1 = count_1( ids[sortedDistances(a)]);
                 int cn_2 = count_2( ids[sortedDistances(a)]);
 
-                //                if(this->browser_renderer){
-                //                    this->browser_renderer->changeNodeSize( n_0, 0.05f+0.1*(cn_0+cn_1)+0.05f*cn_2);
+                //                if(this->browser){
+                //                    this->browser->changeNodeSize( n_0, 0.05f+0.1*(cn_0+cn_1)+0.05f*cn_2);
                 //                }
 
                 if(a>0){
@@ -390,9 +524,9 @@ void ACFilterPlugProximityGrid::setProximityGrid() {
                     if( (p_0 == n_1) && (p_1 == n_0) && (n_2 == p_2) && (cn_0 == 1)  && (cn_1 == 1) && (cp_0 == 1) && (cp_1 == 1) ){
 
                         // We first adjust the distance between the pair along their high dimensional distance
-                        float c_x = 0.5f*(pos(0,n_0) + pos(0,n_1));
-                        float c_y = 0.5f*(pos(1,n_0) + pos(1,n_1));
-                        float nd = dnd/min_nn_nd * min_nn_2d;
+                        double c_x = 0.5f*(pos(0,n_0) + pos(0,n_1));
+                        double c_y = 0.5f*(pos(1,n_0) + pos(1,n_1));
+                        double nd = dnd/min_nn_nd * min_nn_2d;
 
                         pos(0,n_0) = c_x + 0.5f*(pos(0,n_0)-c_x)*nd/d2d;
                         pos(0,n_1) = c_x + 0.5f*(pos(0,n_1)-c_x)*nd/d2d;
@@ -403,13 +537,13 @@ void ACFilterPlugProximityGrid::setProximityGrid() {
                         if( ((cn_2 == 0) || (cp_2 == 0)) ){
 
                             // We then move the pair closer to the common next neighbor along their high dimensional distance
-                            float nd2 = dnd2/min_nn_nd * min_nn_2d;
+                            double nd2 = dnd2/min_nn_nd * min_nn_2d;
                             pos(0,n_0) = pos(0,n_2) + (pos(0,n_0)-pos(0,n_2))*nd2/d2d2;
                             pos(1,n_0) = pos(1,n_2) + (pos(1,n_0)-pos(1,n_2))*nd2/d2d2;
 
-                            float dnd2_2 = resultingFeatureDistances(1,sortedDistances(a-1));
-                            float nd2_2 = dnd2_2/min_nn_nd * min_nn_2d;
-                            float d2d2_2 = sqrt( pow( pos(0,resultingFeatureNeighbors(1,sortedDistances(a-1))) - pos(0,sortedDistances(a-1)) , 2) + pow( pos(1,resultingFeatureNeighbors(1,sortedDistances(a-1))) - pos(1,sortedDistances(a-1)) , 2) );
+                            double dnd2_2 = resultingFeatureDistances(1,sortedDistances(a-1));
+                            double nd2_2 = dnd2_2/min_nn_nd * min_nn_2d;
+                            double d2d2_2 = sqrt( pow( pos(0,resultingFeatureNeighbors(1,sortedDistances(a-1))) - pos(0,sortedDistances(a-1)) , 2) + pow( pos(1,resultingFeatureNeighbors(1,sortedDistances(a-1))) - pos(1,sortedDistances(a-1)) , 2) );
                             pos(0,n_1) = pos(0,n_2) + (pos(0,n_1)-pos(0,n_2))*nd2_2/d2d2_2;
                             pos(1,n_1) = pos(1,n_2) + (pos(1,n_1)-pos(1,n_2))*nd2_2/d2d2_2;
                         }
@@ -467,7 +601,7 @@ void ACFilterPlugProximityGrid::setProximityGrid() {
     for(int e = init; e >= 0 && e < _size;e+=increment){
 
         std::vector<int> id;
-        float dist = 0;
+        double dist = 0;
 
         if(sorting == "Minimum Spanning Tree"){
             id.push_back( mst(0,e) );
@@ -502,8 +636,8 @@ void ACFilterPlugProximityGrid::setProximityGrid() {
 
                                 int cell_id = -2;
 
-                                float f_x;
-                                float f_y;
+                                double f_x;
+                                double f_y;
                                 int i_x;
                                 int i_y;
 
@@ -512,8 +646,8 @@ void ACFilterPlugProximityGrid::setProximityGrid() {
                                     q.x = pos(0,id[0]);
                                     q.y = pos(1,id[0]);
 
-                                    f_x = (q.x - min_x)/(max_x-min_x)*(float)(gridSize-1);
-                                    f_y = (q.y - min_y)/(max_y-min_y)*(float)(gridSize-1);
+                                    f_x = (q.x - min_x)/(max_x-min_x)*(double)(gridSize-1);
+                                    f_y = (q.y - min_y)/(max_y-min_y)*(double)(gridSize-1);
                                     i_x = round(f_x);
                                     i_y = round(f_y);
 
@@ -545,8 +679,8 @@ void ACFilterPlugProximityGrid::setProximityGrid() {
                                 }
 
                                 // Determine ideal cell
-                                f_x = (p.x - min_x)/(max_x-min_x)*(float)(gridSize-1);
-                                f_y = (p.y - min_y)/(max_y-min_y)*(float)(gridSize-1);
+                                f_x = (p.x - min_x)/(max_x-min_x)*(double)(gridSize-1);
+                                f_y = (p.y - min_y)/(max_y-min_y)*(double)(gridSize-1);
                                 i_x = round(f_x);
                                 i_y = round(f_y);
 
@@ -599,49 +733,85 @@ void ACFilterPlugProximityGrid::setProximityGrid() {
         }
     }
 
+    // Compact the grid by removing empty rows and colums. Useful for square views, less progressive for other views.
+    int compact = this->getNumberParameterValue("Compact");
+    if(compact==1){
+        // Remove empty columns and rows
+        int r_rows(0),r_cols(0);
+
+        if(cell_ids.n_rows>1){
+            for(int i=0;i<cell_ids.n_rows;i++){
+                double r_max = arma::max(cell_ids.row(i));
+                double r_min = arma::min(cell_ids.row(i));
+                if(r_max == -1 && r_min == -1){
+                    cell_ids.shed_row(i);
+                    i--; // revisit the current row replaced by the next
+                    r_rows++;
+                }
+            }
+        }
+
+        if(cell_ids.n_rows>1){
+            for(int j=0;j<cell_ids.n_cols;j++){
+                double c_max = arma::max(cell_ids.col(j));
+                double c_min = arma::min(cell_ids.col(j));
+                if(c_max == -1 && c_min == -1){
+                    cell_ids.shed_col(j);
+                    j--; // revisit the current row replaced by the next
+                    r_cols++;
+                }
+            }
+        }
+
+        if(r_rows != 0 || r_cols != 0)
+            std::cout << "Shed " << r_rows << " row(s) and " << r_cols << " col(s)" << std::endl;
+
+        double resolution = (double)currentSize/(double)(ceil(sqrt(libSize-1)));
+        double compact_resolution = (double)(ceil(sqrt(cell_ids.n_cols*cell_ids.n_rows)))/(double)(ceil(sqrt(libSize-1)));
+
+        std::cout << "Resolution " << resolution << " vs compact resolution " << compact_resolution << std::endl;
+    }
+
     ACPoint p;
-    int row = 0;
-    float osg = 0.33f;
+    double osg = 0.33f;
 
     arma::mat id_cell;
     id_cell.set_size(ids.size(),2);
 
-    for(int g=0;g<gridSize;g++){
-        for(int h=0;h<gridSize;h++){
+    for(int g=0;g<cell_ids.n_rows;g++){
+        for(int h=0;h<cell_ids.n_cols;h++){
             long id = cell_ids(g,h);
             if(id>-1){
                 id_cell(id,0)=g;
                 id_cell(id,1)=h;
-                p.x = -osg + 2*osg*(float)g/(float)(gridSize-1);
-                p.y = -osg + 2*osg*(float)h/(float)(gridSize-1);
+                p.x = -osg + 2*osg*(double)g/(double)(cell_ids.n_rows-1);
+                p.y = -osg + 2*osg*(double)h/(double)(cell_ids.n_cols-1);
                 p.z = 0;
                 this->media_cycle->getBrowser()->setNodeNextPosition(id, p);
+
             }
+
         }
     }
 
     int v_n = 0; //vertical neighbors
     int h_n = 0; //horizontal neighbors
-    int dv_n = 0; //direct vertical neighbors
-    int dh_n = 0; //direct horizontal neighbors
-    int dd_n = 0;//direct diagonal neighbors
-
-    float resolution = (float)currentSize/(float)(ceil(sqrt(libSize)));
-
-    std::cout << "Resolution " << resolution << std::endl;
+    int dv_n = 0; //direct vertical neighbors (next cell)
+    int dh_n = 0; //direct horizontal neighbors (next cell)
+    int dd_n = 0;//direct diagonal neighbors (one of the next diag cell)
 
     for(int a=0; a< sortedDistances.n_cols; a++){
         int n_0 = ids[sortedDistances(a)];
         int n_1 = ids[resultingFeatureNeighbors(0,sortedDistances(a))];
 
-        if(abs(id_cell(n_0,0) - id_cell(n_1,0)) < resolution){ // 0
+        if(abs(id_cell(n_0,0) - id_cell(n_1,0)) == 0 ){ // 0
             v_n++;
-            if(abs(id_cell(n_0,1) - id_cell(n_1,1)) <= resolution) // 1
+            if(abs(id_cell(n_0,1) - id_cell(n_1,1)) == 1) // 1
                 dv_n++;
         }
-        if(abs(id_cell(n_0,1) - id_cell(n_1,1)) < resolution){
+        if(abs(id_cell(n_0,1) - id_cell(n_1,1)) == 0 ){
             h_n++;
-            if(abs(id_cell(n_0,0) - id_cell(n_1,0)) <= resolution)
+            if(abs(id_cell(n_0,0) - id_cell(n_1,0)) == 1)
                 dh_n++;
         }
 
@@ -653,14 +823,88 @@ void ACFilterPlugProximityGrid::setProximityGrid() {
     std::cout << "Vertical neighbors " << v_n << std::endl;
     std::cout << "Direct horizontal neighbors " << dh_n << std::endl;
     std::cout << "Direct vertical neighbors " << dv_n << std::endl;
+    std::cout << "Direct plus neighbors " << dh_n+dv_n << std::endl;
     std::cout << "Direct diagonal neighbors " << dd_n << std::endl;
+    std::cout << "Direct star neighbors " << dh_n+dv_n+dd_n << std::endl;
+
+#ifdef USE_DEBUG
+    int save = this->getNumberParameterValue("Save Benchmark");
+    if(save==1 && !media_cycle->isImporting()){
+        std::ofstream file;
+        std::string library_name = this->media_cycle->getLibrary()->getTitle();
+        if(library_name == ""){
+            library_name = "Test";
+        }
+        /*std::vector<std::string> visualisation_plugins = this->media_cycle->getActivePluginNames(PLUGIN_TYPE_CLUSTERS_POSITIONS,this->media_cycle->getMediaType());// ->getBrowser()->getClustersPositionsPlugin()
+
+        std::string visualisation_plugin ("UnknownViz");
+        if(visualisation_plugins.size() == 1)
+            visualisation_plugin = visualisation_plugins.front();*/
+
+        std::string filepath = "./" + library_name + "-Grid.csv";
+        std::cout << "Trying to save to " << filepath << std::endl;
+
+        file.open(filepath.c_str(), ios_base::out | ios_base::in | ios_base::app | std::ios_base::ate);
+        if(file.is_open()){
+            /*file << "\"Library size\",\"" << libSize << "\"" << std::endl;
+            file << "\"Grid side\",\"" << gridSize << "\"" << std::endl;
+            file << "\"Compact\",\"" << compact << "\"" << std::endl;
+            file << "\"Horizontal neighbors\",\"" << h_n << "\"" << std::endl;
+            file << "\"Vertical neighbors\",\"" << v_n << "\"" << std::endl;
+            file << "\"Direct horizontal neighbors\",\"" << dh_n << "\"" << std::endl;
+            file << "\"Direct vertical neighbors\",\"" << dv_n << "\"" << std::endl;
+            file << "\"Direct plus neighbors\",\"" << dh_n+dv_n << "\"" << std::endl;
+            file << "\"Direct diagonal neighbors\",\"" << dd_n << "\"" << std::endl;
+            file << "\"Direct star neighbors\",\"" << dh_n+dv_n+dd_n << "\"" << std::endl;*/
+
+            long pos =  file.tellp();
+
+            if(pos == 0){
+
+                file << "\"Library size\"" <<",";
+                file << "\"Grid side\"" <<",";
+                file << "\"Compact\"" <<",";
+                file << "\"Horizontal neighbors\"" <<",";
+                file << "\"Vertical neighbors\"" <<",";
+                file << "\"Direct horizontal neighbors\"" <<",";
+                file << "\"Direct vertical neighbors\"" <<",";
+                file << "\"Direct plus neighbors\"" <<",";
+                file << "\"Direct diagonal neighbors\"" <<",";
+                file << "\"Direct star neighbors\"" ;//<<","; // no comma
+                file << std::endl;
+            }
+
+            file << libSize << ",";
+            file << gridSize << ",";
+            file << compact << ",";
+            file << h_n << ",";
+            file << v_n << ",";
+            file << dh_n << ",";
+            file << dv_n << ",";
+            file << dh_n+dv_n << ",";
+            file << dd_n << ",";
+            file << dh_n+dv_n+dd_n ;//<< ","; // no comma
+            file << std::endl;
+
+            file.close();
+        }
+        else{
+            std::cerr << "Couldn't open file " << filepath<< std::endl;
+        }
+
+
+
+        this->evalNeighborhoodness();
+
+    }
+#endif
 }
 
 
 void ACFilterPlugProximityGrid::spiralSearch(int id, ACPoint p, std::string method){
     // Determine ideal cell
-    float f_x = (p.x - min_x)/(max_x-min_x)*(float)(gridSize-1);
-    float f_y = (p.y - min_y)/(max_y-min_y)*(float)(gridSize-1);
+    double f_x = (p.x - min_x)/(max_x-min_x)*(double)(gridSize-1);
+    double f_y = (p.y - min_y)/(max_y-min_y)*(double)(gridSize-1);
     int i_x = round(f_x);
     int i_y = round(f_y);
 
@@ -765,9 +1009,9 @@ void ACFilterPlugProximityGrid::spiralSearch(int id, ACPoint p, std::string meth
                     int n_y = c_y;
 
                     // Check if coordinates should be incremented
-                    if( (int)(n_x+(float)c*(float)_x_d/(float)max_inc) != (int)(n_x+(float)(c+_x_s)*(float)_x_d/(float)max_inc))
+                    if( (int)(n_x+(double)c*(double)_x_d/(double)max_inc) != (int)(n_x+(double)(c+_x_s)*(double)_x_d/(double)max_inc))
                         n_x += _x_s;
-                    if( (int)(n_y+(float)c*(float)_y_d/(float)max_inc) != (int)(n_y+(float)(c+_y_s)*(float)_y_d/(float)max_inc))
+                    if( (int)(n_y+(double)c*(double)_y_d/(double)max_inc) != (int)(n_y+(double)(c+_y_s)*(double)_y_d/(double)max_inc))
                         n_y += _y_s;
 
                     // Assign the next cell id to the current cell
@@ -788,71 +1032,6 @@ void ACFilterPlugProximityGrid::spiralSearch(int id, ACPoint p, std::string meth
     else{
         std::cerr << "Error choosing cell for id  " << id << std::endl;
     }
-}
-
-void ACFilterPlugProximityGrid::tighten(){
-
-    if(!media_cycle) return;
-    if(media_cycle->getLibrarySize() == 0) return;
-
-    // Tighten the view in reading order: shift cells up if empty cells in columns
-    ////mlpack::data::Save("./cell_ids.csv", cell_ids,true);
-
-    int hg = ceil(0.5f*gridSize);
-    for (int i=0; i<hg; i++){
-        for (int j=0; j<gridSize; j++){
-
-            int checked = hg + i;
-            while(checked<gridSize-1){
-
-                int id = cell_ids(checked,j);
-
-                std::cout << "current cell " << checked << " " << j << " id " << id << std::endl;
-
-                int step = 0;
-                while (id == -1 && checked+step < gridSize){
-                    id = cell_ids(checked+step,j);
-                    std::cout << "checking cell " << hg+i+step << " " << j << " id " << id << std::endl;
-                    step++;
-                }
-                step--;
-                if( step>0 ){
-                    int k = 0;
-                    while(checked+k+step<gridSize){
-                        std::cout << "next cell " << checked+k+step << " " << j << " id " << cell_ids(checked+k+step,j);// << std::endl;
-                        std::cout << " to cell " << checked+k << " " << j << " id " <<  cell_ids(checked+k,j) << std::endl;
-                        cell_ids(checked+k,j) = cell_ids(checked+k+step,j);
-
-                        /*if( checked+k+step == gridSize-1)
-                            cell_ids(hg+k+step,j) = -1;*/
-                        k++;
-                    }
-                    //i+=step;
-                    //checked = hg+i+step;
-                }
-                checked++;
-            }
-        }
-    }
-
-    ACPoint p;
-    int row = 0;
-    float osg = 0.33f;
-
-    for(int g=0;g<gridSize;g++){
-        for(int h=0;h<gridSize;h++){
-            long id = cell_ids(g,h);
-            if(id>-1){
-                p.x = -osg + 2*osg*(float)g/(float)(gridSize-1);
-                p.y = -osg + 2*osg*(float)h/(float)(gridSize-1);
-                p.z = 0;
-                this->media_cycle->getBrowser()->setNodeNextPosition(id, p);
-
-            }
-
-        }
-    }
-
 }
 
 void ACFilterPlugProximityGrid::extractDescMatrix(ACMediaBrowser* mediaBrowser, arma::mat& desc_m, vector<string> &featureNames){

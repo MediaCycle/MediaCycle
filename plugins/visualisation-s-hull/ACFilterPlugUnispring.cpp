@@ -56,7 +56,8 @@ ACFilterPlugUnispring::ACFilterPlugUnispring() : QObject(), ACPluginQt(), ACFilt
     this->addCallback("Update","Update view",boost::bind(&ACFilterPlugUnispring::setProximityGrid,this));
 
     this->addNumberParameter("Iterations",100,1,1000,1,"Iterations");
-    methods.push_back("Expand 2D");
+    methods.push_back("Expand 2D (far to close in HD)");
+    methods.push_back("Expand 2D (close to far in HD)");
     methods.push_back("Fit 2D");
     this->addStringParameter("Method",methods.front(),methods,"Morph methods"/*,boost::bind(&ACFilterPlugUnispring::setProximityGrid,this)*/);
 }
@@ -66,7 +67,7 @@ ACFilterPlugUnispring::~ACFilterPlugUnispring() {
 }
 
 void ACFilterPlugUnispring::filter() {
-    //this->setProximityGrid();
+
     preFilterPositions.clear();
     gridSize = 0;
 
@@ -74,7 +75,7 @@ void ACFilterPlugUnispring::filter() {
 
     /*int*/ gridSize = ceil(sqrt(libSize));
 
-    // this->updateNumberParameter("Grid side",libSize,gridSize,libSize,1);
+    this->setProximityGrid();
 }
 
 void ACFilterPlugUnispring::setProximityGrid() {
@@ -196,9 +197,9 @@ void ACFilterPlugUnispring::setProximityGrid() {
         edges = 0;
 
         // Add visual links for each edge
-        if(this->browser_renderer){
+        if(this->browser){
             media_cycle->getBrowser()->setLayout(AC_LAYOUT_TYPE_NODELINK);
-            this->browser_renderer->removeLinks();
+            this->browser->removeLinks();
 
             for(std::map<int,std::set<int> >::iterator pair = pairs.begin(); pair != pairs.end(); pair++){
                 int in = pair->first;
@@ -207,7 +208,7 @@ void ACFilterPlugUnispring::setProximityGrid() {
 
                     float dist = sqrt( sum(arma::pow(desc_m.row(in) - desc_m.row(*out),2)) );
                     //std::cout << "Edge " << edges++ << " " << in << " " << *out << " " << dist <<  std::endl;
-                    this->browser_renderer->addLink( ids[in], ids[*out], 1.0f);
+                    this->browser->addLink( ids[in], ids[*out], 1.0f);
 
                 }
             }
@@ -219,17 +220,27 @@ void ACFilterPlugUnispring::setProximityGrid() {
         float min_nd = min( dt.col(2));
         float max_nd = max( dt.col(2));
 
+        methods.push_back("Expand 2D (far to close in HD)");
+        methods.push_back("Expand 2D (close to far in HD)");
+
         std::string method = this->getStringParameterValue("Method");
-        if(method =="Expand 2D" || method == "Fit 2D"){
+
+        int init = sortedDistances.n_rows-1;
+        int inc = -1;
+        if(method == "Expand 2D (close to far in HD)" ){
+            init = 0;
+            inc = 1;
+        }
+
+        if(method =="Expand 2D (far to close in HD)" || method =="Expand 2D (close to far in HD)" || method == "Fit 2D"){
             // Morph method 1: expand edges whose distance is smaller/different than the minimally required 2D distance, without high dimensional influence
-            //for(int a=0; a< sortedDistances.n_rows; a++){
-            for(int a=sortedDistances.n_rows-1; a>=0; a--){
+            for( int a=init; a<sortedDistances.n_rows && a>=0; a+=inc){
                 int in = dt( sortedDistances(a) , 0);
                 int out = dt( sortedDistances(a) , 1);
                 float dist2d = sqrt(  pow(pos(in,0)-pos(out,0),2) + pow(pos(in,1) - pos(out,1),2)  );
                 float distnd = dt( sortedDistances(a) , 2);
 
-                if( (method == "Expand 2D" && dist2d < mindist) || (method == "Fit 2D" && dist2d != mindist)){
+                if( (method == "Fit 2D" && dist2d != mindist) || (method != "Fit 2D" && dist2d < mindist) ){
 
                     float c_x = 0.5f*(pos(in,0) + pos(out,0));
                     float c_y = 0.5f*(pos(in,1) + pos(out,1));

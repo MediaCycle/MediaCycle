@@ -230,7 +230,7 @@ protected:
     ACUserProfileQt* userProfileWindow;
 
 protected:
-    ACOsgCompositeViewQt* compositeOsgView;
+    ACOsgCompositeViewQt* view;
     MediaCycle *media_cycle;
     ACSettingType setting;
 protected slots:

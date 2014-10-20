@@ -53,6 +53,8 @@ IF(COMMAND cmake_policy)
 		cmake_policy(SET CMP0003 NEW) 
 	ELSE()
 		cmake_policy(SET CMP0014 NEW)
+		cmake_policy(SET CMP0046 NEW) # CF comment this to debug the empty ADD_DEPENDENCIES
+		cmake_policy(SET CMP0042 NEW) # otherwise complaints that "MACOSX_RPATH is not specified for the following targets"
 	ENDIF ( )
 ENDIF(COMMAND cmake_policy)
 
@@ -173,6 +175,7 @@ IF ( NOT APPLE_IOS_DEV AND NOT APPLE_IOS_SIM AND NOT APPLE_IOS_XCODE )
                 OPTION(USE_APPLE_MULTITOUCH "Use Apple multitouch support for io-applemultitouch" ON)
 	ENDIF()
 	OPTION(USE_QT4 "Use Qt4 Toolkit" ON)
+	OPTION(USE_QT5 "Use Qt5 Toolkit" OFF)
 	OPTION(USE_OSC "Use OpenSoundControl" ON)
 	OPTION(USE_AUDIOFEAT "Using audio features" ON)
 	OPTION(USE_LAUGHFEAT "Using laugh features" OFF)
@@ -861,7 +864,7 @@ ENDIF(SUPPORT_VIDEO OR SUPPORT_IMAGE)
 #ENDIF ( USE_OPENGL )
 
 # Freetype for osgdb_freetype
-IF(BUILD_APPS OR USE_OSG)
+IF(USE_OSG)
 	FIND_PACKAGE(FreeType REQUIRED) # to display text in OSG
 	IF(MINGW AND CMAKE_TOOLCHAIN_FILE)
 		PKG_CHECK_MODULES (FREETYPEPKG REQUIRED freetype2)
@@ -888,14 +891,14 @@ ELSE()
 	SET(OSG_REQUIRED_VERSION "3.0.0")
 ENDIF()
 
-IF(BUILD_APPS OR USE_OSG)
+IF(USE_OSG)
         FIND_PACKAGE(OpenSceneGraph ${OSG_REQUIRED_VERSION} REQUIRED osgQt osgViewer osgText osgUtil osgDB osgGA osgWidget osg OpenThreads)
 ELSE()
 	IF(SUPPORT_3DMODEL)
 		FIND_PACKAGE(OpenSceneGraph ${OSG_REQUIRED_VERSION} REQUIRED osgDB osgGA OpenThreads)
 	ENDIF()
 ENDIF()
-IF(BUILD_APPS OR USE_OSG OR USE_3DMODEL)
+IF(USE_OSG OR USE_3DMODEL)
 	IF(OSG_FOUND)
 		#CF we need to be able to display images (library cover) for any media type
                 IF(SUPPORT_3DMODEL OR SUPPORT_IMAGE OR SUPPORT_VIDEO)
@@ -1098,17 +1101,7 @@ IF ( USE_QT4 )
 		IF(NOT QT_PHONON_FOUND)
 			MESSAGE("Qt4 - Phonon not found, won't build iVisit applications.")
 		ENDIF()
-		FIND_PACKAGE ( Qwt REQUIRED)
-		IF(QWT_FOUND)
-			MESSAGE( "Qwt found in ${QWT_INCLUDE_DIR} (headers) and ${QWT_LIBRARY} (library), requiring ${QWT_LIBRARIES} (libraries)" )
-			INCLUDE_DIRECTORIES( ${QWT_INCLUDE_DIR} )
-			IF(UNIX AND NOT APPLE AND "${LSB_DISTRIB}" MATCHES "Ubuntu11.10") #required for Ubuntu 11.10
-				SET(QWT_LIBRARIES ${QWT_LIBRARY} -lrt)
-			ENDIF()
-			ADD_LIB_LINKED_DIR(${QWT_LIBRARY})
-		ELSE()
-			MESSAGE(FATAL_ERROR "Qwt not found.")
-		ENDIF()
+
 		MESSAGE("Qt version: ${QTVERSION}")
 
 		INCLUDE (${QT_USE_FILE})
@@ -1155,6 +1148,45 @@ IF ( USE_QT4 )
 		MESSAGE(FATAL_ERROR "Qt4 not found or not complete (phonon might be missing).")
 	ENDIF()
 ENDIF ( USE_QT4 )
+
+IF( USE_QT5 )
+	# Find includes in corresponding build directories
+        set(CMAKE_INCLUDE_CURRENT_DIR ON)
+	# Instruct CMake to run moc automatically when needed.
+        set(CMAKE_AUTOMOC OFF) # this is done per library or application (AddQtApp.cmake or isolated CMakeLists.txt)
+
+        find_package(Qt5Core REQUIRED)
+        find_package(Qt5Gui REQUIRED)
+	find_package(Qt5Widgets REQUIRED)
+	find_package(Qt5WebKitWidgets REQUIRED)
+
+	add_definitions(${Qt5Widgets_DEFINITIONS})
+	set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} ${Qt5Widgets_EXECUTABLE_COMPILE_FLAGS}")
+
+        MESSAGE("Qt5Gui_INCLUDES ${Qt5Gui_INCLUDES}")
+
+        LIST(APPEND QT_LIBRARIES ${Qt5Core_LIBRARIES})
+        LIST(APPEND QT_LIBRARIES ${Qt5Gui_LIBRARIES})
+	LIST(APPEND QT_LIBRARIES ${Qt5Widgets_LIBRARIES})
+	LIST(APPEND QT_LIBRARIES ${Qt5WebKitWidgets_LIBRARIES})
+
+	MESSAGE("QT_LIBRARIES ${QT_LIBRARIES}")
+ENDIF()
+
+# Qwt
+IF( USE_QT4 OR USE_QT5)
+                FIND_PACKAGE ( Qwt REQUIRED)
+                IF(QWT_FOUND)
+                        MESSAGE( "Qwt found in ${QWT_INCLUDE_DIR} (headers) and ${QWT_LIBRARY} (library), requiring ${QWT_LIBRARIES} (libraries)" )
+                        INCLUDE_DIRECTORIES( ${QWT_INCLUDE_DIR} )
+                        IF(UNIX AND NOT APPLE AND "${LSB_DISTRIB}" MATCHES "Ubuntu11.10") #required for Ubuntu 11.10
+                                SET(QWT_LIBRARIES ${QWT_LIBRARY} -lrt)
+                        ENDIF()
+                        ADD_LIB_LINKED_DIR(${QWT_LIBRARY})
+                ELSE()
+                        MESSAGE(FATAL_ERROR "Qwt not found.")
+                ENDIF()
+ENDIF()
 
 # Cocoa
 IF ( USE_COCOA )
@@ -1580,7 +1612,7 @@ IF(SUPPORT_AUDIO AND USE_YAAFE)
 ENDIF()
 
 # RSVG and LibXml2 for osgdb_svg
-IF(BUILD_APPS OR USE_OSG)
+IF(USE_OSG OR SUPPORT_AUDIO) # SUPPORT_AUDIO for the waveform thumbnailer plugin
     FIND_PACKAGE(RSVG REQUIRED)
     FIND_PACKAGE(LibXml2 REQUIRED)
 ENDIF()
@@ -1900,7 +1932,7 @@ IF(BUILD_DOCUMENTATION)
 ENDIF(BUILD_DOCUMENTATION)
 
 # In case we want to make a framework distribution:
-#IF(QT4_FOUND AND USE_QT4) SET(WITH_QT4 ON) ENDIF()
+#IF(QT4_FOUND AND USE_QT4) SET(WITH_QT ON) ENDIF()
 #IF(SUPPORT_AUDIO) SET(USE_AUDIO ON) ENDIF()
 #IF(SUPPORT_IMAGE) SET(USE_IMAGE ON) ENDIF()
 #IF(SUPPORT_VIDEO) SET(USE_VIDEO ON) ENDIF() 

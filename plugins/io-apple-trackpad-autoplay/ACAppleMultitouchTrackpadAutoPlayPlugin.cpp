@@ -49,6 +49,9 @@ ACAppleMultitouchTrackpadAutoPlayPlugin::~ACAppleMultitouchTrackpadAutoPlayPlugi
 
 int ACAppleMultitouchTrackpadAutoPlayPlugin::callback(int device, Finger *data, int nFingers, double timestamp, int frame)
 {
+
+    //std::cout << "Device " << device << " Fingers " << nFingers << std::endl;
+
     if(nFingers==0){
         //std::cout << "Fingers left "<< std::endl;
         if(this->media_cycle){
@@ -58,6 +61,7 @@ int ACAppleMultitouchTrackpadAutoPlayPlugin::callback(int device, Finger *data, 
     else if(nFingers==1){
         //std::cout << nFingers << " fingers" << std::endl;
         if(this->media_cycle){
+
             if(media_cycle->getAutoPlay() == 0){
                 media_cycle->muteAllSources();
                 media_cycle->setAutoPlay(1);

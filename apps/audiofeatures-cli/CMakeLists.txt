@@ -10,7 +10,7 @@ IF (SUPPORT_AUDIO AND USE_AUDIOFEAT AND BUILD_CLIS)
 	ADD_EXECUTABLE(audiofeatures-cli ${SRC} ${HDR})
 
 	ADD_DEPENDENCIES(audiofeatures-cli mediacycle armadillo-utils mediacycle-audio-features)
-	ADD_DEPENDENCIES(audiofeatures-cli mc_audio mc_segmentation)
+        #ADD_DEPENDENCIES(audiofeatures-cli mc_audio mc_segmentation)
 
 	TARGET_LINK_LIBRARIES(audiofeatures-cli mediacycle mediacycle-audio-features ${SNDFILE_LIBRARIES} ${SAMPLERATE_LIBRARY})
 

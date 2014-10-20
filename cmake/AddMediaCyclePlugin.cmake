@@ -243,14 +243,23 @@ file(APPEND ${CMAKE_CURRENT_BINARY_DIR}/${PLUGIN_LIBRARY_NAME}.h "\treturn third
 ")
 
 INCLUDE_DIRECTORIES(${CMAKE_CURRENT_SOURCE_DIR})
-IF(WITH_QT4)
+IF(WITH_QT)
 #MESSAGE("Qt4-powered MediaCycle plugin")
 FILE(GLOB ${TARGET_NAME}_UIS ${CMAKE_CURRENT_SOURCE_DIR}/*.ui ${CMAKE_CURRENT_BINARY_DIR}/*.ui)
+
 # Generates ui_*.h files
-QT4_WRAP_UI(${TARGET_NAME}_UIS_H ${${TARGET_NAME}_UIS})
+IF(USE_QT4)
+    QT4_WRAP_UI(${TARGET_NAME}_UIS_H ${${TARGET_NAME}_UIS})
+ELSEIF(USE_QT5)
+    QT5_WRAP_UI(${TARGET_NAME}_UIS_H ${${TARGET_NAME}_UIS})
+ENDIF()
 
 # Generates moc_*.cxx files
-QT4_WRAP_CPP(${TARGET_NAME}_MOC_SRCS ${${TARGET_NAME}_HDR} OPTIONS "-nw") # for all headers that potentially declare Q_OBJECT, otherwise warnings are suppressed
+IF(USE_QT4)
+    QT4_WRAP_CPP(${TARGET_NAME}_MOC_SRCS ${${TARGET_NAME}_HDR} OPTIONS "-nw") # for all headers that potentially declare Q_OBJECT, otherwise warnings are suppressed
+ELSEIF(USE_QT5)
+    QT5_WRAP_CPP(${TARGET_NAME}_MOC_SRCS ${${TARGET_NAME}_HDR} OPTIONS "-nw") # for all headers that potentially declare Q_OBJECT, otherwise warnings are suppressed
+ENDIF()
 
 # Don't forget to include output directory, otherwise
 # the UI file won't be wrapped!
@@ -284,8 +293,15 @@ IF(CMAKE_TOOLCHAIN_FILE AND MINGW AND OSG_PLUGINS)
 	endforeach(OSG_PLUGIN)
 ENDIF()
 
-IF(WITH_QT4)
-	TARGET_LINK_LIBRARIES(${LIBRARY_NAME} mediacycle-osg-qt)
+IF(WITH_QT)
+        #TARGET_LINK_LIBRARIES(${LIBRARY_NAME} mediacycle-osg-qt)
+        TARGET_LINK_LIBRARIES(${LIBRARY_NAME} mediacycle-qt)
+
+        IF(USE_QT5)
+                qt5_use_modules(${TARGET_NAME} Core Gui Widgets WebKitWidgets)
+                #set_target_properties(${TARGET_NAME} PROPERTIES AUTOMOC ON)
+                #target_include_directories(${TARGET_NAME} PRIVATE ${CMAKE_CURRENT_BINARY_DIR})
+        ENDIF()
 ENDIF()
 
 foreach(MC_MEDIA_LIB ${MC_MEDIA_LIBS})

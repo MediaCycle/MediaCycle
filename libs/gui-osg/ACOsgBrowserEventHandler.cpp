@@ -178,7 +178,6 @@ void ACOsgBrowserEventHandler::clickNode(osgViewer::View* view, const osgGA::GUI
 		//CF should we loop on the hoverWithPointer for each pointer?
 		if (media_cycle->getPointerFromId(-1))
 			media_cycle->getPointerFromId(-1)->setCurrentPosition(xx,yy);
-        //		media_cycle->hoverWithPointerId(xx, yy, -1);//mouse//TR NEM2011 1! Mouse Constructor call (cf		void ACOsgCompositeViewQt::updateGL()
 		return;
 	}
     
@@ -255,7 +254,6 @@ void ACOsgBrowserEventHandler::pick(osgViewer::View* view, const osgGA::GUIEvent
 		//CF should we loop on the hoverWithPointer for each pointer?
 		if (media_cycle->getPointerFromId(-1))
 			media_cycle->getPointerFromId(-1)->setCurrentPosition(xx,yy);
-//		media_cycle->hoverWithPointerId(xx, yy, -1);//mouse//TR NEM2011 1! Mouse Constructor call (cf		void ACOsgCompositeViewQt::updateGL()
 		return;
 	}
 

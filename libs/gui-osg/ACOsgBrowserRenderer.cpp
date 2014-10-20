@@ -76,7 +76,7 @@ USE_GRAPHICSWINDOW()
 
 
 ACOsgBrowserRenderer::ACOsgBrowserRenderer()
-    : ACEventListener(),font(0)
+    : ACAbstractBrowserRenderer(),ACEventListener(),font(0)
 {
     media_cycle = 0;
     //  pthread_mutexattr_init(&activity_update_mutex_attr);
@@ -786,7 +786,7 @@ bool ACOsgBrowserRenderer::addNode(long int _id){//private method
         std::cerr << "ACOsgBrowserRenderer::addNode: couldn't create a renderer for id "<< _id << ", media type unsupported" << std::endl;
     return false;
 }
-bool ACOsgBrowserRenderer::addLink(long in, long out, float width, osg::Vec4 color){
+bool ACOsgBrowserRenderer::addLink(long in, long out, float width, ACColor color){
     bool ok = false;
 
     int id = link_renderers.size();
@@ -810,7 +810,7 @@ bool ACOsgBrowserRenderer::addLink(long in, long out, float width, osg::Vec4 col
             link_renderers[id]->setNodeIn(node_renderers[in]);
             link_renderers[id]->setNodeOut(node_renderers[out]);
             link_renderers[id]->setWidth(width);
-            link_renderers[id]->setColor(color);
+            link_renderers[id]->setColor(osg::Vec4(color.r,color.g,color.b,color.a));
             link_renderers[id]->prepareLinks();
             link_group->addChild(link_renderers[id]->getLink());
             ok = true;
@@ -970,11 +970,11 @@ void ACOsgBrowserRenderer::changeSetting(ACSettingType _setting)
     }
 }
 
-void ACOsgBrowserRenderer::changeNodeColor(int _node, osg::Vec4 _color)
+void ACOsgBrowserRenderer::changeNodeColor(int _node, ACColor _color)
 {
     activity_update_mutex.lock();
     if(node_renderers[_node])
-        node_renderers[_node]->changeNodeColor(_color);
+        node_renderers[_node]->changeNodeColor(osg::Vec4(_color.r,_color.g,_color.b,_color.a));
     activity_update_mutex.unlock();
 }
 

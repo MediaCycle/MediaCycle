@@ -1,7 +1,12 @@
 <?xml version="1.0" ?>
 <KIS>
-    <Sequential Target="3">/Volumes/data/Datasets/xml/KIS/Intro/olpc-riff-grid.xml</Sequential>
-    <Sequential Target="3">/Volumes/data/Datasets/xml/KIS/Intro/olpc-drill-tsne.xml</Sequential>
-    <Sequential Target="6">/Volumes/data/Datasets/xml/KIS/Intro/olpc-explosion-grid.xml</Sequential>
-    <Sequential Target="6">/Volumes/data/Datasets/xml/KIS/Intro/olpc-space-tsne.xml</Sequential>
+    <Sequential Target="87">/Volumes/data/Datasets/xml/KIS/ProxGrid/metal-icons.xml</Sequential>
+    <Sequential Target="86">/Volumes/data/Datasets/xml/KIS/ProxGrid/metal-import.xml</Sequential>
+    <Sequential Target="85">/Volumes/data/Datasets/xml/KIS/ProxGrid/metal-pcatsnegrid27.xml</Sequential>
+    <Sequential Target="32">/Volumes/data/Datasets/xml/KIS/ProxGrid/spring-icons.xml</Sequential>
+    <Sequential Target="33">/Volumes/data/Datasets/xml/KIS/ProxGrid/spring-import.xml</Sequential>
+    <Sequential Target="34">/Volumes/data/Datasets/xml/KIS/ProxGrid/spring-pcatsnegrid26.xml</Sequential>
+    <Sequential Target="38">/Volumes/data/Datasets/xml/KIS/ProxGrid/water-icons.xml</Sequential>
+    <Sequential Target="39">/Volumes/data/Datasets/xml/KIS/ProxGrid/water-import.xml</Sequential>
+    <Sequential Target="40">/Volumes/data/Datasets/xml/KIS/ProxGrid/water-pcatsnegrid12.xml</Sequential>
 </KIS>

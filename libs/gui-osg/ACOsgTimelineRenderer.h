@@ -43,9 +43,11 @@
 
 #include "ACRefId.h"
 
+#include "ACAbstractTimelineRenderer.h"
+
 typedef std::map<long int,ACOsgTrackRenderer*> ACOsgTrackRenderers;
 
-class ACOsgTimelineRenderer {
+class ACOsgTimelineRenderer : public ACAbstractTimelineRenderer {
 protected:
     MediaCycle *media_cycle;
     osg::ref_ptr<osg::Group> group;

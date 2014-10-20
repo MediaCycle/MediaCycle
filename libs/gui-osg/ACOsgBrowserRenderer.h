@@ -44,11 +44,12 @@
 #include <pthread.h>
 
 #include "ACEventListener.h"
+#include "ACAbstractBrowserRenderer.h"
 
 typedef std::map<long int,ACOsgMediaRenderer*> ACOsgMediaRenderers;
 typedef std::map<long int,ACOsgNodeLinkRenderer*> ACOsgNodeLinkRenderers;
 
-class ACOsgBrowserRenderer: public ACEventListener {
+class ACOsgBrowserRenderer: public ACAbstractBrowserRenderer, public ACEventListener {
 public:
     ACOsgBrowserRenderer();
     virtual ~ACOsgBrowserRenderer();
@@ -128,7 +129,7 @@ public:
     std::map<long int, float> getDistanceMouse() { return distance_mouse; }
 
     void setFont(osg::ref_ptr<osgText::Font> _font){this->font = _font;}
-    void changeNodeColor(int _node, osg::Vec4 _color);
+    virtual void changeNodeColor(int _node, ACColor _color);
     void resetNodeColor(int _node);
     void changeAllNodesColor(osg::Vec4 _color);
     void resetAllNodesColor();
@@ -152,8 +153,8 @@ protected:
 public:
 
     void changeSetting(ACSettingType _setting);
-    bool addLink(long in, long out, float width, osg::Vec4 color = osg::Vec4(1.0f,1.0f,1.0f,1.0f));
-    bool removeLinks();
+    virtual bool addLink(long in, long out, float width, ACColor color = ACColor(1.0f,1.0f,1.0f,1.0f));
+    virtual bool removeLinks();
 
 private:
     bool removeNodes();

@@ -36,7 +36,7 @@
 using namespace std;
 
 ACVideoRigidTransformPlugin::ACVideoRigidTransformPlugin(): ACTimedFeaturesPlugin() {
-    this->mMediaType = MEDIA_TYPE_VIDEO;
+    //this->mMediaType = MEDIA_TYPE_VIDEO;
     this->mName = "Video Rigid Transform";
     this->mDescription = "Rigid Transform";
     this->mId = "";
@@ -71,14 +71,16 @@ std::vector<ACMediaFeatures*> ACVideoRigidTransformPlugin::calculate(ACMedia* th
     string aFileName= theMedia->getFileName();
 
     ACMediaTimedFeature* ps_mtf = new ACMediaTimedFeature(t,s, "Rigid Transforms");
-	ACMediaFeatures* rigid_transforms = ps_mtf->mean();
-	//this->saveTimedFeatures(ps_mtf, aFileName, _save_timed_feat); // by default : binary
-	bool _binary=false;
-	theMedia->addTimedFileNames(this->saveTimedFeatures(ps_mtf, aFileName, _save_timed_feat,_binary)); // by default : binary
-	
-	delete ps_mtf;
+    if(ps_mtf){
+        ACMediaFeatures* rigid_transforms = ps_mtf->mean();
+        //this->saveTimedFeatures(ps_mtf, aFileName, _save_timed_feat); // by default : binary
+        bool _binary=false;
+        theMedia->addTimedFileNames(this->saveTimedFeatures(ps_mtf, aFileName, _save_timed_feat,_binary)); // by default : binary
 
-	videoFeatures.push_back(rigid_transforms);
+        delete ps_mtf;
+        videoFeatures.push_back(rigid_transforms);
+    }
+
 	return videoFeatures;
 }
 

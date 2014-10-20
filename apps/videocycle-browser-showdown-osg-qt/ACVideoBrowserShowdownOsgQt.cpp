@@ -53,24 +53,24 @@ ACVideoBrowserShowdownOsgQt::~ACVideoBrowserShowdownOsgQt(){
          return;
     }
 
-    if(this->compositeOsgView->getTimelineRenderer() == 0){
+    if(this->View->getTimelineRenderer() == 0){
         std::cerr << "ACVideoBrowserShowdownOsgQt: no timeline" << std::endl;
          return;
     }
     ACMediaNode* node = this->media_cycle->getNodeFromMedia( this->media_cycle->getLibrary()->getFirstMedia() );
     if(node)
         node->setActivity(0);
-//    if(this->compositeOsgView->getTimelineRenderer()->getNumberOfTracks() == 0)
-//        this->compositeOsgView->toggleTimelineVisibility();
+//    if(this->View->getTimelineRenderer()->getNumberOfTracks() == 0)
+//        this->View->toggleTimelineVisibility();
     if(this->media_cycle->getLibrarySize()==1){
-        this->compositeOsgView->adjustTimelineHeight(1.0f);
+        this->View->adjustTimelineHeight(1.0f);
     }
     else if(this->media_cycle->getLibrarySize()>1){
-        this->compositeOsgView->adjustTimelineHeight(0.25f);
+        this->View->adjustTimelineHeight(0.25f);
     }
     // Load the first media, supposedly the main media
-    this->compositeOsgView->getTimelineRenderer()->addTrack( this->media_cycle->getLibrary()->getFirstMedia() );
-    this->compositeOsgView->setFocus();
+    this->View->getTimelineRenderer()->addTrack( this->media_cycle->getLibrary()->getFirstMedia() );
+    this->View->setFocus();
 }
 
 

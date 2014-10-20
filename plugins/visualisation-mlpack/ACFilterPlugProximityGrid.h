@@ -45,7 +45,7 @@ public:
     ~ACFilterPlugProximityGrid();
     //virtual void updateNextPositions(ACMediaBrowser* );
     virtual void filter();
-    void tighten();
+    virtual void librarySizeChanged();
     void clearLinks();
     void evalNeighborhoodness();
 private:

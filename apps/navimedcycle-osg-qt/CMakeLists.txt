@@ -1,5 +1,5 @@
 SET(TARGET_NAME "NavimedCycle")
-IF ( SUPPORT_NAVIMED AND SUPPORT_MULTIMEDIA AND SUPPORT_IMAGE AND SUPPORT_TEXT AND USE_QT4 AND USE_OSG )
+IF ( SUPPORT_NAVIMED AND SUPPORT_MULTIMEDIA AND SUPPORT_IMAGE AND SUPPORT_TEXT AND (USE_QT4 OR USE_QT5) AND USE_OSG )
 
 	SET(MEDIA_TYPE "MEDIA_TYPE_MIXED")
 	SET(MC_PLUGINS "file;image-features-color;image-features-contours;image-features-faces;image-features-shape;image-features-texture;image-osg;segmentation;sensor;sensor-osg;text;text-osg;video;video-osg;visualisation;visualisation-advanced;navimed") # load navimed after text plugin which also reads .xml

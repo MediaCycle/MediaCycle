@@ -88,7 +88,7 @@ void ACPositionsPluginNodeLinkTreeLayout::updateNextPositions(ACMediaBrowser* _m
     this->mediaBrowser = _mediaBrowser;
 
     if(mediaBrowser->getNumberOfMediaNodes()==0) {
-        mediaBrowser->setNeedsDisplay(true);
+        media_cycle->setNeedsDisplay(true);
         return;
     }
 
@@ -98,7 +98,7 @@ void ACPositionsPluginNodeLinkTreeLayout::updateNextPositions(ACMediaBrowser* _m
         int librarySize = mediaBrowser->getLibrary()->getSize();
 
         if(librarySize==0) {
-            mediaBrowser->setNeedsDisplay(true);
+            media_cycle->setNeedsDisplay(true);
             return;
         }
 
@@ -163,7 +163,7 @@ void ACPositionsPluginNodeLinkTreeLayout::updateNextPositions(ACMediaBrowser* _m
             std::cout << "ACPositionsPluginNodeLinkTreeLayout::updateNextPositions: Node " << *nodeId << " x " << p.x  << " y " << p.y << std::endl;
         }
 
-        mediaBrowser->setNeedsDisplay(true);
+        media_cycle->setNeedsDisplay(true);
     }
 }	
 

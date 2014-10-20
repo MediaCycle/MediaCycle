@@ -40,7 +40,7 @@
 using namespace osg;
 
 ACOsgTimelineRenderer::ACOsgTimelineRenderer()
-    : media_cycle(0), screen_width(0), height(0.0f), width(0.0f),font(0)
+    : ACAbstractTimelineRenderer(), media_cycle(0), screen_width(0), height(0.0f), width(0.0f),font(0)
 {
     group = new Group();
 	track_group = new Group();

@@ -66,5 +66,7 @@ private:
     QTimer *hear_timer;
     long int currentId;
     int sequence;
+    bool useTimer;
+    int seed;
 };
 #endif // _ACAudioCycleKIS

@@ -46,6 +46,7 @@
  * facilitate smooth and understandable transitions between layout configurations.
  */
 
+#include "MediaCycle.h"
 #include "ACPlugin.h"
 #include "ACMediaBrowser.h"
 

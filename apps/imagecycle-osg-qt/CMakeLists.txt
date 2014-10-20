@@ -1,8 +1,15 @@
 SET(TARGET_NAME "ImageCycle")
-IF ( BUILD_IMAGECYCLE_APP AND SUPPORT_IMAGE AND USE_QT4 AND USE_OSG AND USE_OSC )
+IF ( BUILD_IMAGECYCLE_APP AND SUPPORT_IMAGE AND (USE_QT4 OR USE_QT5) AND USE_OSG AND USE_OSC )
 
 	SET(MEDIA_TYPE "MEDIA_TYPE_IMAGE")
         SET(MC_PLUGINS "file;image-features-color;image-features-contours;image-features-shape;image-features-texture;image-osg;pcapreprocess;visualisation;visualisation-advanced;visualisation-tagging")#image-features-faces;
+        IF(MLPACK_FOUND)
+            IF(USE_DEBUG)
+                LIST(APPEND MC_PLUGINS "visualisation-advanced-mlpack")
+            ENDIF()
+            LIST(APPEND MC_PLUGINS "visualisation-mlpack")
+        ENDIF()
+
         SET(MC_PLUGINS_STATIC ON)
         #IF(APPLE)
         #    SET(OSG_PLUGINS "osgdb_imageio")

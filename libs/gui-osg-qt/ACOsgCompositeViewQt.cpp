@@ -56,7 +56,7 @@ namespace fs = boost::filesystem;
 using namespace osg;
 
 ACOsgCompositeViewQt::ACOsgCompositeViewQt( QWidget * parent, const char * name, const QGLWidget * shareWidget, WindowFlags f)
-    : QGLWidget(parent, shareWidget, f),ACEventListener(), media_cycle(0),font(0),
+    : QGLWidget(parent, shareWidget, f),ACEventListener(), ACAbstractViewQt(), media_cycle(0),font(0),
       browser_renderer(0), browser_event_handler(0), timeline_renderer(0), timeline_event_handler(0), hud_renderer(0), hud_view(0),
       mousedown(0), borderdown(0),
       refx(0.0f), refy(0.0f),
@@ -77,8 +77,8 @@ ACOsgCompositeViewQt::ACOsgCompositeViewQt( QWidget * parent, const char * name,
     osg::setNotifyLevel(osg::DEBUG_INFO);
 #endif
 
-    osg_view = new osgViewer::GraphicsWindowEmbedded(0,0,width(),height());
-    setFocusPolicy(Qt::StrongFocus);// CF instead of ClickFocus
+    browser_viewer = new osgViewer::GraphicsWindowEmbedded(0,0,QGLWidget::width(),QGLWidget::height());
+    QGLWidget::setFocusPolicy(Qt::StrongFocus);// CF instead of ClickFocus
 
     setThreadingModel(osgViewer::CompositeViewer::SingleThreaded);
     /*
@@ -214,16 +214,16 @@ void ACOsgCompositeViewQt::dropEvent(QDropEvent *event)
             }
         }
         if (!(directories.empty())){
-            emit (importDirectoriesThreaded(directories,false));
+            // CF emit (importDirectoriesThreaded(directories,false));
             for (std::vector<string>::reverse_iterator iter=directories.rbegin(); iter!=directories.rend();iter++){
                 int locId;
                 
                 locId=media_cycle->getLibrary()->getMediaIndex(*iter);
                 
                 if (locId>=0){
-                        media_cycle->setReferenceNode(locId);
+                    media_cycle->setReferenceNode(locId);
                     break;
-                
+
                 }
             }
             directories.empty();
@@ -236,7 +236,7 @@ void ACOsgCompositeViewQt::dropEvent(QDropEvent *event)
         QEvent *tempEvent=new QEvent(QEvent::MouseButtonRelease);
         this->propagateEventToActions(tempEvent);
         delete tempEvent;
-        osg_view->getEventQueue()->mouseButtonRelease(event->pos().x(), event->pos().y(), button);
+        browser_view->getEventQueue()->mouseButtonRelease(event->pos().x(), event->pos().y(), button);
         std::cout << "ACOsgCompositeViewQt::mouseReleaseEvent clicked node " << media_cycle->getClickedNode() << std::endl;
         if (media_cycle == 0) return;
         if (media_cycle->getClickedNode()>-1)
@@ -255,6 +255,7 @@ void ACOsgCompositeViewQt::updateBrowserView(int _width, int _height){
         browser_view->getCamera()->getViewMatrix().makeIdentity();
         browser_view->getCamera()->setViewMatrixAsLookAt(Vec3(0,0,0.8), Vec3(0,0,0), Vec3(0,1,0));
         //browser_view->getCamera()->setClearColor(Vec4f(0.0,0.0,0.0,0.0));
+        //browser_view->getCamera()->setClearColor(Vec4f(1.0,1.0,1.0,1.0));
     }
 }
 
@@ -279,7 +280,7 @@ void ACOsgCompositeViewQt::updateTimelineView(int _width, int _height){
 ACOsgCompositeViewQt::~ACOsgCompositeViewQt(){
     //browser_view->removeEventHandler(browser_event_handler); // reqs OSG >= 2.9.x and shouldn't be necessary
     //timeline_view->removeEventHandler(timeline_event_handler); // reqs OSG >= 2.9.x and shouldn't be necessary
-    this->clean(false);
+    this->clean(/*false*/);
     delete browser_renderer; browser_renderer = 0;
     //if (browser_event_handler) delete browser_event_handler;
     browser_event_handler = 0;
@@ -305,7 +306,7 @@ ACOsgCompositeViewQt::~ACOsgCompositeViewQt(){
     if(discardMediaAction) delete discardMediaAction; discardMediaAction = 0;
 }
 
-void ACOsgCompositeViewQt::clean(bool updategl){
+void ACOsgCompositeViewQt::clean(/*bool updategl*/){
     browser_event_handler->clean();
     timeline_event_handler->clean();
     mousedown = borderdown = 0;
@@ -316,8 +317,8 @@ void ACOsgCompositeViewQt::clean(bool updategl){
     //if (browser_event_handler) delete browser_event_handler;
     //if (timeline_event_handler) delete timeline_event_handler;
     sepy = 0;
-    if (updategl)
-        this->updateGL();
+    //if (updategl)
+    //    this->updateGL();
     library_loaded = false;
 }
 
@@ -384,8 +385,8 @@ void ACOsgCompositeViewQt::resizeGL( int w, int h )
         timeline_renderer->updateSize(width(),sepy);
     }
 
-    osg_view->getEventQueue()->windowResize(0, 0, w, h);
-    osg_view->resized(0,0,w,h);
+    browser_viewer->getEventQueue()->windowResize(0, 0, w, h);
+    browser_viewer->resized(0,0,w,h);
 
     if (isRealized()){
         this->updateBrowserView(w,h);
@@ -434,7 +435,7 @@ void ACOsgCompositeViewQt::updateGL()
     browser_renderer->mutexLock();
     timeline_renderer->mutexLock();
     double frac = 0.0;
-   
+
     if (media_cycle == 0) return;
 
     if(media_cycle && media_cycle->hasBrowser())
@@ -511,21 +512,26 @@ void ACOsgCompositeViewQt::addInputAction(ACInputActionQt* _action)
 
 void ACOsgCompositeViewQt::pluginLoaded(std::string plugin_name){
     std::cout << "ACOsgCompositeViewQt::pluginLoaded: " << plugin_name << std::endl;
-    QObject* qobject = dynamic_cast<QObject*>(media_cycle->getPluginManager()->getPlugin(plugin_name));
+    ACPlugin* plugin = media_cycle->getPluginManager()->getPlugin(plugin_name);
+    ACAbstractRendererPlugin* renderer_plugin = dynamic_cast<ACAbstractRendererPlugin*>(plugin);
+    if(renderer_plugin){
+        renderer_plugin->setBrowser(this->getBrowser());
+        renderer_plugin->setTimeline(this->getTimeline());
+    }
+    QObject* qobject = dynamic_cast<QObject*>(plugin);
     if(!qobject){
         //std::cerr << "ACOsgCompositeViewQt::pluginLoaded: " << plugin_name << " not an ACPluginQt" << std::endl;
         return;
     }
+
     //std::cout << "ACOsgCompositeViewQt::pluginLoaded: " << plugin_name << " is a QObject" << std::endl;
-    ACPluginQt* plugin = qobject_cast<ACPluginQt*>(qobject);
-    if(!plugin){
+    ACPluginQt* qt_plugin = qobject_cast<ACPluginQt*>(qobject);
+    if(!qt_plugin){
         //std::cerr << "ACOsgCompositeViewQt::pluginLoaded: " << plugin_name << " not an ACPluginQt" << std::endl;
         return;
     }
-    plugin->setBrowserRenderer(this->browser_renderer);
-    plugin->setTimelineRenderer(this->timeline_renderer);
     std::cout << "ACOsgCompositeViewQt::pluginLoaded: " << plugin_name << " is an ACPluginQt" << std::endl;
-    std::vector<ACInputActionQt*> inputActions = plugin->providesInputActions();
+    std::vector<ACInputActionQt*> inputActions = qt_plugin->providesInputActions();
     for(std::vector<ACInputActionQt*>::iterator inputAction = inputActions.begin(); inputAction != inputActions.end(); inputAction++){
         std::cout << "ACOsgCompositeViewQt::pluginLoaded: adding action from " << plugin_name << std::endl;
         if(*inputAction !=0){
@@ -534,10 +540,8 @@ void ACOsgCompositeViewQt::pluginLoaded(std::string plugin_name){
         }
         else
             std::cerr << "ACOsgCompositeViewQt::pluginLoaded: warning, malformed action from plugin " << plugin_name << std::endl;
-
     }
 }
-
 
 void ACOsgCompositeViewQt::mediaImported(int n, int nTot,int mId){
     if(n < nTot && !mouse_disabled){
@@ -599,7 +603,7 @@ void ACOsgCompositeViewQt::initInputActions(){
     changeReferenceNodeAction->setKeyEventType(QEvent::KeyPress);
     changeReferenceNodeAction->setMouseEventType(QEvent::MouseButtonPress);
     connect(changeReferenceNodeAction, SIGNAL(triggered(bool)), this, SLOT(changeReferenceNode()));
-    this->addInputAction(changeReferenceNodeAction);    
+    this->addInputAction(changeReferenceNodeAction);
     
     /*stopPlaybackAction = new ACInputActionQt(tr("Stop Playback"), this);
     stopPlaybackAction->setShortcut(Qt::Key_M);
@@ -858,7 +862,7 @@ void ACOsgCompositeViewQt::addMediaOnTimelineTrack(){
         
         mediaOnTrack = media_id;
         if (mediaOnTrack != -1){
-            this->getBrowserRenderer()->changeNodeColor(mediaOnTrack, Vec4(1.0,1.0,1.0,1.0));//CF color the node of the media on track in white
+            this->getBrowserRenderer()->changeNodeColor(mediaOnTrack, ACColor(1.0,1.0,1.0,1.0));//CF color the node of the media on track in white
             
             //if ( timeline_renderer->getTrack(0)!=0 )
             //{
@@ -974,14 +978,14 @@ void ACOsgCompositeViewQt::keyPressEvent( QKeyEvent* event )
 {
     this->propagateEventToActions(event);
     if (media_cycle == 0) return;
-    osg_view->getEventQueue()->keyPress( (osgGA::GUIEventAdapter::KeySymbol) *(event->text().toAscii().data() ) );
+    browser_view->getEventQueue()->keyPress( (osgGA::GUIEventAdapter::KeySymbol) *(event->text().toStdString().data() ) );
 }
 
 void ACOsgCompositeViewQt::keyReleaseEvent( QKeyEvent* event )
 {
     this->propagateEventToActions(event);
     if (media_cycle == 0) return;
-    osg_view->getEventQueue()->keyRelease( (osgGA::GUIEventAdapter::KeySymbol) *(event->text().toAscii().data() ) );
+    browser_view->getEventQueue()->keyRelease( (osgGA::GUIEventAdapter::KeySymbol) *(event->text().toStdString().data() ) );
 }
 
 void ACOsgCompositeViewQt::mousePressEvent( QMouseEvent* event )
@@ -997,7 +1001,7 @@ void ACOsgCompositeViewQt::mousePressEvent( QMouseEvent* event )
     default: button = 0; break;
     }
     //this->propagateEventToActions(event);
-    osg_view->getEventQueue()->mouseButtonPress(event->x(), event->y(), button);
+    browser_view->getEventQueue()->mouseButtonPress(event->x(), event->y(), button);
     //std::cout << "ACOsgCompositeViewQt::mousePressEvent clicked node " << media_cycle->getClickedNode() << std::endl;
     //browser_view->getEventQueue()->mouseButtonPress(event->x(), event->y()-sepy, button);
 
@@ -1031,7 +1035,8 @@ void ACOsgCompositeViewQt::mousePressEvent( QMouseEvent* event )
 
 void ACOsgCompositeViewQt::mouseMoveEvent( QMouseEvent* event )
 {
-    if (media_cycle&&event->buttons() ){
+    //CF disabling drag temporarily
+    /*if (media_cycle&&event->buttons() ){
 
         if (media_cycle->getClickedNode()>-1){//DRAG (click on a node and move)
             dragFlag=true;
@@ -1040,7 +1045,7 @@ void ACOsgCompositeViewQt::mouseMoveEvent( QMouseEvent* event )
             if ((event->pos() - dragStartPosition).manhattanLength()
                 < QApplication::startDragDistance())
                 return;
-            
+
             QDrag *drag = new QDrag(this);
             QMimeData *mimeData = new QMimeData;
             QList<QUrl> data;
@@ -1053,7 +1058,7 @@ void ACOsgCompositeViewQt::mouseMoveEvent( QMouseEvent* event )
             std::string thumbName= media_cycle->getLibrary()->getMedia(media_cycle->getClickedNode())->getThumbnailFileName();
             if ( thumbName.size()>0){
                 QImageReader *img=new QImageReader(QString::fromStdString(thumbName));
-            
+
                 drag->setPixmap(QPixmap::fromImageReader(img));
                 delete img;
             }
@@ -1061,7 +1066,7 @@ void ACOsgCompositeViewQt::mouseMoveEvent( QMouseEvent* event )
             
             return;
         }
-    }
+    }*/
 
     if(setting == AC_SETTING_INSTALLATION && media_cycle->getAutoPlay()==0){
         media_cycle->setAutoPlay(1);
@@ -1076,7 +1081,7 @@ void ACOsgCompositeViewQt::mouseMoveEvent( QMouseEvent* event )
     case(Qt::NoButton): button = 0; break;
     default: button = 0; break;
     }
-    osg_view->getEventQueue()->mouseMotion(event->x(), event->y());
+    browser_view->getEventQueue()->mouseMotion(event->x(), event->y());
     if (media_cycle == 0) return;
 
     float zoom, angle;
@@ -1117,7 +1122,7 @@ void ACOsgCompositeViewQt::mouseReleaseEvent( QMouseEvent* event )
     default: button = 0; break;
     }
     this->propagateEventToActions(event);
-    osg_view->getEventQueue()->mouseButtonRelease(event->x(), event->y(), button);
+    browser_view->getEventQueue()->mouseButtonRelease(event->x(), event->y(), button);
     //std::cout << "ACOsgCompositeViewQt::mouseReleaseEvent clicked node " << media_cycle->getClickedNode() << std::endl;
     if (media_cycle == 0) return;
     if (media_cycle->getClickedNode()>-1)
@@ -1136,45 +1141,45 @@ bool ACOsgCompositeViewQt::event(QEvent *event)
 }
 
 bool ACOsgCompositeViewQt::gestureEvent(QGestureEvent *event)
- {
-     if (QGesture *swipe = event->gesture(Qt::SwipeGesture))
-         swipeTriggered(static_cast<QSwipeGesture *>(swipe));
-     else if (QGesture *pan = event->gesture(Qt::PanGesture))
-         panTriggered(static_cast<QPanGesture *>(pan));
-     if (QGesture *pinch = event->gesture(Qt::PinchGesture))
-         pinchTriggered(static_cast<QPinchGesture *>(pinch));
-     return true;
- }
+{
+    if (QGesture *swipe = event->gesture(Qt::SwipeGesture))
+        swipeTriggered(static_cast<QSwipeGesture *>(swipe));
+    else if (QGesture *pan = event->gesture(Qt::PanGesture))
+        panTriggered(static_cast<QPanGesture *>(pan));
+    if (QGesture *pinch = event->gesture(Qt::PinchGesture))
+        pinchTriggered(static_cast<QPinchGesture *>(pinch));
+    return true;
+}
 
 // swipe is triggered when holding three fingers on the trackpad then sliding them
 // (on OSX 10.6+, System Preferences > Trackpad, the related the Three Fingers Swipe to Navigate gesture must be activated)
 void ACOsgCompositeViewQt::swipeTriggered(QSwipeGesture *gesture)
- {
-    #ifdef USE_DEBUG
+{
+#ifdef USE_DEBUG
     std::cout << "ACOsgCompositeViewQt::swipeTriggered: angle " << (double) gesture->swipeAngle() << std::endl;
-     if (gesture->state() == Qt::GestureFinished) {
-         if (gesture->horizontalDirection() == QSwipeGesture::Left)
-             std::cout << "ACOsgCompositeViewQt::swipeTriggered left" << std::endl;
-         if (gesture->verticalDirection() == QSwipeGesture::Up)
-             std::cout << "ACOsgCompositeViewQt::swipeTriggered up" << std::endl;
-         if (gesture->horizontalDirection() == QSwipeGesture::Right)
-             std::cout << "ACOsgCompositeViewQt::swipeTriggered right" << std::endl;
-         if (gesture->verticalDirection() == QSwipeGesture::Down)
-             std::cout << "ACOsgCompositeViewQt::swipeTriggered down" << std::endl;
-         update();
-     }
-    #endif
- }
+    if (gesture->state() == Qt::GestureFinished) {
+        if (gesture->horizontalDirection() == QSwipeGesture::Left)
+            std::cout << "ACOsgCompositeViewQt::swipeTriggered left" << std::endl;
+        if (gesture->verticalDirection() == QSwipeGesture::Up)
+            std::cout << "ACOsgCompositeViewQt::swipeTriggered up" << std::endl;
+        if (gesture->horizontalDirection() == QSwipeGesture::Right)
+            std::cout << "ACOsgCompositeViewQt::swipeTriggered right" << std::endl;
+        if (gesture->verticalDirection() == QSwipeGesture::Down)
+            std::cout << "ACOsgCompositeViewQt::swipeTriggered down" << std::endl;
+        update();
+    }
+#endif
+}
 
 // CF pan is triggered when holding one finger on the trackpad then sliding it
 void ACOsgCompositeViewQt::panTriggered(QPanGesture* gesture){
-    #ifdef USE_DEBUG
-   // std::cout << "ACOsgCompositeViewQt::panTriggered:";
-   // std::cout << " offset x " << gesture->offset().x() << " y " << gesture->offset().y();
-   // std::cout << " delta x " << gesture->delta().x() << " y " << gesture->delta().y();
-   // std::cout << " acceleration " << gesture->acceleration() ;
-   // std::cout << std::endl;
-    #endif
+#ifdef USE_DEBUG
+    // std::cout << "ACOsgCompositeViewQt::panTriggered:";
+    // std::cout << " offset x " << gesture->offset().x() << " y " << gesture->offset().y();
+    // std::cout << " delta x " << gesture->delta().x() << " y " << gesture->delta().y();
+    // std::cout << " acceleration " << gesture->acceleration() ;
+    // std::cout << std::endl;
+#endif
 }
 
 //CF pinch is triggered when holding two fingers on the trackpad then moving them
@@ -1205,7 +1210,7 @@ void ACOsgCompositeViewQt::pinchTriggered(QPinchGesture* gesture){
     //#endif
 }
 
-void ACOsgCompositeViewQt::prepareFromBrowser()
+void ACOsgCompositeViewQt::prepareBrowser()
 {
     //setMouseTracking(false); //CF necessary for the hover callback
     browser_renderer->prepareNodes();
@@ -1215,9 +1220,9 @@ void ACOsgCompositeViewQt::prepareFromBrowser()
     //hud_renderer->prepareMediaActions(browser_view); // CF: temporarily disabled, makes MashtaCycle crash
     browser_view->setSceneData(browser_renderer->getShapes());
 
-//    osgDB::SharedStateManager* ssm = osgDB::Registry::instance()->getSharedStateManager();
-//    if ( ssm )
-//        ssm->share( browser_renderer->getShapes() );
+    //    osgDB::SharedStateManager* ssm = osgDB::Registry::instance()->getSharedStateManager();
+    //    if ( ssm )
+    //        ssm->share( browser_renderer->getShapes() );
 
     library_loaded = true;
     //addCamera(renderer_hud->getCamera());
@@ -1254,15 +1259,15 @@ void ACOsgCompositeViewQt::updateTransformsFromBrowser( double frac)
  renderer_hud->updatePointers(views[0]);*/
 }
 
-void ACOsgCompositeViewQt::prepareFromTimeline()
+void ACOsgCompositeViewQt::prepareTimeline()
 {
     //setMouseTracking(false); //CF necessary for the hover callback
     timeline_renderer->prepareTracks();
     timeline_view->setSceneData(timeline_renderer->getShapes());
 
-//    osgDB::SharedStateManager* ssm = osgDB::Registry::instance()->getSharedStateManager();
-//    if ( ssm )
-//        ssm->share( timeline_renderer->getShapes() );
+    //    osgDB::SharedStateManager* ssm = osgDB::Registry::instance()->getSharedStateManager();
+    //    if ( ssm )
+    //        ssm->share( timeline_renderer->getShapes() );
 
 }
 
@@ -1295,7 +1300,7 @@ void ACOsgCompositeViewQt::changeSetting(ACSettingType _setting)
         // QApplication::restoreOverrideCursor();
         if(media_cycle->hasBrowser() && media_cycle->getBrowser()->hasMousePointer() && !mouse_disabled)
             media_cycle->getBrowser()->removeMousePointer();
-       }
+    }
     else{
         this->setCursor(QCursor());
         if(media_cycle->hasBrowser() && media_cycle->getBrowser()->hasMousePointer() == false && !mouse_disabled)

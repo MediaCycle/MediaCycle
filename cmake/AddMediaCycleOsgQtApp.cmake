@@ -55,10 +55,18 @@ file(WRITE ${CMAKE_CURRENT_BINARY_DIR}/main.cpp "
 
 #include <QApplication>
 #include <QtGui>
+")
+
+IF(USE_QT4 AND NOT USE_QT5)
+file(APPEND ${CMAKE_CURRENT_BINARY_DIR}/main.cpp "
 #ifndef USE_DEBUG
 #include <BreakpadHttpSender.h>
 #include <BreakPadHandler.h>
 #endif
+")
+ENDIF()
+
+file(APPEND ${CMAKE_CURRENT_BINARY_DIR}/main.cpp "
 #include \"${MAIN_CLASS}.h\"
 ")
 
@@ -172,11 +180,18 @@ int main(int argc, char *argv[])
 #ifdef __APPLE__
 	QApplication::setLibraryPaths(QStringList(QApplication::applicationDirPath() + \"/../PlugIns\"));
 #endif
-	#ifndef USE_DEBUG
-        BreakpadQt::GlobalHandler::instance()->setDumpPath(QLatin1String(\"crashes\"));
-	#endif
+")
 
-	${MAIN_CLASS} window;
+IF(USE_QT4 AND NOT USE_QT5)
+file(APPEND ${CMAKE_CURRENT_BINARY_DIR}/main.cpp "
+        #ifndef USE_DEBUG
+        BreakpadQt::GlobalHandler::instance()->setDumpPath(QLatin1String(\"crashes\"));
+        #endif
+")
+ENDIF()
+
+file(APPEND ${CMAKE_CURRENT_BINARY_DIR}/main.cpp "
+        ${MAIN_CLASS} window;
 
 	#ifdef USE_DEBUG
 	try {
@@ -214,7 +229,9 @@ file(APPEND ${CMAKE_CURRENT_BINARY_DIR}/main.cpp "
 SET(WITH_MC ON)
 SET(WITH_OSG ON)
 
-INCLUDE_DIRECTORIES(${CMAKE_SOURCE_DIR}/libs/gui-osg-qt ${CMAKE_CURRENT_SOURCE_DIR} ${CMAKE_CURRENT_BINARY_DIR})
+INCLUDE_DIRECTORIES(${CMAKE_SOURCE_DIR}/libs/gui-qt ${CMAKE_BINARY_DIR}/libs/gui-qt )
+INCLUDE_DIRECTORIES(${CMAKE_SOURCE_DIR}/libs/gui-osg-qt ${CMAKE_BINARY_DIR}/libs/gui-osg-qt )
+INCLUDE_DIRECTORIES(${CMAKE_CURRENT_SOURCE_DIR} ${CMAKE_CURRENT_BINARY_DIR})
 
 ADD_QT_EXECUTABLE(${TARGET_NAME})
 

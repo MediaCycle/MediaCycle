@@ -1,11 +1,11 @@
 SET(TARGET_NAME "AudioCycle")
-IF ( BUILD_AUDIOCYCLE_APP AND SUPPORT_AUDIO AND USE_QT4 AND USE_OSG AND USE_OSC AND ( OPENAL_FOUND OR PORTAUDIO_FOUND ) )
+IF ( BUILD_AUDIOCYCLE_APP AND SUPPORT_AUDIO AND (USE_QT4 OR USE_QT5) AND USE_OSG AND USE_OSC AND ( OPENAL_FOUND OR PORTAUDIO_FOUND ) )
 
         SET(WITH_SEGMENTATION ON)
 	SET(WITH_OSC ON)
 
-	SET(MEDIA_TYPE "MEDIA_TYPE_AUDIO")
-        SET(MC_PLUGINS "audio-features-yaafe;audio-engine-stk-sounddesign;audio-osg;audio-reader-sndfile;audio-segmentation;audio-thumbnailer-waveform-svg;audio-thumbnailer-features-svg;io-osc;pcapreprocess;segmentation;visualisation")
+        SET(MEDIA_TYPE "MEDIA_TYPE_AUDIO")
+        SET(MC_PLUGINS "audio-features-yaafe;audio-engine-stk-sounddesign;audio-osg;audio-reader-sndfile;audio-segmentation;io-osc;pcapreprocess;segmentation;visualisation")
 	IF(USE_DEBUG)
                 LIST(APPEND MC_PLUGINS "visualisation-advanced;visualisation-tagging")
 	ENDIF()
@@ -26,10 +26,11 @@ IF ( BUILD_AUDIOCYCLE_APP AND SUPPORT_AUDIO AND USE_QT4 AND USE_OSG AND USE_OSC 
         ENDIF()
 	LIST(APPEND MC_PLUGINS "visualisation-s-hull")
 
-        SET(OSG_PLUGINS "osgdb_svg") #required by audio-thumbnailer-waveform-svg
+	LIST(APPEND MC_PLUGINS "audio-thumbnailer-waveform-svg;audio-thumbnailer-features-svg")
+	#SET(OSG_PLUGINS "osgdb_svg") #required by audio-thumbnailer-waveform-svg
 
         SET(DESCRIPTION "AudioCycle allows to organize audio files by similarity.")
-        SET(FILTERING "Proximity Grid")
+        #SET(FILTERING "Proximity Grid")
         SET(CLUSTERS_POSITIONS "MediaCycle Import Grid")
 
 	INCLUDE (${CMAKE_SOURCE_DIR}/cmake/CreateDefaultConfig.cmake)

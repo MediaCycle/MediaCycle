@@ -288,9 +288,6 @@ void ACMlPackTaggedGMMPlugin::transferToClusterCenter(ACMediaBrowser* mediaBrows
 void ACMlPackTaggedGMMPlugin::clusterNumberChanged(){
     if(!this->media_cycle) return;
     media_cycle->setClusterNumber( this->getNumberParameterValue("clusters") );
-    // XSCF251003 added this
     media_cycle->updateDisplay(true);
-    // XS 310310 removed media_cycle->setNeedsDisplay(true); // now in updateDisplay
-    //osg_view->updateTransformsFromBrowser(1.0); //CF 29/06/2012, this is called by ACOsgCompositeViewQt::updateGL if mediacycle needs display
     media_cycle->setNeedsDisplay(true);
 }

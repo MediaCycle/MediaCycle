@@ -49,6 +49,7 @@
  * support trees with an arbitrary number of children at any given node.
  */
 
+#include "MediaCycle.h"
 #include "ACPlugin.h"
 #include "ACMediaBrowser.h"
 
@@ -67,7 +68,7 @@ typedef enum {
 class ACPositionsPluginTreeNodeParams {
 public:
     ACPositionsPluginTreeNodeParams();
-    ~ACPositionsPluginTreeNodeParams(){};
+    ~ACPositionsPluginTreeNodeParams(){}
 
 public:
     double getWidth(){return width;}
@@ -113,7 +114,7 @@ public:
 class ACPositionsPluginNodeLinkTreeLayout : public ACNeighborPositionsPlugin {
 public:
     ACPositionsPluginNodeLinkTreeLayout();
-    ~ACPositionsPluginNodeLinkTreeLayout(){};
+    ~ACPositionsPluginNodeLinkTreeLayout(){}
     //	virtual int initialize();
     void updateNextPositions(ACMediaBrowser* );
     //void prepareLayout(ACOsgBrowserRenderer*, int start){};

@@ -34,6 +34,8 @@
 ACAudioStkSoundDesignEngineRendererPlugin::ACAudioStkSoundDesignEngineRendererPlugin() : ACAudioStkEngineRendererPlugin(){
     this->mName = "Audio Engine for Sound Design (STK)";
     this->mDescription ="Plugin for playing audio files and sound design with The Synthesis ToolKit in C++ (STK)";
+
+    //this->useMotorizedFaders();
 }
 
 ACAudioStkSoundDesignEngineRendererPlugin::~ACAudioStkSoundDesignEngineRendererPlugin(){

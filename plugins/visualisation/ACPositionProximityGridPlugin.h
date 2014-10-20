@@ -50,10 +50,10 @@ private:
     float proxgridaspectratio;
     int proxgridlx;
     int proxgridly;
-    float proxgridl;
-    float proxgridr;
-    float proxgridb;
-    float proxgridt;
+    double proxgridl;
+    double proxgridr;
+    double proxgridb;
+    double proxgridt;
     int proxgridmaxdistance;
     float proxgridjitter;
     int proxgridboundsset;

@@ -36,7 +36,7 @@
 using namespace std;
 
 ACVideoOpticalFlowPlugin::ACVideoOpticalFlowPlugin() : ACTimedFeaturesPlugin() {
-    this->mMediaType = MEDIA_TYPE_VIDEO;
+    //this->mMediaType = MEDIA_TYPE_VIDEO;
     this->mName = "Video Optical Flow";
     this->mDescription = "Optical Flow";
     this->mId = "";

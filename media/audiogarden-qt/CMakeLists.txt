@@ -1,7 +1,7 @@
 SET(MEDIA_TYPE "audio")
 SET(LIBRARY_NAME "mediacycle-audiogarden-qt")
 SET(MC_MEDIA_LIBS "${MEDIA_TYPE}-core;${MEDIA_TYPE}-engine;${MEDIA_TYPE}-osg;audiogarden-synthesis")
-SET(WITH_QT4 ON)
+SET(WITH_QT ON)
 IF(SUPPORT_AUDIO AND USE_AUDIOGARDEN AND USE_QT4)
         INCLUDE (${CMAKE_SOURCE_DIR}/cmake/AddMediaCycleLibrary.cmake)
         ADD_MC_LIBRARY(${LIBRARY_NAME})

@@ -2,7 +2,7 @@
 #
 # at the end of any application that needs packaging, adapt the following variables:
 # * SET(PROGNAME "app-name") where app-name matches the CMake target name of the application
-# * (optional) SET(WITH_QT4 ON) if you application uses Qt4 as GUI framework
+# * (optional) SET(WITH_QT ON) if you application uses Qt as GUI framework
 # * (optional) SET(MC_PACKAGE_DESCRIPTION "...")
 # then add after: INCLUDE (${CMAKE_SOURCE_DIR}/cmake/CreatePackage.cmake)
 #
@@ -127,12 +127,12 @@ IF(UNIX)
                 list(APPEND UBUNTU_DEPS "libopenscenegraph65" "libopenthreads13")
             ENDIF()
 
-            #IF(WITH_OSG AND WITH_QT4 AND SUPPORT_VIDEO AND USE_VIDEO AND FFMPEG_FOUND) # dirty test to check if we're packaging a GUI application under Ubuntu
+            #IF(WITH_OSG AND WITH_QT AND SUPPORT_VIDEO AND USE_VIDEO AND FFMPEG_FOUND) # dirty test to check if we're packaging a GUI application under Ubuntu
             #    #INSTALL(FILES ${CMAKE_BINARY_DIR}/3rdparty/osgdb_ffmpeg/osgdb_ffmpeg.so DESTINATION lib/osgPlugins-${OPENSCENEGRAPH_VERSION} COMPONENT ${PROGNAME})
             #ENDIF()
 
             # Qt4 libqtcore4 and libqtgui4 are package for kubuntu, libqt4-core and libqt4-gui for ubuntu
-            IF(USE_QT4 AND WITH_QT4)
+            IF(USE_QT4 AND WITH_QT)
                 list(APPEND UBUNTU_DEPS "libqt4-core|libqtcore4" "libqt4-gui|libqtgui4" "libqt4-opengl" "libqt4-svg" "libqt4-xml")
                 IF(QT_USE_PHONON)
                     list(APPEND UBUNTU_DEPS "libphonon4")
@@ -327,17 +327,30 @@ ENDIF()
 # Install needed Qt plugins by copying directories from the qt installation
 # One can cull what gets copied by using 'REGEX "..." EXCLUDE'
 IF(APPLE)
-IF(WITH_QT4)
-	INSTALL(DIRECTORY "${QT_PLUGINS_DIR}/imageformats" DESTINATION ${plugin_dest_dir} COMPONENT ${PROGNAME})
-	file(GLOB_RECURSE QTPLUGINS ${QT_PLUGINS_DIR}/imageformats/*.dylib)
-	STRING(REGEX REPLACE "${QT_PLUGINS_DIR}" "${CMAKE_INSTALL_PREFIX}/${plugin_dest_dir}" QTPLUGINS "${QTPLUGINS}")
+IF(WITH_QT)
+	IF(USE_QT4)
+		INSTALL(DIRECTORY "${QT_PLUGINS_DIR}/imageformats" DESTINATION ${plugin_dest_dir} COMPONENT ${PROGNAME})
+		file(GLOB_RECURSE QTPLUGINS ${QT_PLUGINS_DIR}/imageformats/*.dylib)
+		STRING(REGEX REPLACE "${QT_PLUGINS_DIR}" "${CMAKE_INSTALL_PREFIX}/${plugin_dest_dir}" QTPLUGINS "${QTPLUGINS}")
+	ELSEIF(USE_QT5)
+		foreach(plugin ${Qt5Gui_PLUGINS})
+		                    get_target_property(_loc ${plugin} LOCATION)
+		                    #message("Core Plugin ${plugin} is at location ${_loc}")
+				GET_FILENAME_COMPONENT(plugin_path "${_loc}" PATH)
+				GET_FILENAME_COMPONENT(plugin_path "${plugin_path}" NAME)
+				#MESSAGE("plugin_path ${plugin_path}")
+				INSTALL(FILES "${_loc}" DESTINATION ${plugin_dest_dir}/${plugin_path} COMPONENT ${PROGNAME})				
+				GET_FILENAME_COMPONENT(plugin_name "${_loc}" NAME )
+				LIST(APPEND QTPLUGINS "${CMAKE_INSTALL_PREFIX}/${plugin_dest_dir}/${plugin_path}/${plugin_name}")
+		endforeach()
+	ENDIF()
 ENDIF()
 ENDIF()
 #--------------------------------------------------------------------------------
 # install a qt.conf file
 # this inserts some cmake code into the install script to write the file
 IF(APPLE)
-IF(WITH_QT4)
+IF(WITH_QT AND USE_QT4)
 	INSTALL(CODE "
  	   file(WRITE \"\${CMAKE_INSTALL_PREFIX}/${qtconf_dest_dir}/qt.conf\" \"[Paths]\nPlugins = plugins\")
  	   " COMPONENT ${PROGNAME})
@@ -556,7 +569,7 @@ ENDIF()
 # over.
 IF(APPLE)
 LIST(APPEND PLUGINS ${EXTRA_APPS})
-IF(WITH_QT4)
+IF(WITH_QT)
 	LIST(APPEND PLUGINS ${QTPLUGINS})
 ENDIF()
 IF(WITH_MC AND NOT MC_PLUGINS_STATIC)

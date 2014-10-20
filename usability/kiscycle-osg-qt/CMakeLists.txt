@@ -1,5 +1,5 @@
 SET(TARGET_NAME "KnownItemSearchCycle")
-IF ( SUPPORT_AUDIO AND USE_QT4 AND USE_OSG AND MLPACK_FOUND)
+IF ( SUPPORT_AUDIO AND (USE_QT4 OR USE_QT5) AND USE_OSG AND MLPACK_FOUND)
 
         SET(WITH_SEGMENTATION OFF)
         SET(WITH_OSC ON)
@@ -20,7 +20,7 @@ IF ( SUPPORT_AUDIO AND USE_QT4 AND USE_OSG AND MLPACK_FOUND)
         ENDIF()
         #SET(CLUSTERS_METHOD "MediaCycle KMeans")
         #SET(CLUSTERS_POSITIONS "MediaCycle t_Sne")
-        SET(OSG_PLUGINS "osgdb_svg") #required by audio-thumbnailer-waveform-svg
+        #SET(OSG_PLUGINS "osgdb_svg") #required by audio-thumbnailer-waveform-svg
         SET(MAIN_CLASS "ACAudioCycleKIS")
         SET(DESCRIPTION "KnownItemSearchCycle is a stripped-down version of AudioCycle, aimed at organizing audio files by similarity, tailored for usability testing.")
 

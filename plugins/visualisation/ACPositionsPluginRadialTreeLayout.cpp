@@ -74,7 +74,7 @@ void ACPositionsPluginRadialTreeLayout::updateNextPositions(ACMediaBrowser* _med
     this->mediaBrowser = _mediaBrowser;
 
     if(mediaBrowser->getNumberOfMediaNodes()==0) {
-        mediaBrowser->setNeedsDisplay(true);
+        media_cycle->setNeedsDisplay(true);
         return;
     }
 
@@ -84,7 +84,7 @@ void ACPositionsPluginRadialTreeLayout::updateNextPositions(ACMediaBrowser* _med
         int librarySize = mediaBrowser->getLibrary()->getSize();
 
         if(librarySize==0) {
-            mediaBrowser->setNeedsDisplay(true);
+            media_cycle->setNeedsDisplay(true);
             return;
         }
 
@@ -140,7 +140,7 @@ void ACPositionsPluginRadialTreeLayout::updateNextPositions(ACMediaBrowser* _med
             mediaBrowser->setMediaNodeDisplayed(*nodeId, true); // CF n instead of mediaBrowser->getUserLog()->getMediaIdFromNodeId(n)
             //std::cout << "ACPositionsPluginRadialTreeLayout::updateNextPositions: Node " << n << " x " << m_nodeParams[n]->getX() << " y " << -m_nodeParams[n]->getY() << std::endl;
         }
-        mediaBrowser->setNeedsDisplay(true);
+        media_cycle->setNeedsDisplay(true);
     }
 }
 

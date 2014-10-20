@@ -9,7 +9,7 @@ IF(SUPPORT_IMAGE)
         INCLUDE_DIRECTORIES(${CMAKE_SOURCE_DIR}/3rdparty/gnuplot_i)
 
 	ADD_EXECUTABLE(image-test ${SRC} ${HDR})
-	ADD_DEPENDENCIES(image-test mediacycle mc_image)
+        #ADD_DEPENDENCIES(image-test mediacycle mc_image)
 	TARGET_LINK_LIBRARIES(image-test mediacycle mediacycle-image-features)
 
 	SET_TARGET_PROPERTIES("image-test" PROPERTIES FOLDER "${FOLDERNAME}")

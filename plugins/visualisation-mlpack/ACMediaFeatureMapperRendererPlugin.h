@@ -33,7 +33,7 @@
 #define __ACMediaFeatureMapperRendererPlugin_H__
 
 #include <ACPlugin.h>
-#include <ACOsgRendererPlugin.h>
+#include <ACAbstractRendererPlugin.h>
 
 #include <boost/any.hpp>
 using boost::any_cast;
@@ -73,7 +73,7 @@ typedef struct {
     double v;       // percent [0;1]
 } hsv;
 
-class ACMediaFeatureMapperRendererPlugin : virtual public ACOsgRendererPlugin
+class ACMediaFeatureMapperRendererPlugin : virtual public ACAbstractRendererPlugin, virtual public ACMediaRendererPlugin
 {
 
 public:

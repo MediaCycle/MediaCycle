@@ -80,7 +80,7 @@ void ACPosPlugImportGrid::updateNextPositions(ACMediaBrowser* mediaBrowser){
 
     ACPoint p;
     int row = 0;
-    float osg = 0.33f;
+    double osg = 0.33f;
 
     bool landmower = this->getNumberParameterValue("Landmower mode");
 
@@ -90,10 +90,10 @@ void ACPosPlugImportGrid::updateNextPositions(ACMediaBrowser* mediaBrowser){
             row++;
         }
         if(landmower)
-            p.x = (-osg + 2*osg*(float)(i%gridSize)/(float)(gridSize-1))*pow(-1.0f,row+1);
+            p.x = (-osg + 2*osg*(double)(i%gridSize)/(double)(gridSize-1))*pow(-1.0f,row+1);
         else
-            p.x = -osg + 2*osg*(float)(i%gridSize)/(float)(gridSize-1);
-        p.y = osg -2*osg*(float)(row-1)/(float)(gridSize-1);
+            p.x = -osg + 2*osg*(double)(i%gridSize)/(double)(gridSize-1);
+        p.y = osg -2*osg*(double)(row-1)/(double)(gridSize-1);
         p.z = 0;
         mediaBrowser->setNodeNextPosition(ids[i], p);
         //std::cout << "ACPosPlugImportGrid::updateNextPositions: media " << ids[i] << " i%gridSize " << i%gridSize << " x " << p.x << " y " << p.y << std::endl;

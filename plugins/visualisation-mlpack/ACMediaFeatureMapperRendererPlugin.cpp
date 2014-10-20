@@ -42,7 +42,7 @@ using namespace mlpack::neighbor;
 using namespace arma;
 
 ACMediaFeatureMapperRendererPlugin::ACMediaFeatureMapperRendererPlugin()
-    :ACOsgRendererPlugin()
+    :ACAbstractRendererPlugin(),ACMediaRendererPlugin()
 {
     //this->mName = "Feature Mapper Thumbnailer";
     this->mName = "Feature Mapper";
@@ -340,7 +340,7 @@ void ACMediaFeatureMapperRendererPlugin::assignedFeaturesChanged(){
         /*if(color_b_feature){
             std::cout << "Media " << media->first << " feature " << color_b_feature_name << " value " << color_b_feature->getFeatureElement(color_b_feature_dim) << " -> " << hsvc.v << " HSV ("<< hsvc.h << ";" << hsvc.s << ";" << hsvc.v << ") RGB (" << rgb2.r << ";" << rgb2.g << ";" << rgb2.b << ")" << std::endl;
         }*/
-        browser->changeNodeColor(media->first,osg::Vec4(rgb2.r,rgb2.g,rgb2.b,1.0f));
+        browser->changeNodeColor(media->first,ACColor(rgb2.r,rgb2.g,rgb2.b,1.0f));
     }
     media_cycle->setNeedsDisplay(true);
 }
@@ -459,7 +459,7 @@ void ACMediaFeatureMapperRendererPlugin::updateLinks(){
         AllkNN a(desc_m);
         //mlpack::data::Save("./desc_m.csv", desc_m, true);
         a.Search(k, resultingNeighbors, resultingDistances);
-        //mlpack::data::Save("./resultingNeighbors.csv", resultingNeighbors, true);
+        mlpack::data::Save("./resultingNeighbors.csv", resultingNeighbors, true);
         //mlpack::data::Save("./resultingDistances.csv", resultingDistances, true);
         ////mlpack::data::Save("./mst.csv", mst, true);
         //mst = arma::join_rows(resultingNeighbors,resultingDistances);
@@ -519,7 +519,7 @@ void ACMediaFeatureMapperRendererPlugin::updateLinks(){
         _size = resultingNeighbors.n_cols;
     }
 
-    osg::Vec4 color(1.0f,1.0f,1.0f,1.0f);
+    ACColor color(1.0f,1.0f,1.0f,1.0f);
 
     for(int e = init; e >= 0 && e < _size;e+=increment){
 
@@ -543,7 +543,7 @@ void ACMediaFeatureMapperRendererPlugin::updateLinks(){
                 dist = resultingDistances(n,e);
                 //std::cout << "Edge " << e << " " << in << " " << out << " d " << dist << std::endl;
                 if(this->browser){
-                    color.a() = 1/(float)(n+1);
+                    color.a = 1/(float)(n+1);
                     this->browser->addLink( in , out, 10.0f/dist, color );
                 }
             }

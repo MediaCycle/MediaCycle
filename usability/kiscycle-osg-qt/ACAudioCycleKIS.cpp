@@ -37,8 +37,10 @@
 ACAudioCycleKIS::ACAudioCycleKIS() : ACMediaCycleOsgQt(), task_timer(0), hear_timer(0), currentId(-1), sequence(0) {
     count = 0;
     // delay after which we change media_files (if it's ok)
-    attente = 2*60*1000; // in ms
+    attente = 10*60*1000; // in ms
     grace = 10*1000; // in ms
+    useTimer = true;
+    seed = 1;
 
     this->useSegmentationByDefault(false);
 
@@ -187,6 +189,13 @@ void ACAudioCycleKIS::startLoopXML(){
 void ACAudioCycleKIS::openNextLibrary(){
     media_cycle->performActionOnMedia("reset",-1);
     this->getTimer()->reset();
+
+    QPalette* lcdpalette = new QPalette();
+    lcdpalette->setColor(QPalette::Background, QColor(0, 0, 0));
+    lcdpalette->setColor(QPalette::Base, QColor(0, 0, 0));
+    lcdpalette->setColor(QPalette::AlternateBase, QColor(0, 0, 0));
+    this->getScore()->setPalette(*lcdpalette);
+
     cout << "Opening next library: " << count << endl;
     // going through all files again
 
@@ -226,7 +235,7 @@ void ACAudioCycleKIS::openNextLibrary(){
         std::cerr << "Library empty "<< std::endl;
     }
 
-    if(target == -1){
+    if(target == -1){ 
         int b = qrand();
         currentId = b % librarySize;
     }
@@ -269,6 +278,13 @@ void ACAudioCycleKIS::mediaActionPerformed(std::string action, long int mediaId,
         std::cout << "Submitted media " << mediaId << std::endl;
         if(mediaId == currentId){
             this->getTimer()->success();
+
+            QPalette* lcdpalette = new QPalette();
+            lcdpalette->setColor(QPalette::Background, QColor(0, 255, 0));
+            lcdpalette->setColor(QPalette::Base, QColor(0, 255, 0));
+            lcdpalette->setColor(QPalette::AlternateBase, QColor(0, 255, 0));
+            this->getScore()->setPalette(*lcdpalette);
+
             media_cycle->performActionOnMedia("success",currentId);
             //std::cout << "Current " << this->getScore()->value() << " attente "<< attente<< " timer "<< this->getTimer()->value() <<std::endl;
             this->getScore()->display( this->getScore()->value() + this->getTimer()->value() );
@@ -276,6 +292,13 @@ void ACAudioCycleKIS::mediaActionPerformed(std::string action, long int mediaId,
         }
         else{
             this->getTimer()->fail();
+
+            QPalette* lcdpalette = new QPalette();
+            lcdpalette->setColor(QPalette::Background, QColor(255, 0, 0));
+            lcdpalette->setColor(QPalette::Base, QColor(255, 0, 0));
+            lcdpalette->setColor(QPalette::AlternateBase, QColor(255, 0, 0));
+            this->getScore()->setPalette(*lcdpalette);
+
             this->getScore()->display( this->getScore()->value() - 10 );
         }
     }

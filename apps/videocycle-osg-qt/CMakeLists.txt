@@ -1,11 +1,11 @@
 SET(TARGET_NAME "VideoCycle")
-IF ( BUILD_VIDEOCYCLE_APP AND SUPPORT_VIDEO AND USE_QT4 AND USE_OSG AND USE_OSC AND USE_FFMPEG )
+IF ( BUILD_VIDEOCYCLE_APP AND SUPPORT_VIDEO AND (USE_QT4 OR USE_QT5) AND USE_OSG AND USE_OSC AND USE_FFMPEG )
 
         SET(WITH_SEGMENTATION OFF)
 	SET(WITH_OSC ON)
 
 	SET(MEDIA_TYPE "MEDIA_TYPE_VIDEO")
-        SET(MC_PLUGINS "video;file;video-reader-opencv;video-osg;video-thumbnailer-resize;video-thumbnailer-slitscan-opencv;visualisation;io-osc")
+        SET(MC_PLUGINS "file;video-reader-opencv;video-osg;video-thumbnailer-resize;video-thumbnailer-slitscan-opencv;visualisation;io-osc")#video;
         #pcapreprocess;segmentation;video-segmentation;
         IF(USE_DEBUG)
                 LIST(APPEND MC_PLUGINS "visualisation-advanced;visualisation-tagging")

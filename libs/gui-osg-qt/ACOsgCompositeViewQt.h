@@ -46,6 +46,9 @@
 #include <QtOpenGL/QGLWidget>
 using Qt::WindowFlags;
 
+#include <QApplication>
+#include <QGestureEvent>
+
 #include <iostream>
 #include <MediaCycle.h>
 #include <ACOsgBrowserRenderer.h>
@@ -59,8 +62,9 @@ using Qt::WindowFlags;
 //#include "ui_ACOsgCompositeViewQt.h"
 
 #include <ACInputActionQt.h>
+#include <ACAbstractViewQt.h>
 
-class ACOsgCompositeViewQt : public QGLWidget, public osgViewer::CompositeViewer, public ACEventListener
+class ACOsgCompositeViewQt : public QGLWidget, public osgViewer::CompositeViewer, public ACEventListener, public ACAbstractViewQt
 {
     Q_OBJECT
 
@@ -93,9 +97,9 @@ public slots:
 public:
     ACOsgCompositeViewQt( QWidget * parent = 0, const char * name = 0, const QGLWidget * shareWidget = 0, WindowFlags f = 0 );
     ~ACOsgCompositeViewQt();
-    void clean(bool updategl=true);
-    osgViewer::GraphicsWindow* getGraphicsWindow() { return osg_view; }//.get(); }
-    const osgViewer::GraphicsWindow* getGraphicsWindow() const { return osg_view; }//.get(); }
+    virtual void clean(/*bool updategl=true*/);
+    osgViewer::GraphicsWindow* getGraphicsWindow() { return browser_viewer; }//.get(); }
+    const osgViewer::GraphicsWindow* getGraphicsWindow() const { return browser_viewer; }//.get(); }
     virtual void paintGL();
 
 protected:
@@ -112,7 +116,7 @@ protected:
     virtual void mousePressEvent( QMouseEvent* event );
     virtual void mouseReleaseEvent( QMouseEvent* event );
     virtual void mouseMoveEvent( QMouseEvent* event );
-    osg::ref_ptr<osgViewer::GraphicsWindowEmbedded> osg_view;
+    osg::ref_ptr<osgViewer::GraphicsWindowEmbedded> browser_viewer;
     QTimer _timer;
 
 protected:
@@ -146,12 +150,12 @@ private:
     *addMediaOnTimelineTrackAction, *toggleTimelinePlaybackAction, *adjustTimelineHeightAction,
     *discardMediaAction;
     //*neighborsOfReferentAction, *clusterAroundReferentAction, *removeMediaAction
-    QList<ACInputActionQt*> inputActions;
+
 
     void initInputActions();
 public:
-    void addInputAction(ACInputActionQt* _action);
-    QList<ACInputActionQt*> getInputActions(){return inputActions;}
+    virtual void addInputAction(ACInputActionQt* _action);
+
     // MediaCycle listener callback
     virtual void pluginLoaded(std::string plugin_name);
     void mediaImported(int n,int nTot,int mId);
@@ -163,19 +167,21 @@ private:
 
 public:
     // needs to be called when medias are added or removed
-    void prepareFromBrowser();
+    virtual void prepareBrowser();
     // needs to be called when node positions are changed
     void updateTransformsFromBrowser( double frac);
     void setMediaCycle(MediaCycle* _media_cycle);
     // needs to be called when tracks are added or removed
-    void prepareFromTimeline();
+    virtual void prepareTimeline();
     // needs to be called when tracks positions are changed
     void updateTransformsFromTimeline( double frac);
     ACOsgBrowserRenderer* getBrowserRenderer(){return browser_renderer;}
     ACOsgHUDRenderer* getHUDRenderer(){return hud_renderer;}
     ACOsgTimelineRenderer* getTimelineRenderer(){return timeline_renderer;}
-    bool isLibraryLoaded(){return library_loaded;}
-    void setLibraryLoaded(bool load_status){library_loaded = load_status;}
+    virtual ACAbstractBrowserRenderer* getBrowser(){return browser_renderer;}
+    virtual ACAbstractTimelineRenderer* getTimeline(){return timeline_renderer;}
+    virtual bool isLibraryLoaded(){return library_loaded;}
+    virtual void setLibraryLoaded(bool load_status){library_loaded = load_status;}
 
 private:
     int mousedown, borderdown;
@@ -200,8 +206,8 @@ private:
 protected:
     ACSettingType setting;
 public:
-    void changeSetting(ACSettingType _setting);
-signals:
-    void importDirectoriesThreaded(std::vector<std::string> directories,bool flag);
+    virtual void changeSetting(ACSettingType _setting);
+//CF signals:
+//    void importDirectoriesThreaded(std::vector<std::string> directories,bool flag);
 };
 #endif

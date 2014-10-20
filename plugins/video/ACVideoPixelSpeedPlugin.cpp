@@ -43,7 +43,7 @@ using namespace std;
 // note : this->mDescription will be used for mtf_file_name
 ACVideoPixelSpeedPlugin::ACVideoPixelSpeedPlugin() : ACTimedFeaturesPlugin() {
     //vars herited from ACPlugin
-    this->mMediaType = MEDIA_TYPE_VIDEO;
+    //this->mMediaType = MEDIA_TYPE_VIDEO;
     this->mName = "Video Pixel Speed";
     this->mDescription = "Pixel Speed";
     this->mId = "";

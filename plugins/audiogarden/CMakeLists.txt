@@ -1,7 +1,7 @@
 SET(MEDIA_TYPE "audio")
 SET(PLUGIN_NAME "audiogarden")
 SET(MC_MEDIA_LIBS "${MEDIA_TYPE}-core;${MEDIA_TYPE}-features;${MEDIA_TYPE}-engine;${MEDIA_TYPE}-osg;audiogarden-synthesis;audiogarden-qt")
-SET(WITH_QT4 ON)
+SET(WITH_QT ON)
 list(APPEND 3RDPARTY_NAMES "libsndfile")
 list(APPEND 3RDPARTY_LICENSES "LGPL or GPL")
 list(APPEND 3RDPARTY_URLS "http://www.mega-nerd.com/libsndfile")
