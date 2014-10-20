@@ -543,6 +543,7 @@ int MediaCycle::importDirectory(string path, int recursive, bool forward_order, 
         cout << "no analysis plugins were loaded. you will need to load a plugin to use the application." << endl;
     }
     ok = this->mediaLibrary->importDirectory(path, recursive, this->pluginManager, forward_order, doSegment, _save_timed_feat);
+    //CF there should be libraryContentChanged(needsNormalizeAndCluster) to initialise features weights but if forces clustering and positioning, not ok for CLIs
     this->importing = false;
     return ok;
 }
@@ -911,6 +912,9 @@ bool MediaCycle::changeActivePlugin(ACPluginType pluginType, std::string pluginN
         this->getLibrary()->setPreProcessPlugin(plugin);
         ok = true;
     }
+    if(ok && this->getLibrarySize()>0){
+        this->eventManager->sig_updateDisplayNeeded();
+    }
     return ok;
 }
 
@@ -1129,6 +1133,7 @@ void MediaCycle::setNeedsDisplay(bool _dis) {
     if (mediaBrowser){
         mediaBrowser->setNeedsDisplay(_dis);
     }
+    eventManager->sig_updateDisplayNeeded();
 }
 
 int MediaCycle::getNeedsDisplay3D(){return mNeedsDisplay;}
@@ -1464,7 +1469,7 @@ void MediaCycle::changeSelectedMediaTagId(int ClusterId){
         if (mediaLibrary->getMediaTaggedClassId(media_id)!=ClusterId){
             std::cout << "MediaCycle::changeSelectedMediaTagId "<<ClusterId<<"for mediaId"<<media_id << std::endl;
             this->setMediaTaggedClassId(media_id, ClusterId);
-            mediaBrowser->updateDisplay();
+            this->updateDisplay(false);
         }
     }
 
@@ -1482,7 +1487,7 @@ void MediaCycle::transferClassToTag(){
         }
     }
     if (changed)
-        mediaBrowser->updateDisplay();
+        this->updateDisplay(false);
 }
 
 void MediaCycle::cleanAllMediaTag(){
@@ -1496,7 +1501,7 @@ void MediaCycle::cleanAllMediaTag(){
         }
     }
     if (changed)
-        mediaBrowser->updateDisplay();
+        this->updateDisplay(false);
 }
 
 
@@ -1771,6 +1776,7 @@ void MediaCycle::updateDisplay(bool _animate) {
     if(mediaBrowser){
         mediaBrowser->updateDisplay(_animate);
     }
+    eventManager->sig_updateDisplayNeeded();
 }
 
 void MediaCycle::initializeFeatureWeights(){
@@ -2073,6 +2079,8 @@ int MediaCycle::readXMLConfigFilePlugins(TiXmlHandle _rootHandle) {
                                 this->getBrowser()->setNeighborsMethodPlugin(plugin);
                             if(type == "NeighborsPositions")
                                 this->getBrowser()->setNeighborsPositionsPlugin(plugin);
+                            if(type == "Filtering")
+                                this->getBrowser()->setFilteringPlugin(plugin);
                         }
                         catch(const std::exception e){
                             // Nothing yet, no plugin set
@@ -2312,7 +2320,10 @@ TiXmlElement* MediaCycle::saveXMLConfigFile(string _fname) {
         MC_e_active_plugins->LinkEndChild( MC_e_neighbors_pos_plugin );
         TiXmlText* MC_e_neighbors_pos_plugin_name = new TiXmlText( this->getBrowser()->getActivePluginName(PLUGIN_TYPE_NEIGHBORS_POSITIONS) );
         MC_e_neighbors_pos_plugin->LinkEndChild( MC_e_neighbors_pos_plugin_name );
-
+        TiXmlElement* MC_e_filtering_plugin = new TiXmlElement( "Filtering" );
+        MC_e_active_plugins->LinkEndChild( MC_e_filtering_plugin );
+        TiXmlText* MC_e_filtering_plugin_name = new TiXmlText( this->getBrowser()->getActivePluginName(PLUGIN_TYPE_FILTERING) );
+        MC_e_filtering_plugin->LinkEndChild( MC_e_filtering_plugin_name );
     }
 
     bool success = MC_doc.SaveFile(_fname.c_str());

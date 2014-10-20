@@ -393,6 +393,7 @@ class ACFilteringPlugin : virtual public ACPlugin {
 public:
     ACFilteringPlugin();
     virtual void filter()=0;
+    virtual void librarySizeChanged(){}
 };
 
 class ACClientPlugin : virtual public ACPlugin {

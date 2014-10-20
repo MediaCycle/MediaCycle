@@ -130,7 +130,7 @@ void ACClusterPositionsPropellerPlugin::updateNextPositions(ACMediaBrowser* medi
     // XS loop on MediaNodes.
     // each MediaNode has a MediaId by which we can access the Media
 
-    float maxr = 0.0f;
+    double maxr = 0.0;
 
     float *rmin = new float[clusterCount];
     float *rmax = new float[clusterCount];
@@ -233,7 +233,7 @@ void ACClusterPositionsPropellerPlugin::updateNextPositions(ACMediaBrowser* medi
     delete[] dtmin;
     delete[] dtmax;
 
-    mediaBrowser->setNeedsDisplay(true);
+    media_cycle->setNeedsDisplay(true);
 
     if(!media_cycle) std::cerr << "ACClusterPositionsPropellerPlugin::updateNextPositions mediacycle not set" << std::endl;
 }

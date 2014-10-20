@@ -710,6 +710,9 @@ void ACMediaBrowser::libraryContentChanged(int needsCluster) {
     if (needsCluster)
         this->initializeFeatureWeights(); //TR NEM modification
 
+    if (mFilteringPlugin)
+        mFilteringPlugin->librarySizeChanged();
+
     updateDisplay(true, needsCluster);
 
 }
@@ -750,7 +753,7 @@ void ACMediaBrowser::initializeFeatureWeights(){
         int fc = mLibrary->getFirstMedia()->getNumberOfPreProcFeaturesVectors();
         if (mFeatureWeights.size()!=fc){
             mFeatureWeights.resize(fc);
-            printf("setting first feature weights to 1.0 (count=%d), others to 0.0 \n", (int) mFeatureWeights.size());
+            printf("setting feature weights to 1.0 (count=%d) \n", (int) mFeatureWeights.size());
             for(int i=0; i<fc; i++) {
                 mFeatureWeights[i] = 1.0;
             }
@@ -2106,6 +2109,8 @@ void ACMediaBrowser::setVisualisationPlugin(ACPlugin* acpl)
 void ACMediaBrowser::setFilteringPlugin(ACPlugin *acpl)
 {
     mFilteringPlugin=dynamic_cast<ACFilteringPlugin*> (acpl);
+    if(mFilteringPlugin)
+        mFilteringPlugin->librarySizeChanged();
 }
 
 bool ACMediaBrowser::changeClustersMethodPlugin(ACPlugin* acpl)
@@ -2207,6 +2212,7 @@ bool ACMediaBrowser::changeClustersPositionsPlugin(ACPlugin* acpl)
             setState(AC_CHANGING);
             if (acpl){
                 mClustersPosPlugin->updateNextPositions(this);
+                // CF shouldn't we commitPositions?
                 success = true;
             }
             else{
@@ -2258,6 +2264,7 @@ bool ACMediaBrowser::changeFilteringPlugin(ACPlugin* acpl)
 {
     if(acpl)
         this->setFilteringPlugin(acpl);
+
     this->commitPositions();
     this->setNeedsDisplay(true);
 }
@@ -2299,6 +2306,10 @@ std::string ACMediaBrowser::getActivePluginName(ACPluginType PluginType){
     case PLUGIN_TYPE_NEIGHBORS_POSITIONS:
         if(mNeighborsPosPlugin)
             name = mNeighborsPosPlugin->getName();
+        break;
+    case PLUGIN_TYPE_FILTERING:
+        if(mFilteringPlugin)
+            name = mFilteringPlugin->getName();
         break;
     default:
         //cerr << "plugin type not used for the browser" << endl;
