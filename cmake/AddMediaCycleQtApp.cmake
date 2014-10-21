@@ -156,8 +156,8 @@ int main(int argc, char *argv[])
 	app.setApplicationName(\"${TARGET_NAME}\");
 
 	// Make Apple *.app bundles not load installed Qt Frameworks but load Qt Plugins
-#ifdef __APPLE__
-	QApplication::setLibraryPaths(QStringList(QApplication::applicationDirPath() + \"/../PlugIns\"));
+#if defined (__APPLE__) and !defined(USE_DEBUG)
+        QApplication::setLibraryPaths(QStringList(QApplication::applicationDirPath() + \"/../PlugIns\"));
 #endif
 ")
 

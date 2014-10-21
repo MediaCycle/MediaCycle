@@ -1,5 +1,5 @@
 SET(TARGET_NAME "breakpad-qt")
-IF(USE_BREAKPAD AND USE_QT4 )
+IF(USE_BREAKPAD AND (USE_QT4 OR USE_QT5) )
 
 	IF(APPLE)
 		SET(PLATFORM "mac")
@@ -74,9 +74,17 @@ IF(USE_BREAKPAD AND USE_QT4 )
 	)
 
 	# Generates ui_*.h files 
-	#QT4_WRAP_UI(${TARGET_NAME}_UIS_H ${${TARGET_NAME}_UIS})
+        #IF(USE_QT4)
+        #	QT4_WRAP_UI(${TARGET_NAME}_UIS_H ${${TARGET_NAME}_UIS})
+        #ELSEIF(USE_QT5)
+        #	QT5_WRAP_UI(${TARGET_NAME}_UIS_H ${${TARGET_NAME}_UIS})
+        #ENDIF()
 	# Generates moc_*.cxx files
-	QT4_WRAP_CPP(${TARGET_NAME}_MOC_SRCS ${${TARGET_NAME}_HDRS} OPTIONS "-nw") # for all headers that potentially declare Q_OBJECT, otherwise warnings are suppressed	
+        IF(USE_QT4)
+            QT4_WRAP_CPP(${TARGET_NAME}_MOC_SRCS ${${TARGET_NAME}_HDRS} OPTIONS "-nw") # for all headers that potentially declare Q_OBJECT, otherwise warnings are suppressed
+        ELSEIF(USE_QT5)
+            QT5_WRAP_CPP(${TARGET_NAME}_MOC_SRCS ${${TARGET_NAME}_HDRS} OPTIONS "-nw") # for all headers that potentially declare Q_OBJECT, otherwise warnings are suppressed
+        ENDIF()
 
 	# Don't forget to include output directory, otherwise
 	# the UI file won't be wrapped!
@@ -85,6 +93,12 @@ IF(USE_BREAKPAD AND USE_QT4 )
 	ADD_LIBRARY(${TARGET_NAME} ${${TARGET_NAME}_SRCS} ${${TARGET_NAME}_HDRS} ${${TARGET_NAME}_UIS_H} ${${TARGET_NAME}_MOC_SRCS} ${${TARGET_NAME}_RCC_SRCS})
 	TARGET_LINK_LIBRARIES(${TARGET_NAME} ${QT_LIBRARIES} ${OPENSSL_LIBRARIES})
 	
+        IF(USE_QT5)
+                qt5_use_modules(${TARGET_NAME} Core Gui Widgets)
+                #set_target_properties(${TARGET_NAME} PROPERTIES AUTOMOC ON)
+                #target_include_directories(${TARGET_NAME} PRIVATE ${CMAKE_CURRENT_BINARY_DIR})
+        ENDIF()
+
 	IF ( APPLE )
 		TARGET_LINK_LIBRARIES(${TARGET_NAME} ${COREFOUNDATION_LIBRARY})
 	ENDIF ( APPLE )

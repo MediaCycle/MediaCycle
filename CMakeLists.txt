@@ -55,6 +55,7 @@ IF(COMMAND cmake_policy)
 		cmake_policy(SET CMP0014 NEW)
 		cmake_policy(SET CMP0046 NEW) # CF comment this to debug the empty ADD_DEPENDENCIES
 		cmake_policy(SET CMP0042 NEW) # otherwise complaints that "MACOSX_RPATH is not specified for the following targets"
+                cmake_policy(SET CMP0043 NEW) # otherwise complaints about "Ignore COMPILE_DEFINITIONS_<Config> properties"
 	ENDIF ( )
 ENDIF(COMMAND cmake_policy)
 
@@ -1163,14 +1164,13 @@ IF( USE_QT5 )
 	add_definitions(${Qt5Widgets_DEFINITIONS})
 	set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} ${Qt5Widgets_EXECUTABLE_COMPILE_FLAGS}")
 
-        MESSAGE("Qt5Gui_INCLUDES ${Qt5Gui_INCLUDES}")
-
         LIST(APPEND QT_LIBRARIES ${Qt5Core_LIBRARIES})
         LIST(APPEND QT_LIBRARIES ${Qt5Gui_LIBRARIES})
 	LIST(APPEND QT_LIBRARIES ${Qt5Widgets_LIBRARIES})
 	LIST(APPEND QT_LIBRARIES ${Qt5WebKitWidgets_LIBRARIES})
 
 	MESSAGE("QT_LIBRARIES ${QT_LIBRARIES}")
+
 ENDIF()
 
 # Qwt
@@ -1618,7 +1618,7 @@ IF(USE_OSG OR SUPPORT_AUDIO) # SUPPORT_AUDIO for the waveform thumbnailer plugin
 ENDIF()
 
 # Google Breakpad crash reporter wrapped with Qt
-IF(USE_BREAKPAD AND USE_QT4)
+IF(USE_BREAKPAD AND (USE_QT4 OR USE_QT5))
        	IF(MINGW AND CMAKE_TOOLCHAIN_FILE)
 		PKG_CHECK_MODULES (OPENSSLPKG REQUIRED openssl)
 		IF (OPENSSLPKG_FOUND)
@@ -1754,7 +1754,7 @@ MESSAGE("\nInternal dependencies:")
 INCLUDE_DIRECTORIES(3rdparty/fftooura 3rdparty/tinyxml 3rdparty/tree)
 
 # App dependencies
-IF(USE_BREAKPAD)
+IF(USE_BREAKPAD AND (USE_QT4 OR USE_QT5))
 	INCLUDE_DIRECTORIES(3rdparty/breakpad-qt/handler 3rdparty/breakpad-qt/sender)
 ENDIF()
 
