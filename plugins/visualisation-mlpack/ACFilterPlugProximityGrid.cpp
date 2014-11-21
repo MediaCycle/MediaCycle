@@ -45,6 +45,8 @@
 #include "mlpack/core.hpp"
 #include "mlpack/methods/emst/dtb.hpp"
 #include "mlpack/methods/neighbor_search/neighbor_search.hpp"
+#include <mlpack/core/metrics/lmetric.hpp>
+#include <mlpack/core/tree/binary_space_tree.hpp>
 
 #include<limits>
 
@@ -101,12 +103,41 @@ arma::mat emst(arma::mat desc_m, bool naive, const size_t leafSize){
         naive.ComputeMST(mst);
     }
     else{
-        mlpack::emst::DualTreeBoruvka<> dtb(desc_m, false, leafSize);
-        dtb.ComputeMST(mst);
+        std::vector<size_t> oldFromNew;
+        mlpack::tree::BinarySpaceTree <mlpack::bound::HRectBound<2>, mlpack::emst::DTBStat> tree(desc_m,oldFromNew, leafSize);
+        mlpack::metric::LMetric<2, true> metric;
+
+        mlpack::emst::DualTreeBoruvka<> dtb(&tree, desc_m, metric);
+
+        arma::mat results;
+        dtb.ComputeMST(results);
+
+        // Unmap the results.
+        arma::mat unmappedResults(results.n_rows, results.n_cols);
+        for (size_t i = 0; i < results.n_cols; ++i)
+        {
+            const size_t indexA = oldFromNew[size_t(results(0, i))];
+            const size_t indexB = oldFromNew[size_t(results(1, i))];
+
+            if (indexA < indexB)
+            {
+                unmappedResults(0, i) = indexA;
+                unmappedResults(1, i) = indexB;
+            }
+            else
+            {
+                unmappedResults(0, i) = indexB;
+                unmappedResults(1, i) = indexA;
+            }
+
+            unmappedResults(2, i) = results(2, i);
+        }
+
+        mst = unmappedResults;
+
     }
     return mst;
 }
-
 
 ACFilterPlugProximityGrid::~ACFilterPlugProximityGrid() {
 }
