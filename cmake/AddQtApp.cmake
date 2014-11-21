@@ -7,7 +7,11 @@ macro(ADD_QT_EXECUTABLE TARGET_NAME)
 	FILE(GLOB ${TARGET_NAME}_UIS ${CMAKE_CURRENT_SOURCE_DIR}/*.ui ${CMAKE_CURRENT_BINARY_DIR}/*.ui)
 
         # generate rules for building source files from the resources
-        QT5_ADD_RESOURCES(${TARGET_NAME}_RCC_SRCS ${${TARGET_NAME}_QRCS})
+        IF(USE_QT4)
+                QT4_ADD_RESOURCES(${TARGET_NAME}_RCC_SRCS ${${TARGET_NAME}_QRCS})
+        ELSEIF(USE_QT5)
+                QT5_ADD_RESOURCES(${TARGET_NAME}_RCC_SRCS ${${TARGET_NAME}_QRCS})
+        ENDIF()
 
 	# Generates ui_*.h files 
 	IF(USE_QT4)
