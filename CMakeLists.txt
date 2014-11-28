@@ -48,11 +48,12 @@ MESSAGE(FATAL_ERROR "In-source building forbidden: create a 'Builds' subdirector
 ENDIF()
 
 IF(COMMAND cmake_policy)
-	IF ( ${CMAKE_VERSION} STRLESS "2.8.0")
+        IF ( ${CMAKE_VERSION} STRLESS "2.8.13")
 		#AM: don't know which is the best, but must be < CMP0008 for cmake 2.6.0 and < CMP0012 for cmake 2.6.4
 		cmake_policy(SET CMP0003 NEW) 
 	ELSE()
 		cmake_policy(SET CMP0014 NEW)
+		cmake_policy(SET CMP0017 NEW) # CF to remove the warning for the forked FindosgQt.cmake file
 		cmake_policy(SET CMP0046 NEW) # CF comment this to debug the empty ADD_DEPENDENCIES
 		cmake_policy(SET CMP0042 NEW) # otherwise complaints that "MACOSX_RPATH is not specified for the following targets"
                 cmake_policy(SET CMP0043 NEW) # otherwise complaints about "Ignore COMPILE_DEFINITIONS_<Config> properties"
@@ -591,8 +592,12 @@ ENDIF ( APPLE )
 
 IF ( USE_DEBUG )
 	MESSAGE( "\nConfigured for Debug Build")
-	SET(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -DUSE_DEBUG -DTI_DEBUG=1 -g")
-	SET(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -DUSE_DEBUG -DTI_DEBUG=1 -g")
+        SET(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -DUSE_DEBUG -DTI_DEBUG=1")
+        SET(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -DUSE_DEBUG -DTI_DEBUG=1")
+        IF(APPLE OR UNIX)
+            SET(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -g")
+            SET(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -g")
+        ENDIF()
 	SET(CMAKE_BUILD_TYPE "Debug")
 	SET(CMAKE_VERBOSE_MAKEFILE ON)
 ELSE ( USE_DEBUG )
@@ -642,9 +647,9 @@ IF(MINGW OR WIN32)
 	add_definitions(-D_WIN32_WINNT=0x0501 -DBOOST_THREAD_USE_LIB -DBOOST_USE_WINDOWS_H)
 ENDIF()
 IF (SUPPORT_TEXT)
-	FIND_PACKAGE ( Boost REQUIRED COMPONENTS serialization system filesystem locale graph ${BOOST_THREAD} program_options)
+       FIND_PACKAGE ( Boost REQUIRED COMPONENTS serialization system filesystem locale graph ${BOOST_THREAD} program_options)
 ELSE()
-	FIND_PACKAGE ( Boost REQUIRED COMPONENTS serialization system filesystem graph ${BOOST_THREAD} program_options)
+       FIND_PACKAGE ( Boost REQUIRED COMPONENTS serialization system filesystem graph ${BOOST_THREAD} program_options)
 ENDIF()
 IF ( Boost_FOUND )
 	MESSAGE( "Found boost in ${Boost_LIBRARY_DIRS}" )
@@ -793,14 +798,13 @@ IF(SUPPORT_VIDEO OR SUPPORT_IMAGE)
 
 	find_path(OpenCV_DIR NAMES opencv-config.cmake OpenCVConfig.cmake PATH_SUFFIXES lib/cmake) # for MacPorts
 
-	IF( APPLE_IOS_DEV OR APPLE_IOS_SIM OR APPLE_IOS_XCODE )
-		FIND_PACKAGE ( OpenCV REQUIRED COMPONENTS core contrib features2d imgproc legacy objdetect video) 
-	ELSE()
-		FIND_PACKAGE ( OpenCV REQUIRED COMPONENTS core contrib features2d imgproc legacy objdetect video highgui)
-		# other components (at v. 2.2.0): calib3d ffmpeg? flann gpu haartraining ml traincascade
-		# other components (at v. 2.3.0): androidcamera calib3d flann gpu haartraining ml stitching traincascade ts
-		# other components (at v. 2.4.2): androidcamera calib3d flann gpu java ml nonfree photo stitching ts videostab world
-	ENDIF()
+        #FIND_PACKAGE ( OpenCV REQUIRED COMPONENTS core contrib features2d imgproc legacy objdetect video highgui) # < 3.0.0
+        FIND_PACKAGE ( OpenCV REQUIRED COMPONENTS core features2d imgproc objdetect video highgui) # >= 3.0.0
+
+        # other components (at v. 2.2.0): calib3d ffmpeg? flann gpu haartraining ml traincascade
+        # other components (at v. 2.3.0): androidcamera calib3d flann gpu haartraining ml stitching traincascade ts
+        # other components (at v. 2.4.2): androidcamera calib3d flann gpu java ml nonfree photo stitching ts videostab world
+
 	IF ( OpenCV_FOUND )
 		IF(${OpenCV_VERSION} VERSION_LESS ${OpenCV_MIN_VERSION})
 			MESSAGE(FATAL_ERROR "OpenCV version (${OpenCV_VERSION} is present, while ${OpenCV_MIN_VERSION}+ is required")
@@ -1158,6 +1162,7 @@ IF( USE_QT5 )
 
         find_package(Qt5Core REQUIRED)
         find_package(Qt5Gui REQUIRED)
+        find_package(Qt5OpenGL REQUIRED)
 	find_package(Qt5Widgets REQUIRED)
 	find_package(Qt5WebKitWidgets REQUIRED)
 
@@ -1166,6 +1171,7 @@ IF( USE_QT5 )
 
         LIST(APPEND QT_LIBRARIES ${Qt5Core_LIBRARIES})
         LIST(APPEND QT_LIBRARIES ${Qt5Gui_LIBRARIES})
+        LIST(APPEND QT_LIBRARIES ${Qt5OpenGL_LIBRARIES})
 	LIST(APPEND QT_LIBRARIES ${Qt5Widgets_LIBRARIES})
 	LIST(APPEND QT_LIBRARIES ${Qt5WebKitWidgets_LIBRARIES})
 

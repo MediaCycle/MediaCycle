@@ -28,10 +28,10 @@ IF(USE_OSG AND (USE_QT4 OR USE_QT5) AND QWT_FOUND)
 	ADD_LIBRARY(${TARGET_NAME} ${${TARGET_NAME}_SRCS} ${${TARGET_NAME}_HDRS} ${${TARGET_NAME}_UIS_H} ${${TARGET_NAME}_MOC_SRCS} ${${TARGET_NAME}_RCC_SRCS})
 	ADD_DEPENDENCIES(${TARGET_NAME} mediacycle-osg mediacycle-qt)
 
-	TARGET_LINK_LIBRARIES(${TARGET_NAME} mediacycle-osg mediacycle-qt)
+        TARGET_LINK_LIBRARIES(${TARGET_NAME} mediacycle-osg mediacycle-qt ${OPENSCENEGRAPH_LIBRARIES})
 	
 	IF(USE_QT5)
-                qt5_use_modules(${TARGET_NAME} Core Gui Widgets WebKitWidgets)
+                qt5_use_modules(${TARGET_NAME} Core Gui OpenGL Widgets WebKitWidgets)
                 #set_target_properties(${TARGET_NAME} PROPERTIES AUTOMOC ON)
                 #target_include_directories(${TARGET_NAME} PRIVATE ${CMAKE_CURRENT_BINARY_DIR})
 	ENDIF()
