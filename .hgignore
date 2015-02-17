@@ -4,6 +4,7 @@ syntax: glob
 .svn
 *.pyc
 *~
+*.swp
 .DS_Store
 Builds
 External
