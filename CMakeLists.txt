@@ -48,16 +48,18 @@ MESSAGE(FATAL_ERROR "In-source building forbidden: create a 'Builds' subdirector
 ENDIF()
 
 IF(COMMAND cmake_policy)
-        IF ( ${CMAKE_VERSION} STRLESS "2.8.13")
+	IF(${CMAKE_VERSION} STRLESS "2.8.13")
 		#AM: don't know which is the best, but must be < CMP0008 for cmake 2.6.0 and < CMP0012 for cmake 2.6.4
 		cmake_policy(SET CMP0003 NEW) 
 	ELSE()
 		cmake_policy(SET CMP0014 NEW)
 		cmake_policy(SET CMP0017 NEW) # CF to remove the warning for the forked FindosgQt.cmake file
-		cmake_policy(SET CMP0046 NEW) # CF comment this to debug the empty ADD_DEPENDENCIES
-		cmake_policy(SET CMP0042 NEW) # otherwise complaints that "MACOSX_RPATH is not specified for the following targets"
-                cmake_policy(SET CMP0043 NEW) # otherwise complaints about "Ignore COMPILE_DEFINITIONS_<Config> properties"
-	ENDIF ( )
+		IF(${CMAKE_VERSION} STRGREATER "3.0")    
+			cmake_policy(SET CMP0042 NEW) # otherwise complaints that "MACOSX_RPATH is not specified for the following targets"
+			cmake_policy(SET CMP0043 NEW) # otherwise complaints about "Ignore COMPILE_DEFINITIONS_<Config> properties"
+			cmake_policy(SET CMP0046 NEW) # CF comment this to debug the empty ADD_DEPENDENCIES
+		ENDIF()
+	ENDIF()
 ENDIF(COMMAND cmake_policy)
 
 # Checking Apple OSX versions and generator
