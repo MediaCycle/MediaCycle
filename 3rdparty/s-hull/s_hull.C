@@ -5,7 +5,7 @@
 #include <fstream>
 #include <stdlib.h>
 #include <math.h>
-
+#include <algorithm>
 
 #include "s_hull.h"
 
