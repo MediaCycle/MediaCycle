@@ -23,7 +23,7 @@
 
 FIND_PATH(LIBUSB_INCLUDE_DIR libusb.h PATH_SUFFIXES libusb-1.0)
 
-SET(LIBUSB_NAMES ${LIBUSB_NAMES} libusb usb usb-1.0)
+SET(LIBUSB_NAMES ${LIBUSB_NAMES} libusb-1.0.0 usb-1.0.0 libusb usb usb-1.0)
 FIND_LIBRARY(LIBUSB_LIBRARY NAMES ${LIBUSB_NAMES} PATH_SUFFIXES i386-linux-gnu x86_64-linux-gnu)
 
 # handle the QUIETLY and REQUIRED arguments and set LIBUSB_FOUND to TRUE if 
