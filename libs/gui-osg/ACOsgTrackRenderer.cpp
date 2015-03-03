@@ -37,7 +37,7 @@
 using namespace osg;
 
 ACOsgTrackRenderer::ACOsgTrackRenderer()
-    : ACOsgBaseRenderer(),track_index(-1),media_index(-1),media_from_lib(true),
+    : ACOsgBaseRenderer(),ACAbstractTrackRenderer(),track_index(-1),media_index(-1),media_from_lib(true),
       screen_width(0.0f),width(0.0f),height(0.0f),screen_width_changed(false),width_changed(false),height_changed(false)
 {
     media_type = MEDIA_TYPE_NONE;

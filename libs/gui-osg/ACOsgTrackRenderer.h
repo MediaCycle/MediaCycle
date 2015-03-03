@@ -32,13 +32,14 @@
 #ifndef __ACOSG_TRACK_RENDERER_H__
 #define __ACOSG_TRACK_RENDERER_H__
 
+#include "ACAbstractTrackRenderer.h"
 #include "ACOsgBaseRenderer.h"
 
 #include <osg/Geode>
 #include <osg/Group>
 #include <osg/MatrixTransform>
 
-class ACOsgTrackRenderer : public ACOsgBaseRenderer {
+class ACOsgTrackRenderer : public ACOsgBaseRenderer, public ACAbstractTrackRenderer {
 protected:
     osg::ref_ptr<osg::MatrixTransform> track_node;
 
@@ -84,12 +85,12 @@ public:
 
     //virtual bool addRangeSegment(float begin, float end)=0;
     //virtual bool removeRangeSegment(float begin, float end)=0;
-    void setManualSelection(bool manual){this->manual_selection=manual;}
-    void moveSelection(float _center_x,float _center_y);
+    virtual void setManualSelection(bool manual){this->manual_selection=manual;}
+    virtual void moveSelection(float _center_x,float _center_y);
     void resizeSelectionFromBegin(float _begin_x, float _begin_y);
     void resizeSelectionFromEnd(float _end_x, float _end_y);
     void resizeSelectionWidth(float _width);
-    float getSelectionPosX(){return this->selection_center_pos_x;}
+    virtual float getSelectionPosX(){return this->selection_center_pos_x;}
     float getSelectionPosY(){return this->selection_center_pos_y;}
     float getSelectionWidth(){return this->selection_end_pos_x-this->selection_begin_pos_x;}
     bool skipToNextSegment();

@@ -1,8 +1,8 @@
 /**
- * @brief Abstract class to define a timeline renderer
+ * @brief Abstract class to define a track renderer
  * @author Christian Frisson
- * @date 21/04/2014
- * @copyright (c) 2014 – UMONS - Numediart
+ * @date 12/01/2015
+ * @copyright (c) 2015 – UMONS - Numediart
  * 
  * MediaCycle of University of Mons – Numediart institute is 
  * licensed under the GNU AFFERO GENERAL PUBLIC LICENSE Version 3 
@@ -29,16 +29,16 @@
  * <mailto:avre@umons.ac.be>
  */
 
-#ifndef ACAbstractTimelineRenderer_H
-#define ACAbstractTimelineRenderer_H
+#ifndef ACAbstractTrackRenderer_H
+#define ACAbstractTrackRenderer_H
 
-#include "ACAbstractTrackRenderer.h"
-
-class ACAbstractTimelineRenderer {
+class ACAbstractTrackRenderer {
 public:
-    ACAbstractTimelineRenderer(){}
-    ~ACAbstractTimelineRenderer(){}
-    virtual ACAbstractTrackRenderer* getTrack(int id){return 0;}
+    ACAbstractTrackRenderer(){}
+    ~ACAbstractTrackRenderer(){}
+    virtual float getSelectionPosX(){return 0;}
+    virtual void setManualSelection(bool manual){}
+    virtual void moveSelection(float _center_x,float _center_y){}
 };
 
-#endif // ACAbstractTimelineRenderer_H
+#endif // ACAbstractTrackRenderer_H

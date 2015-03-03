@@ -214,7 +214,7 @@ void ACOsgCompositeViewQt::dropEvent(QDropEvent *event)
             }
         }
         if (!(directories.empty())){
-            // CF emit (importDirectoriesThreaded(directories,false));
+            media_cycle->importDirectoriesThreaded(directories,false);
             for (std::vector<string>::reverse_iterator iter=directories.rbegin(); iter!=directories.rend();iter++){
                 int locId;
                 

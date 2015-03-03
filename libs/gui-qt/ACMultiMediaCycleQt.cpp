@@ -155,10 +155,10 @@ ACMultiMediaCycleQt::ACMultiMediaCycleQt(ACAbstractViewQt* _view, QWidget *paren
  qDebug() << "Qt codecForLocale:"   << QTextCodec::codecForLocale()->name();
  #endif*/
 
-    #if not (QT_VERSION >= QT_VERSION_CHECK(5, 0, 0))
+#if not (QT_VERSION >= QT_VERSION_CHECK(5, 0, 0))
     if (!QTextCodec::codecForCStrings())
         QTextCodec::setCodecForCStrings(QTextCodec::codecForName("UTF-8"));//CF hack for CF to load accents
-    #endif
+#endif
 
     // XS reminder: need to call configureSettings from the application main.
 
@@ -281,26 +281,26 @@ void ACMultiMediaCycleQt::pluginLoaded(std::string plugin_name){
 
 void ACMultiMediaCycleQt::changeMenuBarVisibility(bool visibility)
 {
-	if(visibility)
-		ui.menubar->show();
-	else
-		ui.menubar->hide();
+    if(visibility)
+        ui.menubar->show();
+    else
+        ui.menubar->hide();
 }
 
 void ACMultiMediaCycleQt::changeStatusBarVisibility(bool visibility)
 {
-	if(visibility)
-		ui.statusbar->show();
-	else
-		ui.statusbar->hide();
+    if(visibility)
+        ui.statusbar->show();
+    else
+        ui.statusbar->hide();
 }
 
 void ACMultiMediaCycleQt::changeToolBarVisibility(bool visibility)
 {
-	if(visibility)
-		ui.toolbar->show();
-	else
-		ui.toolbar->hide();
+    if(visibility)
+        ui.toolbar->show();
+    else
+        ui.toolbar->hide();
 }
 
 void ACMultiMediaCycleQt::setMediaType(ACMediaType _mt)
@@ -629,11 +629,11 @@ void ACMultiMediaCycleQt::writeXMLConfig(string _filename){
 
         fileNames = dialog.selectedFiles();
 
-        #if (QT_VERSION >= QT_VERSION_CHECK(5, 0, 0))
+#if (QT_VERSION >= QT_VERSION_CHECK(5, 0, 0))
         QString nameFilter = dialog.selectedNameFilter();
-        #else
+#else
         QString nameFilter = dialog.selectedFilter();
-        #endif
+#endif
 
         bool as_xml = (nameFilter.compare("MediaCycle XML Library (*.xml)") == 0);
 
@@ -674,26 +674,24 @@ void ACMultiMediaCycleQt::writeXMLConfig(string _filename){
             if(!writer_plugin)
                 return;
 
-            if(writer_plugin->getParametersCount() > 0){
+            if(!librarySaveDialog)
+                librarySaveDialog = new ACPluginControlsDialogQt(PLUGIN_TYPE_LIBRARY_WRITER,"Library saving parameters","Do you want to save the library?");
+            librarySaveDialog->setMediaCycle(media_cycle);
+            librarySaveDialog->updatePluginsSettings();
 
-                if(!librarySaveDialog)
-                    librarySaveDialog = new ACPluginControlsDialogQt(PLUGIN_TYPE_LIBRARY_WRITER,"Library saving parameters","Do you want to save the library?");
-                librarySaveDialog->setMediaCycle(media_cycle);
-                librarySaveDialog->updatePluginsSettings();
+            if(!librarySaveDialog->exec())
+                return;
+            if(librarySaveDialog->result() != 1)
+                return;
 
-                if(!librarySaveDialog->exec())
-                    return;
-                if(librarySaveDialog->result() != 1)
-                    return;
-
-                try{
-                    media_cycle->saveLibrary(_filename,type.toStdString());
-                }
-                catch (const exception& e) {
-                    this->showError(e);
-                    return;
-                }
+            try{
+                media_cycle->saveLibrary(_filename,type.toStdString());
             }
+            catch (const exception& e) {
+                this->showError(e);
+                return;
+            }
+
         }
     }else{
         // filename supplied (either as argument or from QMessageBox above)
@@ -997,9 +995,9 @@ void ACMultiMediaCycleQt::on_actionFullscreen_triggered(bool checked) {
         if(this->setting != AC_SETTING_INSTALLATION){
             ui.menubar->show();
             ui.statusbar->show();
-            #ifndef __APPLE__
+#ifndef __APPLE__
             ui.toolbar->show();
-            #endif
+#endif
         }
         this->readQSettings();
     }

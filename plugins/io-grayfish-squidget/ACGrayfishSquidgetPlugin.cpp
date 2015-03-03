@@ -189,12 +189,12 @@ void ACGrayfishSquidgetPlugin::device_loop(){
                 if ( fabs(_value-value) >= _span - 1)
                     turns+=direction;
 
-                if(this->timeline_renderer && this->timeline_renderer->getTrack(0)){
-                    float pos_x = this->timeline_renderer->getTrack(0)->getSelectionPosX() + 0.1f*_d_diff/(float)_span /*(float)value/(float)_span*/;
+                if(this->getTimeline() && this->getTimeline()->getTrack(0)){
+                    float pos_x = this->getTimeline()->getTrack(0)->getSelectionPosX() + 0.1f*_d_diff/(float)_span /*(float)value/(float)_span*/;
                     if(pos_x < 0.0f) pos_x = 1.0f + pos_x;
                     if(pos_x > 1.0f) pos_x = pos_x - 1.0f;
-                    this->timeline_renderer->getTrack(0)->setManualSelection(true);
-                    this->timeline_renderer->getTrack(0)->moveSelection( pos_x , 0.0f);
+                    this->getTimeline()->getTrack(0)->setManualSelection(true);
+                    this->getTimeline()->getTrack(0)->moveSelection( pos_x , 0.0f);
                 }
 
             }
@@ -221,16 +221,16 @@ void ACGrayfishSquidgetPlugin::device_loop(){
             std::cout << " " << speed/(float)bufsize*1000;
             std::cout << std::endl;
 
-            if(this->timeline_renderer && this->timeline_renderer->getTrack(0)){
-                 this->timeline_renderer->getTrack(0)->setManualSelection(false);
+            if(this->getTimeline() && this->getTimeline()->getTrack(0)){
+                 this->getTimeline()->getTrack(0)->setManualSelection(false);
             }
 
         }
         value = _value;
         //usleep(8000);
 
-        /*if(this->timeline_renderer && this->timeline_renderer->getTrack(0) && this->timeline_renderer->getTrack(0)->getSharedThumbnailStream()){
-            osg::ref_ptr<osg::ImageStream> stream = this->timeline_renderer->getTrack(0)->getSharedThumbnailStream();
+        /*if(this->getTimeline() && this->getTimeline()->getTrack(0) && this->getTimeline()->getTrack(0)->getSharedThumbnailStream()){
+            osg::ref_ptr<osg::ImageStream> stream = this->getTimeline()->getTrack(0)->getSharedThumbnailStream();
             float current_time = stream->getCurrentTime();
             float _length = stream->getLength();
             stream->seek(_length/(float)_span*(float)value);

@@ -481,13 +481,13 @@ void ACNovintFalconPlugin::nifalcon_update_loop()
                     force[closest] = -m_plane_stiffness*plane_dist;
 
                 if(media_cycle){
-                    if(media_cycle->getLibrarySize()>0 && this->getBrowserRenderer() && media_cycle->getClosestNode(0) > -1){
+                    if(media_cycle->getLibrarySize()>0 && media_cycle->getBrowser() && media_cycle->getClosestNode(0) > -1){
                         ACMediaNode* node = media_cycle->getMediaNode( media_cycle->getClosestNode(0) );
                         if(node){
                             ACPoint p = node->getCurrentPosition(); // getNextPosition();//
                             float distance = 0;
-                            if( this->getBrowserRenderer())
-                                distance = this->getBrowserRenderer()->getDistanceMouse()[media_cycle->getClosestNode(0)];
+                            if( this->getBrowser())
+                                distance = media_cycle->getBrowser()->getDistanceMouse()[media_cycle->getClosestNode(0)];
 
                             if(distance < m_distance){
 
