@@ -37,9 +37,7 @@
 #include <vector>
 #include <cmath>
 
-#include <cv.h>
-#include <cxcore.h>
-#include <highgui.h>
+#include <ACOpenCVInclude.h>
 
 class ps3eyecv : public ps3eyethread {
 public:

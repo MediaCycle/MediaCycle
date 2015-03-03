@@ -40,25 +40,28 @@
 //#define MAC_FRAMEWORKS
 
 #ifdef __APPLE__
-    #ifdef MAC_FRAMEWORKS
-		#include <OpenCV/cv.h>
-		#include <OpenCV/cxcore.h>
-		#include <OpenCV/highgui.h> // for cvloadimage
-    #else
-		#ifdef APPLE_IOS //CF in reality, it is because of OpenCV 2.1... test to improve!
-			#include <cv.h>
-			#include <cxcore.h>
-			//#include <highgui.h> // for cvloadimage
-		#else
-			#include "OpenCV/cv.h"
-			#include "OpenCV/cxcore.h"
-			#include "OpenCV/highgui.h" // for cvloadimage
-		#endif
-    #endif
+#ifdef MAC_FRAMEWORKS
+#include <OpenCV/cv.h>
+#include <OpenCV/cxcore.h>
+#include <OpenCV/highgui.h> // for cvloadimage
 #else
-    //#include <opencv/cv.h>
-    //#include <opencv/cxcore.h>
-    //#include <opencv/highgui.h>
+#ifdef APPLE_IOS //CF in reality, it is because of OpenCV 2.1... test to improve!
+#include <cv.h>
+#include <cxcore.h>
+//#include <highgui.h> // for cvloadimage
+#else
+#include "OpenCV/cv.h"
+#include "OpenCV/cxcore.h"
+#include "OpenCV/highgui.h" // for cvloadimage
+#include <opencv2/opencv.hpp>
+#include <opencv2/highgui/highgui.hpp>
+#include <opencv2/core/core.hpp>
+#endif
+#endif
+#else
+//#include <opencv/cv.h>
+//#include <opencv/cxcore.h>
+//#include <opencv/highgui.h>
 #include <opencv2/opencv.hpp>
 #include <opencv2/highgui/highgui.hpp>
 #include <opencv2/core/core.hpp>
@@ -77,7 +80,7 @@
 //#endif
 
 // --------------------------------------------------------------------
-// XS TODO 2.* plus nécessaire !!
+// XS TODO 2.* plus necessaire !!
 //http://www.cs.iit.edu/~agam/cs512/lect-notes/opencv-intro/opencv-intro.html#SECTION00053000000000000000
 // C++ wrapper around IplImage that allows convenient (and hopefully fast) pixel access
 

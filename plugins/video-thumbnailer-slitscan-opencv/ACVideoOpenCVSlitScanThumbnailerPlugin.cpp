@@ -270,7 +270,7 @@ std::vector<ACMediaThumbnail*> ACVideoOpenCVSlitScanThumbnailerPlugin::computeSl
                     cv::Mat slice(transparent_frame, cv::Rect((int)(0.5f*width)-slice_x-1, 0, slice_w+2, height));
                     cv::Mat transparent_canvas(4*height, 4*height, CV_8UC4);
                     cv::Mat transparent_slit(transparent_canvas, cv::Rect((int)(2*height)-slice_x-1, 0, slice_w+2, height));
-                    slice.copyTo(transparent_slit,slit);
+                    slice.copyTo(transparent_slit);//slice.copyTo(transparent_slit,slit);
                     cv::Mat rotated_canvas(4*height, 4*height, CV_8UC4);
                     cv::Point2f center( 2*height, 2*height );
                     cv::Mat rot_mat = cv::getRotationMatrix2D( center, -(float)f/(float)total_frames*360.0f, 1.0 );
