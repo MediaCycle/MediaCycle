@@ -100,7 +100,11 @@ INPUT                  = ${MediaCycle_SOURCE_DIR}/apps \
                          ${MediaCycle_SOURCE_DIR}/libs \
                          ${MediaCycle_SOURCE_DIR}/media \
                          ${MediaCycle_SOURCE_DIR}/plugins \
-                         ${MediaCycle_SOURCE_DIR}/tests
+                         ${MediaCycle_SOURCE_DIR}/tests \
+                         ${MediaCycle_SOURCE_DIR}/usability \
+                         ${PROJECT_BINARY_DIR}/apps \
+                         ${PROJECT_BINARY_DIR}/plugins \
+                         ${PROJECT_BINARY_DIR}/usability \
 INPUT_ENCODING         = UTF-8
 FILE_PATTERNS          = *.h \
                          *.cpp \
