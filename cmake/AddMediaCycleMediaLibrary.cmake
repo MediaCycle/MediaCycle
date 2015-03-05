@@ -1,3 +1,15 @@
+#=============================================================================
+# Author: Christian Frisson
+# Copyright (c) 2013 – UMONS - Numediart
+#
+# Distributed under the OSI-approved BSD License (the "License");
+# see accompanying file Copyright.txt for details.
+#
+# This software is distributed WITHOUT ANY WARRANTY; without even the
+# implied warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.
+# See the License for more information.
+#=============================================================================
+
 # Optional variables to be set:
 #  MC_3RDPARTIES (list): example SET(MC_3RDPARTIES "cvBlobsLib;cvgabor")
 #  MC_MEDIA_LIBS (list): example SET(MC_MEDIA_LIBS "image-core;image-features"), without their prefix mediacycle-

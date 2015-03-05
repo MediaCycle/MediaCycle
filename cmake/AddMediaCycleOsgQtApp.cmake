@@ -1,3 +1,15 @@
+#=============================================================================
+# Author: Christian Frisson
+# Copyright (c) 2012 – UMONS - Numediart
+#
+# Distributed under the OSI-approved BSD License (the "License");
+# see accompanying file Copyright.txt for details.
+#
+# This software is distributed WITHOUT ANY WARRANTY; without even the
+# implied warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.
+# See the License for more information.
+#=============================================================================
+
 # Requires the following variables to be set:
 #  MC_PLUGINS (list): example SET(MC_PLUGINS "segmentation;visualisation")
 #  DESCRIPTION: example: SET(DESCRIPTION "MediaCycle allows to organize media files by similarity")
@@ -177,7 +189,7 @@ int main(int argc, char *argv[])
 	app.setApplicationName(\"${TARGET_NAME}\");
 
 	// Make Apple *.app bundles not load installed Qt Frameworks but load Qt Plugins
-#ifdef __APPLE__
+#if defined (__APPLE__) and !defined(USE_DEBUG)
 	QApplication::setLibraryPaths(QStringList(QApplication::applicationDirPath() + \"/../PlugIns\"));
 #endif
 ")
