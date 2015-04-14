@@ -576,8 +576,9 @@ void MediaCycle::saveLibrary(std::string _path, ACMediaLibraryWriterPlugin* plug
 void MediaCycle::saveLibrary(std::string _path, std::string plugin_name){
     if(!mediaLibrary)
         return;
-    if(mediaLibrary->getSize()==0)
-        return;
+    //CF saving an empty library writes a file that can be helpful (check its headers, test if the file is actually written)
+    //if(mediaLibrary->getSize()==0)
+    //    return;
     if(_path=="" || plugin_name =="")
         return;
     ACPlugin* plugin = this->getPlugin(plugin_name);

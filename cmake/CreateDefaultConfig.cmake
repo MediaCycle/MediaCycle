@@ -1,3 +1,15 @@
+#=============================================================================
+# Author: Christian Frisson
+# Copyright (c) 2012 – UMONS - Numediart
+#
+# Distributed under the OSI-approved BSD License (the "License");
+# see accompanying file Copyright.txt for details.
+#
+# This software is distributed WITHOUT ANY WARRANTY; without even the
+# implied warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.
+# See the License for more information.
+#=============================================================================
+
 # Requires the following variables to be set:
 #  MEDIA_TYPE, example: SET(MEDIA_TYPE "MEDIA_TYPE_AUDIO")
 #  DESCRIPTION: example: SET(DESCRIPTION "MediaCycle allows to organize media files by similarity")

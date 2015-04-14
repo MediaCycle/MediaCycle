@@ -1,3 +1,15 @@
+#=============================================================================
+# Author: Christian Frisson
+# Copyright (c) 2011 – UMONS - Numediart
+#
+# Distributed under the OSI-approved BSD License (the "License");
+# see accompanying file Copyright.txt for details.
+#
+# This software is distributed WITHOUT ANY WARRANTY; without even the
+# implied warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.
+# See the License for more information.
+#=============================================================================
+
 # MediaCycle packaging system.
 #
 # at the end of any application that needs packaging, adapt the following variables:
@@ -333,7 +345,7 @@ IF(WITH_QT)
 		file(GLOB_RECURSE QTPLUGINS ${QT_PLUGINS_DIR}/imageformats/*.dylib)
 		STRING(REGEX REPLACE "${QT_PLUGINS_DIR}" "${CMAKE_INSTALL_PREFIX}/${plugin_dest_dir}" QTPLUGINS "${QTPLUGINS}")
 	ELSEIF(USE_QT5)
-		foreach(plugin ${Qt5Gui_PLUGINS})
+                foreach(plugin ${Qt5Gui_PLUGINS};Qt5::QCocoaIntegrationPlugin;Qt5::AVFMediaPlayerServicePlugin) # appending ${Qt5Multimedia_PLUGINS} might add too many dependencies
 		                get_target_property(_loc ${plugin} LOCATION)
 		                #message("Core Plugin ${plugin} is at location ${_loc}")
 				get_filename_component(plugin_path "${_loc}" PATH)
@@ -347,44 +359,46 @@ IF(WITH_QT)
 		# We need to install Cocoa platform plugin for Qt5 on Mac.
 		# FIXME: This should be part of Qt5 CMake scripts, but unfortunatelly
 		# Qt5 Mac support is missing there.
-		  macro(install_qt5_plugin _qt_plugin_name _qt_plugins_var)
-		    get_target_property(_qt_plugin_path "${_qt_plugin_name}" LOCATION)
-		    if(EXISTS "${_qt_plugin_path}")
-		      get_filename_component(_qt_plugin_file "${_qt_plugin_path}" NAME)
-		      get_filename_component(_qt_plugin_type "${_qt_plugin_path}" PATH)
-		      get_filename_component(_qt_plugin_type "${_qt_plugin_type}" NAME)
-		      set(_qt_plugin_dest "${plugin_dest_dir}/${_qt_plugin_type}")
-		      install(FILES "${_qt_plugin_path}"
-		        DESTINATION "${_qt_plugin_dest}"
-			COMPONENT ${PROGNAME})
-		      set(${_qt_plugins_var}
-		        "${${_qt_plugins_var}};${_qt_plugin_dest}/${_qt_plugin_file}")
-		    else()
-		      message(FATAL_ERROR "QT plugin ${_qt_plugin_name} not found")
-		    endif()
-		  endmacro()
+                #  macro(install_qt5_plugin _qt_plugin_name _qt_plugins_var)
+                #    get_target_property(_qt_plugin_path "${_qt_plugin_name}" LOCATION)
+                #    if(EXISTS "${_qt_plugin_path}")
+                #      get_filename_component(_qt_plugin_file "${_qt_plugin_path}" NAME)
+                #      get_filename_component(_qt_plugin_type "${_qt_plugin_path}" PATH)
+                #      get_filename_component(_qt_plugin_type "${_qt_plugin_type}" NAME)
+                #      set(_qt_plugin_dest "${plugin_dest_dir}/${_qt_plugin_type}")
+                #      install(FILES "${_qt_plugin_path}"
+                #        DESTINATION "${_qt_plugin_dest}"
+                #	COMPONENT ${PROGNAME})
+                #      set(${_qt_plugins_var}
+                #        "${${_qt_plugins_var}};${_qt_plugin_dest}/${_qt_plugin_file}")
+                #    else()
+                #      message(FATAL_ERROR "QT plugin ${_qt_plugin_name} not found")
+                #    endif()
+                #  endmacro()
 
-		  install_qt5_plugin("Qt5::QCocoaIntegrationPlugin" QT_PLUGINS)
+                  #install_qt5_plugin("Qt5::QCocoaIntegrationPlugin" QT_PLUGINS)
+                  #install_qt5_plugin("Qt5::AVFMediaPlayerServicePlugin" QT_PLUGINS)
 
 		# Install mediaservice plugins, hacking the general qt5 plugin path from Qt5::QCocoaIntegrationPlugin
-		get_target_property(_qt_plugin_path "Qt5::QCocoaIntegrationPlugin" LOCATION)
-		if(EXISTS "${_qt_plugin_path}")
-			get_filename_component(_qt_plugin_file "${_qt_plugin_path}" NAME)
-			get_filename_component(_qt_plugin_type "${_qt_plugin_path}" PATH)
-			get_filename_component(_qt_plugin_type "${_qt_plugin_type}" NAME)
-			set(_qt_plugin_dest "${plugin_dest_dir}/${_qt_plugin_type}")
-			get_filename_component(_qt_plugin_file "${_qt_plugin_path}" NAME)
-			get_filename_component(_qt_plugin_type "${_qt_plugin_path}" PATH)
-			get_filename_component(_qt_plugins_path "${_qt_plugin_type}" PATH)
-			file(GLOB_RECURSE plugins ${_qt_plugins_path}/mediaservice/*.dylib)
-			foreach(plugin ${plugins})
-				get_filename_component(plugin_path "${plugin}" PATH)
-				get_filename_component(plugin_path "${plugin_path}" NAME)
-				get_filename_component(plugin_name "${plugin}" NAME )
-				INSTALL(FILES "${plugin}" DESTINATION ${plugin_dest_dir}/${plugin_path} COMPONENT ${PROGNAME})				
-				LIST(APPEND QTPLUGINS "${CMAKE_INSTALL_PREFIX}/${plugin_dest_dir}/${plugin_path}/${plugin_name}")
-			endforeach()
-		endif()
+                # CF replaced by adding ;Qt5::AVFMediaPlayerServicePlugin to the foreach(plugin ...) loop above
+                #get_target_property(_qt_plugin_path "Qt5::QCocoaIntegrationPlugin" LOCATION)
+                #if(EXISTS "${_qt_plugin_path}")
+                #	get_filename_component(_qt_plugin_file "${_qt_plugin_path}" NAME)
+                #	get_filename_component(_qt_plugin_type "${_qt_plugin_path}" PATH)
+                #	get_filename_component(_qt_plugin_type "${_qt_plugin_type}" NAME)
+                #	set(_qt_plugin_dest "${plugin_dest_dir}/${_qt_plugin_type}")
+                #	get_filename_component(_qt_plugin_file "${_qt_plugin_path}" NAME)
+                #	get_filename_component(_qt_plugin_type "${_qt_plugin_path}" PATH)
+                #	get_filename_component(_qt_plugins_path "${_qt_plugin_type}" PATH)
+                #	file(GLOB_RECURSE plugins ${_qt_plugins_path}/mediaservice/*.dylib)
+                #	foreach(plugin ${plugins})
+                #		get_filename_component(plugin_path "${plugin}" PATH)
+                #		get_filename_component(plugin_path "${plugin_path}" NAME)
+                #		get_filename_component(plugin_name "${plugin}" NAME )
+                #		INSTALL(FILES "${plugin}" DESTINATION ${plugin_dest_dir}/${plugin_path} COMPONENT ${PROGNAME})
+                #		LIST(APPEND QTPLUGINS "${CMAKE_INSTALL_PREFIX}/${plugin_dest_dir}/${plugin_path}/${plugin_name}")
+                #	endforeach()
+                #endif()
 	ENDIF()
 ENDIF()
 ENDIF()

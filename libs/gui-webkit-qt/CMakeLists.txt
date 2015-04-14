@@ -1,5 +1,5 @@
-SET(TARGET_NAME "mediacycle-qt")
-IF((USE_QT4 OR USE_QT5) AND QWT_FOUND) 
+SET(TARGET_NAME "mediacycle-webkit-qt")
+IF(USE_QT4 OR USE_QT5)
 
 	FILE(GLOB ${TARGET_NAME}_SRCS ${CMAKE_CURRENT_SOURCE_DIR}/AC*.cpp)
 	FILE(GLOB ${TARGET_NAME}_HDRS ${CMAKE_CURRENT_SOURCE_DIR}/AC*.h)
@@ -23,22 +23,19 @@ IF((USE_QT4 OR USE_QT5) AND QWT_FOUND)
 	# the UI file won't be wrapped!
 	include_directories(${CMAKE_CURRENT_BINARY_DIR})
 
+	include_directories(${CMAKE_SOURCE_DIR}/libs/gui-qt ${CMAKE_BINARY_DIR}/libs/gui-qt)
+
 	ADD_LIBRARY(${TARGET_NAME} ${${TARGET_NAME}_SRCS} ${${TARGET_NAME}_HDRS} ${${TARGET_NAME}_UIS_H} ${${TARGET_NAME}_MOC_SRCS} ${${TARGET_NAME}_RCC_SRCS})
-        ADD_DEPENDENCIES(${TARGET_NAME} mediacycle-gui-core mediacycle)
+	ADD_DEPENDENCIES(${TARGET_NAME} mediacycle-qt)
 
-        TARGET_LINK_LIBRARIES(${TARGET_NAME} mediacycle-gui-core mediacycle)
-	TARGET_LINK_LIBRARIES(${TARGET_NAME} ${Boost_SYSTEM_LIBRARY})
-        TARGET_LINK_LIBRARIES(${TARGET_NAME} ${QT_LIBRARIES} ${QWT_LIBRARIES})
-
+        TARGET_LINK_LIBRARIES(${TARGET_NAME} mediacycle-qt)
+	
 	IF(USE_QT5)
-                qt5_use_modules(${TARGET_NAME} Core Gui Widgets)
+                qt5_use_modules(${TARGET_NAME} Core Gui OpenGL Widgets WebKitWidgets)
                 #set_target_properties(${TARGET_NAME} PROPERTIES AUTOMOC ON)
                 #target_include_directories(${TARGET_NAME} PRIVATE ${CMAKE_CURRENT_BINARY_DIR})
 	ENDIF()
 
-	IF ( MINGW )#OR APPLE_IOS_DEV OR APPLE_IOS_SIM )
-		TARGET_LINK_LIBRARIES(${TARGET_NAME} ${Qt4_PKG_STATIC_LDFLAGS})#${Qt4_PKG_LDFLAGS})
-	ENDIF ( MINGW )#OR APPLE_IOS_DEV OR APPLE_IOS_SIM )
 	SET_TARGET_PROPERTIES(${TARGET_NAME} PROPERTIES FOLDER "${FOLDERNAME}")
 
 	MESSAGE("[X] ${TARGET_NAME}")

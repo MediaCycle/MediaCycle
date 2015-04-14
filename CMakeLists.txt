@@ -1168,6 +1168,7 @@ IF( USE_QT5 )
         find_package(Qt5Core REQUIRED)
         find_package(Qt5Gui REQUIRED)
         find_package(Qt5OpenGL REQUIRED)
+        find_package(Qt5Multimedia REQUIRED)
 	find_package(Qt5Widgets REQUIRED)
 	find_package(Qt5WebKitWidgets REQUIRED)
 
@@ -1177,11 +1178,11 @@ IF( USE_QT5 )
         LIST(APPEND QT_LIBRARIES ${Qt5Core_LIBRARIES})
         LIST(APPEND QT_LIBRARIES ${Qt5Gui_LIBRARIES})
         LIST(APPEND QT_LIBRARIES ${Qt5OpenGL_LIBRARIES})
+        LIST(APPEND QT_LIBRARIES ${Qt5Multimedia_LIBRARIES})
 	LIST(APPEND QT_LIBRARIES ${Qt5Widgets_LIBRARIES})
 	LIST(APPEND QT_LIBRARIES ${Qt5WebKitWidgets_LIBRARIES})
 
 	MESSAGE("QT_LIBRARIES ${QT_LIBRARIES}")
-
 ENDIF()
 
 # Qwt

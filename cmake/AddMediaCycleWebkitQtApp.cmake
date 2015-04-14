@@ -1,6 +1,6 @@
 #=============================================================================
 # Author: Christian Frisson
-# Copyright (c) 2014 – UMONS - Numediart
+# Copyright (c) 2015 – UMONS - Numediart
 #
 # Distributed under the OSI-approved BSD License (the "License");
 # see accompanying file Copyright.txt for details.
@@ -16,14 +16,19 @@
 #  DEFAULT_CONFIGS (list): example SET(DEFAULT_CONFIGS "ACLoopCycleDefaultConfig;ACLoopJamDefaultConfig")
 #  See CreateDefaultConfig.cmake for its required variables
 #
+# Required (Webkit view)
+#  LOCAL_LIBRARY_FILENAME: example SET(LOCAL_LIBRARY_FILENAME "library.json")
+#  LOCAL_LIBRARY_WRITER_PLUGIN_NAME: example SET(LOCAL_LIBRARY_WRITER_PLUGIN_NAME "JSON export")
+#  WEBPAGE_RELATIVE_SOURCEPATH: example SET(WEBPAGE_RELATIVE_SOURCEPATH "3rdparty/audio-gui-html5/index.html")
+#
 # Optional:
 #  MC_PLUGINS_STATIC: example SET(MC_PLUGINS_STATIC ON)
-#  MAIN_CLASS: that inherits from ACMultiMediaCycleQt: example SET(MAIN_CLASS "ACAudioCycleLoopJam")
+#  MAIN_CLASS: that inherits from ACMediaCycleWebkitQt: example SET(MAIN_CLASS "ACMediaCycleWebkitQt")
 #  ICON_NAME: example SET(ICON_NAME "MultiMediaCycle")
 #  HIDE_INFORMATION: example SET(HIDE_INFORMATION ON)
 
 include(${CMAKE_SOURCE_DIR}/cmake/AddQtApp.cmake)
-macro(ADD_MC_QT_EXECUTABLE APP_NAME)
+macro(ADD_MC_WEBKIT_QT_EXECUTABLE APP_NAME)
 
 IF(APPLE AND USE_DEBUG)
     GET_FILENAME_COMPONENT(TARGET_FOLDER ${CMAKE_CURRENT_BINARY_DIR} NAME)
@@ -44,14 +49,91 @@ ENDIF()
 IF(NOT DEFAULT_CONFIGS)
 	MESSAGE(FATAL_ERROR "Warning, no default config available, set the DEFAULT_CONFIGS list")
 ENDIF()
+
+# Required (Webkit view)
+IF(NOT LOCAL_LIBRARY_FILENAME)
+        MESSAGE(FATAL_ERROR "Warning, LOCAL_LIBRARY_FILENAME must be set, example SET(LOCAL_LIBRARY_FILENAME \"library.json\")")
+ENDIF()
+IF(NOT LOCAL_LIBRARY_WRITER_PLUGIN_NAME)
+        MESSAGE(FATAL_ERROR "Warning, LOCAL_LIBRARY_WRITER_PLUGIN_NAME must be set, example SET(LOCAL_LIBRARY_WRITER_PLUGIN_NAME \"JSON export\")")
+ENDIF()
+IF(NOT WEBPAGE_RELATIVE_SOURCEPATH)
+        MESSAGE(FATAL_ERROR "Warning, WEBPAGE_RELATIVE_SOURCEPATH must be set, example SET(WEBPAGE_RELATIVE_SOURCEPATH \"3rdparty/audio-gui-html5/index.html\")")
+ENDIF()
+
 IF(NOT MAIN_CLASS)
-	MESSAGE(FATAL_ERROR "The main class must be mentioned and derived from ACMultiMediaCycleQt")
-	#SET(MAIN_CLASS "ACMultiMediaCycleQt")
+        SET(MAIN_CLASS "ACMediaCycleWebkitQt")
 ENDIF()
 
 IF(MC_PLUGINS_STATIC)
     ADD_DEFINITIONS(-DMC_PLUGINS_STATIC)
 ENDIF()
+
+# Generate the class that inherits from ACMultiMediaCycleQt and embeds an ACWebkitViewQt view
+SET(MAIN_WINDOW_CLASS_NAME "AC${APP_NAME}WebkitQt")
+file(APPEND ${CMAKE_CURRENT_BINARY_DIR}/${MAIN_WINDOW_CLASS_NAME}.h "
+/**
+ * @brief Main ${APP_NAME} window wrapping a webkit view of a ${APP_NAME} browser
+ * @author Christian Frisson
+ * @date 05/03/2015
+ * @copyright (c) 2015 – UMONS - Numediart
+ * 
+ * MediaCycle of University of Mons – Numediart institute is 
+ * licensed under the GNU AFFERO GENERAL PUBLIC LICENSE Version 3 
+ * licence (the “License”); you may not use this file except in compliance 
+ * with the License.
+ * 
+ * This program is free software: you can redistribute it and/or 
+ * it under the terms of the GNU Affero General Public License as
+ * published by the Free Software Foundation, either version 3 of the
+ * License, or (at your option) any later version.
+ * 
+ * This program is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU Affero General Public License for more details.
+ * 
+ * You should have received a copy of the GNU Affero General Public License
+ * along with this program.  If not, see <https://www.gnu.org/licenses/>.
+ * 
+ * Each use of this software must be attributed to University of Mons – 
+ * Numediart Institute
+ * 
+ * Any other additional authorizations may be asked to avre@umons.ac.be 
+ * <mailto:avre@umons.ac.be>
+ */
+
+#ifndef HEADER_${MAIN_WINDOW_CLASS_NAME}
+#define HEADER_${MAIN_WINDOW_CLASS_NAME}
+
+#include \"ACMultiMediaCycleQt.h\"
+#include \"ACWebkitViewQt.h\"
+
+class ${MAIN_WINDOW_CLASS_NAME} : public ACMultiMediaCycleQt {
+    //Q_OBJECT
+
+public:
+    ${MAIN_WINDOW_CLASS_NAME}(QWidget *parent = 0) : ACMultiMediaCycleQt(new ACWebkitViewQt())
+    {
+        ACMediaFactory::getInstance().useRendering(false);
+    }
+    ~${MAIN_WINDOW_CLASS_NAME}(){}
+
+    // From ACMultiMediaCycleQt
+    /// This will be run right after the default config has been loaded
+    virtual void postLoadDefaultConfig(){
+        ACWebkitViewQt* webkitView = dynamic_cast<ACWebkitViewQt*>(this->view);
+        if(webkitView){
+            webkitView->setMediaLibraryBaseFileName(\"${LOCAL_LIBRARY_FILENAME}\");
+            webkitView->setMediaLibraryWriterPluginName(\"${LOCAL_LIBRARY_WRITER_PLUGIN_NAME}\");
+            webkitView->setWebpageRelativeSourcePath(\"${WEBPAGE_RELATIVE_SOURCEPATH}\");
+        }
+    }
+protected:
+    ACWebkitViewQt* webkitView;
+};
+#endif // HEADER_${MAIN_WINDOW_CLASS_NAME}
+")
 
 # Generate main.cpp
 file(WRITE ${CMAKE_CURRENT_BINARY_DIR}/main.cpp "
@@ -77,7 +159,7 @@ file(APPEND ${CMAKE_CURRENT_BINARY_DIR}/main.cpp "
 ENDIF()
 
 file(APPEND ${CMAKE_CURRENT_BINARY_DIR}/main.cpp "
-#include \"${MAIN_CLASS}.h\"
+#include \"${MAIN_WINDOW_CLASS_NAME}.h\"
 ")
 
 foreach(DEFAULT_CONFIG ${DEFAULT_CONFIGS})
@@ -140,11 +222,11 @@ ENDIF()
 
 file(APPEND ${CMAKE_CURRENT_BINARY_DIR}/main.cpp "
 
-class ACApplicationQt : public QApplication {
+class ACApplicationWebkitQt : public QApplication {
 public:
-  ACApplicationQt(int& argc, char ** argv) :
+  ACApplicationWebkitQt(int& argc, char ** argv) :
     QApplication(argc, argv) { }
-  virtual ~ACApplicationQt() { }
+  virtual ~ACApplicationWebkitQt() { }
 
   // reimplemented from QApplication so we can throw exceptions in slots
   virtual bool notify(QObject * receiver, QEvent * event) {
@@ -162,27 +244,27 @@ public:
 
 int main(int argc, char *argv[])
 {
-        ACApplicationQt app(argc, argv);
+        ACApplicationWebkitQt app(argc, argv);
 	app.setOrganizationName(\"UMONS/numediart\");
 	app.setOrganizationDomain(\"mediacycle.org\");
 	app.setApplicationName(\"${TARGET_NAME}\");
 
 	// Make Apple *.app bundles not load installed Qt Frameworks but load Qt Plugins
 #if defined (__APPLE__) and !defined(USE_DEBUG)
-        QApplication::setLibraryPaths(QStringList(QApplication::applicationDirPath() + \"/../PlugIns\"));
+	QApplication::setLibraryPaths(QStringList(QApplication::applicationDirPath() + \"/../PlugIns\"));
 #endif
 ")
 
 IF(USE_QT4 AND NOT USE_QT5)
 file(APPEND ${CMAKE_CURRENT_BINARY_DIR}/main.cpp "
-	#ifndef USE_DEBUG
+        #ifndef USE_DEBUG
         BreakpadQt::GlobalHandler::instance()->setDumpPath(QLatin1String(\"crashes\"));
-	#endif
+        #endif
 ")
 ENDIF()
 
 file(APPEND ${CMAKE_CURRENT_BINARY_DIR}/main.cpp "
-	${MAIN_CLASS} window;
+        ${MAIN_WINDOW_CLASS_NAME} window;
 
 	#ifdef USE_DEBUG
 	try {
@@ -220,11 +302,12 @@ file(APPEND ${CMAKE_CURRENT_BINARY_DIR}/main.cpp "
 SET(WITH_MC ON)
 
 INCLUDE_DIRECTORIES(${CMAKE_SOURCE_DIR}/libs/gui-qt ${CMAKE_BINARY_DIR}/libs/gui-qt )
+INCLUDE_DIRECTORIES(${CMAKE_SOURCE_DIR}/libs/gui-webkit-qt ${CMAKE_BINARY_DIR}/libs/gui-webkit-qt )
 INCLUDE_DIRECTORIES(${CMAKE_CURRENT_SOURCE_DIR} ${CMAKE_CURRENT_BINARY_DIR})
 
 ADD_QT_EXECUTABLE(${TARGET_NAME})
 
-ADD_DEPENDENCIES(${TARGET_NAME} mediacycle-qt)
+ADD_DEPENDENCIES(${TARGET_NAME} mediacycle-webkit-qt)
 
 # GCC flag to strip unneeded symbols
 IF(MINGW AND CMAKE_TOOLCHAIN_FILE AND MC_PLUGINS_STATIC)
@@ -312,7 +395,7 @@ IF(MC_PLUGINS_STATIC)
     ENDIF()
 ENDIF()
 
-TARGET_LINK_LIBRARIES(${TARGET_NAME} mediacycle-qt)
+TARGET_LINK_LIBRARIES(${TARGET_NAME} mediacycle-webkit-qt)
 
 IF ( APPLE )
 	SET(CMAKE_EXE_LINKER_FLAGS "${CMAKE_EXE_LINKER_FLAGS} -framework CoreVideo -framework AppKit -framework Foundation -framework AudioToolbox")
@@ -322,4 +405,15 @@ IF ( APPLE )
 	ENDIF ( USE_APPLE_MULTITOUCH )
 ENDIF ( APPLE )
 
-endmacro(ADD_MC_QT_EXECUTABLE APP_NAME)
+IF(APPLE)# AND NOT USE_DEBUG)
+    IF(XCODE)
+        SET(EXTRA_PATH "/Debug")
+    ENDIF()
+    GET_FILENAME_COMPONENT(WEBPAGE_RELATIVE_SOURCEDIR ${WEBPAGE_RELATIVE_SOURCEPATH} PATH)
+    ADD_CUSTOM_COMMAND( TARGET ${TARGET_NAME} POST_BUILD
+        COMMAND mkdir -p ${CMAKE_CURRENT_BINARY_DIR}${EXTRA_PATH}/${TARGET_NAME}.app/Contents/Resources/
+        COMMAND cp -R "${CMAKE_SOURCE_DIR}/${WEBPAGE_RELATIVE_SOURCEDIR}/*" ${CMAKE_CURRENT_BINARY_DIR}${EXTRA_PATH}/${TARGET_NAME}.app/Contents/Resources/
+    )
+ENDIF()
+
+endmacro(ADD_MC_WEBKIT_QT_EXECUTABLE APP_NAME)

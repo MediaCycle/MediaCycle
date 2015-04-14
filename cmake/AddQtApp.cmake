@@ -1,3 +1,15 @@
+#=============================================================================
+# Author: Christian Frisson
+# Copyright (c) 2012 – UMONS - Numediart
+#
+# Distributed under the OSI-approved BSD License (the "License");
+# see accompanying file Copyright.txt for details.
+#
+# This software is distributed WITHOUT ANY WARRANTY; without even the
+# implied warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.
+# See the License for more information.
+#=============================================================================
+
 macro(ADD_QT_EXECUTABLE TARGET_NAME)
 
         SET(WITH_QT ON)

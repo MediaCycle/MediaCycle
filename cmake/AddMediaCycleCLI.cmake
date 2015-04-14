@@ -1,3 +1,15 @@
+#=============================================================================
+# Author: Christian Frisson
+# Copyright (c) 2013 – UMONS - Numediart
+#
+# Distributed under the OSI-approved BSD License (the "License");
+# see accompanying file Copyright.txt for details.
+#
+# This software is distributed WITHOUT ANY WARRANTY; without even the
+# implied warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.
+# See the License for more information.
+#=============================================================================
+
 # Requires the following variables to be set:
 #  MC_PLUGINS (list): example SET(MC_PLUGINS "segmentation;visualisation")
 #  DESCRIPTION: example: SET(DESCRIPTION "MediaCycle allows to organize media files by similarity")
