@@ -6,7 +6,9 @@ syntax: glob
 *~
 *.swp
 .DS_Store
+.directory
 Builds
+build
 External
 CMakeCache.txt
 *CMakeLists.txt.user*
