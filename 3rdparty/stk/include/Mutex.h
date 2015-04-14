@@ -3,7 +3,7 @@
 
 #include "Stk.h"
 
-#if (defined(__OS_IRIX__) || defined(__OS_LINUX__) || defined(__OS_MACOSX__))
+#if (defined(__OS_IRIX__) || defined(__OS_LINUX__) || defined(__OS_MACOSX__) || defined(unix))
 
   #include <pthread.h>
   typedef pthread_mutex_t MUTEX;

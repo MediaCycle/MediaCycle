@@ -1,4 +1,5 @@
 SET(TARGET_NAME "audioengine-tests")
+
 IF(SUPPORT_AUDIO AND USE_OPENAL)
 	FILE(GLOB SRC *.cpp)
 	FILE(GLOB HDR *.h)
@@ -28,6 +29,13 @@ IF(SUPPORT_AUDIO AND USE_OPENAL)
 		set(CMAKE_EXE_LINKER_FLAGS "-framework CoreAudio -framework AppKit -framework Foundation")
 	ENDIF ( APPLE )
 	SET_TARGET_PROPERTIES(${TARGET_NAME} PROPERTIES FOLDER "${FOLDERNAME}")
+	
+	# Dirty correction because ACAudioFeedback.h makes reference to alreverb.h situated in 3rdparty/openal-soft-reverb and not referred beacause no macro is defined for ugly tests
+	IF(USE_OPENAL AND OPENALEXT_FOUND)
+		SET(MC_3RDPARTY "openal-soft-reverb")
+		INCLUDE_DIRECTORIES(${CMAKE_SOURCE_DIR}/3rdparty/${MC_3RDPARTY})
+	ENDIF()
+	
 	MESSAGE("[X] ${TARGET_NAME}")
 ELSE()
 	MESSAGE("[ ] ${TARGET_NAME}")

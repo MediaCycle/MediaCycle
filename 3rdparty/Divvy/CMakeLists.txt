@@ -4,7 +4,7 @@
 # https://github.com/jmlewis/divvy/blob/master/Plugins/Reducers/TSNE/
 # New BSD License
 SET(TARGET_NAME "Divvy")
-IF(LIBDISPATCH_FOUND)
+IF(LIBDISPATCH_FOUND AND APPLE)
         INCLUDE_DIRECTORIES(${CMAKE_CURRENT_SOURCE_DIR})
 
         FILE(GLOB ${TARGET_NAME}_SRCS *.c)
