@@ -12,12 +12,13 @@
 #include <cstdio>
 #include <cstdlib>
 #include <vector>
+#include <cstring>
 
 // define shared_ptr in std 
 
-//#if (defined( _MSC_VER ) && ( _MSC_VER >= 1600 )) || (__cplusplus >= 201103L)
-    #include <memory>
-/*#else
+#if (defined( _MSC_VER ) && ( _MSC_VER >= 1600 )) || (__cplusplus >= 201103L)
+     #include <memory>
+#else
     #include <tr1/memory>
     namespace std {
         using std::tr1::shared_ptr;
@@ -27,7 +28,7 @@
         using std::tr1::const_pointer_cast;
         using std::tr1::enable_shared_from_this;
     }
-#endif*/
+#endif
 
 #include "libusb.h"
 

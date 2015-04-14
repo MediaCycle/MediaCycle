@@ -10,6 +10,10 @@
 
 #if defined WIN32 || defined _WIN32 || defined WINCE
 	#include <windows.h>
+#elif defined unix || defined __unix || defined __linux__ || defined __unix__
+	#include <sys/time.h>
+	#include <time.h>
+	#include <unistd.h>
 #else
 	#include <sys/time.h>
 	#include <time.h>
@@ -317,14 +321,17 @@ static uint8_t find_ep(struct libusb_device *device)
     return ep_addr;
 }
 
-// timestapms
-// WIN and MAC only
+// timestamps
 static int64_t getTickCount()
 {
 #if defined WIN32 || defined _WIN32 || defined WINCE
     LARGE_INTEGER counter;
     QueryPerformanceCounter( &counter );
     return (int64_t)counter.QuadPart;
+#elif defined unix || defined __unix || defined __linux__ || defined __unix__
+	struct timeval tm;
+	gettimeofday(&tm, NULL);
+	return (int64_t)tm.tv_sec * 1000000.0 + (int64_t)tm.tv_usec;
 #else
     return (int64_t)mach_absolute_time();
 #endif
@@ -336,6 +343,8 @@ static double getTickFrequency()
     LARGE_INTEGER freq;
     QueryPerformanceFrequency(&freq);
     return (double)freq.QuadPart;
+#elif defined unix || defined __unix || defined __linux__ || defined __unix__
+	return 1000000.0;
 #else
     static double freq = 0;
     if( freq == 0 )
@@ -786,6 +795,8 @@ bool PS3EYECam::init(uint32_t width, uint32_t height, uint8_t desiredFrameRate)
 
 #ifdef _MSC_VER
 	Sleep(100);
+#elif defined unix || defined __unix || defined __linux__ || defined __unix__
+	usleep(100000);
 #else
     nanosleep((struct timespec[]){{0, 100000000}}, NULL);
 #endif
@@ -797,7 +808,9 @@ bool PS3EYECam::init(uint32_t width, uint32_t height, uint8_t desiredFrameRate)
 	sccb_reg_write(0x12, 0x80);
 #ifdef _MSC_VER
 	Sleep(10);
-#else    
+#elif defined unix || defined __unix || defined __linux__ || defined __unix__
+	usleep(100000);
+#else
     nanosleep((struct timespec[]){{0, 10000000}}, NULL);
 #endif
 

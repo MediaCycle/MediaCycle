@@ -17,3 +17,10 @@ IF(OpenCV_FOUND AND LIBUSB_FOUND)
 ELSE()
 	MESSAGE("[ ] ${LIBRARY_NAME}")
 ENDIF()
+
+# TODO Do it more properly
+# We must link thread libs on linux
+IF(UNIX)
+	find_package(Threads REQUIRED)
+	target_link_libraries(ps3eyecvtest ${CMAKE_THREAD_LIBS_INIT})
+ENDIF()
