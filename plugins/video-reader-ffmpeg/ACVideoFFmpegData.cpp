@@ -62,7 +62,7 @@ bool ACVideoFFmpegData::readData(std::string filename){
 
     // Retrieve stream information
     // av_find_stream_info deprecated, use avformat_find_stream_info
-    if(av_find_stream_info(pFormatCtx)<0){
+    if(avformat_find_stream_info(pFormatCtx, NULL)<0){
         std::cerr << "Couldn't find stream information" << std::endl;
         return -1;
     }

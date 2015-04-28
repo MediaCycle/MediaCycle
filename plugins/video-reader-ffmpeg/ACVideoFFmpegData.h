@@ -35,6 +35,8 @@
 #include "ACVideoData.h"
 #include "ACMediaTypes.h"
 #include "ACFFmpegInclude.h"
+#include <libavutil/mathematics.h>
+
 
 class ACVideoFFmpegDataContainer : public ACMediaDataContainer, public ACSpatialData, public ACTemporalData {
 public:
