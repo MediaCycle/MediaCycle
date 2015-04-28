@@ -153,7 +153,7 @@ IF(USE_QT4 AND NOT USE_QT5)
 file(APPEND ${CMAKE_CURRENT_BINARY_DIR}/main.cpp "
 #ifndef USE_DEBUG
 #include <BreakpadHttpSender.h>
-#include <BreakPadHandler.h>
+#include <BreakpadHandler.h>
 #endif
 ")
 ENDIF()
@@ -172,6 +172,7 @@ endforeach(DEFAULT_CONFIG)
 
 SET(MC_PLUGIN_LIBRARIES)
 SET(DIRECTORIES_TO_INCLUDE)
+
 FOREACH(PLUGIN_NAME ${MC_PLUGINS})
 
     IF(CMAKE_CAN_APPEND_PROPERTIES)
