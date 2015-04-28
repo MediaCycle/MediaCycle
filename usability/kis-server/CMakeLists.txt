@@ -3,7 +3,7 @@ SET(TARGET_NAME "kis-server")
 	add_custom_target (
 		${TARGET_NAME} ALL
 	)
-	IF(Java_JAVAC_EXECUTABLE AND Java_JAR_EXECUTABLE)
+	IF(Java_JAVAC_EXECUTABLE AND Java_JAR_EXECUTABLE AND APPLE)
 		add_custom_command(
     		TARGET ${TARGET_NAME}
    			POST_BUILD
