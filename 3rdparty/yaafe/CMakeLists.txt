@@ -21,9 +21,8 @@ set (YAAFE_LIBVERSION ${YAAFE_VERSION}.${YAAFE_API_VERSION})
 if (NOT CMAKE_BUILD_TYPE)
    set(CMAKE_BUILD_TYPE "Release" CACHE STRING "Choose the type of build, options are: None Debug Release RelWithDebInfo MinSizeRel." FORCE)
 endif (NOT CMAKE_BUILD_TYPE)
-set(CMAKE_CXX_FLAGS_DEBUG "${CMAKE_CXX_FLAGS_DEBUG} -DDEBUG -ftemplate-depth-90 -g2" CACHE STRING "CXX DEBUG FLAGS" FORCE) # -ftemplate-depth-30 clashes boost
 set(CMAKE_C_FLAGS_DEBUG "-DDEBUG -g2" CACHE STRING "C DEBUG FLAGS" FORCE)
-set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -ftemplate-depth-90" CACHE STRING "CXX FLAGS" FORCE)
+set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -ftemplate-depth-90") # -ftemplate-depth-30 clashes boost
 add_definitions(-Wno-write-strings)
 
 #find_package(Argtable2 REQUIRED)
