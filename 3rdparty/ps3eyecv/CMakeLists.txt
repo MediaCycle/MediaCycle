@@ -1,7 +1,7 @@
 SET(LIBRARY_NAME "ps3eyecv")
 IF(OpenCV_FOUND AND LIBUSB_FOUND)
 
-        INCLUDE_DIRECTORIES(${CMAKE_CURRENT_SOURCE_DIR})
+	INCLUDE_DIRECTORIES(${CMAKE_CURRENT_SOURCE_DIR})
 
 	FILE(GLOB SRC *.cpp *.c)
 	FILE(GLOB HDR *.hpp *.h)
@@ -10,17 +10,17 @@ IF(OpenCV_FOUND AND LIBUSB_FOUND)
 	TARGET_LINK_LIBRARIES(${LIBRARY_NAME} ${OpenCV_LIBRARIES} ${LIBUSB_LIBRARIES})
 
 	ADD_EXECUTABLE(ps3eyecvtest test/main.cpp)
-        TARGET_LINK_LIBRARIES(ps3eyecvtest ${LIBRARY_NAME})
+	TARGET_LINK_LIBRARIES(ps3eyecvtest ${LIBRARY_NAME})
 
+	# TODO Do it more properly
+	# We must link thread libs on linux
+	IF(UNIX)
+		find_package(Threads REQUIRED)
+		target_link_libraries(ps3eyecvtest ${CMAKE_THREAD_LIBS_INIT})
+	ENDIF()
 	SET_TARGET_PROPERTIES("${LIBRARY_NAME}" PROPERTIES FOLDER "${FOLDERNAME}")
 	MESSAGE("[X] ${LIBRARY_NAME}")
 ELSE()
 	MESSAGE("[ ] ${LIBRARY_NAME}")
 ENDIF()
 
-# TODO Do it more properly
-# We must link thread libs on linux
-IF(UNIX)
-	find_package(Threads REQUIRED)
-	target_link_libraries(ps3eyecvtest ${CMAKE_THREAD_LIBS_INIT})
-ENDIF()

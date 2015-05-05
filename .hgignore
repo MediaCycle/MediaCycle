@@ -7,8 +7,8 @@ syntax: glob
 *.swp
 .DS_Store
 .directory
-Builds
-build
+[bB]uilds
+[bB]uild
 External
 CMakeCache.txt
 *CMakeLists.txt.user*
