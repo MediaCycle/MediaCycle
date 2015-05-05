@@ -178,10 +178,15 @@ bool TemporalFilter<T>::process(Ports<InputBuffer*>& inp, Ports<OutputBuffer*>& 
 	while (!in->empty() && (in->tokenno()-out->tokenno()<m_delay))
 	{
 		const double* inPtr = in->readToken();
+        if(inPtr){//CF hack so that yaafe doesn't segfaults on very short files (<1s)
 		for (int i=0;i<m_size;i++)
-			m_data[i*m_length+m_pos] = inPtr[i];
-		in->consumeToken();
+            m_data[i*m_length+m_pos] = inPtr[i];
+        in->consumeToken();
 		m_pos = ++m_pos % m_length;
+        }
+        else{
+            in->clear();
+        }
 	}
 
 	while (!in->empty())
