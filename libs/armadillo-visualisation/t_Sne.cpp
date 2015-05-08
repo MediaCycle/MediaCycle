@@ -115,7 +115,7 @@ arma::mat t_Sne::compute(int ndim,arma::mat yInit){
     uword epsilon = 500;            // initial learning rate
     double min_gain = .01;          // minimum gain for delta-bar-delta
     int convergence_iter = 2;       // must converge twice in a row
-    int convervence_count = 0;
+    int convergence_count = 0;
     
     for (uword i=0;i<n;i++)
         P(i,i)=0;
