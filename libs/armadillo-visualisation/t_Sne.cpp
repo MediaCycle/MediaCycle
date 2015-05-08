@@ -17,6 +17,7 @@ t_Sne::t_Sne(){
     kk=30;
     tol=1e-4;
     max_iter = 1500;
+    convergence_threshold = 0.00001;
 }
 
 bool t_Sne::setDistanceMatrix(arma::mat D){
@@ -107,13 +108,14 @@ arma::mat t_Sne::compute(int ndim,arma::mat yInit){
     if (yInit.n_elem==0||yInit.n_cols!=ndim)
         initFlag=false;
     int n=this->P.n_rows;
-    double momentum = 0.5;                              // initial momentum
-    double final_momentum = 0.8;                               // value to which momentum is changed
-    uword mom_switch_iter = 250;                              // iteration at which momentum is changed
-    uword stop_lying_iter = 100;                              // maximum number of iterations
-    uword epsilon = 500;                                      // initial learning rate
-    double min_gain = .01;                                     // minimum gain for delta-bar-delta
-    
+    double momentum = 0.5;          // initial momentum
+    double final_momentum = 0.8;    // value to which momentum is changed
+    uword mom_switch_iter = 250;    // iteration at which momentum is changed
+    uword stop_lying_iter = 100;    // maximum number of iterations
+    uword epsilon = 500;            // initial learning rate
+    double min_gain = .01;          // minimum gain for delta-bar-delta
+    int convergence_iter = 2;       // must converge twice in a row
+    int convervence_count = 0;
     
     for (uword i=0;i<n;i++)
         P(i,i)=0;
@@ -164,8 +166,25 @@ arma::mat t_Sne::compute(int ndim,arma::mat yInit){
             P = P / 4;
         float cost=_const-sum(sum(P%log(Q)));
         if (cost<costMin){
+            float dcost = (costMin - cost)/costMin;
             costMin=cost;
             yfinal=ydata;
+
+            //convergence ?
+            if (dcost < convergence_threshold) {
+                //how many times did we get a convergence
+                //in a row
+                convergence_count++;
+                if (convergence_count >= convergence_iter) {
+                    //we had 'convergence_iter' convergences in a row
+                    //--> we can consider it's not happenstance
+                    break;
+                }
+            } else {
+                convergence_count = 0;
+            }
+        } else {
+            convergence_count = 0;
         }
         //if (iter%10==0)
         //    cout<<"Iteration "<<iter<<": error is "<<cost<<endl;

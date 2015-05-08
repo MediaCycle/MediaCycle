@@ -24,6 +24,7 @@ public:
     virtual arma::mat compute(int ndim,arma::mat yInit=arma::mat(0,0));
     void setPerplexity(double perplexity){kk=perplexity;};
     void setIterMax(unsigned int im){max_iter=im;};
+    void setConvergenceThreshold(double ct){convergence_threshold=ct;};
 protected:
     virtual bool d2p(arma::mat Dist);//encode conditionnal probabilties P matrix. Dis =square of distance matrix
     void Hbeta(double &H,arma::rowvec &thisP,arma::rowvec Dist,int ind,double beta);
@@ -32,6 +33,7 @@ protected:
     double kk;
     double tol;                          // iteration at which lying about P-values is stopped
     unsigned int max_iter;
+    double convergence_threshold;
 };
 
 #endif /* defined(__MediaCycle__t_Sne__) */
