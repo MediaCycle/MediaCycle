@@ -65,6 +65,13 @@ file(WRITE ${CMAKE_CURRENT_BINARY_DIR}/main.cpp "
 #include \"ACAbstractProcessCLI.h\"
 #include \"ACAbstractDefaultConfig.h\"
 ")
+
+IF(MLPACK_FOUND)
+file(APPEND ${CMAKE_CURRENT_BINARY_DIR}/main.cpp "
+#include <mlpack/core.hpp>
+")
+ENDIF()
+
 IF(MAIN_CLASS)
 file(APPEND ${CMAKE_CURRENT_BINARY_DIR}/main.cpp "#include \"${MAIN_CLASS}.h\"\n")
 ENDIF()
@@ -129,9 +136,17 @@ ENDIF()
 
 file(APPEND ${CMAKE_CURRENT_BINARY_DIR}/main.cpp "
 int main(int argc, char *argv[])
-{
+{")
+
+IF(MLPACK_FOUND)
+	file(APPEND ${CMAKE_CURRENT_BINARY_DIR}/main.cpp "
+    mlpack::CLI::ParseCommandLine(argc, argv);
+")
+ENDIF()
+
+file(APPEND ${CMAKE_CURRENT_BINARY_DIR}/main.cpp "
     try {
-        MediaCycle* media_cycle = new MediaCycle(MEDIA_TYPE_NONE);
+	MediaCycle* media_cycle = new MediaCycle(MEDIA_TYPE_NONE);
 ")
 SET(ACTION "load")
 list(LENGTH DEFAULT_CONFIGS DEFAULT_CONFIGS_NUMBER)
