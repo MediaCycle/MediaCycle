@@ -2,9 +2,10 @@
  *  ACNeighborsManager.h
  *  MediaCycle
  *
- *  @author Stphane Dupont, Damien Tardieu
+ *  @author Stéphane Dupont, Damien Tardieu
  *  @date 25/02/10
  *  Filled by Christian Frisson since 12/03/2010
+ *  UnGPL'd by Alexis Moinet on 26/06/2015
  *  @copyright (c) 2010 – UMONS - Numediart
  *  
  *  MediaCycle of University of Mons – Numediart institute is 
@@ -39,9 +40,9 @@
 #include <algorithm>
 #include <string>
 #include <iostream>
-
-#include <tree.hh>
 #include <list>
+
+#include "Tree.h"
 
 class ACNeighborsManager {
 
@@ -49,8 +50,8 @@ public:
     ACNeighborsManager();
     ~ACNeighborsManager();
 
-    void setReferenceNode(long int _mediaId, int _clickTime);
-    bool addNode(long int _parentId, long int _mediaId, int _clickTime);
+    void setReferenceNode(long int _mediaId, int _clickTime=0);
+    bool addNode(long int _parentId, long int _mediaId, int _clickTime=0);
     bool removeNode(long int _id);
     bool removeChildrenNodes(long int _id);
     void setClickedNode(long int _mediaId);
@@ -66,7 +67,7 @@ public:
     std::list<long int> getNodeIds(long int _nodeId);
     int getSize();
 
-protected: //CF these methods are not yet bound by ACMediaBrowser
+//protected: //CF these methods are not yet bound by ACMediaBrowser
     int getDepthAtNode(long int _nodeId);
     int getMaxDepth();
     bool isEmpty();
@@ -75,7 +76,7 @@ protected: //CF these methods are not yet bound by ACMediaBrowser
 
 private:	
     int mNodeId;
-    Tree<long int> mTree;
+    mc::Tree mTree;
     int mLastClickedNodeId;
 };
 
