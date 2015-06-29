@@ -1,17 +1,14 @@
 #ifndef _structures_h
 #define _structures_h
 
-
-
-
 // for FILE
-
 #include <stdlib.h>
 #include <vector>
 #include <set>
 #include <iostream>
 #include <algorithm>
-
+#include <fstream>
+#include <math.h>
 
 /* 
    for use in s_hull.C

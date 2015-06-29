@@ -1,12 +1,3 @@
-#include <iostream>
-//#include <hash_set.h>
-#include <set>
-#include <vector>
-#include <fstream>
-#include <stdlib.h>
-#include <math.h>
-#include <algorithm>
-
 #include "s_hull.h"
 
 /*
