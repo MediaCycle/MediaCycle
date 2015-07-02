@@ -1165,12 +1165,16 @@ IF( USE_QT5 )
 	# Instruct CMake to run moc automatically when needed.
         set(CMAKE_AUTOMOC OFF) # this is done per library or application (AddQtApp.cmake or isolated CMakeLists.txt)
 
-        find_package(Qt5Core REQUIRED)
-        find_package(Qt5Gui REQUIRED)
-        find_package(Qt5OpenGL REQUIRED)
-        find_package(Qt5Multimedia REQUIRED)
-	find_package(Qt5Widgets REQUIRED)
-	find_package(Qt5WebKitWidgets REQUIRED)
+        IF(MACPORTS_FOUND)
+                SET(QT5_MACPORTS "${MACPORTS_PREFIX}/libexec/qt5-mac")
+        ENDIF()
+
+        find_package(Qt5Core REQUIRED HINTS ${QT5_MACPORTS})
+        find_package(Qt5Gui REQUIRED HINTS ${QT5_MACPORTS})
+        find_package(Qt5OpenGL REQUIRED HINTS ${QT5_MACPORTS})
+        find_package(Qt5Xml REQUIRED HINTS ${QT5_MACPORTS})
+        find_package(Qt5Widgets REQUIRED HINTS ${QT5_MACPORTS})
+        find_package(Qt5WebKitWidgets REQUIRED HINTS ${QT5_MACPORTS})
 
 	add_definitions(${Qt5Widgets_DEFINITIONS})
 	set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} ${Qt5Widgets_EXECUTABLE_COMPILE_FLAGS}")

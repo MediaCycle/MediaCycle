@@ -13,24 +13,25 @@ homepage            http://qwt.sourceforge.net
 
 master_sites        sourceforge:qwt
 use_bzip2           yes
-use_parallel_build  no
+use_parallel_build  yes
 
 platforms           darwin
 
 if {${subport} == ${name}} {
 
-    version         6.1.1
-    distname        qwt-6.1.1
+    version         6.1.2
+    distname        qwt-6.1.2
     conflicts       qwt52 qwt60 qwt-60 qwt-devel
-#    checksums           sha1    48a967038f7aa9a9c87c64bcb2eb07c5df375565 \
-#                   rmd160  d96bee65350fc500a885c1922bfa35e1f49e2c54
-    checksums           sha1    6d142cb9725da7e03fbb507532fc268b5212080a \
-                    rmd160  612aadaff6725216295c3cabbc0276feadbaec7d
-    patchfiles      patch-qwtconfig.pri.611.diff \
-                    patch-qwtfunctions.pri.611.diff \
-                    patch-designer_designer.pro.611.diff \
-                    patch-qwtbuild.pri.611.diff \
-                    patch-src_src.pro.611.diff
+#    checksums           sha1    6d142cb9725da7e03fbb507532fc268b5212080a \
+#                    rmd160  612aadaff6725216295c3cabbc0276feadbaec7d
+    checksums           sha1    6af82b6ee4132f779d1c8c2db872f01463b0d61c \
+                    rmd160  6c8ba1b974aae55f5a0614d345d59af8fb77f21a
+    patchfiles      patch-qwtconfig.pri.612.diff
+#    patchfiles      patch-qwtconfig.pri.611.diff \
+#                    patch-qwtfunctions.pri.611.diff \
+#                    patch-designer_designer.pro.611.diff \
+#                    patch-qwtbuild.pri.611.diff \
+#                    patch-src_src.pro.611.diff
 
     livecheck.url   http://sourceforge.net/api/file/index/project-id/13693/mtime/desc/rss
     livecheck.regex \\/qwt\\/(6\\.1\\.\\d+)\\/
@@ -153,8 +154,8 @@ post-patch {
     }
 }
 
-set qt_qmake_cmd    ${prefix}/bin/qmake
 if {${qwt_major} < 6} {
+    set qt_qmake_cmd    ${prefix}/bin/qmake
 
     # QWT version 5 can work with Qt3 or Qt4
 
@@ -190,16 +191,19 @@ if {${qwt_major} < 6} {
     #PortGroup qt4 1.0
     variant qt4 description {Build with Qt Backend support.} {
         PortGroup               qt4 1.0
+        set qt_qmake_cmd    ${prefix}/bin/qmake
     }
 
     variant qt5 description {Build with Qt Backend support.} {
         #depends_lib-append    port:qt5-mac
 	PortGroup           qt5 1.0
+	set qt_qmake_cmd    ${prefix}/libexec/qt5-mac/bin/qmake
+configure.cmd       ${qt_qmake_cmd}
     }
 
 }
 
-configure.cmd       ${qt_qmake_cmd}
+#configure.cmd       ${qt_qmake_cmd}
 configure.pre_args  INSTALLBASE="${prefix}"
 
 # qmake does not handle these flags flags
@@ -218,6 +222,26 @@ post-destroot {
     # if qwt is installed as a framework,
     # link in as libraries and headers too
 
+    if {[file exists ${destroot}${prefix}/lib/libqwt.dylib]} {
+	system "echo ${destroot}${prefix}/lib/libqwt.dylib"
+
+	system "install_name_tool -id ${prefix}/lib/libqwt.dylib ${destroot}${prefix}/lib/libqwt.dylib"
+        foreach fixfile [exec find ${destroot}${prefix}/lib \
+                             -name "*.dylib" | \
+                             sed -e "s@${destroot}${prefix}/lib/@@g"] {
+		system "install_name_tool -id ${prefix}/lib/${fixfile} ${destroot}${prefix}/lib/${fixfile}"
+		system "echo install_name_tool -id ${prefix}/lib/${fixfile} ${destroot}${prefix}/lib/${fixfile}"
+
+	}
+        foreach fixfile [exec find ${destroot}${prefix}/libexec/qt5-mac/plugins/designer \
+                             -name "libqwt*dylib" | \
+                             sed -e "s@${destroot}${prefix}/libexec/qt5-mac/plugins/designer/@@g"] {
+		system "install_name_tool -id ${prefix}/libexec/qt5-mac/plugins/designer/${fixfile} ${destroot}${prefix}/libexec/qt5-mac/plugins/designer/${fixfile}"
+		system "install_name_tool -change libqwt.6.dylib ${prefix}/lib/libqwt.6.dylib ${destroot}${prefix}/libexec/qt5-mac/plugins/designer/${fixfile}"
+		system "echo install_name_tool -id ${prefix}/libexec/qt5-mac/plugins/designer/${fixfile} ${destroot}${prefix}/libexec/qt5-mac/plugins/designer/${fixfile}"
+
+	}
+    }
     if {[file exists ${destroot}${qt_frameworks_dir}/qwt.framework/qwt]} {
 
 	system "install_name_tool -id ${qt_frameworks_dir}/qwt.framework/qwt ${destroot}${qt_frameworks_dir}/qwt.framework/qwt"

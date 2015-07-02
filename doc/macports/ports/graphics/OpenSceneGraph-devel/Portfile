@@ -7,8 +7,8 @@ PortGroup               cmake 1.0
 name                    OpenSceneGraph-devel
 conflicts               OpenSceneGraph
 set my_name             OpenSceneGraph
-version                 3.3.2
-revision                1
+version                 3.3.8
+revision                0
 platforms               darwin
 categories              graphics
 maintainers             nomaintainer
@@ -25,10 +25,10 @@ distname                ${my_name}-${version}
 
 use_zip                 yes
 
-checksums               rmd160  5dc562afc508faf31a67f0e1f7e75b7444263dd3 \
-                        sha256  759676cdccd0b88e60dc1f86ee143c7598a817506fce9a6d8a388998f4230099
+checksums           rmd160  ce1a72817059d752d40545cd454e8f2c5061f759 \
+                    sha256  192b538e1693c9a6ffd0374f8ea7def425a66b0f233869c489f072f568ef10c2
 
-patchfiles              patch-CMakeLists.txt.diff
+#patchfiles              patch-CMakeLists.txt.diff
 
 depends_build-append    port:pkgconfig
 

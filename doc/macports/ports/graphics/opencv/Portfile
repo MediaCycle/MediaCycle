@@ -6,7 +6,7 @@ PortGroup           cmake 1.0
 PortGroup           compiler_blacklist_versions 1.0
 
 name                opencv
-version             3.0.0-beta
+version             3.0.0
 revision            0
 categories          graphics science
 platforms           darwin
@@ -30,7 +30,7 @@ homepage            http://opencv.org
 master_sites        https://github.com/Itseez/opencv/archive/
 distname	    ${version}
 
-worksrcdir          ${worksrcdir}/../build
+worksrcdir          ${workpath}/opencv-${distname}
 #patch.dir           ${workpath}/${distname}
 patch.dir           ${workpath}/opencv-${distname}
 
@@ -40,11 +40,13 @@ post-extract {
 
 use_zip             yes
 
-#checksums           rmd160  f0fff1421569479dd6918d9e86e701e03aad7945 \
-#                    sha256  1bf4cb87283797fd91669d4f90b622a677a903c20b4a577b7958a2164f7596c6
-
+# OpenCV 3.0.0-beta
 checksums           rmd160  18042ded20384ca0011c09c72bc90e14b2aa75ae \
                     sha256  490924750a1d5f43c17ec9e99266c03b11790f8cb5e9aa62f878873386d51228
+
+# OpenCV 3.0.0
+checksums           rmd160  7b4dff26502e71e6570c2452c35fd03a1982bc7e \
+                    sha256  07094ea2f996f2622d572f0f3a162d698c8a547520341ca9109fbaf9363fb001
 
 depends_build-append \
                     port:pkgconfig
@@ -60,14 +62,14 @@ depends_lib-append  port:zlib \
                     path:lib/libavcodec.dylib:ffmpeg
 
 patchfiles          patch-install_name.diff \
-                    patch-CMakeLists.txt.diff \
-                    patch-cmake_OpenCVFindLibsPerf.cmake.diff \
                     patch-modules_core_src_parallel.cpp.diff \
                     patch-modules-highgui-src-window_cocoa.mm.diff
 
 #patchfiles          patch-fix_dirname_case.diff \
 #                    patch-modules_java_CMakeLists.txt.diff \
 #                    patch-modules_python_CMakeLists.txt.diff \
+#                    patch-CMakeLists.txt.diff \
+#                    patch-cmake_OpenCVFindLibsPerf.cmake.diff \
 
 configure.args-append ../opencv-${distname}/ \
                     -DWITH_1394=OFF \
@@ -183,6 +185,17 @@ variant opencl description {Enable OpenCL support.} {
     }
     configure.args-delete   -DWITH_OPENCL=OFF
     configure.args-append   -DWITH_OPENCL=ON
+}
+
+variant openmp description {Enable OpenMP support.} {
+    depends_lib-append      port:openmpi-default
+    configure.args-delete   -DWITH_OPENMP=OFF
+    configure.args-append   -DWITH_OPENMP=ON
+    compiler.blacklist-append	*clang*
+    configure.compiler		macports-gcc
+# compiler.fallback macports-gcc-4.8 macports-gcc-4.7 macports-gcc-4.6 macports-gcc-4.5 macports-gcc-4.4 macports-gcc-4.3
+#PortGroup           mpi 1.0
+#mpi.setup                   -openmpi
 }
 
 variant openni description {Enable OpenNI support.} {
