@@ -63,7 +63,7 @@ using namespace mlpack::tree;
 using namespace std;*/
 using namespace mlpack::neighbor;
 
-ACFilterPlugProximityGrid::ACFilterPlugProximityGrid() : QObject(), ACPluginQt(), ACFilteringPlugin(),
+ACFilterPlugProximityGrid::ACFilterPlugProximityGrid() : ACFilteringPlugin(),
     min_x(1),min_y(1),max_x(-1),max_y(-1){
     this->mMediaType = MEDIA_TYPE_ALL;
     // this->mPluginType = PLUGIN_TYPE_NONE;
@@ -72,7 +72,6 @@ ACFilterPlugProximityGrid::ACFilterPlugProximityGrid() : QObject(), ACPluginQt()
     this->mId = "";
 
     this->addCallback("Update","Update view",boost::bind(&ACFilterPlugProximityGrid::setProximityGrid,this));
-    //this->addCallback("Clear","Clear links",boost::bind(&ACFilterPlugProximityGrid::clearLinks,this));
     this->addCallback("Cost","Eval neighborhoodness",boost::bind(&ACFilterPlugProximityGrid::evalNeighborhoodness,this));
 
     methods.push_back("Greedy Empty");
@@ -142,12 +141,6 @@ arma::mat emst(arma::mat desc_m, bool naive, const size_t leafSize){
 ACFilterPlugProximityGrid::~ACFilterPlugProximityGrid() {
 }
 
-void ACFilterPlugProximityGrid::clearLinks() {
-    if(this->browser){
-        this->browser->removeLinks();
-    }
-}
-
 void ACFilterPlugProximityGrid::evalNeighborhoodness() {
 
     if(!media_cycle) return;
@@ -191,6 +184,12 @@ void ACFilterPlugProximityGrid::evalNeighborhoodness() {
     arma::mat desc_m;
     vector<string> featureNames;
     this->extractDescMatrix(this->media_cycle->getBrowser(), desc_m, featureNames);
+
+    if(!desc_m.is_finite()){
+        std::cerr << "ACFilterPlugProximityGrid::evalNeighborhoodness: features contain NaN values, aborting neighborhoodness evaluation" << std::endl;
+        return;
+    }
+
     desc_m = desc_m.t();//arma::inplace_trans(desc_m); // required but contradictory with the example provided by mlpack
 
     arma::Mat<size_t> resultingFeatureNeighbors,resultingPosNeighbors;
@@ -383,11 +382,20 @@ void ACFilterPlugProximityGrid::setProximityGrid() {
     if (distance == "Features")
         visual_mst = false;
 
-
     std::string method = this->getStringParameterValue("Method");
 
     arma::mat desc_m;
     arma::mat pos;
+
+    vector<string> featureNames;
+    if(!visual_mst)
+        this->extractDescMatrix(this->media_cycle->getBrowser(), desc_m, featureNames);
+
+    // Force visual neighbors if features contain NaN values
+    if(!desc_m.is_finite()){
+        std::cerr << "ACFilterPlugProximityGrid::setProximityGrid: features contain NaN values, computing minimum spanning tree from positions" << std::endl;
+        visual_mst = true;
+    }
 
     if(visual_mst)
         desc_m.set_size(libSize,2);//(2,libSize);
@@ -418,11 +426,6 @@ void ACFilterPlugProximityGrid::setProximityGrid() {
     t_y = -(max_y+min_y)/2.0f;
     z_x = 2.0f/(max_x-min_x);
     z_y = 2.0f/(max_y-min_y);
-
-    vector<string> featureNames;
-
-    if(!visual_mst)
-        this->extractDescMatrix(this->media_cycle->getBrowser(), desc_m, featureNames);
 
     desc_m = desc_m.t();//arma::inplace_trans(desc_m); // required but contradictory with the example provided by mlpack
 

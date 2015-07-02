@@ -37,16 +37,12 @@
 #ifndef _ACFilterPlugProximityGrid_
 #define _ACFilterPlugProximityGrid_
 
-class ACFilterPlugProximityGrid : public QObject, public ACPluginQt, virtual public ACFilteringPlugin {
-    Q_OBJECT
-    Q_INTERFACES(ACPluginQt)
+class ACFilterPlugProximityGrid : virtual public ACFilteringPlugin {
 public:
     ACFilterPlugProximityGrid();
     ~ACFilterPlugProximityGrid();
-    //virtual void updateNextPositions(ACMediaBrowser* );
     virtual void filter();
     virtual void librarySizeChanged();
-    void clearLinks();
     void evalNeighborhoodness();
 private:
     void setProximityGrid();
