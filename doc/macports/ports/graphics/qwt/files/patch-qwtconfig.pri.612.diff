@@ -1,0 +1,53 @@
+--- qwtconfig.pri.orig	2015-06-29 12:21:30.000000000 +0200
++++ qwtconfig.pri	2015-06-29 12:23:39.000000000 +0200
+@@ -16,9 +16,9 @@
+ # Install paths
+ ######################################################################
+ 
+-QWT_INSTALL_PREFIX = $$[QT_INSTALL_PREFIX]
++QWT_INSTALL_PREFIX = $$INSTALLBASE
+ 
+-unix {
++unix:!macx {
+     QWT_INSTALL_PREFIX    = /usr/local/qwt-$$QWT_VERSION
+     # QWT_INSTALL_PREFIX = /usr/local/qwt-$$QWT_VERSION-qt-$$QT_VERSION
+ }
+@@ -28,8 +28,8 @@
+     # QWT_INSTALL_PREFIX = C:/Qwt-$$QWT_VERSION-qt-$$QT_VERSION
+ }
+ 
+-QWT_INSTALL_DOCS      = $${QWT_INSTALL_PREFIX}/doc
+-QWT_INSTALL_HEADERS   = $${QWT_INSTALL_PREFIX}/include
++QWT_INSTALL_DOCS      = $${QWT_INSTALL_PREFIX}/share/qwt/doc
++QWT_INSTALL_HEADERS   = $${QWT_INSTALL_PREFIX}/include/qwt
+ QWT_INSTALL_LIBS      = $${QWT_INSTALL_PREFIX}/lib
+ 
+ ######################################################################
+@@ -42,7 +42,7 @@
+ # runtime environment of designer/creator.
+ ######################################################################
+ 
+-QWT_INSTALL_PLUGINS   = $${QWT_INSTALL_PREFIX}/plugins/designer
++QWT_INSTALL_PLUGINS   = $$[QT_INSTALL_PLUGINS]/designer
+ 
+ # linux distributors often organize the Qt installation
+ # their way and QT_INSTALL_PREFIX doesn't offer a good
+@@ -63,7 +63,7 @@
+ # with every Qt upgrade. 
+ ######################################################################
+ 
+-QWT_INSTALL_FEATURES  = $${QWT_INSTALL_PREFIX}/features
++QWT_INSTALL_FEATURES  = $$[QT_INSTALL_DATA]/mkspecs/features
+ # QWT_INSTALL_FEATURES  = $$[QT_INSTALL_PREFIX]/features
+ 
+ ######################################################################
+@@ -161,7 +161,8 @@
+ 
+ macx:!static:CONFIG(qt_framework, qt_framework|qt_no_framework) {
+ 
+-    QWT_CONFIG += QwtFramework
++    #QWT_CONFIG += QwtFramework
++    #QWT_INSTALL_LIBS = $$INSTALLBASE/Library/Frameworks #$$[QT_INSTALL_FRAMEWORKS]
+ }  
+ 
+ ######################################################################
