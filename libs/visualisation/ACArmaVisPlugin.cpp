@@ -1,8 +1,8 @@
 /**
  * @brief ACArmaVisPlugin.cpp
  * @author Christian Frisson
- * @date 10/03/2014
- * @copyright (c) 2014 – UMONS - Numediart
+ * @date 02/07/2015
+ * @copyright (c) 2015 – UMONS - Numediart
  * 
  * MediaCycle of University of Mons – Numediart institute is 
  * licensed under the GNU AFFERO GENERAL PUBLIC LICENSE Version 3 
@@ -90,6 +90,22 @@ void ACArmaVisPlugin::updateNextPositions(ACMediaBrowser* mediaBrowser){
     nbActiveFeatures = 9;
     extractDescMatrix(mediaBrowser, desc_m, featureNames,_tag);
     descD_m=desc_m;
+
+    // CF Handle errors is features contain NaN values, should be tested on the core
+    if (!desc_m.is_finite()){
+        int cpt=0;
+        std::cerr << "ACArmaVisPlugin::updateNextPositions: the features contain NaN values, can't compute positions from these" << std::endl;
+        for (int i=0; i<ids.size(); i++){
+            ACMediaNode* node = mediaBrowser->getMediaNode(ids[i]);
+            if (node && node->isDisplayed() && cpt<desc_m.n_rows){
+                ACPoint p = node->getCurrentPosition();
+                mediaBrowser->setNodeNextPosition(ids[i], p);
+                cpt++;
+            }
+        }
+        return;
+    }
+
     if (desc_m.n_cols < 2){
         ACPoint p;
         for (int i=0; i<ids.size(); i++){
@@ -118,7 +134,7 @@ void ACArmaVisPlugin::updateNextPositions(ACMediaBrowser* mediaBrowser){
     //float batchSize=0.2;
     //Batch batchAlgo;
     //batchAlgo.setTagVector((ucolvec)(_tag.t()));
-    //umat tag=batchAlgo.select(batchSize*1);
+    //umat tag=batchAlgo.select(batchSize*1);    
     dimensionReduction(posDisp_m,desc_m,_tag.t());
 #ifdef USE_DEBUG
     _tag.save(fileName+string("_tag.txt"),arma_ascii);
