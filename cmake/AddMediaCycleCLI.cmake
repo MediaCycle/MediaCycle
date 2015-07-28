@@ -66,11 +66,11 @@ file(WRITE ${CMAKE_CURRENT_BINARY_DIR}/main.cpp "
 #include \"ACAbstractDefaultConfig.h\"
 ")
 
-IF(MLPACK_FOUND)
-file(APPEND ${CMAKE_CURRENT_BINARY_DIR}/main.cpp "
-#include <mlpack/core.hpp>
-")
-ENDIF()
+#IF(MLPACK_FOUND)
+#file(APPEND ${CMAKE_CURRENT_BINARY_DIR}/main.cpp "
+##include <mlpack/core.hpp>
+#")
+#ENDIF()
 
 IF(MAIN_CLASS)
 file(APPEND ${CMAKE_CURRENT_BINARY_DIR}/main.cpp "#include \"${MAIN_CLASS}.h\"\n")
@@ -138,11 +138,11 @@ file(APPEND ${CMAKE_CURRENT_BINARY_DIR}/main.cpp "
 int main(int argc, char *argv[])
 {")
 
-IF(MLPACK_FOUND)
-	file(APPEND ${CMAKE_CURRENT_BINARY_DIR}/main.cpp "
-    mlpack::CLI::ParseCommandLine(argc, argv);
-")
-ENDIF()
+#IF(MLPACK_FOUND)
+#	file(APPEND ${CMAKE_CURRENT_BINARY_DIR}/main.cpp "
+#    mlpack::CLI::ParseCommandLine(argc, argv);
+#")
+#ENDIF()
 
 file(APPEND ${CMAKE_CURRENT_BINARY_DIR}/main.cpp "
     try {
