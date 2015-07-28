@@ -170,7 +170,7 @@ OPTION(USE_OPENGL "Use OpenGL" ON)
 OPTION(USE_OSG "Use OSG" ON) # Currently required in the core for 3D models or for GUI apps
 OPTION(USE_OPENAL "Use OpenAL" ON)
 OPTION(USE_PORTAUDIO "Use PortAudio" OFF)
-OPTION(USE_STARPU "Use StarPU for CPU/GPU parallel feature extraction" ON)
+OPTION(USE_STARPU "Use StarPU for CPU/GPU parallel feature extraction" OFF)
 OPTION(USE_OPENMP "Use OpenMP" OFF) # doesn't work on Snow Leopard, returns readv failed on Ubuntu 10.04
 OPTION(USE_CORE_DISPATCH "Use Grand Central Dispatch in core" OFF)
 IF ( NOT APPLE_IOS_DEV AND NOT APPLE_IOS_SIM AND NOT APPLE_IOS_XCODE )
@@ -1490,25 +1490,26 @@ IF(APPLE AND USE_APPLE_MULTITOUCH)
 ENDIF ()
 
 # OpenMP
-include(CMakeForceCompiler)
+#include(CMakeForceCompiler)
 IF(USE_OPENMP)
 	#CMAKE_FORCE_C_COMPILER(gcc-4.2 GNU)
 	#CMAKE_FORCE_CXX_COMPILER(gcc-4.2 GNU)
 	FIND_PACKAGE(OpenMP) 
 	IF (OPENMP_FOUND) 
-		SET(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} ${OpenMP_CXX_FLAGS} -D_USE_OPENMP") 
-		SET(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} ${OpenMP_C_FLAGS} -D_USE_OPENMP")
-		SET(USE_OPENMP ON) 
+		SET(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} ${OpenMP_CXX_FLAGS} -DUSE_OPENMP") 
+		SET(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} ${OpenMP_C_FLAGS} -DUSE_OPENMP")
+		#SET(USE_OPENMP ON)
+                MESSAGE("OpenMP supported.")
 	ELSE (OPENMP_FOUND)
 		SET(USE_OPENMP OFF)
+		MESSAGE(FATAL_ERROR "OpenMP not supported.")
 	ENDIF (OPENMP_FOUND)
 ENDIF()
-
-IF(USE_STARPU)
 
 
 
 # StarPU http://runtime.bordeaux.inria.fr/StarPU/
+IF(USE_STARPU)
 FIND_PACKAGE ( StarPU )
 IF (STARPU_FOUND)
 	MESSAGE("StarPU found in ${STARPU_INCLUDE_DIR}.")
@@ -1533,7 +1534,6 @@ IF (STARPU_FOUND)
 ELSE (STARPU_FOUND)
 	MESSAGE("StarPU not found, support disabled.")
 ENDIF (STARPU_FOUND)
-
 ENDIF(USE_STARPU)
 
 # Torch3
