@@ -1,0 +1,11 @@
+--- src/wscript.orig	2015-08-26 22:03:06.000000000 +0200
++++ src/wscript	2015-08-27 01:50:49.000000000 +0200
+@@ -41,7 +41,7 @@
+     if bld.env['WITH_STLFACADE']:
+         sources += bld.path.ant_glob('stlfacade/*.cpp')
+ 
+-    gaialib = bld.stlib(
++    gaialib = bld.shlib(
+         features = 'qt5 cxx',
+         uselib   = 'QT5CORE QT5CONCURRENT',
+         source   = sources,

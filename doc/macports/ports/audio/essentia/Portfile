@@ -1,0 +1,52 @@
+# -*- coding: utf-8; mode: tcl; tab-width: 4; indent-tabs-mode: nil; c-basic-offset: 4 -*- vim:fenc=utf-8:ft=tcl:et:sw=4:ts=4:sts=4
+# $Id: Portfile 125893 2015-08-26 23:36:54Z gmail.com:christian.frisson $
+
+PortSystem              1.0
+PortGroup               waf 1.0
+PortGroup               github 1.0
+
+github.setup            ChristianFrisson essentia 078ae59e1f
+name                    essentia
+version                 2.1-dev
+license                 AGPLv3
+categories              audio
+maintainers             gmail.com:christian.frisson openmaintainer
+platforms               darwin
+
+description             C++ library of algorithms to extract features \
+                        from audio files, including Python bindings.
+
+long_description        Essentia is an open-source C++ library for audio analysis \
+                        and audio-based music information retrieval released under \
+                        the Affero GPL license. It contains an extensive collection \
+                        of reusable algorithms which implement audio input/output \
+                        functionality, standard digital signal processing blocks, \
+                        statistical characterization of data, and a large set of \
+                        spectral, temporal, tonal and high-level music descriptors. \
+                        The library is also wrapped in Python and includes a number \
+                        of predefined executable extractors for the available music \
+                        descriptors, which facilitates its use for fast prototyping \
+                        and allows setting up research experiments very rapidly. \
+                        Furthermore, it includes a Vamp plugin to be used with \
+                        Sonic Visualiser for visualization purposes. The library \
+                        is cross-platform and currently supports Linux, Mac OS X, \
+                        and Windows systems. Essentia is designed with a focus on \
+                        the robustness of the provided music descriptors and is \
+                        optimized in terms of the computational cost of the algorithms. \
+                        The provided functionality, specifically the music descriptors \
+                        included in-the-box and signal processing algorithms, \
+                        is easily expandable and allows for both research experiments \
+                        and development of large-scale industrial applications.
+
+homepage                http://essentia.upf.edu
+
+checksums               rmd160  e0bad69eea9bac205eabc26552d26a6d367d5297 \
+                        sha256  732c746014610d4a8161533ec6be58cd924d0e01fe21bbc4b85835d41003edc3
+
+configure.args-append   --with-gaia
+#configure.args-append   --mode=release
+#configure.args-delete   --nocache
+
+depends_build-append    port:pkgconfig
+
+depends_lib             port:fftw port:ffmpeg port:libsamplerate port:taglib port:libyaml port:gaia

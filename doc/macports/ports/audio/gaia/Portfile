@@ -1,0 +1,36 @@
+# -*- coding: utf-8; mode: tcl; tab-width: 4; indent-tabs-mode: nil; c-basic-offset: 4 -*- vim:fenc=utf-8:ft=tcl:et:sw=4:ts=4:sts=4
+# $Id: Portfile 125893 2015-08-26 22:12:54Z gmail.com:christian.frisson $
+
+PortSystem              1.0
+PortGroup               waf 1.0
+PortGroup               github 1.0
+
+github.setup            ChristianFrisson gaia c0b9cdd4de
+name                    gaia
+version                 2.4.4
+license                 AGPLv3
+categories              audio
+maintainers             gmail.com:christian.frisson openmaintainer
+platforms               darwin
+
+description             C++ library to apply similarity measures and \
+                        classiﬁcations on the results of audio analysis.
+long_description        C++ library to apply similarity measures and \
+                        classiﬁcations on the results of audio analysis, \
+                        including Python bindings. Together with Essentia \
+                        it can be used to compute high-level descriptions of music. 
+
+homepage                http://essentia.upf.edu
+
+checksums               rmd160  dd38785ce69402b7a6622e0b183fd5ed4ef59330 \
+                        sha256  3379bcd59dfaa1a6052f0a570195248c3f9a94a6bd755bd48e1f7d962d8be3de
+
+#patchfiles              patch-src-wscript.diff
+
+configure.args-append   --qtdir=${prefix}/libexec/qt5-mac
+configure.args-append   --prefix=${prefix}
+configure.args-delete   --nocache
+
+depends_build-append    port:pkgconfig
+
+depends_lib             port:libyaml port:swig port:qt5-mac
