@@ -32,8 +32,8 @@
 using namespace std;
 
 extern "C" {
-	FILE *yyin;
-	void df_parser_restart(FILE* yyin);
+	FILE *yaafe_yyin;
+	void df_parser_restart(FILE* yaafe_yyin);
 }
 
 extern "C++" {
@@ -195,17 +195,17 @@ void DataFlow::mergeFlow(Graph<NodeDesc>* f,const Graph<NodeDesc>* g, std::map<N
 
 bool DataFlow::load(const std::string& filename)
 {
-	yyin = fopen(filename.c_str(),"r");
-	if (yyin==NULL)
+	yaafe_yyin = fopen(filename.c_str(),"r");
+	if (yaafe_yyin==NULL)
 	{
 		cerr << "cannot open file " << filename << endl;
 		return false;
 	}
-	df_parser_restart(yyin);
+	df_parser_restart(yaafe_yyin);
 	DataFlowContext context;
 	context.m_dataflow = this;
 	int iRc = df_parser_parse(context);
-	fclose(yyin);
+	fclose(yaafe_yyin);
 	return (iRc==0);
 }
 

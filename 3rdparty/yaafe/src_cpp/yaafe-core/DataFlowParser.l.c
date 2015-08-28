@@ -13,7 +13,7 @@
 #define yy_flush_buffer df_parser__flush_buffer
 #define yy_load_buffer_state df_parser__load_buffer_state
 #define yy_switch_to_buffer df_parser__switch_to_buffer
-#define yyin df_parser_in
+//#define yyin df_parser_in
 #define yyleng df_parser_leng
 #define yylex df_parser_lex
 #define yylineno df_parser_lineno
