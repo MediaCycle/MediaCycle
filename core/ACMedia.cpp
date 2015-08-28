@@ -1404,7 +1404,7 @@ int ACMedia::segment(ACPluginManager *acpl, bool _saved_timed_features ) {
 }
 
 ACMediaTimedFeature* ACMedia::getTimedFeatures() {
-    bool _binary=false;//true
+    bool _binary=true; //CF
     ACMediaType mediaType=this->getType();
     ACMediaTimedFeature* output = 0;
     std::vector<std::string> mtf_files_names=this->getTimedFileNames();
@@ -1442,7 +1442,7 @@ ACMediaTimedFeature* ACMedia::getTimedFeatures() {
 // CPL 25/06
 // get only one TimedFeature
 ACMediaTimedFeature* ACMedia::getTimedFeature(string feature_name) {
-    bool _binary=false;//true
+    bool _binary=true;//CF
     ACMediaType mediaType=this->getType();
     ACMediaTimedFeature* mtf_from_file = 0;
     ACMediaTimedFeature* output = 0;

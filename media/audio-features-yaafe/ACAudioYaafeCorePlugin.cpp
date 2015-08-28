@@ -722,7 +722,7 @@ std::vector<ACMediaFeatures*> ACAudioYaafeCorePlugin::calculate(ACMedia* theMedi
     boost::filesystem::path f_path( theMedia->getFileName() );
 
     // try to keep the convention : _b.mtf = binary ; _t.mtf = ascii text
-    bool save_binary = false;//CF was true
+    bool save_binary = true;//CF was true
     string mtf_file_name; // file(s) in which feature(s) will be saved
     string file_ext =  "_b.mtf";
     if(!save_binary)
