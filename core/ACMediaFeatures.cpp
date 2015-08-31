@@ -38,12 +38,20 @@
 #include <fstream>
 #include <algorithm>
 
+#include <armadillo>
+
+#include "boost/filesystem.hpp"
+
+using namespace arma;
+
 using std::cerr;
 using std::cout;
 using std::endl;
 using std::ofstream;
 using std::vector;
 using std::string;
+
+using namespace boost;
 
 ACMediaFeatures::ACMediaFeatures(void){
  	//XS TODO: is this flag still necessary ?
@@ -138,3 +146,80 @@ void ACMediaFeatures::write(string file_name){ // output in file
 	
 	out.close();
 }
+
+bool ACMediaFeatures::saveInFile(string _fname, bool _binary){ 
+	bool save_ok = false;
+	
+	fvec data;
+	for (int i=0; i<int(features_vector.size()); i++){
+		data << features_vector[i];
+	}
+	
+	if (_binary){
+		#ifdef ARMADILLO_HAVE_RANDU // randu and .save returns were both introduced in version 0.9.50
+			save_ok = data.save(_fname, arma_binary); // default format = arma_binary
+		#else
+			data.save(_fname, arma_binary); // default format = arma_binary
+			if ( boost::filesystem::exists( _fname ) )
+				save_ok = true;
+		#endif
+	}
+	else {
+		#ifdef ARMADILLO_HAVE_RANDU // randu and .save returns were both introduced in version 0.9.50
+			save_ok = data.save(_fname, arma_ascii);
+		#else
+			data.save(_fname, arma_ascii);
+			if ( boost::filesystem::exists( _fname ) )
+				save_ok = true;
+		#endif	
+	}
+	return save_ok;
+}
+
+bool ACMediaFeatures::loadFromFile(string _fname, bool _binary){
+	fvec tmp_m;
+	bool load_ok = false;
+    
+    boost::filesystem::path p( _fname.c_str());// , boost::filesystem::native );
+    if ( !boost::filesystem::exists( p ) ){
+        std::cout << "ACMediaTimedFeature::loadFromFile: file " << _fname << " doesn't exist " << std::endl;
+        return false;
+    }
+    /*if(!boost::filesystem::is_regular( p ) ){
+        std::cout << "ACMediaTimedFeature::loadFromFile: file " << _fname << " isn't regular " << std::endl;
+        return false;
+    }
+    if(boost::filesystem::file_size( p ) == 0 ){
+        std::cout << "ACMediaTimedFeature::loadFromFile: file " << _fname << " has null size " << std::endl;
+        return false;
+    }*/
+    
+	if (_binary){
+		#ifdef ARMADILLO_HAVE_RANDU // randu and .save returns were both introduced in version 0.9.50
+			load_ok = tmp_m.load(_fname, arma_binary); // default format = arma_binary
+		#else
+			tmp_m.load(_fname, arma_binary); // default format = arma_binary
+			if ( tmp_m.n_rows > 0 && tmp_m.n_cols > 0 )
+				load_ok = true;
+		#endif
+	}
+	else {
+		#ifdef ARMADILLO_HAVE_RANDU // randu and .save returns were both introduced in version 0.9.50
+			load_ok = tmp_m.load(_fname, arma_ascii);
+		#else
+			tmp_m.load(_fname, arma_ascii);
+			if ( tmp_m.n_rows > 0 && tmp_m.n_cols > 0 )
+				load_ok = true;
+		#endif
+	}
+	
+	if (load_ok) { 
+		//  tmp_m.print();
+		fvec data;
+        for (int i=0; i<int(data.size()); i++){
+            features_vector.push_back(data[i]);
+        }
+	}
+	return load_ok;
+}
+

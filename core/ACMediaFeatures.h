@@ -79,6 +79,9 @@ public:
 	void write(std::string);  // output in a file -- todo : define format
 	// void read() {} // read from file -- cf. plugin ?
 	
+	bool saveInFile(std::string _fname, bool _binary = true);
+	bool loadFromFile(std::string _fname, bool _binary = true);
+	
 	std::string getName() {return name;};
 	void setName(std::string namei) {this->name = namei;};
 
