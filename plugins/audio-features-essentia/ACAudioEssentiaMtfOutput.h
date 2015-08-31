@@ -94,7 +94,7 @@ public:
     
     void clearFeatures();
     void clearTimedFeatures();
-    std::vector<ACMediaFeatures*> getFeatures();
+    std::map<std::string,ACMediaFeatures*> getFeatures();
     std::map<std::string,ACMediaTimedFeature*> getTimedFeatures();
     
     
@@ -102,8 +102,8 @@ protected:
     template <typename StreamType> void emitMtf(StreamType* s, MtfNode* n, const std::string& indent);
     void outputMtfToStream(MtfNode& root, std::ostream* out);
     
-    std::map<std::string,ACMediaTimedFeature*> descmf;
-    std::vector<ACMediaFeatures*> desc;
+    std::map<std::string,ACMediaTimedFeature*> descmtf;
+    std::map<std::string,ACMediaFeatures*> descmf;
   
     
 };

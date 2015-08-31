@@ -67,47 +67,153 @@ ACAudioEssentiaPlugin::~ACAudioEssentiaPlugin(){
 }
 
 ACFeatureDimensions ACAudioEssentiaPlugin::getFeaturesDimensions(){
-    ACFeatureDimensions featdims;
-    return featdims;
+    return featureDimensions;
 }
 
 ACFeatureDimensions ACAudioEssentiaPlugin::getTimedFeaturesDimensions(){
-    ACFeatureDimensions featdims;
-    return featdims;
+    return timedFeatureDimensions;
 }
 
 void ACAudioEssentiaPlugin::clearFeatures(){
-    /*std::vector<ACMediaTimedFeature*>::iterator mf;
-    for(mf=desc.begin();mf!=desc.end();mf++)
-        //delete (*mf);*/
-    desc.clear();
-}
-
-void ACAudioEssentiaPlugin::clearTimedFeatures(){
-    std::map<std::string,ACMediaTimedFeature*>::iterator mf;
+    /*std::map<std::string,ACMediaTimedFeature*>::iterator mf;
     for(mf=descmf.begin();mf!=descmf.end();mf++)
-        (*mf).second = 0;//delete (*mf);
+        //delete (*mf);*/
     descmf.clear();
 }
 
+void ACAudioEssentiaPlugin::clearTimedFeatures(){
+    std::map<std::string,ACMediaTimedFeature*>::iterator mtf;
+    for(mtf=descmtf.begin();mtf!=descmtf.end();mtf++)
+        (*mtf).second = 0;//delete (*mtf);
+    descmtf.clear();
+}
+
 std::vector<ACMediaFeatures*> ACAudioEssentiaPlugin::calculate(ACMedia* theMedia, bool _save_timed_feat) {
+    std::vector<ACMediaFeatures*> desc;
     this->clearFeatures();
     this->clearTimedFeatures();
     
+    bool storeDimensions = false;
+    if(featureDimensions.empty() && timedFeatureDimensions.empty()){
+        storeDimensions = true;
+        featureDimensions.clear();
+        timedFeatureDimensions.clear();
+    }
     
-    //f_path.parent_path().string();
     _save_timed_feat = true; // forcing saving features so that we don't have to calculate them all the time
     
     // try to keep the convention : _b.mtf = binary ; _t.mtf = ascii text
     bool save_binary = true;//CF was true
     string mtf_file_name; // file(s) in which feature(s) will be saved
-    string file_ext =  "_b.mtf";
+    string mf_file_name; 
+    string binary("_b");
+    string mtf_file_ext =  ".mtf";
+    string mf_file_ext =  ".mf";
     if(!save_binary)
-        file_ext =  "_t.mtf";
+        binary =  "_t";
     string aFileName = theMedia->getFileName();
     string aFileName_noext = aFileName.substr(0,aFileName.find_last_of('.'));
     
-    mtf_file_name = aFileName_noext + "_" + "essentia"  + file_ext;
+    std::map<std::string,ACMediaTimedFeature*>::iterator mtf;
+    std::map<std::string,ACMediaFeatures*>::iterator mf;
+    
+    // Trying to open previously-computed files for parent files (TODO should test/compare parameters and plugin versions)
+    bool featuresAvailable = false;
+    //#ifdef USE_DEBUG
+    _save_timed_feat = true; // forcing saving features so that we don't have to calculate them all the time
+    if(!storeDimensions && theMedia->getParentId()==-1){
+        featuresAvailable = true;
+        
+        // For each timed feature name, try to load it
+        for(ACFeatureDimensions::iterator timedFeatureDim = timedFeatureDimensions.begin(); timedFeatureDim != timedFeatureDimensions.end();timedFeatureDim++){
+            ACMediaTimedFeature* feature = 0;
+            feature = new ACMediaTimedFeature();
+            bool featureAvailable = false;
+            std::string featureName((*timedFeatureDim).first);
+            std::replace( featureName.begin(), featureName.end(), '_', ' ');
+            std::string mtfFeatureName((*timedFeatureDim).first);
+            std::replace( mtfFeatureName.begin(), mtfFeatureName.end(), ' ', '_');
+            mtf_file_name = aFileName_noext + "_" + mtfFeatureName + binary+ mtf_file_ext;
+            //std::cout << "ACAudioEssentiaPlugin: trying to load feature named '" << mtf_file_name << "'... " << std::endl;
+            featureAvailable = feature->loadFromFile(mtf_file_name,save_binary);
+            if(featureAvailable && feature){
+                feature->setName(featureName);
+                featureAvailable = this->addMediaTimedFeature(feature);
+            }
+            if(!featureAvailable){
+                std::cout << "ACAudioEssentiaPlugin: feature named '" << mtf_file_name  << "' NOT loaded" << std::endl;
+            }
+            /*else{
+                std::cout << "ACAudioEssentiaPlugin: feature named '" << mtf_file_name  << "' NOT loaded" << std::endl;
+            }*/
+            featuresAvailable *= featureAvailable;
+        }
+        if(descmtf.size()==0){
+            featuresAvailable = false;
+            std::cout << "ACAudioEssentiaPlugin: features weren't calculated previously" << std::endl;
+        }
+        else if(timedFeatureDimensions.size()==0){
+            featuresAvailable = false;
+            std::cerr << "ACAudioEssentiaPlugin: loaded features are empty" << std::endl;
+        }
+        else if(timedFeatureDimensions.size()!=descmtf.size()){
+            featuresAvailable = false;
+            std::cerr << "ACAudioEssentiaPlugin: some features weren't calculated previously" << std::endl;
+        }
+        if(!featuresAvailable){
+            for(mtf=descmtf.begin();mtf!=descmtf.end();mtf++)
+                delete (*mtf).second;
+            descmtf.clear();
+            std::cerr << "ACAudioEssentiaPlugin: error while loading features, now recalculating them..." << std::endl;
+        }
+        
+        // For each feature name, try to load it
+        for(ACFeatureDimensions::iterator featureDim = featureDimensions.begin(); featureDim != featureDimensions.end();featureDim++){
+            ACMediaFeatures* feature = 0;
+            feature = new ACMediaFeatures();
+            bool featureAvailable = false;
+            std::string featureName((*featureDim).first);
+            std::replace( featureName.begin(), featureName.end(), '_', ' ');
+            std::string mfFeatureName((*featureDim).first);
+            std::replace( mfFeatureName.begin(), mfFeatureName.end(), ' ', '_');
+            mf_file_name = aFileName_noext + "_" + mfFeatureName + binary+ mf_file_ext;
+            //std::cout << "ACAudioEssentiaPlugin: trying to load feature named '" << mf_file_name << "'... " << std::endl;
+            featureAvailable = feature->loadFromFile(mf_file_name,save_binary);
+            if(featureAvailable && feature){
+                feature->setName(featureName);
+                featureAvailable = this->addMediaFeature(feature);
+            }
+            if(!featureAvailable){
+                std::cout << "ACAudioEssentiaPlugin: feature named '" << mf_file_name  << "' NOT loaded" << std::endl;
+            }
+            /*else{
+                std::cout << "ACAudioEssentiaPlugin: feature named '" << mf_file_name  << "' loaded" << std::endl;
+            }*/
+            featuresAvailable *= featureAvailable;
+        }
+        if(descmf.size()==0){
+            featuresAvailable = false;
+            std::cout << "ACAudioEssentiaPlugin: features weren't calculated previously" << std::endl;
+        }
+        else if(featureDimensions.size()==0){
+            featuresAvailable = false;
+            std::cerr << "ACAudioEssentiaPlugin: loaded features are empty" << std::endl;
+        }
+        else if(featureDimensions.size()!=descmf.size()){
+            featuresAvailable = false;
+            std::cerr << "ACAudioEssentiaPlugin: some features weren't calculated previously" << std::endl;
+        }
+        if(!featuresAvailable){
+            for(mf=descmf.begin();mf!=descmf.end();mf++)
+                delete (*mf).second;
+            descmf.clear();
+            std::cerr << "ACAudioEssentiaPlugin: error while loading features, now recalculating them..." << std::endl;
+        }
+    }
+    //#endif
+    // CF TODO check if the features length matches the expected length based on the file length and block/step sizes and resample rate
+    // CF TODO if some features weren't previously calcultated, only recalculate these
+    
     string yaml_file_name = aFileName_noext + "_" + "essentia.xml";
     
     // pool containing profile (configure) options:
@@ -115,8 +221,6 @@ std::vector<ACMediaFeatures*> ACAudioEssentiaPlugin::calculate(ACMedia* theMedia
     // pools for storing results
     essentia::Pool neqloudPool; // non equal loudness pool
     essentia::Pool eqloudPool; // equal loudness pool
-    
-    
     
     bool neqloud = options.value<Real>("nequalLoudness") != 0;
     bool eqloud =  options.value<Real>("equalLoudness")  != 0;
@@ -126,28 +230,67 @@ std::vector<ACMediaFeatures*> ACAudioEssentiaPlugin::calculate(ACMedia* theMedia
                                 equal loudness is set to false. At least one must set to true");
     }
     
-    try {
+    bool computed = false;
+    
+    if(descmf.size()==0 && desc.size()==0){
         
-        compute(aFileName, yaml_file_name, neqloudPool, eqloudPool, options);
+        try {
+            
+            compute(aFileName, yaml_file_name, neqloudPool, eqloudPool, options);
+            computed = true;
+            
+        }
+        catch (EssentiaException& e) {
+            cout << e.what() << endl;
+            //throw;
+            computed = false;
+        }
     }
-    catch (EssentiaException& e) {
-        cout << e.what() << endl;
-        //throw;
+    else{
+        bool reloading = true;
+        std::cout << reloading << std::endl; 
     }
     
-    std::map<std::string,ACMediaTimedFeature*>::iterator mf;
-    for(mf=descmf.begin();mf!=descmf.end();mf++){
-        std::string featureName((*mf).second->getName());
-        std::replace( featureName.begin(), featureName.end(), ' ', '_');
-        mtf_file_name = aFileName_noext + "_" + featureName  + file_ext;
-        std::cout << "ACAudioEssentiaPlugin: trying to save feature named '" << mtf_file_name << "'... " << std::endl;
-        //if(!featuresAvailable){
-            bool saved = (*mf).second->saveInFile(mtf_file_name, save_binary);
+    if(computed){
+        
+        std::map<std::string,ACMediaTimedFeature*>::iterator mtf;
+        for(mtf=descmtf.begin();mtf!=descmtf.end();mtf++){
+            std::string featureName((*mtf).second->getName());
+            std::replace( featureName.begin(), featureName.end(), ' ', '_');
+            mtf_file_name = aFileName_noext + "_" + featureName   + binary+ mtf_file_ext;;
+            //std::cout << "ACAudioEssentiaPlugin: trying to save feature named '" << mtf_file_name << "'... " << std::endl;
+            //if(!featuresAvailable){
+            bool saved = (*mtf).second->saveInFile(mtf_file_name, save_binary);
             if(!saved)
                 std::cerr << "ACAudioEssentiaPlugin: couldn't save feature named '" << mtf_file_name << "'" << std::endl;
-        //}
-        theMedia->addTimedFileNames(mtf_file_name);
-        //mtf_file_names.push_back(mtf_file_name); // keep track of saved features
+            //}
+            theMedia->addTimedFileNames(mtf_file_name);
+            //mtf_file_names.push_back(mtf_file_name); // keep track of saved features
+            if(storeDimensions){
+                std::replace( featureName.begin(), featureName.end(), '_', ' ');
+                timedFeatureDimensions[ featureName ] = (*mtf).second->getDim();
+            }
+        }
+        
+        std::map<std::string,ACMediaFeatures*>::iterator mf;
+        for(mf=descmf.begin();mf!=descmf.end();mf++){
+            std::string featureName((*mf).second->getName());
+            std::replace( featureName.begin(), featureName.end(), ' ', '_');
+            std::string mf_file_name = aFileName_noext + "_" + featureName  + binary+ mf_file_ext;
+            //std::cout << "ACAudioEssentiaPlugin: trying to save feature named '" << mf_file_name << "'... " << std::endl;
+            //if(!featuresAvailable){
+            bool saved = (*mf).second->saveInFile(mf_file_name, save_binary);
+            if(!saved)
+                std::cerr << "ACAudioEssentiaPlugin: couldn't save feature named '" << mf_file_name << "'" << std::endl;
+            //}
+            //theMedia->addTimedFileNames(mtf_file_name);
+            //mtf_file_names.push_back(mtf_file_name); // keep track of saved features
+            if(storeDimensions){
+                std::replace( featureName.begin(), featureName.end(), '_', ' ');
+                featureDimensions[ featureName ] = (*mf).second->getSize();
+            }
+            desc.push_back((*mf).second);
+        }
     }
     
     this->clearTimedFeatures();
@@ -273,26 +416,21 @@ void ACAudioEssentiaPlugin::compute(const string& audioFilename, const string& o
 
 
 bool ACAudioEssentiaPlugin::addMediaTimedFeature(ACMediaTimedFeature* feature){
-    std::map<std::string,ACMediaTimedFeature*>::iterator mf = descmf.find(feature->getName());
-    if(mf!=descmf.end()){
-        //std::cout << "ACAudioYaafeCorePlugin: appended feature: " << feature->getName() << " of length " << feature->getLength() << "/" << (*mf).second->getLength() << " and dim " << feature->getDim() << " vs " << (*mf).second->getDim() << " for file " << file << std::endl;
-        return (*mf).second->appendTimedFeatureAlongTime(feature);
+    std::map<std::string,ACMediaTimedFeature*>::iterator mtf = descmtf.find(feature->getName());
+    if(mtf!=descmtf.end()){
+        //std::cout << "ACAudioEssentiaPlugin: appended feature: " << feature->getName() << " of length " << feature->getLength() << "/" << (*mf).second->getLength() << " and dim " << feature->getDim() << " vs " << (*mf).second->getDim() << " for file " << file << std::endl;
+        return (*mtf).second->appendTimedFeatureAlongTime(feature);
     }
     else{
-        //std::cout << "ACAudioYaafeCorePlugin: new feature: " << feature->getName() << " of length " << feature->getLength() << " and dim " << feature->getDim() << " for file " << file << std::endl;
-        descmf.insert( pair<std::string,ACMediaTimedFeature*>(feature->getName(),feature) );
+        //std::cout << "ACAudioEssentiaPlugin: new feature: " << feature->getName() << " of length " << feature->getLength() << " and dim " << feature->getDim() << " for file " << file << std::endl;
+        descmtf.insert( pair<std::string,ACMediaTimedFeature*>(feature->getName(),feature) );
         return true;
     }
 }
 
 bool ACAudioEssentiaPlugin::addMediaFeature(ACMediaFeatures* feature){
-    std::vector<ACMediaFeatures*>::iterator mf = std::find(desc.begin(),desc.end(),feature);
-    
-    if(mf==desc.end()){
-        desc.push_back(feature);
-        return true;
-    }
-    return false;
+    descmf.insert( pair<std::string,ACMediaFeatures*>(feature->getName(),feature) );
+    return true;
 }
 
 void ACAudioEssentiaPlugin::outputToFile(Pool& pool, const string& outputFilename, const Pool& options) {
@@ -318,15 +456,15 @@ void ACAudioEssentiaPlugin::outputToFile(Pool& pool, const string& outputFilenam
     
     ACAudioEssentiaMtfOutput* mtf_output = dynamic_cast<ACAudioEssentiaMtfOutput*>(output);
     if(mtf_output){
-        std::map<std::string,ACMediaTimedFeature*> _descmf = mtf_output->getTimedFeatures();
-        std::vector<ACMediaFeatures*> _desc = mtf_output->getFeatures();
+        std::map<std::string,ACMediaTimedFeature*> _descmtf = mtf_output->getTimedFeatures();
+        std::map<std::string,ACMediaFeatures*> _descmf = mtf_output->getFeatures();
         
-        for(std::map<std::string,ACMediaTimedFeature*>::iterator mf = _descmf.begin();mf!=_descmf.end();mf++){
-            this->addMediaTimedFeature(mf->second);
+        for(std::map<std::string,ACMediaTimedFeature*>::iterator mtf = _descmtf.begin();mtf!=_descmtf.end();mtf++){
+            this->addMediaTimedFeature(mtf->second);
         }
         
-        for(std::vector<ACMediaFeatures*>::iterator mf = _desc.begin(); mf!=_desc.end();mf++){
-            this->addMediaFeature(*mf);
+        for(std::map<std::string,ACMediaFeatures*>::iterator mf = _descmf.begin(); mf!=_descmf.end();mf++){
+            this->addMediaFeature(mf->second);
         }
         
         mtf_output->clearFeatures();

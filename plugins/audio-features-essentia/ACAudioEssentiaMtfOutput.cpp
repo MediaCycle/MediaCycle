@@ -326,7 +326,7 @@ void ACAudioEssentiaMtfOutput::emitMtf(StreamType* s, MtfNode* n, const string& 
                             
                             feature = splits[splits.size()-2];
                             category = splits[splits.size()-3];
-                            mc_feature = feature + ": " + mc_stat;
+                            mc_feature = feature + " " + mc_stat;
                             
                         }
                     }
@@ -563,10 +563,10 @@ void ACAudioEssentiaMtfOutput::emitMtf(StreamType* s, MtfNode* n, const string& 
                 }
                 
                 if(timeFeat && isTemporalFeature){
-                    this->descmf[mc_feature] = timeFeat;
+                    this->descmtf[mc_feature] = timeFeat;
                 }
                 if(feat){
-                    this->desc.push_back(feat);
+                    this->descmf[mc_feature] = feat;
                 }
             }
             
@@ -741,24 +741,24 @@ void ACAudioEssentiaMtfOutput::compute() {
 }
 
 void ACAudioEssentiaMtfOutput::clearFeatures(){
-    /*std::vector<ACMediaTimedFeature*>::iterator mf;
-    for(mf=desc.begin();mf!=desc.end();mf++)
-        //delete (*mf);*/
-    desc.clear();
-}
-
-void ACAudioEssentiaMtfOutput::clearTimedFeatures(){
-    std::map<std::string,ACMediaTimedFeature*>::iterator mf;
-    for(mf=descmf.begin();mf!=descmf.end();mf++)
-        (*mf).second = 0;//delete (*mf);
+std::map<std::string,ACMediaFeatures*>::iterator mf;
+    /*for(mf=descmf.begin();mf!=descmf.end();mf++)
+        (*mf).second = 0;//delete (*mf);*/
     descmf.clear();
 }
 
-std::vector<ACMediaFeatures*> ACAudioEssentiaMtfOutput::getFeatures(){
-    return desc;
+void ACAudioEssentiaMtfOutput::clearTimedFeatures(){
+    std::map<std::string,ACMediaTimedFeature*>::iterator mtf;
+    for(mtf=descmtf.begin();mtf!=descmtf.end();mtf++)
+        (*mtf).second = 0;//delete (*mtf);
+    descmtf.clear();
+}
+
+std::map<std::string,ACMediaFeatures*> ACAudioEssentiaMtfOutput::getFeatures(){
+    return descmf;
 }
 
 std::map<std::string,ACMediaTimedFeature*> ACAudioEssentiaMtfOutput::getTimedFeatures(){
-    return descmf;
+    return descmtf;
 }
 

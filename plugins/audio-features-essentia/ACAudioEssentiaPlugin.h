@@ -62,11 +62,18 @@ protected:
     
     void clearFeatures();
     void clearTimedFeatures();
+
     bool addMediaTimedFeature(ACMediaTimedFeature* feature);
     bool addMediaFeature(ACMediaFeatures* feature);
     
-    std::map<std::string,ACMediaTimedFeature*> descmf;
-    std::vector<ACMediaFeatures*> desc;
+    std::map<std::string,ACMediaTimedFeature*> descmtf;
+    std::map<std::string,ACMediaFeatures*> descmf;
+    
+    /*std::vector<std::string> timedFeatureNames;
+    std::vector<std::string> featureNames;*/
+    
+    ACFeatureDimensions featureDimensions;
+    ACFeatureDimensions timedFeatureDimensions;
 };
 
 
