@@ -99,7 +99,7 @@ public:
     
     
 protected:
-    template <typename StreamType> void emitMtf(StreamType* s, MtfNode* n, const std::string& indent);
+    template <typename StreamType> void emitMtf(StreamType* s, MtfNode* p, MtfNode* n, const std::string& indent);
     void outputMtfToStream(MtfNode& root, std::ostream* out);
     
     std::map<std::string,ACMediaTimedFeature*> descmtf;

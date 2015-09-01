@@ -35,7 +35,6 @@
 #include <fstream>
 #include <sstream> // escapeJsonString
 
-
 using namespace std;
 using namespace essentia;
 using namespace standard;
@@ -233,24 +232,15 @@ void fillMtfTree (const Pool& p, MtfNode* root) {
 // Emits YAML given a MtfNode root to a specified stream.
 // This is a recursive solution.
 template <typename StreamType>
-void ACAudioEssentiaMtfOutput::emitMtf(StreamType* s, MtfNode* n, const string& indent) {
-    
-    
-    
-    
+void ACAudioEssentiaMtfOutput::emitMtf(StreamType* s, MtfNode* p, MtfNode* n, const string& indent) {
+
     *s << indent << n->name << ":";
     ////std::cout << n->name << std::endl;
     
     //CF
     /*if(n->name == "configuration" || n->name == "metadata")
         return;*/
-    
-    
-    
-    
-    
-    
-    
+
     if (n->children.empty()) { // if there are no children, emit the value here
         if (n->value != NULL) {
             *s << " " << *(n->value) << "\n";  // Parameters know how to be emitted to streams
@@ -258,9 +248,9 @@ void ACAudioEssentiaMtfOutput::emitMtf(StreamType* s, MtfNode* n, const string& 
             //std::string _filename;
             
             
-            const Pool& p = _pool.get();            
+            const Pool& _p = _pool.get();            
             
-            std::vector<std::string> descNames = p.descriptorNames();
+            std::vector<std::string> descNames = _p.descriptorNames();
             std::string category;
             std::string feature;
             std::string stat;
@@ -273,9 +263,9 @@ void ACAudioEssentiaMtfOutput::emitMtf(StreamType* s, MtfNode* n, const string& 
             bool isStat = false;
             
             for(std::vector<std::string>::iterator descName = descNames.begin(); descName != descNames.end(); descName++){
-                //std::cout << "descName " << *descName << std::endl; 
                 std::vector<std::string> splits = dotsplit(*descName);
-                if(splits.size()>1 && splits.back() == n->name){
+                //////std::cout << "descName " << *descName << " dots " << splits.size() << " " << std::endl; 
+                if(splits.size()>2 && splits.back() == n->name && splits[splits.size()-2] == p->name){
                     if(splits.front() == "metadata"){
                         isMetadata = true;
                     }
@@ -356,22 +346,22 @@ void ACAudioEssentiaMtfOutput::emitMtf(StreamType* s, MtfNode* n, const string& 
             
             if(isFeature || isStat){
                 
-                float channels = p.value<Real>("metadata.audio_properties.channels");
-                float analysis_sample_rate = p.value<Real>("metadata.audio_properties.analysis_sample_rate");
-                float length = p.value<Real>("metadata.audio_properties.length");          
+                float channels = _p.value<Real>("metadata.audio_properties.channels");
+                float analysis_sample_rate = _p.value<Real>("metadata.audio_properties.analysis_sample_rate");
+                float length = _p.value<Real>("metadata.audio_properties.length");          
                 
                 float frameSize = 0;
-                bool hasFrameSize = p.contains<Real>("configuration." + category + ".frameSize");
+                bool hasFrameSize = _p.contains<Real>("configuration." + category + ".frameSize");
                 if(hasFrameSize){
-                    frameSize = p.value<Real>("configuration." + category + ".frameSize");
+                    frameSize = _p.value<Real>("configuration." + category + ".frameSize");
                 }
                 
                 //std::cout << " frameSize " << frameSize /*<< std::endl*/;
                 
                 float hopSize = 0;
-                bool hasHopSize = p.contains<Real>("configuration." + category + ".hopSize");
+                bool hasHopSize = _p.contains<Real>("configuration." + category + ".hopSize");
                 if(hasHopSize){
-                    hopSize = p.value<Real>("configuration." + category + ".hopSize");
+                    hopSize = _p.value<Real>("configuration." + category + ".hopSize");
                 }
                 
                 //std::cout << " hopSize " << hopSize /*<< std::endl*/;
@@ -593,7 +583,7 @@ void ACAudioEssentiaMtfOutput::emitMtf(StreamType* s, MtfNode* n, const string& 
         
         // and then emit the yaml for all of its children, recursive call
         for (int i=0; i<(int)n->children.size(); ++i) {
-            emitMtf(s, n->children[i], indent+"    ");
+            emitMtf(s, n, n->children[i], indent+"    ");
         }
     }
 }
@@ -658,7 +648,7 @@ void emitJson(StreamType* s, MtfNode* n, int indentsize, int indentincr) {
 void ACAudioEssentiaMtfOutput::outputMtfToStream(MtfNode& root, ostream* out) {
     for (int i=0; i<(int)root.children.size(); ++i) {
         *out << "\n";
-        emitMtf(out, root.children[i], "");
+        emitMtf(out, &root, root.children[i], "");
     }
 }
 
