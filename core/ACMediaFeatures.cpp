@@ -150,14 +150,14 @@ void ACMediaFeatures::write(string file_name){ // output in file
 bool ACMediaFeatures::saveInFile(string _fname, bool _binary){ 
 	bool save_ok = false;
 	
-	fvec data;
+	vec data(features_vector.size(),fill::zeros);
 	for (int i=0; i<int(features_vector.size()); i++){
-		data << features_vector[i];
+		data(i) = features_vector[i];
 	}
 	
 	if (_binary){
 		#ifdef ARMADILLO_HAVE_RANDU // randu and .save returns were both introduced in version 0.9.50
-			save_ok = data.save(_fname, arma_binary); // default format = arma_binary
+			save_ok = data.save(_fname,arma_binary); // default format = arma_binary
 		#else
 			data.save(_fname, arma_binary); // default format = arma_binary
 			if ( boost::filesystem::exists( _fname ) )
@@ -177,7 +177,7 @@ bool ACMediaFeatures::saveInFile(string _fname, bool _binary){
 }
 
 bool ACMediaFeatures::loadFromFile(string _fname, bool _binary){
-	fvec tmp_m;
+	mat tmp_m;
 	bool load_ok = false;
     
     boost::filesystem::path p( _fname.c_str());// , boost::filesystem::native );
@@ -214,10 +214,8 @@ bool ACMediaFeatures::loadFromFile(string _fname, bool _binary){
 	}
 	
 	if (load_ok) { 
-		//  tmp_m.print();
-		fvec data;
-        for (int i=0; i<int(data.size()); i++){
-            features_vector.push_back(data[i]);
+        for (int i=0; i<int(tmp_m.n_rows); i++){
+            features_vector.push_back(tmp_m(i,0));
         }
 	}
 	return load_ok;
