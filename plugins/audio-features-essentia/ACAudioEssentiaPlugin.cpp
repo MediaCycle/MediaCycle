@@ -232,7 +232,7 @@ std::vector<ACMediaFeatures*> ACAudioEssentiaPlugin::calculate(ACMedia* theMedia
     
     bool computed = false;
     
-    if(descmf.size()==0 && desc.size()==0){
+    if(descmtf.size()==0 && descmf.size()==0){
         
         try {
             
@@ -253,7 +253,6 @@ std::vector<ACMediaFeatures*> ACAudioEssentiaPlugin::calculate(ACMedia* theMedia
     
     if(computed){
         
-        std::map<std::string,ACMediaTimedFeature*>::iterator mtf;
         for(mtf=descmtf.begin();mtf!=descmtf.end();mtf++){
             std::string featureName((*mtf).second->getName());
             std::replace( featureName.begin(), featureName.end(), ' ', '_');
@@ -272,7 +271,6 @@ std::vector<ACMediaFeatures*> ACAudioEssentiaPlugin::calculate(ACMedia* theMedia
             }
         }
         
-        std::map<std::string,ACMediaFeatures*>::iterator mf;
         for(mf=descmf.begin();mf!=descmf.end();mf++){
             std::string featureName((*mf).second->getName());
             std::replace( featureName.begin(), featureName.end(), ' ', '_');
@@ -289,8 +287,11 @@ std::vector<ACMediaFeatures*> ACAudioEssentiaPlugin::calculate(ACMedia* theMedia
                 std::replace( featureName.begin(), featureName.end(), '_', ' ');
                 featureDimensions[ featureName ] = (*mf).second->getSize();
             }
-            desc.push_back((*mf).second);
         }
+    }
+    
+    for(mf=descmf.begin();mf!=descmf.end();mf++){
+        desc.push_back((*mf).second);
     }
     
     this->clearTimedFeatures();

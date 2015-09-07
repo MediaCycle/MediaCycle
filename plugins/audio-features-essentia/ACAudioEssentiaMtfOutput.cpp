@@ -265,7 +265,7 @@ void ACAudioEssentiaMtfOutput::emitMtf(StreamType* s, MtfNode* p, MtfNode* n, co
             for(std::vector<std::string>::iterator descName = descNames.begin(); descName != descNames.end(); descName++){
                 std::vector<std::string> splits = dotsplit(*descName);
                 //////std::cout << "descName " << *descName << " dots " << splits.size() << " " << std::endl; 
-                if(splits.size()>2 && splits.back() == n->name && splits[splits.size()-2] == p->name){
+                if(splits.size()>=2 && splits.back() == n->name && splits[splits.size()-2] == p->name){
                     if(splits.front() == "metadata"){
                         isMetadata = true;
                     }
