@@ -251,46 +251,45 @@ std::vector<ACMediaFeatures*> ACAudioEssentiaPlugin::calculate(ACMedia* theMedia
         std::cout << reloading << std::endl; 
     }
     
-    if(computed){
+    for(mtf=descmtf.begin();mtf!=descmtf.end();mtf++){
+        std::string featureName((*mtf).second->getName());
+        std::replace( featureName.begin(), featureName.end(), ' ', '_');
+        mtf_file_name = aFileName_noext + "_" + featureName   + binary+ mtf_file_ext;;
         
-        for(mtf=descmtf.begin();mtf!=descmtf.end();mtf++){
-            std::string featureName((*mtf).second->getName());
-            std::replace( featureName.begin(), featureName.end(), ' ', '_');
-            mtf_file_name = aFileName_noext + "_" + featureName   + binary+ mtf_file_ext;;
-            //std::cout << "ACAudioEssentiaPlugin: trying to save feature named '" << mtf_file_name << "'... " << std::endl;
-            //if(!featuresAvailable){
+        /// Save each timed feature in a *.mtf file if it has just been computed (not if loaded)
+        if(computed){
             bool saved = (*mtf).second->saveInFile(mtf_file_name, save_binary);
             if(!saved)
                 std::cerr << "ACAudioEssentiaPlugin: couldn't save feature named '" << mtf_file_name << "'" << std::endl;
-            //}
-            theMedia->addTimedFileNames(mtf_file_name);
-            //mtf_file_names.push_back(mtf_file_name); // keep track of saved features
-            if(storeDimensions){
-                std::replace( featureName.begin(), featureName.end(), '_', ' ');
-                timedFeatureDimensions[ featureName ] = (*mtf).second->getDim();
-            }
         }
         
-        for(mf=descmf.begin();mf!=descmf.end();mf++){
-            std::string featureName((*mf).second->getName());
-            std::replace( featureName.begin(), featureName.end(), ' ', '_');
-            std::string mf_file_name = aFileName_noext + "_" + featureName  + binary+ mf_file_ext;
-            //std::cout << "ACAudioEssentiaPlugin: trying to save feature named '" << mf_file_name << "'... " << std::endl;
-            //if(!featuresAvailable){
-            bool saved = (*mf).second->saveInFile(mf_file_name, save_binary);
-            if(!saved)
-                std::cerr << "ACAudioEssentiaPlugin: couldn't save feature named '" << mf_file_name << "'" << std::endl;
-            //}
-            //theMedia->addTimedFileNames(mtf_file_name);
-            //mtf_file_names.push_back(mtf_file_name); // keep track of saved features
-            if(storeDimensions){
-                std::replace( featureName.begin(), featureName.end(), '_', ' ');
-                featureDimensions[ featureName ] = (*mf).second->getSize();
-            }
+        if(storeDimensions){
+            std::replace( featureName.begin(), featureName.end(), '_', ' ');
+            timedFeatureDimensions[ featureName ] = (*mtf).second->getDim();
         }
+        
+        /// Inform the media of its available timed features
+        theMedia->addTimedFileNames(mtf_file_name);
     }
     
     for(mf=descmf.begin();mf!=descmf.end();mf++){
+        std::string featureName((*mf).second->getName());
+        std::replace( featureName.begin(), featureName.end(), ' ', '_');
+        std::string mf_file_name = aFileName_noext + "_" + featureName  + binary+ mf_file_ext;
+        
+        /// Save each feature in a *.mf file if it has just been computed (not if loaded)
+        if(computed){
+            bool saved = (*mf).second->saveInFile(mf_file_name, save_binary);
+            if(!saved)
+                std::cerr << "ACAudioEssentiaPlugin: couldn't save feature named '" << mf_file_name << "'" << std::endl;
+        }
+        
+        if(storeDimensions){
+            std::replace( featureName.begin(), featureName.end(), '_', ' ');
+            featureDimensions[ featureName ] = (*mf).second->getSize();
+        }
+        
+        /// Build a list of features extracted
         desc.push_back((*mf).second);
     }
     
