@@ -47,29 +47,35 @@
 #include "yaafe-core/ComponentFactory.h"
 
 class ACAudioYaafeCorePlugin : public ACTimedFeaturesPlugin {
-
+    
 public:
     ACAudioYaafeCorePlugin();
     virtual ~ACAudioYaafeCorePlugin();
-
+    
     virtual std::string dataflowFilename()=0;
-
+    
     std::vector<ACMediaFeatures*> calculate(ACMedia* theMedia, bool _save_timed_feat=false);
-
-    // XS TODO check if this works
-    // ACMediaTimedFeature* getTimedFeatures();
-    bool addMediaTimedFeature(ACMediaTimedFeature* feature, std::string file);
+    
+    bool addMediaTimedFeature(ACMediaTimedFeature* feature);
+    bool addMediaFeature(ACMediaFeatures* feature);
+    
     bool isMediaTimedFeatureStored(std::string name, std::string file);
     ACMediaTimedFeature* getMediaTimedFeatureStored(std::string name, std::string file);
+    
     virtual ACFeatureDimensions getFeaturesDimensions();
     virtual ACFeatureDimensions getTimedFeaturesDimensions();
+    
+    void clearFeatures();
+    void clearTimedFeatures();
 
 protected:
     void loadDataflow();
     bool registerFactories();
-
+    
 private:
-    std::map<std::string,ACMediaTimedFeature*> descmf;
+    std::map<std::string,ACMediaTimedFeature*> descmtf;
+    std::map<std::string,ACMediaFeatures*> descmf;
+    
     //std::vector<std::string> mtf_file_names;
     void listComponents();
     void describeComponent(const std::string component);
@@ -79,7 +85,10 @@ private:
     int m_default_resample_rate, m_default_step_size, m_default_block_size;
     bool dataflowLoaded;
     bool factoriesRegistered;
+    
     ACFeatureDimensions featureDimensions;
+    ACFeatureDimensions timedFeatureDimensions;
+    
     std::vector<std::string> timedFeatureNames;
     std::vector<std::string> readableTimedFeatureNames;
     std::map<std::string,ACStatType> featuresStats;

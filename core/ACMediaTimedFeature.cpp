@@ -384,7 +384,7 @@ ACMediaFeatures* ACMediaTimedFeature::weightedMean(ACMediaTimedFeature* weight){
 	fmat weightVal = weight->getValueAtTime(this->getTime());
 	float sumWeight = as_scalar(sum(weightVal));
 	fmat tmp_m;
-    string nameLoc = ": Weighted mean";
+    string nameLoc = " Weighted Mean";
 	weightVal = weightVal / sumWeight;
 	tmp_m = trans(weightVal) * this->getValue();
 	if (! tmp_m.is_finite()){
@@ -400,7 +400,7 @@ ACMediaFeatures* ACMediaTimedFeature::weightedMean(ACMediaTimedFeature* weight){
 ACMediaFeatures* ACMediaTimedFeature::mean(){
 	ACMediaFeatures* mean_mf = new ACMediaFeatures();  
 	fmat mean_m = arma::mean(this->getValue());
-    string nameLoc = ": Mean";
+    string nameLoc = " Mean";
     mean_mf->setName(this->getName()+nameLoc);
 	for (int i=0; i<mean_m.n_cols; i++){
 		mean_mf->addFeatureElement(mean_m(0,i)); // 0 = per column
@@ -411,7 +411,7 @@ ACMediaFeatures* ACMediaTimedFeature::mean(){
 ACMediaFeatures* ACMediaTimedFeature::min(){
     ACMediaFeatures* min_mf = new ACMediaFeatures();
     fmat min_m = arma::min(this->getValue());
-    string nameLoc = ": Min";
+    string nameLoc = " Min";
     min_mf->setName(this->getName()+nameLoc);
     //cout << "armadillo min" << endl;
     for (int i=0; i<min_m.n_cols; i++){
@@ -424,7 +424,7 @@ ACMediaFeatures* ACMediaTimedFeature::min(){
 ACMediaFeatures* ACMediaTimedFeature::max(){
 	ACMediaFeatures* max_mf = new ACMediaFeatures();  
 	fmat max_m = arma::max(this->getValue());
-    string nameLoc = ": Max";
+    string nameLoc = " Max";
     max_mf->setName(this->getName()+nameLoc);
     //cout << "armadillo max" << endl;
 	for (int i=0; i<max_m.n_cols; i++){
@@ -452,7 +452,7 @@ ACMediaFeatures* ACMediaTimedFeature::centroid(){
 		output = moments[0];
 		centroid_mf->addFeatureElement(output);
 	}
-	string nameLoc = ": Centroid";
+	string nameLoc = " Centroid";
     centroid_mf->setName(this->getName()+nameLoc);
     centroid_mf->setNeedsNormalization(1);
 	return centroid_mf;
@@ -478,7 +478,7 @@ ACMediaFeatures* ACMediaTimedFeature::spread(){
 		//std::cout << "mom1 " << moments[0] << " / mom2 " << moments[1] << " / mom3 " << moments[2] << " / mom4 " << moments[3] << " // kurtosis: " << output << "\n";
 	}
 	
-    string nameLoc = ": Spread";
+    string nameLoc = " Spread";
     spread_mf->setName(this->getName()+nameLoc);
     spread_mf->setNeedsNormalization(1);
 	
@@ -520,7 +520,7 @@ ACMediaFeatures* ACMediaTimedFeature::skew(){
 		skew_mf->addFeatureElement(output);
 	}
 	
-	string nameLoc = ": Skewness";
+	string nameLoc = " Skewness";
     skew_mf->setName(this->getName()+nameLoc);
     skew_mf->setNeedsNormalization(1);
 	
@@ -562,7 +562,7 @@ ACMediaFeatures* ACMediaTimedFeature::kurto(){
 		//std::cout << "mom1 " << moments[0] << " / mom2 " << moments[1] << " / mom3 " << moments[2] << " / mom4 " << moments[3] << " // kurtosis: " << output << "\n";
 	}
 	
-	string nameLoc = ": Kurtosis";
+	string nameLoc = " Kurtosis";
     kurt_mf->setName(this->getName()+nameLoc);
     kurt_mf->setNeedsNormalization(1);
 	
@@ -596,7 +596,7 @@ ACMediaFeatures* ACMediaTimedFeature::weightedStdDeviation(ACMediaTimedFeature* 
 	ACMediaFeatures* wstd_mf = new ACMediaFeatures();
 	fmat wstd_m;
 	wstd_m = sqrt(trans(weightVal) * cDataSq);
-    string nameLoc = ": Weighted standard deviation";
+    string nameLoc = " Weighted Standard Deviation";
     wstd_mf->setName(this->getName()+nameLoc);
 	for (int i=0; i<wstd_m.n_cols; i++)
 		wstd_mf->addFeatureElement(wstd_m(0,i));
@@ -605,7 +605,7 @@ ACMediaFeatures* ACMediaTimedFeature::weightedStdDeviation(ACMediaTimedFeature* 
 
 ACMediaFeatures* ACMediaTimedFeature::std(){  
 	fmat std_m = stddev(this->getValue());
-    string nameLoc = ": Standard deviation";
+    string nameLoc = " Standard Deviation";
 	ACMediaFeatures* std_mf = new ACMediaFeatures();
     std_mf->setName(this->getName()+nameLoc);
 	for (int i=0; i<std_m.n_cols; i++)
@@ -625,7 +625,7 @@ ACMediaFeatures* ACMediaTimedFeature::cov(int nbDiag){
         for (uword j=0; j < locCov.n_cols-i; j++)
             cov_mf->addFeatureElement(locCov(j+i,j));
     }
-    string nameLoc = ": Cov";
+    string nameLoc = " Cov";
     cov_mf->setName(this->getName()+nameLoc);
     cov_mf->setNeedsNormalization(1);
     return cov_mf;
@@ -640,7 +640,7 @@ ACMediaFeatures* ACMediaTimedFeature::cor(int nbDiag){
         for (uword j=0; j < locCor.n_cols-i; j++)
             cor_mf->addFeatureElement(locCor(j+i,j));
     }
-    string nameLoc = ": Cor";
+    string nameLoc = " Corr";
     cor_mf->setName(this->getName()+nameLoc);
     cor_mf->setNeedsNormalization(1);
     return cor_mf;
@@ -714,7 +714,7 @@ ACMediaFeatures* ACMediaTimedFeature::modulation(){
     for (int j=0;j<energyMod.n_cols;j++)
         cout<<sumMod(j)<<"\t";
     cout<<endl;*/
-	string nameLoc = ": modulation";
+	string nameLoc = " Modulation";
     modulation_mf->setName(this->getName()+nameLoc);
     modulation_mf->setNeedsNormalization(1);
     return modulation_mf;
@@ -746,7 +746,7 @@ ACMediaFeatures* ACMediaTimedFeature::logCentroid(){
 		output = moments[0];
 		centroid_mf->addFeatureElement(output);
 	}
-	string nameLoc = ": log Centroid";
+	string nameLoc = " Log Centroid";
     centroid_mf->setName(this->getName()+nameLoc);
     centroid_mf->setNeedsNormalization(1);
 	return centroid_mf;
@@ -779,7 +779,7 @@ ACMediaFeatures* ACMediaTimedFeature::logSpread(){
 		//std::cout << "mom1 " << moments[0] << " / mom2 " << moments[1] << " / mom3 " << moments[2] << " / mom4 " << moments[3] << " // kurtosis: " << output << "\n";
 	}
 	
-    string nameLoc = ": log Spread";
+    string nameLoc = " Log Spread";
     spread_mf->setName(this->getName()+nameLoc);
     spread_mf->setNeedsNormalization(1);
 	
@@ -828,7 +828,7 @@ ACMediaFeatures* ACMediaTimedFeature::logSkew(){
 		skew_mf->addFeatureElement(output);
 	}
 	
-	string nameLoc = ": log Skewness";
+	string nameLoc = " Log Skewness";
     skew_mf->setName(this->getName()+nameLoc);
     skew_mf->setNeedsNormalization(1);
 	
@@ -877,7 +877,7 @@ ACMediaFeatures* ACMediaTimedFeature::logKurto(){
 		//std::cout << "mom1 " << moments[0] << " / mom2 " << moments[1] << " / mom3 " << moments[2] << " / mom4 " << moments[3] << " // kurtosis: " << output << "\n";
 	}
 	
-	string nameLoc = ": log Kurtosis";
+	string nameLoc = " Log Kurtosis";
     kurt_mf->setName(this->getName()+nameLoc);
     kurt_mf->setNeedsNormalization(1);
 	
@@ -1060,7 +1060,7 @@ ACMediaFeatures* ACMediaTimedFeature::temporalModel(double start_sec, double sto
 		exit(1);
 	}
 	
-    string nameLoc = ": Temporal Model";
+    string nameLoc = " Temporal Model";
     temporalModel_mf->setName(this->getName()+nameLoc);
 	for (int i = 0; i < sm_v.n_cols; i++){
 		temporalModel_mf->addFeatureElement(sm_v(i)); 

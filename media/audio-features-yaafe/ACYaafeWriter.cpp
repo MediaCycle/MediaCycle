@@ -216,7 +216,7 @@ bool ACYaafeWriter::process(Ports<InputBuffer*>& inp, Ports<OutputBuffer*>& outp
     }
 
     if(m_plugin && feat){
-        return m_plugin->addMediaTimedFeature(feat,m_file);
+        return m_plugin->addMediaTimedFeature(feat);
     }
     return true;
 }
