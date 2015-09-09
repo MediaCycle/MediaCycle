@@ -128,7 +128,7 @@ ACAudioYaafeCorePlugin::ACAudioYaafeCorePlugin() : ACTimedFeaturesPlugin() {
     
     //DataBlock::setPreferedBlockSize(1024);
     
-    m_default_resample_rate = 20050;
+    m_default_resample_rate = 22050;
     m_default_step_size = 256;
     m_default_block_size = 512;
     
