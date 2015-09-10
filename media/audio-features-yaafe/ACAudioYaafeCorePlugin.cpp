@@ -791,12 +791,6 @@ std::vector<ACMediaFeatures*> ACAudioYaafeCorePlugin::calculate(ACMedia* theMedi
             featuresAvailable = false;
             std::cerr << "ACAudioYaafeCorePlugin: some features weren't calculated previously" << std::endl;
         }
-        if(!featuresAvailable){
-            for(mtf=descmtf.begin();mtf!=descmtf.end();mtf++)
-                delete (*mtf).second;
-            descmtf.clear();
-            std::cerr << "ACAudioYaafeCorePlugin: error while loading features, now recalculating them..." << std::endl;
-        }
         
         // For each feature name, try to load it
         for(ACFeatureDimensions::iterator featureDim = featureDimensions.begin(); featureDim != featureDimensions.end();featureDim++){
@@ -834,12 +828,17 @@ std::vector<ACMediaFeatures*> ACAudioYaafeCorePlugin::calculate(ACMedia* theMedi
             featuresAvailable = false;
             std::cerr << "ACAudioYaafeCorePlugin: some features weren't calculated previously" << std::endl;
         }
-        if(!featuresAvailable){
-            for(mf=descmf.begin();mf!=descmf.end();mf++)
-                delete (*mf).second;
-            descmf.clear();
-            std::cerr << "ACAudioYaafeCorePlugin: error while loading features, now recalculating them..." << std::endl;
-        }
+    }
+    
+    if(!featuresAvailable){
+        for(mtf=descmtf.begin();mtf!=descmtf.end();mtf++)
+            delete (*mtf).second;
+        descmtf.clear();
+
+        for(mf=descmf.begin();mf!=descmf.end();mf++)
+            delete (*mf).second;
+        descmf.clear();
+        std::cerr << "ACAudioYaafeCorePlugin: error while loading features, now recalculating them..." << std::endl;
     }
     
     //#endif
