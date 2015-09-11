@@ -42,10 +42,14 @@
 #include <boost/filesystem/operations.hpp>
 namespace fs = boost::filesystem;
 
+#include <boost/chrono/thread_clock.hpp>
+
 #ifdef USE_CORE_DISPATCH
 #include <dispatch/dispatch.h>
 dispatch_queue_t queue;
 #endif
+
+using namespace boost::chrono;
 
 using namespace std;
 
@@ -1031,6 +1035,8 @@ int ACMedia::import(std::string _path, int _mid, ACPluginManager *acpl, bool _sa
     this->filename_thumbnail = _path; // XS TODO make real separate thumbnail option
     int import_ok = 0;
     
+    thread_clock::time_point extract_start = thread_clock::now();  
+    
     if (this->getMediaData()==0){
         cerr << "<ACMedia::import> failed accessing data for media number: " << _mid << endl;
         return 0;
@@ -1048,13 +1054,23 @@ int ACMedia::import(std::string _path, int _mid, ACPluginManager *acpl, bool _sa
         return 0;
     }
     
-    //compute thumbnails with available plugins that doesn't require feature extraction or segmentation
-    this->computeThumbnails(acpl,false, false);
+    thread_clock::time_point extract_stop = thread_clock::now();  
+    std::cout << "ACMedia::import extractData took: " << duration_cast<microseconds>(extract_stop - extract_start).count() << " us" << std::endl;
+ 
     
+    //compute thumbnails with available plugins that doesn't require feature extraction or segmentation
+    thread_clock::time_point thumb_start = thread_clock::now(); 
+    this->computeThumbnails(acpl,false, false);
+    thread_clock::time_point thumb_stop = thread_clock::now();  
+    std::cout << "ACMedia::import computeThumbnails took: " << duration_cast<microseconds>(thumb_stop - thumb_start).count() << " us" << std::endl;
+ 
     //compute features with available plugins
+    thread_clock::time_point feat_start = thread_clock::now(); 
     if (!this->extractFeatures(acpl,_save_timed_feat))
         return 0;
     import_ok=1;
+    thread_clock::time_point feat_stop = thread_clock::now();  
+    std::cout << "ACMedia::import extractFeatures took: " << duration_cast<microseconds>(feat_stop - feat_start).count() << " us" << std::endl;
     
     //compute thumbnails with available plugins that require feature extraction but not segmentation
     this->computeThumbnails(acpl,true, false);
@@ -1276,7 +1292,7 @@ int ACMedia::extractFeatures(ACPluginManager *acpl, bool _save_timed_feat) {
             }
         }
         
-        std::cout << "ACMedia: " << this->features_vectors.size() << " features." <<std::endl;
+        //std::cout << "ACMedia: " << this->features_vectors.size() << " features." <<std::endl;
         if (this->features_vectors.size()>0)
             extract_feat_ok = 1;
     }

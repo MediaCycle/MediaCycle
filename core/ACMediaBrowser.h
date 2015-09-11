@@ -122,7 +122,7 @@ public:
     ACMediaLibrary *getLibrary() { return mLibrary; };
 
     // call this when the number of nodes changes in the library
-    void libraryContentChanged(int needsCluster=1);
+    void libraryContentChanged(int needsCluster=1, bool needsDisplay = true);
 
     // handy library to just assign random positions to items
     void randomizeNodePositions();

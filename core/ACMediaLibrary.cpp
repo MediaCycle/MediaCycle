@@ -309,7 +309,7 @@ std::vector<int> ACMediaLibrary::importFile(std::string _filename, ACPluginManag
 
         if (media_type == fileMediaType){
             media = ACMediaFactory::getInstance().create(extension);
-            cout << "extension:" << extension << endl;
+            //cout << "extension:" << extension << endl;
         }
         else {
             cout << "<ACMediaLibrary::importFile> other media type, skipping " << _filename << " ... " << endl;

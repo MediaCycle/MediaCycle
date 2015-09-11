@@ -75,7 +75,7 @@ bool ACAudioSndfileData::readData(std::string _filename){
         return false;
     }
 
-    std::cout << "ACAudioSndfileData::readData: file " << _filename << " with " << sfinfo->channels << " channel(s)" << std::endl;
+    /*std::cout << "ACAudioSndfileData::readData: file " << _filename << " with " << sfinfo->channels << " channel(s)" << std::endl;
     std::cout << "ACAudioSndfileData::readData: file " << _filename << " of format ";
     if((sfinfo->format & SF_FORMAT_SUBMASK) == SF_FORMAT_PCM_S8)
         std::cout << "-> Signed 8 bit data "<< std::endl;
@@ -90,7 +90,7 @@ bool ACAudioSndfileData::readData(std::string _filename){
     if((sfinfo->format & SF_FORMAT_SUBMASK) == SF_FORMAT_FLOAT)
         std::cout << "-> 32 bit float data "<< std::endl;
     if((sfinfo->format & SF_FORMAT_SUBMASK) == SF_FORMAT_DOUBLE)
-        std::cout << "-> 64 bit float data "<< std::endl;
+        std::cout << "-> 64 bit float data "<< std::endl;*/
     //std::cout << "ACAudioSndfileData::readData: file " << _filename << " with submask " << (int)(sfinfo->format & SF_FORMAT_SUBMASK) << std::endl;
     //std::cout << "ACAudioSndfileData::readData: file " << _filename << " with typemask " << (int)(sfinfo->format & SF_FORMAT_TYPEMASK) << std::endl;
     return true;

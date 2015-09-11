@@ -162,8 +162,8 @@ bool ACAudio::extractData(string fname) {
         seg_level = "file";
     else
         seg_level = "segment";
-    std::cout << "Duration of the "<< seg_level <<" : " << this->getDuration() << std::endl;
-    std::cout << "Number of frames of the "<< seg_level <<" : " << this->getNFrames() << std::endl;
+    //std::cout << "Duration of the "<< seg_level <<" : " << this->getDuration() << std::endl;
+    //std::cout << "Number of frames of the "<< seg_level <<" : " << this->getNFrames() << std::endl;
     return true;
 }
 

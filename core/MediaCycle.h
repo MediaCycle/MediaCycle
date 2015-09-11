@@ -93,7 +93,7 @@ public:
 
     /// Media Library
     int importDirectories();
-    int importDirectories(std::vector<std::string> paths, int recursive, bool forward_order=true, bool doSegment=false);
+    int importDirectories(std::vector<std::string> paths, int recursive, bool forward_order=true, bool doSegment=false, bool periodicNormalizeAndCluster=true);
     int importDirectoriesThreaded(std::vector<std::string> paths, int recursive, bool forward_order=true, bool doSegment=false);
     //int importDirectory(std::string path, int recursive, bool forward_order=true, bool doSegment=false, TiXmlElement* _medias = 0);
     int importDirectory(std::string path, int recursive, bool forward_order=true, bool doSegment=false, bool _save_timed_feat=false);
@@ -101,7 +101,7 @@ public:
     int importACLLibrary(std::string path);
     int importXMLLibrary(std::string path);
     int importMCSLLibrary(std::string path);//CF 31/05/2010 temporary MediaCycle Segmented Library (MCSL) for AudioGarden, adding a parentID for segments to the initial ACL, awaiting approval
-    void libraryContentChanged(int needsNormalizeAndCluster=1);
+    void libraryContentChanged(int needsNormalizeAndCluster=1, bool needsDisplay=true);
 
     void saveLibrary(std::string _path, ACMediaLibraryWriterPlugin* plugin);
     void saveLibrary(std::string _path, std::string plugin_name);

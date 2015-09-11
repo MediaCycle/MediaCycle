@@ -123,6 +123,8 @@ ACAudioYaafeCorePlugin::ACAudioYaafeCorePlugin() : ACTimedFeaturesPlugin() {
     this->mId = "";
     //this->mtf_file_name = "";
     
+    this->addNumberParameter("loadTimeFeatures",1,0,1,1,"load time features");
+    
     dataflowLoaded = false;
     factoriesRegistered = false;
     
@@ -699,6 +701,8 @@ std::vector<ACMediaFeatures*> ACAudioYaafeCorePlugin::calculate(ACMedia* theMedi
     this->clearFeatures();
     this->clearTimedFeatures();
     
+    bool loadTimeFeatures = this->getNumberParameterValue("loadTimeFeatures");
+    
     if(!factoriesRegistered){
         factoriesRegistered = this->registerFactories();
         if(!factoriesRegistered){
@@ -755,41 +759,43 @@ std::vector<ACMediaFeatures*> ACAudioYaafeCorePlugin::calculate(ACMedia* theMedi
     if(theMedia->getParentId()==-1){
         featuresAvailable = true;
         
-        // For each timed feature name, try to load it
-        for(ACFeatureDimensions::iterator timedFeatureDim = timedFeatureDimensions.begin(); timedFeatureDim != timedFeatureDimensions.end();timedFeatureDim++){
-            ACMediaTimedFeature* feature = 0;
-            feature = new ACMediaTimedFeature();
-            bool featureAvailable = false;
-            std::string featureName((*timedFeatureDim).first);
-            std::replace( featureName.begin(), featureName.end(), '_', ' ');
-            std::string mtfFeatureName((*timedFeatureDim).first);
-            std::replace( mtfFeatureName.begin(), mtfFeatureName.end(), ' ', '_');
-            mtf_file_name = aFileName_noext + "_" + mtfFeatureName + binary+ mtf_file_ext;
-            //std::cout << "ACAudioYaafeCorePlugin: trying to load feature named '" << mtf_file_name << "'... " << std::endl;
-            featureAvailable = feature->loadFromFile(mtf_file_name,save_binary);
-            if(featureAvailable && feature){
-                feature->setName(featureName);
-                featureAvailable = this->addMediaTimedFeature(feature);
-            }
-            if(!featureAvailable){
-                std::cout << "ACAudioYaafeCorePlugin: feature named '" << mtf_file_name  << "' NOT loaded" << std::endl;
-            }
-            /*else{
+        if(loadTimeFeatures){
+            // For each timed feature name, try to load it
+            for(ACFeatureDimensions::iterator timedFeatureDim = timedFeatureDimensions.begin(); timedFeatureDim != timedFeatureDimensions.end();timedFeatureDim++){
+                ACMediaTimedFeature* feature = 0;
+                feature = new ACMediaTimedFeature();
+                bool featureAvailable = false;
+                std::string featureName((*timedFeatureDim).first);
+                std::replace( featureName.begin(), featureName.end(), '_', ' ');
+                std::string mtfFeatureName((*timedFeatureDim).first);
+                std::replace( mtfFeatureName.begin(), mtfFeatureName.end(), ' ', '_');
+                mtf_file_name = aFileName_noext + "_" + mtfFeatureName + binary+ mtf_file_ext;
+                //std::cout << "ACAudioYaafeCorePlugin: trying to load feature named '" << mtf_file_name << "'... " << std::endl;
+                featureAvailable = feature->loadFromFile(mtf_file_name,save_binary);
+                if(featureAvailable && feature){
+                    feature->setName(featureName);
+                    featureAvailable = this->addMediaTimedFeature(feature);
+                }
+                if(!featureAvailable){
+                    std::cout << "ACAudioYaafeCorePlugin: feature named '" << mtf_file_name  << "' NOT loaded" << std::endl;
+                }
+                /*else{
                 std::cout << "ACAudioYaafeCorePlugin: feature named '" << mtf_file_name  << "' NOT loaded" << std::endl;
             }*/
-            featuresAvailable *= featureAvailable;
-        }
-        if(descmtf.size()==0){
-            featuresAvailable = false;
-            std::cout << "ACAudioYaafeCorePlugin: features weren't calculated previously" << std::endl;
-        }
-        else if(timedFeatureDimensions.size()==0){
-            featuresAvailable = false;
-            std::cerr << "ACAudioYaafeCorePlugin: loaded features are empty" << std::endl;
-        }
-        else if(timedFeatureDimensions.size()!=descmtf.size()){
-            featuresAvailable = false;
-            std::cerr << "ACAudioYaafeCorePlugin: some features weren't calculated previously" << std::endl;
+                featuresAvailable *= featureAvailable;
+            }
+            if(descmtf.size()==0){
+                featuresAvailable = false;
+                std::cout << "ACAudioYaafeCorePlugin: features weren't calculated previously" << std::endl;
+            }
+            else if(timedFeatureDimensions.size()==0){
+                featuresAvailable = false;
+                std::cerr << "ACAudioYaafeCorePlugin: loaded features are empty" << std::endl;
+            }
+            else if(timedFeatureDimensions.size()!=descmtf.size()){
+                featuresAvailable = false;
+                std::cerr << "ACAudioYaafeCorePlugin: some features weren't calculated previously" << std::endl;
+            }
         }
         
         // For each feature name, try to load it
@@ -834,7 +840,7 @@ std::vector<ACMediaFeatures*> ACAudioYaafeCorePlugin::calculate(ACMedia* theMedi
         for(mtf=descmtf.begin();mtf!=descmtf.end();mtf++)
             delete (*mtf).second;
         descmtf.clear();
-
+        
         for(mf=descmf.begin();mf!=descmf.end();mf++)
             delete (*mf).second;
         descmf.clear();

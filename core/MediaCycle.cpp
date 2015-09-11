@@ -48,33 +48,33 @@ using std::ofstream;
 using std::ifstream;
 
 MediaCycle::MediaCycle(ACMediaType aMediaType, string local_directory, string libname) : Subject() {
-
+    
     this->forwarddown = 0;
     //	this->playkeydown = true;
-
+    
     this->local_directory = local_directory;
     this->libname = libname;
     this->networkSocket	= 0;
-
+    
     ACMediaFactory::getInstance(); // this populates the available file extensions if not called before
-
+    
     this->mediaLibrary = new ACMediaLibrary(aMediaType);
-
+    
     this->mediaBrowser = new ACMediaBrowser();
     this->mediaBrowser->setLibrary(this->mediaLibrary);
-
+    
     this->pluginManager = new ACPluginManager();
     this->pluginManager->setMediaCycle(this);
     ACMediaFactory::getInstance().setPluginManager(pluginManager);
     this->changeActivePlugin(PLUGIN_TYPE_CLUSTERS_METHOD,"MediaCycle KMeans");
     this->changeActivePlugin(PLUGIN_TYPE_CLUSTERS_POSITIONS,"MediaCycle Propeller");
-
+    
     this->config_file_xml = "";
     this->current_config = "";
-
+    
     this->prevLibrarySize = 0;
     this->eventManager=new ACEventManager;
-
+    
     // when importing files:
     // 1) the library creates a media
     // 2) the browser creates a node
@@ -109,17 +109,17 @@ void MediaCycle::clean(){
     this->local_directory = "";
     this->libname = "";
     this->config_file_xml = "";
-
+    
     this->prevLibrarySize = 0;
     this->mNeedsDisplay = false;
-
+    
     this->import_recursive = 0;
     this->import_forward_order = false;
     this->import_doSegment = false;
-
+    
     this->port = 0;
     this->max_connections = 0;
-
+    
     this->mediaLibrary->cleanLibrary();
     this->mediaBrowser->clean();
     //this->pluginManager->clean();
@@ -179,17 +179,17 @@ void MediaCycle::loadDefaultConfig(std::string name){
     if(this->current_config == name){
         throw runtime_error("Current config already of the same name '" + name + "', not loading");
     }
-
+    
     if(current_config!="")
         this->clean();
-
+    
     if(this->getMediaType() != config->mediaType())
         this->changeMediaType(config->mediaType());
     if(this->getBrowserMode() != config->browserMode())
         this->changeBrowserMode(config->browserMode());
-
+    
     this->current_config = name;
-
+    
     std::vector<std::string> plugins = config->pluginLibraries();
     for(std::vector<std::string>::iterator plugin = plugins.begin();plugin != plugins.end();++plugin){
         if(config->staticLibraries()){
@@ -216,7 +216,7 @@ void MediaCycle::loadDefaultConfig(std::string name){
             }
         }
     }
-
+    
     if(config->clustersMethodPlugin() != "")
         this->changeActivePlugin(PLUGIN_TYPE_CLUSTERS_METHOD,config->clustersMethodPlugin());
     if(config->clustersPositionsPlugin() != "")
@@ -233,7 +233,7 @@ void MediaCycle::loadDefaultConfig(std::string name){
         this->changeActivePlugin(PLUGIN_TYPE_LIBRARY_WRITER,config->libraryWriterPlugin());
     if(config->filteringPlugin() != "")
         this->changeActivePlugin(PLUGIN_TYPE_FILTERING,config->filteringPlugin());
-
+    
 #if defined (SUPPORT_MULTIMEDIA)
     mediaLibrary->setActiveMediaType( config->activeMediaType(), this->pluginManager );
     mediaLibrary->setMediaReaderPlugin( this->getPlugin( config->mediaReaderPlugin() ) );
@@ -274,7 +274,7 @@ int MediaCycle::startTcpServer(int aPort, int aMaxConnections) {
         this->networkSocket->start();
         return 0;
     }
-
+    
     return -1;
 }
 
@@ -286,7 +286,7 @@ int MediaCycle::startTcpServer(int aPort, int aMaxConnections, ACNetworkSocketSe
         this->networkSocket->start();
         return 0;
     }
-
+    
     return -1;
 }
 
@@ -308,22 +308,22 @@ int MediaCycle::processTcpMessage(char* buffer, int l, char **buffer_send, int *
     int bufpos1, bufpos2;
     int id, k;
     vector<int> ids;
-
+    
     printf ("Processing TCP message of length %d: %s", l, buffer);
-
+    
     // SD TODO - define OSC namespace, or else XML schema for these control messages
-
+    
     sbuffer = string(buffer, l);
     bufpos1 = 0;
     bufpos2 = sbuffer.find(" ");
     subbuffer = sbuffer.substr(bufpos1, bufpos2-bufpos1);
     ostringstream osstream;
-
+    
     string thumbnail_filename;
     FILE *thumbnail_file;
     struct stat file_status;
     int thumbnail_size;
-
+    
     if (subbuffer == "addfile") {
         /*bufpos1 = bufpos2+1;
    subbuffer = sbuffer.substr(bufpos1);
@@ -404,7 +404,7 @@ int MediaCycle::processTcpMessage(char* buffer, int l, char **buffer_send, int *
         *buffer_send = 0;
         *l_send = 0;
     }
-
+    
     return 0;
 }
 
@@ -422,12 +422,12 @@ void *threadImport(void *import_thread_arg) {
 // XS TODO this does not seem compatible with Qt GUI
 int MediaCycle::importDirectoriesThreaded(vector<string> directories, int recursive, bool forward_order, bool doSegment) {
     this->importing = true;
-
+    
     import_directories = directories;
     import_recursive = recursive;
     import_forward_order = forward_order;
     import_doSegment = doSegment;
-
+    
     pthread_attr_init(&import_thread_attr);
     import_thread_arg = (void*)this;
     pthread_create(&import_thread, &import_thread_attr, &threadImport, import_thread_arg);
@@ -444,28 +444,28 @@ int MediaCycle::importDirectories() {
 // scans directories, fills the filenames vector and calls importFile
 // then normalize the features and updates the library ("libraryContentChanged")
 // each time the library grows by a factor prevLibrarySizeMultiplier, re-normalize and re-cluster everything
-int MediaCycle::importDirectories(vector<string> directories, int recursive, bool forward_order, bool doSegment) {
+int MediaCycle::importDirectories(vector<string> directories, int recursive, bool forward_order, bool doSegment, bool periodicNormalizeAndCluster) {
     this->importing = true;
     int ok = 0;
     float prevLibrarySizeMultiplier = 2;
     int needsNormalizeAndCluster = 0;
     vector<string> filenames;
-
+    
     mediaLibrary->scanDirectories(directories, recursive, filenames);
-
+    
     int n;
     int i = 0;
     //double t1, t2; // in case we want to check execution time
-
+    
 #ifdef USE_OPENMP
     omp_set_num_threads(2);
 #endif
     //t1 = getTime();
-
+    
     n = filenames.size();
     this->mediaLibrary->addNumberOfFilesToImport(n);
     eventManager->sig_mediaImported(0,n,-1);
-
+    
     /*
 #pragma omp parallel for
  */
@@ -474,20 +474,21 @@ int MediaCycle::importDirectories(vector<string> directories, int recursive, boo
         if (media_ids.size() >0){
             ok++;
             needsNormalizeAndCluster = 0;
-            if ( (mediaLibrary->getSize() >= int(prevLibrarySizeMultiplier * prevLibrarySize))
-                 || (i==n-1)) {
+            if ( (periodicNormalizeAndCluster && mediaLibrary->getSize() >= int(prevLibrarySizeMultiplier * prevLibrarySize)) || (i==n-1)) {
                 needsNormalizeAndCluster = 1;
                 prevLibrarySize = mediaLibrary->getSize();
             }
-            //needsNormalizeAndCluster = 1;
-            normalizeFeatures(needsNormalizeAndCluster); // exclusively medialibrary
+            if(periodicNormalizeAndCluster || (!periodicNormalizeAndCluster && needsNormalizeAndCluster)){  
+                //needsNormalizeAndCluster = 1;
+                normalizeFeatures(needsNormalizeAndCluster); // exclusively medialibrary
+            }
             //mediaBrowser->setNeedsNavigationUpdateLock(1);
             for (vector<int>::iterator media_id=media_ids.begin();media_id!=media_ids.end();media_id++)
             {
                 mediaBrowser->initializeNode(*media_id);
                 eventManager->sig_mediaImported(i+1,n,*media_id);
             }
-
+            
             /*#if defined (SUPPORT_MULTIMEDIA)
             if (this->getMediaType()==MEDIA_TYPE_MIXED){
                 ACMedia* media =  mediaLibrary->getMedia(media_id);
@@ -499,7 +500,9 @@ int MediaCycle::importDirectories(vector<string> directories, int recursive, boo
                 }
             }
 #endif*/
-            libraryContentChanged(needsNormalizeAndCluster); // exclusively mediabrowser, thus updateAfterFileImport and importDirectories can't be move to ACMediaLibrary
+            if(periodicNormalizeAndCluster || (!periodicNormalizeAndCluster && needsNormalizeAndCluster)){
+                libraryContentChanged(needsNormalizeAndCluster, /*bool needsDisplay*/periodicNormalizeAndCluster); // exclusively mediabrowser, thus updateAfterFileImport and importDirectories can't be move to ACMediaLibrary
+            }
             //mediaBrowser->setNeedsNavigationUpdateLock(0);
             // this initiates node rendering, must be done after creating a media in the library and a node in the browser
         }
@@ -519,7 +522,7 @@ int MediaCycle::importDirectories(vector<string> directories, int recursive, boo
     //t2 = getTime();
     //printf("TTT - %f\n",float(t2-t1));
     //}
-
+    
     filenames.empty();
     this->importing = false;
     return ok;
@@ -554,10 +557,10 @@ int MediaCycle::setPath(string path) {
     return ok;
 }
 
-void MediaCycle::libraryContentChanged(int needsNormalizeAndCluster)
+void MediaCycle::libraryContentChanged(int needsNormalizeAndCluster, bool needsDisplay)
 {
     if (mediaBrowser){
-        mediaBrowser->libraryContentChanged(needsNormalizeAndCluster);
+        mediaBrowser->libraryContentChanged(needsNormalizeAndCluster, needsDisplay);
     }
 }
 
@@ -630,7 +633,7 @@ void MediaCycle::cleanLibrary()
         if(plugin)
             plugin->disable();
     }
-
+    
     prevLibrarySize=0;
     eventManager->sig_libraryCleaned();
     if(mediaLibrary){
@@ -648,7 +651,7 @@ int MediaCycle::importACLLibrary(string path) {
     ok = this->mediaLibrary->openACLLibrary(path);
     if (ok>=1) this->mediaLibrary->normalizeFeatures();
     return ok;
-
+    
 }
 
 int MediaCycle::importXMLLibrary(string path) {
@@ -666,7 +669,7 @@ int MediaCycle::importXMLLibrary(string path) {
     //if (ok>=1) this->mediaLibrary->normalizeFeatures();//CF done by signals
     normalizeFeatures(1);
     int lastIndex=this->mediaLibrary->getNewestMediaId();
-
+    
     for (int newId=beginIndex+1;newId<=lastIndex;newId++){
         mediaBrowser->initializeNode(newId);
     }
@@ -674,7 +677,7 @@ int MediaCycle::importXMLLibrary(string path) {
     
     this->importing = false;
     return ok;
-
+    
 }
 
 //CF 31/05/2010 temporary MediaCycle Segmented Library (MCSL) for AudioGarden, adding a parentID for segments to the initial ACL, awaiting approval
@@ -989,7 +992,7 @@ std::vector<std::string> MediaCycle::getAvailablePluginNames(ACPluginType plugin
 void MediaCycle::setPreProcessPlugin(std::string pluginName){
     ACPlugin* preProcessPlugin = this->getPluginManager()->getPlugin(pluginName);
     if (preProcessPlugin!=NULL&&(preProcessPlugin->mediaTypeSuitable(this->getLibrary()->getMediaType()))){
-
+        
         this->getLibrary()->setPreProcessPlugin(preProcessPlugin);
         cout << "MediaCycle: Preprocessing plugin: " << preProcessPlugin->getName() << endl;
     }
@@ -1008,8 +1011,8 @@ void MediaCycle::setMediaReaderPlugin(std::string pluginName){
     {
         this->getLibrary()->setMediaReaderPlugin(0);
         cout << "MediaCycle: impossible to import MediaReader plugin: " << pluginName << endl;
-
-
+        
+        
     }
 }
 
@@ -1019,7 +1022,7 @@ std::string MediaCycle::getActiveSubMediaKey(){
     if(this->mediaLibrary == 0)
         return "";
     return (mediaLibrary->getActiveSubMediaKey());
-
+    
 }
 
 int MediaCycle::setActiveMediaType(std::string mediaName){
@@ -1247,7 +1250,7 @@ void MediaCycle::setClosestNode(int i,int p_index) {
     int current = mediaBrowser->getClosestNode(p_index);
     std::map<long int,int> nodeActivities = mediaBrowser->setClosestNode(i,p_index);
     if( nodeActivities.size()>0){// && current != i){
-
+        
         for(std::map<long int,int>::iterator nodeActivity = nodeActivities.begin(); nodeActivity != nodeActivities.end(); nodeActivity++){
             if(nodeActivity->second == 2)
                 this->performActionOnMedia("hover closest node", nodeActivity->first);
@@ -1473,7 +1476,7 @@ void MediaCycle::changeSelectedMediaTagId(int ClusterId){
             this->updateDisplay(false);
         }
     }
-
+    
 }
 
 void MediaCycle::transferClassToTag(){
@@ -1688,10 +1691,10 @@ void MediaCycle::pickedObjectCallback(int _mediaId) {
         //this->performActionOnMedia("play", _mediaId);
         mediaBrowser->toggleSourceActivity(_mediaId);
     }
-
+    
     // with observer pattern
     this->notify();
-
+    
 }
 
 void MediaCycle::hoverWithPointerId(float xx, float yy, int p_id) {
@@ -1729,14 +1732,14 @@ bool MediaCycle::performActionOnMedia(std::string action, long int mediaId, std:
         std::cerr << "MediaCycle::performActionOnMedia: plugin manager not set" << std::endl;
         return false;
     }
-
+    
     // Block media actions while importing
     if(this->importing)
         return false;
-
+    
     if(this->eventManager)
         eventManager->sig_mediaActionPerformed(action, mediaId, arguments);
-
+    
     bool renderers_passed = true;
     std::vector<std::string> renderer_plugins = pluginManager->getAvailablePluginsNames(PLUGIN_TYPE_MEDIARENDERER, this->getMediaType());
     for(std::vector<std::string>::iterator renderer_plugin = renderer_plugins.begin();renderer_plugin!=renderer_plugins.end();renderer_plugin++){
@@ -1800,24 +1803,24 @@ TiXmlHandle MediaCycle::readXMLConfigFileHeader(string _fname) {
         exit(1);
         //return EXIT_FAILURE;
     }
-
+    
     TiXmlHandle docHandle(&doc);
     TiXmlHandle rootHandle = docHandle.FirstChildElement( "MediaCycle" );
-
+    
     TiXmlText* browserModeText=rootHandle.FirstChild( "BrowserMode" ).FirstChild().Text();
     std::stringstream tmp;
     tmp << browserModeText->ValueStr();
     int bm; // ACBrowserMode
     tmp >> bm;
     this->setBrowserMode(ACBrowserMode (bm));
-
+    
     TiXmlText* mediaTypeText=rootHandle.FirstChild( "MediaType" ).FirstChild().Text();
     std::stringstream tmp2;
     tmp2 << mediaTypeText->ValueStr();
     int mt; //ACMediaType
     tmp2 >> mt;
     this->setMediaType(ACMediaType(mt));
-
+    
     // Camera
     TiXmlElement* nCameraNode=rootHandle.FirstChild( "Camera" ).Element();
     if(nCameraNode){
@@ -1844,7 +1847,7 @@ TiXmlHandle MediaCycle::readXMLConfigFileHeader(string _fname) {
             this->mediaBrowser->setCameraRotation(rotation);
         }
     }
-
+    
     // features vector weights
     int n_feat=-1;
     TiXmlText* FeaturesWeightsText=rootHandle.FirstChild( "FeaturesWeights" ).FirstChild().Text();
@@ -1852,7 +1855,7 @@ TiXmlHandle MediaCycle::readXMLConfigFileHeader(string _fname) {
     FeaturesWeightsNode->QueryIntAttribute("NumberOfFeatures", &n_feat);
     if (n_feat < 0)
         throw runtime_error("corrupted XML file, wrong number of features weights");
-
+    
     std::stringstream tmp3;
     tmp3 << FeaturesWeightsText->ValueStr();
     vector<float> fw;
@@ -1869,13 +1872,13 @@ TiXmlHandle MediaCycle::readXMLConfigFileHeader(string _fname) {
         // attempt to catch potential problems and group them
         throw runtime_error("corrupted XML file, error reading feature weight");
     }
-
+    
     return rootHandle;
 }
 
 // XS TODO return value, tests
 int MediaCycle::readXMLConfigFileCore(TiXmlHandle _rootHandle) {
-
+    
     // Camera
     TiXmlElement* nCameraNode=_rootHandle.FirstChild( "Camera" ).Element();
     if(nCameraNode){
@@ -1902,14 +1905,14 @@ int MediaCycle::readXMLConfigFileCore(TiXmlHandle _rootHandle) {
             this->mediaBrowser->setCameraRotation(rotation);
         }
     }
-
+    
     TiXmlElement* media_element = this->mediaLibrary->openCoreXMLLibrary(_rootHandle);
-
+    
     eventManager->sig_mediaImported(0,this->mediaLibrary->getNumberOfFilesToImport(),-1);
-
+    
     int needsNormalizeAndCluster = 0;
     float prevLibrarySizeMultiplier = 2;
-
+    
     bool with_thumbnails = true;
     if(this->getCurrentConfig() && this->getCurrentConfig()->loadThumbnails() == false)
         with_thumbnails = false;
@@ -1939,7 +1942,7 @@ int MediaCycle::readXMLConfigFileCore(TiXmlHandle _rootHandle) {
     long int media_id = this->mediaLibrary->getNewestMediaId();
     int i = this->mediaLibrary->getNumberOfFilesProcessed();
     int n = this->mediaLibrary->getNumberOfFilesToImport();
-
+    
     //   needsNormalizeAndCluster = 0;
     //if ( (mediaLibrary->getSize() >= int(prevLibrarySizeMultiplier * prevLibrarySize))
     //   || (i==n-1)) {
@@ -1970,9 +1973,9 @@ int MediaCycle::readXMLConfigFileCore(TiXmlHandle _rootHandle) {
         //        eventManager->sig_mediaImported(this->mediaLibrary->getNumberOfFilesProcessed(),this->mediaLibrary->getNumberOfFilesToImport(),newId);
     }
     eventManager->sig_mediasImported(this->mediaLibrary->getNumberOfFilesProcessed(),this->mediaLibrary->getNumberOfFilesToImport(),locIds);
-
+    
     n = this->mediaLibrary->getSize(); // segmentation might have increased the number of medias in the library
-
+    
     this->mediaImported(n,n,-1);
 }
 
@@ -1980,17 +1983,17 @@ int MediaCycle::readXMLConfigFileCore(TiXmlHandle _rootHandle) {
 int MediaCycle::readXMLConfigFilePlugins(TiXmlHandle _rootHandle) {
     //if (!this->pluginManager) this->pluginManager = new ACPluginManager();
     this->pluginManager->setMediaCycle(this);
-
+    
     TiXmlElement* MC_e_plugin_manager = _rootHandle.FirstChild("PluginsManager").ToElement();
     int nb_plugins_lib=0;
     if (MC_e_plugin_manager!=0){
         MC_e_plugin_manager->QueryIntAttribute("NumberOfPluginsLibraries", &nb_plugins_lib);
-
+        
         //this->pluginManager->clean();
         //this->pluginManager->setMediaCycle(this);
         //this->mediaBrowser->changeClustersMethodPlugin( this->pluginManager->getPlugin("MediaCycle KMeans") );
         //this->mediaBrowser->changeClustersPositionsPlugin( this->pluginManager->getPlugin("MediaCycle Propeller") );
-
+        
         TiXmlElement* pluginLibraryNode=MC_e_plugin_manager->FirstChild()->ToElement();
         for( pluginLibraryNode; pluginLibraryNode; pluginLibraryNode=pluginLibraryNode->NextSiblingElement()) {
             string libraryName("");
@@ -2012,54 +2015,54 @@ int MediaCycle::readXMLConfigFilePlugins(TiXmlHandle _rootHandle) {
                 //    plugins_names = this->pluginManager->addLibrary( this->getPluginPathFromBaseName(fs::basename(libraryName)));
                 //#endif
                 //if(plugins_names.size()>0){
-
-                    TiXmlElement* pluginNode=pluginLibraryNode->FirstChild()->ToElement();
-                    for( pluginNode; pluginNode; pluginNode=pluginNode->NextSiblingElement()) {
-                        string pluginName("");
-                        if(pluginNode->Attribute("Name")){
-                            std::string _plugin_name = pluginNode->Attribute("Name");
-                            ACPlugin* _plugin = this->pluginManager->getPlugin(_plugin_name);
-                            if(_plugin){
-                                TiXmlNode* numberParametersNode=pluginNode->FirstChild("NumberParameters");
-                                if(numberParametersNode){
-                                    TiXmlElement* numberParameters=pluginNode->FirstChild("NumberParameters")->ToElement();
-                                    TiXmlElement* numberParameter=numberParameters->FirstChild()->ToElement();
-                                    for( numberParameter; numberParameter; numberParameter=numberParameter->NextSiblingElement()) {
-                                        if(numberParameter->Attribute("Name") && numberParameter->Attribute("Value")){
-                                            double value = -1;
-                                            bool success = (numberParameter->QueryDoubleAttribute("Value",&value) == TIXML_SUCCESS);
-                                            if(success && _plugin->getNumberParameterValue(numberParameter->Attribute("Name"))!= value)
-                                                _plugin->setNumberParameterValue(numberParameter->Attribute("Name"),value);
-                                        }
+                
+                TiXmlElement* pluginNode=pluginLibraryNode->FirstChild()->ToElement();
+                for( pluginNode; pluginNode; pluginNode=pluginNode->NextSiblingElement()) {
+                    string pluginName("");
+                    if(pluginNode->Attribute("Name")){
+                        std::string _plugin_name = pluginNode->Attribute("Name");
+                        ACPlugin* _plugin = this->pluginManager->getPlugin(_plugin_name);
+                        if(_plugin){
+                            TiXmlNode* numberParametersNode=pluginNode->FirstChild("NumberParameters");
+                            if(numberParametersNode){
+                                TiXmlElement* numberParameters=pluginNode->FirstChild("NumberParameters")->ToElement();
+                                TiXmlElement* numberParameter=numberParameters->FirstChild()->ToElement();
+                                for( numberParameter; numberParameter; numberParameter=numberParameter->NextSiblingElement()) {
+                                    if(numberParameter->Attribute("Name") && numberParameter->Attribute("Value")){
+                                        double value = -1;
+                                        bool success = (numberParameter->QueryDoubleAttribute("Value",&value) == TIXML_SUCCESS);
+                                        if(success && _plugin->getNumberParameterValue(numberParameter->Attribute("Name"))!= value)
+                                            _plugin->setNumberParameterValue(numberParameter->Attribute("Name"),value);
                                     }
                                 }
-                                TiXmlNode* stringParametersNode=pluginNode->FirstChild("StringParameters");
-                                if(stringParametersNode){
-                                    TiXmlElement* stringParameters=pluginNode->FirstChild("StringParameters")->ToElement();
-                                    TiXmlElement* stringParameter=stringParameters->FirstChild()->ToElement();
-                                    for( stringParameter; stringParameter; stringParameter=stringParameter->NextSiblingElement()) {
-                                        if(stringParameter->Attribute("Name") && stringParameter->Attribute("Value")){
-                                            string _name = stringParameter->Attribute("Name");
-                                            string _value = stringParameter->Attribute("Value");
-                                            if(_plugin->getStringParameterValue(_name) != _value)
-                                                _plugin->setStringParameterValue(_name,_value);
-                                            std::cout << "Plugin " << _plugin_name << " parameter " << stringParameter->Attribute("Name") << " value " << stringParameter->Attribute("Value") << std::endl;
-                                        }
-                                    }
-                                }
-                                eventManager->sig_pluginLoaded(_plugin_name);
                             }
+                            TiXmlNode* stringParametersNode=pluginNode->FirstChild("StringParameters");
+                            if(stringParametersNode){
+                                TiXmlElement* stringParameters=pluginNode->FirstChild("StringParameters")->ToElement();
+                                TiXmlElement* stringParameter=stringParameters->FirstChild()->ToElement();
+                                for( stringParameter; stringParameter; stringParameter=stringParameter->NextSiblingElement()) {
+                                    if(stringParameter->Attribute("Name") && stringParameter->Attribute("Value")){
+                                        string _name = stringParameter->Attribute("Name");
+                                        string _value = stringParameter->Attribute("Value");
+                                        if(_plugin->getStringParameterValue(_name) != _value)
+                                            _plugin->setStringParameterValue(_name,_value);
+                                        std::cout << "Plugin " << _plugin_name << " parameter " << stringParameter->Attribute("Name") << " value " << stringParameter->Attribute("Value") << std::endl;
+                                    }
+                                }
+                            }
+                            eventManager->sig_pluginLoaded(_plugin_name);
                         }
-
-                        //#if defined(__APPLE__) && !defined(DEBUG)
-                        //#else
-                        //}
-                        //#endif
-                        //
-                        //for(std::vector<std::string>::iterator plugin_name = plugins_names.begin();plugin_name!=plugins_names.end();plugin_name++){
-                        //    eventManager->sig_pluginLoaded(*plugin_name);
-                        //}
                     }
+                    
+                    //#if defined(__APPLE__) && !defined(DEBUG)
+                    //#else
+                    //}
+                    //#endif
+                    //
+                    //for(std::vector<std::string>::iterator plugin_name = plugins_names.begin();plugin_name!=plugins_names.end();plugin_name++){
+                    //    eventManager->sig_pluginLoaded(*plugin_name);
+                    //}
+                }
                 //}
             }
         }
@@ -2089,7 +2092,7 @@ int MediaCycle::readXMLConfigFilePlugins(TiXmlHandle _rootHandle) {
                     }
                 }
             }
-
+            
         }
     }
 }
@@ -2102,42 +2105,42 @@ int MediaCycle::readXMLConfigFile(string _fname) {
 
 std::string MediaCycle::getPluginPathFromBaseName(std::string basename)
 {
-
+    
     //std::string s_path = QApplication::applicationDirPath().toStdString();
     //std::cout << "Qt app path " << s_path << std::endl;
-
+    
 #ifdef __APPLE__
     //std::cout << "Executable path '" << getExecutablePath() << "'" << std::endl;
     boost::filesystem::path e_path( getExecutablePath() );
     std::string r_path = e_path.parent_path().parent_path().string() + "/Resources/";
     //std::cout << "Resources path " << r_path << std::endl;
 #endif
-
+    
     // Add the path to the makam toolbox and yin mex files
     //boost::filesystem::path s_path( __FILE__ );
     //std::cout << "Main source path: " << s_path.parent_path().parent_path().parent_path() << std::endl;
     boost::filesystem::path b_path( boost::filesystem::current_path() );
     //std::cout << "Main build path " << b_path << std::endl;
-
+    
     std::string prefix("mc_");
     size_t found = basename.find(prefix);
     if(found != std::string::npos){
         basename = basename.substr(found+prefix.size());
         //std::cout << "MediaCycle::getPluginPathFromBaseName: new basename: " << basename << std::endl;
     }
-
+    
     char c_path[2048];
     // use the function to get the path
     getcwd(c_path, 2048);
     boost::filesystem::path s_path(c_path);
     std::string plugins_path(""),plugin_subfolder(""),plugin_ext("");
     //std::cout << "Current path " << s_path << std::endl;
-
+    
     std::string build_type ("Release");
 #ifdef USE_DEBUG
     build_type = "Debug";
 #endif //USE_DEBUG
-
+    
 #if defined(__APPLE__)
     plugin_ext = ".dylib";
 #if not defined (USE_DEBUG) and not defined (XCODE) // needs "make install" to be ran to work
@@ -2192,10 +2195,10 @@ TiXmlElement* MediaCycle::saveXMLConfigFile(string _fname) {
     TiXmlDocument MC_doc(_fname);
     TiXmlDeclaration* MC_decl = new TiXmlDeclaration( "1.0", "", "" );
     MC_doc.LinkEndChild( MC_decl );
-
+    
     TiXmlElement* MC_e_root = new TiXmlElement( "MediaCycle" );
     MC_doc.LinkEndChild( MC_e_root );
-
+    
     // "header"
     TiXmlElement* MC_e_browser_mode = new TiXmlElement( "BrowserMode" );
     MC_e_root->LinkEndChild( MC_e_browser_mode );
@@ -2204,7 +2207,7 @@ TiXmlElement* MediaCycle::saveXMLConfigFile(string _fname) {
     tmp_bm << this->getBrowserMode();
     TiXmlText* MC_t_bm = new TiXmlText( tmp_bm.str() );
     MC_e_browser_mode->LinkEndChild( MC_t_bm );
-
+    
     TiXmlElement* MC_e_media_type = new TiXmlElement( "MediaType" );
     MC_e_root->LinkEndChild( MC_e_media_type );
     // XS  TODO get it as text e.g. this->getMediaTypeAsString()
@@ -2212,7 +2215,7 @@ TiXmlElement* MediaCycle::saveXMLConfigFile(string _fname) {
     tmp_mt << this->getMediaType();
     TiXmlText* MC_t_mt = new TiXmlText( tmp_mt.str() );
     MC_e_media_type->LinkEndChild( MC_t_mt );
-
+    
     // Camera
     TiXmlElement* MC_e_camera = new TiXmlElement("Camera");
     MC_e_root->LinkEndChild(  MC_e_camera );
@@ -2225,13 +2228,13 @@ TiXmlElement* MediaCycle::saveXMLConfigFile(string _fname) {
     MC_e_camera->SetAttribute("Zoom", czstrm.str());
     crstrm << mediaBrowser->getCameraRotation();
     MC_e_camera->SetAttribute("Rotation", crstrm.str());
-
+    
     // "medias and features"
     TiXmlElement* MC_e_features_weights = new TiXmlElement("FeaturesWeights");
     MC_e_root->LinkEndChild( MC_e_features_weights );
     vector<float> features_weights = this->getWeightVector();
     MC_e_features_weights->SetAttribute("NumberOfFeatures", features_weights.size());
-
+    
     // concatenate feature weights separated by a " "
     std::string sfw;
     std::stringstream tmp;
@@ -2241,16 +2244,16 @@ TiXmlElement* MediaCycle::saveXMLConfigFile(string _fname) {
     sfw = tmp.str();
     TiXmlText* MC_t_features_weights = new TiXmlText(sfw.c_str());
     MC_e_features_weights->LinkEndChild( MC_t_features_weights );
-
+    
     std::string media_identifier = "Medias";
     if(mediaLibrary->getMediaType() == MEDIA_TYPE_MIXED){
         media_identifier = "MediaDocuments";
     }
     TiXmlElement* MC_e_medias = new TiXmlElement(media_identifier);
-
+    
     this->mediaLibrary->saveCoreXMLLibrary(MC_e_root, MC_e_medias);
     MC_e_root->LinkEndChild( MC_e_medias );
-
+    
     // "plugins"
     // XS TODO put this in a method getPluginsNames(blabla)
     if (pluginManager) {
@@ -2274,7 +2277,7 @@ TiXmlElement* MediaCycle::saveXMLConfigFile(string _fname) {
                     tmp_p << _plugin->getName() ;
                     TiXmlText* MC_t_pm = new TiXmlText( tmp_p.str() );
                     MC_e_plugin->LinkEndChild( MC_t_pm );*/
-
+                    
                     std::vector<std::string> number_param_names = _plugin->getNumberParametersNames();
                     if(number_param_names.size()>0){
                         TiXmlElement* MC_e_number_params = new TiXmlElement( "NumberParameters" );
@@ -2287,7 +2290,7 @@ TiXmlElement* MediaCycle::saveXMLConfigFile(string _fname) {
                             MC_e_number_param->SetDoubleAttribute("Value",_plugin->getNumberParameterValue(*number_param_name));
                         }
                     }
-
+                    
                     std::vector<std::string> string_param_names = _plugin->getStringParametersNames();
                     if(string_param_names.size()>0){
                         TiXmlElement* MC_e_string_params = new TiXmlElement( "StringParameters" );
@@ -2326,23 +2329,23 @@ TiXmlElement* MediaCycle::saveXMLConfigFile(string _fname) {
         TiXmlText* MC_e_filtering_plugin_name = new TiXmlText( this->getBrowser()->getActivePluginName(PLUGIN_TYPE_FILTERING) );
         MC_e_filtering_plugin->LinkEndChild( MC_e_filtering_plugin_name );
     }
-
+    
     bool success = MC_doc.SaveFile(_fname.c_str());
     if(success)
         cout << "saved XML config : " << _fname << endl;
     else{
         cerr << "saving file " << _fname << " failed" << endl;
-
+        
         /// When batch-importing files one-by-one with videocycle-cli, some won't output an XML file when saving, even the following workaround won't work
         //        // Declare a printer
         //        TiXmlPrinter printer;
-
+        
         //        // attach it to the document you want to convert in to a std::string
         //        MC_doc.Accept(&printer);
-
+        
         //        // Create a std::string and copy your document data in to the string
         //        std::string str = printer.CStr();
-
+        
         //        std::ofstream outfile(_fname.c_str(), ios::out);
         //        if(!outfile.is_open())
         //        {
@@ -2352,7 +2355,7 @@ TiXmlElement* MediaCycle::saveXMLConfigFile(string _fname) {
         //        outfile << str;
         //        outfile.close();
     }
-
+    
     // children of MC_Doc get deleted automatically
     return MC_e_root;
 }
@@ -2375,12 +2378,12 @@ void MediaCycle::dumpNavigationLevels(){
 void MediaCycle::testThreads(){
     /*
           int nthreads, tid, NumberOfProcs;
-
+          
           NumberOfProcs = omp_get_num_procs();
           printf("\nWorking on %d Processors",NumberOfProcs);
-
+          
           omp_set_num_threads(NumberOfProcs);
-
+          
           #pragma omp parallel private(tid)
           {
           tid = omp_get_thread_num();
@@ -2392,35 +2395,35 @@ void MediaCycle::testThreads(){
           }
           printf("\n");
           // No more threads
-
+          
           */
-
+    
     /*
           double t1 = getTime();
           int s = 500000;
           float *x = new float[s];
-
+          
           for (unsigned int i=0; i<s; i++) {
-
+          
           x[i] = rand();
           x[i] = cos(sin(cos(sin(cos(sin(cos(sin(x[i]))))))));
-
+          
           }
-
+          
           double t2 = getTime();
-
+          
           printf("TTT - %f\n",float(t2-t1));
-
+          
           t1 = getTime();
-
+          
           #pragma omp parallel for
           for (unsigned int i=0; i<s; i++) {
           x[i] = rand();
           x[i] = cos(sin(cos(sin(cos(sin(cos(sin(x[i]))))))));
           }
-
+          
           t2 = getTime();
-
+          
           printf("TTT - %f\n",float(t2-t1));
           */
 }
