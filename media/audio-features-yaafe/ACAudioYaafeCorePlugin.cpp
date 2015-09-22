@@ -273,13 +273,23 @@ void ACAudioYaafeCorePlugin::loadDataflow(){
     dataflow_file = dataflow_path.string();
     
 #endif
-#else
+
+#else // Not USE_DEBUG
 #ifdef __APPLE__
-    dataflow_file = getExecutablePath() + "/" + this->dataflowFilename();
+	dataflow_file = getExecutablePath() + "/" + this->dataflowFilename();
 #elif __WIN32__
-    dataflow_file = this->dataflowFilename();
-#else
-    dataflow_file = "/usr/share/mediacycle/plugins/audio/" + this->dataflowFilename();
+	dataflow_file = this->dataflowFilename();
+#else // UNIX
+	boost::filesystem::path source_path( __FILE__ );
+	std::string library_path("");
+//	if(media_cycle)
+//		library_path = media_cycle->getLibraryPathFromPlugin(this->mName);
+//	if(library_path == ""){
+//		std::cerr << "ACAudioYaafeCorePlugin::loadDataflow: couldn't get the library path" << std::endl;
+//		return;
+//	}
+//	boost::filesystem::path b_path( library_path );
+	dataflow_file = source_path.parent_path().parent_path().parent_path().string() + "/plugins/audio-features-yaafe/" + this->dataflowFilename();
 #endif
 #endif
     DataFlow df;
