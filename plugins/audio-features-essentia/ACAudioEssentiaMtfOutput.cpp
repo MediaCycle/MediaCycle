@@ -487,9 +487,15 @@ void ACAudioEssentiaMtfOutput::emitMtf(StreamType* s, MtfNode* p, MtfNode* n, co
                         }
                         else if ( _frames > 0 && _frames == _dim1){
                             std::vector<float> _values_flat;
-                            for (auto vec : _values) {
+                            // cxx11
+                            /*for (auto vec : _values) {
                                 for (auto el : vec) {
                                     _values_flat.push_back(el);
+                                }
+                            }*/
+                            for(vector<vector<Real> >::iterator __values = _values.begin(); __values != _values.end(); __values++){
+                                for(vector<Real>::iterator __value = __values->begin(); __value != __values->end(); __value++){
+                                    _values_flat.push_back(*__value);
                                 }
                             }
                             arma::fmat _arma_values(_values_flat);
