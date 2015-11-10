@@ -207,7 +207,12 @@ std::vector<ACMediaFeatures*> ACAudioEssentiaPlugin::calculate(ACMedia* theMedia
         for(mf=descmf.begin();mf!=descmf.end();mf++)
             delete (*mf).second;
         descmf.clear();
-        std::cerr << "ACAudioEssentiaPlugin: error while loading features, now recalculating them..." << std::endl;
+        // The Essentia API does not provide methods to know (timed) feature dimensions
+        // our solution is to import the first audio file then store (timed) feature dimensions
+        // so that file loading checks can be performed.
+        if(!(featureDimensions.empty() && timedFeatureDimensions.empty())){
+            std::cerr << "ACAudioEssentiaPlugin: error while loading features, now recalculating them..." << std::endl;
+        }
     }
     //#endif
     // CF TODO check if the features length matches the expected length based on the file length and block/step sizes and resample rate
