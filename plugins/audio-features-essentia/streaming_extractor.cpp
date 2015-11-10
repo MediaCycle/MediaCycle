@@ -371,7 +371,13 @@ void computeReplayGain(const string& audioFilename, Pool& neqloudPool, Pool& eql
 
     // very high value for replayGain, we are probably analyzing a silence even
     // though it is not a pure digital silence
-    if (replayGain > 40.0) { // before it was set to 20 but it was found too conservative
+    float replayGainThreshold = 60.0;
+    if (replayGain > replayGainThreshold) { 
+      // CF changed replayGainThreshold from 40.0 to 60.0:
+      // test file: ESC-US/01/000170-1848-0-5.ogg @ 58.54 (a 5s mono file containing a 0.2s impact)
+      // https://dataverse.harvard.edu/dataset.xhtml?persistentId=doi:10.7910/DVN/YDEPUT
+      //
+      // Essentia team: before replayGainThreshold was set to 20 but it was found too conservative
       // NB: except if it was some electro music where someone thought it was smart
       //     to have opposite left and right channels... Try with only the left
       //     channel, then.
@@ -384,7 +390,7 @@ void computeReplayGain(const string& audioFilename, Pool& neqloudPool, Pool& eql
         eqloudPool.remove("metadata.audio_properties.replay_gain");
       }
       else {
-        cout << "ERROR: File looks like a completely silent file... Aborting..." << endl;
+        cout << "ERROR: File looks like a completely silent file (replayGain of "<< replayGain << " above threshold of " << replayGainThreshold << ")... Aborting..." << endl;
         exit(5);
       }
     }
