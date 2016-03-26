@@ -195,9 +195,9 @@ if {${qwt_major} < 6} {
     }
 
     variant qt5 description {Build with Qt Backend support.} {
-        #depends_lib-append    port:qt5-mac
+        #depends_lib-append    port:qt5
 	PortGroup           qt5 1.0
-	set qt_qmake_cmd    ${prefix}/libexec/qt5-mac/bin/qmake
+	set qt_qmake_cmd    ${prefix}/libexec/qt5/bin/qmake
 configure.cmd       ${qt_qmake_cmd}
     }
 
@@ -233,12 +233,12 @@ post-destroot {
 		system "echo install_name_tool -id ${prefix}/lib/${fixfile} ${destroot}${prefix}/lib/${fixfile}"
 
 	}
-        foreach fixfile [exec find ${destroot}${prefix}/libexec/qt5-mac/plugins/designer \
+        foreach fixfile [exec find ${destroot}${prefix}/libexec/qt5/plugins/designer \
                              -name "libqwt*dylib" | \
-                             sed -e "s@${destroot}${prefix}/libexec/qt5-mac/plugins/designer/@@g"] {
-		system "install_name_tool -id ${prefix}/libexec/qt5-mac/plugins/designer/${fixfile} ${destroot}${prefix}/libexec/qt5-mac/plugins/designer/${fixfile}"
-		system "install_name_tool -change libqwt.6.dylib ${prefix}/lib/libqwt.6.dylib ${destroot}${prefix}/libexec/qt5-mac/plugins/designer/${fixfile}"
-		system "echo install_name_tool -id ${prefix}/libexec/qt5-mac/plugins/designer/${fixfile} ${destroot}${prefix}/libexec/qt5-mac/plugins/designer/${fixfile}"
+                             sed -e "s@${destroot}${prefix}/libexec/qt5/plugins/designer/@@g"] {
+		system "install_name_tool -id ${prefix}/libexec/qt5/plugins/designer/${fixfile} ${destroot}${prefix}/libexec/qt5/plugins/designer/${fixfile}"
+		system "install_name_tool -change libqwt.6.dylib ${prefix}/lib/libqwt.6.dylib ${destroot}${prefix}/libexec/qt5/plugins/designer/${fixfile}"
+		system "echo install_name_tool -id ${prefix}/libexec/qt5/plugins/designer/${fixfile} ${destroot}${prefix}/libexec/qt5/plugins/designer/${fixfile}"
 
 	}
     }
