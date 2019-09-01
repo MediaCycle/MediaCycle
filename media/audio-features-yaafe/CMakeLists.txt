@@ -5,7 +5,7 @@ IF(SUPPORT_AUDIO AND USE_YAAFE)
 	INCLUDE_DIRECTORIES(${CMAKE_SOURCE_DIR}/3rdparty/yaafe)
         INCLUDE_DIRECTORIES(${CMAKE_SOURCE_DIR}/3rdparty/yaafe/src_cpp)
         INCLUDE_DIRECTORIES(${CMAKE_SOURCE_DIR}/3rdparty/yaafe/externals/audio-smarc)
-        INCLUDE_DIRECTORIES(${CMAKE_SOURCE_DIR}/3rdparty/yaafe/externals/eigen)
+        INCLUDE_DIRECTORIES(${EIGEN_INCLUDE_DIR})
         INCLUDE_DIRECTORIES(${CMAKE_SOURCE_DIR}/3rdparty/yaafe-cba-extension/src_cpp)
 
 	FILE(GLOB SRC *.cpp *.c)
