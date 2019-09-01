@@ -60,8 +60,8 @@ arma::icolvec findpeaks(const arma::Col<eT>& Data, long Pd)
 		// Update the leftmost neighbor index if there is a peak within
 		// "Pd" neighbors of leftmost index
 		if(m >= 0){
-			if (j < std::min(locs(m)+Pd, L-1)){
-				j = std::min(locs(m)+Pd, L-1);
+			if (j < std::min((long long)locs(m)+Pd, L-1)){
+				j = std::min((long long)locs(m)+Pd, L-1);
 				endL = j-Pd;
 			}
 		}
