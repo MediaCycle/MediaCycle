@@ -48,7 +48,11 @@
 #include "rot90.h"
 #include "size.h"
 #include "findpeaks.h"
-#include "diff.h"
+
+// diff has been introduced in armadillo v7.8
+// https://gitlab.com/conradsnicta/armadillo-code/commits/9.700.x/include/armadillo_bits/fn_diff.hpp
+//#include "diff.h"
+
 #include "cart2pol.h"
 #include "concat.h"
 #include "ismember.h"
