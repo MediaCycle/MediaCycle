@@ -48,6 +48,12 @@
 #include <mlpack/core/metrics/lmetric.hpp>
 #include <mlpack/core/tree/binary_space_tree.hpp>
 
+#include <mlpack/core/util/version.hpp>
+
+#if(MLPACK_VERSION_MAJOR >= 3)
+#include "mlpack/methods/neighbor_search/ns_model.hpp"
+#endif
+
 #include<limits>
 
 #include <iostream>
@@ -62,6 +68,13 @@ using namespace mlpack::emst;
 using namespace mlpack::tree;
 using namespace std;*/
 using namespace mlpack::neighbor;
+#if(MLPACK_VERSION_MAJOR >= 2)
+using namespace mlpack::tree;
+using namespace mlpack::metric;
+using namespace mlpack::util;
+// Convenience typedef.
+typedef NSModel<NearestNeighborSort> KNNModel;
+#endif
 
 ACFilterPlugProximityGrid::ACFilterPlugProximityGrid() : ACFilteringPlugin(),
     min_x(1),min_y(1),max_x(-1),max_y(-1){
@@ -103,10 +116,16 @@ arma::mat emst(arma::mat desc_m, bool naive, const size_t leafSize){
     }
     else{
         std::vector<size_t> oldFromNew;
+        #if(MLPACK_VERSION_MAJOR >= 2)
+        const size_t leafSize = 20;
+        mlpack::tree::KDTree<EuclideanDistance, mlpack::emst::DTBStat, arma::mat> tree(desc_m,oldFromNew,leafSize);
+        mlpack::metric::LMetric<2, true> metric;
+        mlpack::emst::DualTreeBoruvka<> dtb(&tree, metric);
+        #else
         mlpack::tree::BinarySpaceTree <mlpack::bound::HRectBound<2>, mlpack::emst::DTBStat> tree(desc_m,oldFromNew, leafSize);
         mlpack::metric::LMetric<2, true> metric;
-
         mlpack::emst::DualTreeBoruvka<> dtb(&tree, desc_m, metric);
+        #endif
 
         arma::mat results;
         dtb.ComputeMST(results);
@@ -194,7 +213,20 @@ void ACFilterPlugProximityGrid::evalNeighborhoodness() {
 
     arma::Mat<size_t> resultingFeatureNeighbors,resultingPosNeighbors;
     arma::mat resultingFeatureDistances,resultingPosDistances;
+    #if(MLPACK_VERSION_MAJOR >= 3)
+    int leaf_size = 20;
+    KNNModel featKNN,posKNN;
+    featKNN.TreeType() = KNNModel::KD_TREE;
+    featKNN.LeafSize() = size_t(leaf_size);
+    featKNN.BuildModel(std::move(desc_m), size_t(leaf_size), DUAL_TREE_MODE,
+        0.0);
+    posKNN.TreeType() = KNNModel::KD_TREE;
+    posKNN.LeafSize() = size_t(leaf_size);
+    posKNN.BuildModel(std::move(pos), size_t(leaf_size), DUAL_TREE_MODE,
+        0.0);
+    #else
     AllkNN featKNN(desc_m),posKNN(pos);
+    #endif
     ////mlpack::data::Save("./desc_m.csv", desc_m, true);
     featKNN.Search(1, resultingFeatureNeighbors, resultingFeatureDistances);
     posKNN.Search(k, resultingPosNeighbors, resultingPosDistances);
@@ -440,7 +472,21 @@ void ACFilterPlugProximityGrid::setProximityGrid() {
         return;
 
     // Our dataset matrices, which are column-major.
+    #if(MLPACK_VERSION_MAJOR >= 3)
+    int leaf_size = 20;
+    KNNModel featKNN,posKNN;
+    featKNN.TreeType() = KNNModel::KD_TREE;
+    featKNN.LeafSize() = size_t(leaf_size);
+    featKNN.BuildModel(std::move(desc_m), size_t(leaf_size), DUAL_TREE_MODE,
+        0.0);
+    posKNN.TreeType() = KNNModel::KD_TREE;
+    posKNN.LeafSize() = size_t(leaf_size);
+    posKNN.BuildModel(std::move(pos), size_t(leaf_size), DUAL_TREE_MODE,
+        0.0);
+    #else
     AllkNN featKNN(desc_m),posKNN(pos);
+    #endif
+
     featKNN.Search(k, resultingFeatureNeighbors, resultingFeatureDistances);
 
     sortedDistances = sort_index(resultingFeatureDistances.row(0));
@@ -449,7 +495,7 @@ void ACFilterPlugProximityGrid::setProximityGrid() {
 
     if(sorting == "Minimum Spanning Tree"){
 
-        // Euclidean Minimum Spanning Tree from methodss/emst/emst_main.cpp
+        // Euclidean Minimum Spanning Tree from methods/emst/emst_main.cpp
         // using the dual-tree Boruvka algorithm.
         // The output is saved in a three-column matrix, where each row indicates an
         // edge.  The first column corresponds to the lesser index of the edge; the

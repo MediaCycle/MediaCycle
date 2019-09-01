@@ -36,8 +36,22 @@
 #include "ACFilterPlugProximityGrid.h"
 
 #include "mlpack/methods/neighbor_search/neighbor_search.hpp"
+
+#include <mlpack/core/util/version.hpp>
+
+#if(MLPACK_VERSION_MAJOR >= 3)
+#include "mlpack/methods/neighbor_search/ns_model.hpp"
+#endif
+
 using namespace mlpack;
 using namespace mlpack::neighbor;
+#if(MLPACK_VERSION_MAJOR >= 3)
+using namespace mlpack::tree;
+using namespace mlpack::metric;
+using namespace mlpack::util;
+// Convenience typedef.
+typedef NSModel<NearestNeighborSort> KNNModel;
+#endif
 
 using namespace arma;
 
@@ -456,9 +470,19 @@ void ACMediaFeatureMapperRendererPlugin::updateLinks(){
     else if(sorting == "Closest Neighbor"){
 
         // Our dataset matrices, which are column-major.
+        #if(MLPACK_VERSION_MAJOR >= 3)
+        KNNModel a;
+        int leaf_size = 20;
+        a.TreeType() = KNNModel::KD_TREE;
+        a.LeafSize() = size_t(leaf_size);
+        a.BuildModel(std::move(desc_m), size_t(leaf_size), DUAL_TREE_MODE,
+        0.0);
+        #else
         AllkNN a(desc_m);
+        #endif
         //mlpack::data::Save("./desc_m.csv", desc_m, true);
         a.Search(k, resultingNeighbors, resultingDistances);
+
         mlpack::data::Save("./resultingNeighbors.csv", resultingNeighbors, true);
         //mlpack::data::Save("./resultingDistances.csv", resultingDistances, true);
         ////mlpack::data::Save("./mst.csv", mst, true);
