@@ -31,7 +31,6 @@
 
 #include "MediaCycle.h"
 #include "ACPlugin.h"
-#include <ACPluginQt.h>
 #include "ACMediaBrowser.h"
 
 #ifndef _ACFilterPlugProximityGrid_
