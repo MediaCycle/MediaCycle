@@ -28,8 +28,8 @@ add_definitions(-Wno-write-strings)
 #find_package(Argtable2 REQUIRED)
 #find_package(DL REQUIRED)
 
-set(EIGEN_INCLUDE_DIR ${CMAKE_CURRENT_SOURCE_DIR}/externals/eigen)
-mark_as_advanced(FORCE EIGEN_INCLUDE_DIR) 
+#set(EIGEN_INCLUDE_DIR ${CMAKE_CURRENT_SOURCE_DIR}/externals/eigen)
+#mark_as_advanced(FORCE EIGEN_INCLUDE_DIR) 
 set(SMARC_INCLUDE_DIR ${CMAKE_CURRENT_SOURCE_DIR}/externals/audio-smarc)
 mark_as_advanced(FORCE SMARC_INCLUDE_DIR)
 
