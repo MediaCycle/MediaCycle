@@ -40,6 +40,7 @@ using namespace essentia;
 using namespace standard;
 
 const char* ACAudioEssentiaMtfOutput::name = "MtfOutput";
+const char* ACAudioEssentiaMtfOutput::category = "Input/output";
 const char* ACAudioEssentiaMtfOutput::description = DOC("This algorithm emits a MediaCycle mtf representation of a Pool.\n"
                                                         "\n"
                                                         "Each descriptor key in the Pool is decomposed into different nodes of the mtf format by "

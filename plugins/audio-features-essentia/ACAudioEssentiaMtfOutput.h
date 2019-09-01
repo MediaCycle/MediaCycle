@@ -90,6 +90,7 @@ public:
     void configure();
     
     static const char* name;
+    static const char* category;
     static const char* description;
     
     void clearFeatures();

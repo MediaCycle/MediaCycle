@@ -252,7 +252,7 @@ std::vector<ACMediaFeatures*> ACAudioEssentiaPlugin::calculate(ACMedia* theMedia
     }
     else{
         bool reloading = true;
-        std::cout << reloading << std::endl; 
+        //std::cout << reloading << std::endl; 
     }
     
     for(mtf=descmtf.begin();mtf!=descmtf.end();mtf++){
