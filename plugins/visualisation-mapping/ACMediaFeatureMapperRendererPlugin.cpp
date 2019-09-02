@@ -32,8 +32,7 @@
 #include <ACMediaFeatureMapperRendererPlugin.h>
 
 #include "mlpack/core.hpp"
-//Wrapper to prevent mlpack::emst duplicate symbols when compiling
-#include "ACFilterPlugProximityGrid.h"
+#include "emst.h"
 
 #include "mlpack/methods/neighbor_search/neighbor_search.hpp"
 

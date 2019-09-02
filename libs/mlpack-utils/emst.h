@@ -1,8 +1,8 @@
 /**
- * @brief Plugin for gridding nodes in a proximity grid
+ * @brief Convenience function to use the emst method from mlpack  
  * @author Christian Frisson
- * @date 23/02/2014
- * @copyright (c) 2014 – UMONS - Numediart
+ * @date 09/09/2015
+ * @copyright (c) 2015 – UMONS - Numediart
  * 
  * MediaCycle of University of Mons – Numediart institute is 
  * licensed under the GNU AFFERO GENERAL PUBLIC LICENSE Version 3 
@@ -29,33 +29,9 @@
  * <mailto:avre@umons.ac.be>
  */
 
-#include "MediaCycle.h"
-#include "ACPlugin.h"
-#include "ACMediaBrowser.h"
+#include "mlpack/core.hpp"
+#include "mlpack/methods/emst/dtb.hpp"
+#include "mlpack/methods/neighbor_search/neighbor_search.hpp"
+#include <mlpack/core/metrics/lmetric.hpp>
 
-#ifndef _ACFilterPlugProximityGrid_
-#define _ACFilterPlugProximityGrid_
-
-class ACFilterPlugProximityGrid : virtual public ACFilteringPlugin {
-public:
-    ACFilterPlugProximityGrid();
-    ~ACFilterPlugProximityGrid();
-    virtual void filter();
-    virtual void librarySizeChanged();
-    void evalNeighborhoodness();
-private:
-    void setProximityGrid();
-    void spiralSearch(int id, ACPoint p, std::string method);
-
-protected:
-    void extractDescMatrix(ACMediaBrowser* mediaBrowser, arma::mat& desc_m, std::vector<std::string> &featureNames);
-private:
-    std::map<long,ACPoint> preFilterPositions;
-    arma::imat cell_ids;
-    int gridSize;
-    std::vector<std::string> methods,distances,sortings;
-    float min_x,min_y,max_x,max_y;
-    std::map<long,bool> id_celled;
-};
-
-#endif // _ACFilterPlugProximityGrid_
+arma::mat emst(arma::mat desc_m, bool naive=false, const size_t leafSize=1);

@@ -13,7 +13,7 @@ IF ( BUILD_AUDIOCYCLE_APP AND SUPPORT_AUDIO AND (USE_QT4 OR USE_QT5) AND USE_OSG
             IF(USE_DEBUG)
                 LIST(APPEND MC_PLUGINS "visualisation-advanced-mlpack")
             ENDIF()
-            LIST(APPEND MC_PLUGINS "visualisation-mlpack")
+            LIST(APPEND MC_PLUGINS "visualisation-mapping;visualisation-mlpack")
         ENDIF()
         IF(APPLE)
             LIST(APPEND MC_PLUGINS "visualisation-divvy")
@@ -23,6 +23,9 @@ IF ( BUILD_AUDIOCYCLE_APP AND SUPPORT_AUDIO AND (USE_QT4 OR USE_QT5) AND USE_OSG
         ENDIF()
         IF(USE_FALCON AND LIBNIFALCON_FOUND AND LIBUSB_FOUND)
                 LIST(APPEND MC_PLUGINS "io-novint-falcon")
+        ENDIF()
+        IF(APPLE AND USE_APPLE_MULTITOUCH)
+                LIST(APPEND MC_PLUGINS "io-apple-trackpad-autoplay")
         ENDIF()
 	LIST(APPEND MC_PLUGINS "visualisation-s-hull")
 

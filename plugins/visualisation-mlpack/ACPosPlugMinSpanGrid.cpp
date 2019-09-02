@@ -43,8 +43,7 @@
 #include "ACPosPlugMinSpanGrid.h"
 
 #include "mlpack/core.hpp"
-//Wrapper to prevent mlpack::emst duplicate symbols when compiling
-#include "ACFilterPlugProximityGrid.h"
+#include "emst.h"
 
 using namespace arma;
 /*using namespace mlpack;

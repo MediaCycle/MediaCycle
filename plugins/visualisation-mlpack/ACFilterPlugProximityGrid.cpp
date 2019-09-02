@@ -41,6 +41,7 @@
 
 #include<armadillo>
 #include "ACFilterPlugProximityGrid.h"
+#include "emst.h"
 
 #include "mlpack/core.hpp"
 #include "mlpack/methods/emst/dtb.hpp"
@@ -68,7 +69,7 @@ using namespace mlpack::emst;
 using namespace mlpack::tree;
 using namespace std;*/
 using namespace mlpack::neighbor;
-#if(MLPACK_VERSION_MAJOR >= 2)
+#if(MLPACK_VERSION_MAJOR >= 2 || __MLPACK_VERSION_MAJOR >= 2)
 using namespace mlpack::tree;
 using namespace mlpack::metric;
 using namespace mlpack::util;
@@ -104,57 +105,6 @@ ACFilterPlugProximityGrid::ACFilterPlugProximityGrid() : ACFilteringPlugin(),
 #ifdef USE_DEBUG
     this->addNumberParameter("Save Benchmark",1,0,1,1,"Save benchmark automatically");
 #endif
-}
-
-arma::mat emst(arma::mat desc_m, bool naive, const size_t leafSize){
-
-    arma::mat mst;
-
-    if(naive){
-        mlpack::emst::DualTreeBoruvka<> naive(desc_m, true);
-        naive.ComputeMST(mst);
-    }
-    else{
-        std::vector<size_t> oldFromNew;
-        #if(MLPACK_VERSION_MAJOR >= 2)
-        const size_t leafSize = 20;
-        mlpack::tree::KDTree<EuclideanDistance, mlpack::emst::DTBStat, arma::mat> tree(desc_m,oldFromNew,leafSize);
-        mlpack::metric::LMetric<2, true> metric;
-        mlpack::emst::DualTreeBoruvka<> dtb(&tree, metric);
-        #else
-        mlpack::tree::BinarySpaceTree <mlpack::bound::HRectBound<2>, mlpack::emst::DTBStat> tree(desc_m,oldFromNew, leafSize);
-        mlpack::metric::LMetric<2, true> metric;
-        mlpack::emst::DualTreeBoruvka<> dtb(&tree, desc_m, metric);
-        #endif
-
-        arma::mat results;
-        dtb.ComputeMST(results);
-
-        // Unmap the results.
-        arma::mat unmappedResults(results.n_rows, results.n_cols);
-        for (size_t i = 0; i < results.n_cols; ++i)
-        {
-            const size_t indexA = oldFromNew[size_t(results(0, i))];
-            const size_t indexB = oldFromNew[size_t(results(1, i))];
-
-            if (indexA < indexB)
-            {
-                unmappedResults(0, i) = indexA;
-                unmappedResults(1, i) = indexB;
-            }
-            else
-            {
-                unmappedResults(0, i) = indexB;
-                unmappedResults(1, i) = indexA;
-            }
-
-            unmappedResults(2, i) = results(2, i);
-        }
-
-        mst = unmappedResults;
-
-    }
-    return mst;
 }
 
 ACFilterPlugProximityGrid::~ACFilterPlugProximityGrid() {
