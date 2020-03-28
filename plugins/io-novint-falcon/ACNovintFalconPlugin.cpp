@@ -71,7 +71,7 @@ ACNovintFalconPlugin::ACNovintFalconPlugin()
       m_positiveForce(true),
       m_runClickCount(0),
       m_buttonDown(false),
-      m_stiffness(1000),
+      m_stiffness(-0.0225),
       m_distance(0.03),
       m_radius(0.024),
       m_plusButtonDown(false),
@@ -88,6 +88,8 @@ ACNovintFalconPlugin::ACNovintFalconPlugin()
     layouts.push_back("Right-handed starfish eNTERFACE");
 
     this->addStringParameter("Layout",layouts.back(),layouts,"Layout of the Novint Falcon");
+
+    this->addNumberParameter("Stiffness",m_stiffness,-1,1,0.01,"Stiffness");
 
     this->active = false;
     for(int i = 0; i < 3; ++i)
@@ -496,7 +498,8 @@ void ACNovintFalconPlugin::nifalcon_update_loop()
                                 //make sphere soft radius or "slippery"
                                 //m_stiffness = -300.0;//attraction
                                 //m_stiffness = 500.0;//repulsion
-                                m_stiffness = -0.225;//0.225;
+                                //m_stiffness = -0.225;//0.225; // TEI 2014 value
+                                m_stiffness = this->getNumberParameterValue("Stiffness");
 
                                 if(this->getStringParameterValue("Layout") == "Desktop"){
                                     // Falcon x,y -> Screen x,y : Desktop
