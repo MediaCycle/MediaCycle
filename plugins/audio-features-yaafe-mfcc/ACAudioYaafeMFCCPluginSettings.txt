@@ -1,0 +1,19 @@
+audio := Input Resample="yes" SampleRate="22050"
+nAudioIn := FrameTokenizer blockSize="512" stepSize="256"
+audio > nAudioIn
+
+nFFT := FFT FFTLength="512" FFTWindow="Hanning"
+nAudioIn > nFFT
+
+nFFTAbs := Abs
+nFFT > nFFTAbs
+
+nMelFilterBank := MelFilterBank MelMaxFreq="6854.0" MelMinFreq="130.0" MelNbFilters="40"
+nFFTAbs > nMelFilterBank
+
+nCepstrum := Cepstrum CepsIgnoreFirstCoeff="1" CepsNbCoeffs="13"
+nMelFilterBank > nCepstrum
+
+MFCC := Output normalize="-1" version="v0.6" yaafedefinition="MFCC blockSize=512 stepSize=256" dimensions="13" statistics="centroid,spread,skewness,kurtosis"
+nCepstrum > MFCC
+

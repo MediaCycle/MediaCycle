@@ -1,0 +1,23 @@
+audio := Input Resample="yes" SampleRate="22050"
+nAudioIn := FrameTokenizer blockSize="512" stepSize="256"
+audio > nAudioIn
+
+nFFT := FFT FFTLength="512" FFTWindow="Hanning"
+nAudioIn > nFFT
+
+nFFTAbs := Abs
+nFFT > nFFTAbs
+
+nFFTAbsSqr := Sqr
+nFFTAbs > nFFTAbsSqr
+
+nLoudness := Loudness
+nFFTAbsSqr > nLoudness
+
+nLoudnessNormalized := Normalize NNorm="Sum"
+nLoudnessSharpness := LoudnessSharpness
+Perceptual_Sharpness := Output normalize="-1" version="v0.6" yaafedefinition="PerceptualSharpness blockSize=512 stepSize=256" dimensions="1" statistics="min,max"
+nLoudness > nLoudnessNormalized
+nLoudnessNormalized > nLoudnessSharpness
+nLoudnessSharpness > Perceptual_Sharpness
+
