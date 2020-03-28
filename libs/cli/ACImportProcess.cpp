@@ -58,9 +58,15 @@ void ACImportProcess::run(int argc, char *argv[]){
     bool doSegment=false;
     int doSegmentArg = 0;
     bool _save_timed_feat=false;
+    bool saveCSV=false;
+    std::string csv("");
+    int saveCSVarg = 0;
     bool saveXML=false;
     std::string xml("");
     int saveXMLarg = 0;
+    bool saveJSON=false;
+    std::string json("");
+    int saveJSONarg = 0;
     std::string path("");
     std::string segmentation_plugin("");
 
@@ -71,7 +77,9 @@ void ACImportProcess::run(int argc, char *argv[]){
         std::cerr << "\t-r\tfor recursive" << std::endl;
         std::cerr << "\t-mtf\tto save media timed features" << std::endl;
         std::cerr << "\t-s [\"optional name\"]\tfor segment" << std::endl;
+        std::cerr << "\t-csv [\"optional name\"]\tto save as CSV" << std::endl;
         std::cerr << "\t-xml [\"optional name\"]\tto save as XML" << std::endl;
+        std::cerr << "\t-json [\"optional name\"]\tto save as JSON" << std::endl;
         std::cerr << std::endl;
         return;
     }
@@ -86,14 +94,26 @@ void ACImportProcess::run(int argc, char *argv[]){
         }
         else if( strcmp(argv[arg],"-mtf") == 0)
             _save_timed_feat = true;
+        else if( strcmp(argv[arg],"-csv") == 0){
+            saveCSV = true;
+            saveCSVarg = arg;
+        }
         else if( strcmp(argv[arg],"-xml") == 0){
             saveXML = true;
             saveXMLarg = arg;
         }
+        else if( strcmp(argv[arg],"-json") == 0){
+            saveJSON = true;
+            saveJSONarg = arg;
+        }
         else{
             // if the previous arg was "-xml" and the current arg isn't another flag or the last arg
-            if( saveXMLarg != 0 && arg == saveXMLarg+1 && arg < argc-1 )
+            if( saveCSVarg != 0 && arg == saveCSVarg+1 && arg < argc-1 )
+                csv = argv[arg];
+            else if( saveXMLarg != 0 && arg == saveXMLarg+1 && arg < argc-1 )
                 xml = argv[arg];
+            else if( saveJSONarg != 0 && arg == saveJSONarg+1 && arg < argc-1 )
+                json = argv[arg];
             else if( doSegmentArg != 0 && arg == doSegmentArg+1 && arg < argc-1 )
                 segmentation_plugin = argv[arg];
             else if (arg == argc-1)
@@ -137,6 +157,21 @@ void ACImportProcess::run(int argc, char *argv[]){
         std::cout << "ACImportProcess:: importing file '" << path << "'" << std::endl;
     }
 
+    if(saveCSV && csv==""){
+        std::stringstream csv_path;
+        std::string slash = "/";
+#ifdef WIN32
+        slash = "\\";
+#endif
+#ifdef __APPLE__
+        csv_path << folder_path.parent_path().string() << slash << folder_path.stem().string();
+#else // this seems required on ubuntu to compile...
+        csv_path << folder_path.parent_path() << slash << folder_path.stem();
+#endif
+        csv_path << ".csv";
+        csv = csv_path.str();
+        std::cout <<  "ACImportProcess: no csv file specified, will save as '" << csv << "'" << std::endl;
+    }
     if(saveXML && xml==""){
         std::stringstream xml_path;
         std::string slash = "/";
@@ -151,6 +186,21 @@ void ACImportProcess::run(int argc, char *argv[]){
         xml_path << ".xml";
         xml = xml_path.str();
         std::cout <<  "ACImportProcess: no xml file specified, will save as '" << xml << "'" << std::endl;
+    }
+    if(saveJSON && json==""){
+        std::stringstream json_path;
+        std::string slash = "/";
+#ifdef WIN32
+        slash = "\\";
+#endif
+#ifdef __APPLE__
+        json_path << folder_path.parent_path().string() << slash << folder_path.stem().string();
+#else // this seems required on ubuntu to compile...
+        json_path << folder_path.parent_path() << slash << folder_path.stem();
+#endif
+        json_path << ".json";
+        json = json_path.str();
+        std::cout <<  "ACImportProcess: no JSON file specified, will save as '" << json << "'" << std::endl;
     }
     if(doSegment){
         std::vector<std::string> segment_plugins = media_cycle->getAvailablePluginNames(PLUGIN_TYPE_SEGMENTATION,media_cycle->getMediaType());
@@ -181,24 +231,86 @@ void ACImportProcess::run(int argc, char *argv[]){
                 _save_timed_feat /*bool _save_timed_feat=false*/
                 );
 
-    std::cout <<  "ACImportProcess: saving as '" << xml << "'" << std::endl;
-    media_cycle->saveXMLConfigFile(xml);
+    if(saveCSV){
+        std::cout <<  "ACImportProcess: saving as '" << csv << "'" << std::endl;
 
-    fs::path xml_path(xml.c_str());
-    if ( !fs::exists( xml_path ) )
-    {
-        std::cerr << "ACImportProcess:: file '" << xml << "' doesn't exist " << std::endl;
-        return;
+        try{
+            media_cycle->saveLibrary(csv,"CSV export");
+        }
+        catch (const exception& e) {
+            std::cerr << "ACImportProcess: couldn't save as '" << csv << "' due to error: " << e.what() << std::endl;
+            return;
+        }
+
+        fs::path csv_path(csv.c_str());
+        if ( !fs::exists( csv_path ) )
+        {
+            std::cerr << "ACImportProcess:: file '" << csv << "' doesn't exist " << std::endl;
+            return;
+        }
+
+        if ( !fs::is_regular( csv_path ) )
+        {
+            std::cerr << "ACImportProcess:: file or folder '" << csv << "' is not regular " << std::endl;
+            return;
+        }
+
+        if( fs::file_size( csv_path ) <= 0 ){
+            std::cerr << "ACImportProcess:: file or folder '" << csv << "' is of null size " << std::endl;
+            return;
+        }
     }
 
-    if ( !fs::is_regular( xml_path ) )
-    {
-        std::cerr << "ACImportProcess:: file or folder '" << xml << "' is not regular " << std::endl;
-        return;
+    if(saveXML){
+        std::cout <<  "ACImportProcess: saving as '" << xml << "'" << std::endl;
+        media_cycle->saveXMLConfigFile(xml);
+
+        fs::path xml_path(xml.c_str());
+        if ( !fs::exists( xml_path ) )
+        {
+            std::cerr << "ACImportProcess:: file '" << xml << "' doesn't exist " << std::endl;
+            return;
+        }
+
+        if ( !fs::is_regular( xml_path ) )
+        {
+            std::cerr << "ACImportProcess:: file or folder '" << xml << "' is not regular " << std::endl;
+            return;
+        }
+
+        if( fs::file_size( xml_path ) <= 0 ){
+            std::cerr << "ACImportProcess:: file or folder '" << xml << "' is of null size " << std::endl;
+            return;
+        }
     }
 
-    if( fs::file_size( xml_path ) <= 0 ){
-        std::cerr << "ACImportProcess:: file or folder '" << xml << "' is of null size " << std::endl;
-        return;
+    if(saveJSON){
+        std::cout <<  "ACImportProcess: saving as '" << json << "'" << std::endl;
+
+        try{
+            media_cycle->saveLibrary(json,"JSON export");
+        }
+        catch (const exception& e) {
+            std::cerr << "ACImportProcess: couldn't save as '" << json << "' due to error: " << e.what() << std::endl;
+            return;
+        }
+
+        fs::path json_path(json.c_str());
+        if ( !fs::exists( json_path ) )
+        {
+            std::cerr << "ACImportProcess:: file '" << json << "' doesn't exist " << std::endl;
+            return;
+        }
+
+        if ( !fs::is_regular( json_path ) )
+        {
+            std::cerr << "ACImportProcess:: file or folder '" << json << "' is not regular " << std::endl;
+            return;
+        }
+
+        if( fs::file_size( json_path ) <= 0 ){
+            std::cerr << "ACImportProcess:: file or folder '" << json << "' is of null size " << std::endl;
+            return;
+        }
     }
 }

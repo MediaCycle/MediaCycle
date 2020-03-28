@@ -80,6 +80,17 @@ bool ACLibraryCsvWriterPlugin::saveLibraryMetadata(){
     file << "\"Filename\"";
     if(with_media_id)
         file << ",\"Media ID\"";
+
+    if(media_cycle && media_cycle->getLibrarySize()>0){
+        ACMedia* media = media_cycle->getLibrary()->getFirstMedia();
+        if(media){
+            std::vector<ACMediaFeatures*> features = media->getAllFeaturesVectors();
+            for(std::vector<ACMediaFeatures*>::iterator feature = features.begin(); feature != features.end();feature++){
+                file << ",\"" << (*feature)->getName() << "\"";
+            }
+        }
+    }
+
     file << std::endl;
     return true;
 }
@@ -90,6 +101,19 @@ bool ACLibraryCsvWriterPlugin::saveMedia(ACMedia* media){
     file << "\"" << media->getFileName() << "\"";
     if(with_media_id)
         file << ",\"" << media->getId() << "\"";
+
+    if(media){
+        std::vector<ACMediaFeatures*> features = media->getAllFeaturesVectors();
+        for(std::vector<ACMediaFeatures*>::iterator feature = features.begin(); feature != features.end();feature++){
+            // keep feature elements separated by a " "
+            int n_features_elements = (*feature)->getSize();
+            std::stringstream tmp;
+            for (int j=0; j<n_features_elements; j++) {
+                tmp << (*feature)->getFeatureElement(j) << " " ;
+            }
+            file << ",\"" << tmp.str() << "\"";
+        }
+    }
     file << std::endl;
     return true;
 }
