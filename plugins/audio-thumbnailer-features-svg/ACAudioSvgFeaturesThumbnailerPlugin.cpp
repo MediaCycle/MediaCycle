@@ -210,6 +210,18 @@ std::vector<ACMediaThumbnail*> ACAudioSvgFeaturesThumbnailerPlugin::summarize(AC
 
                         }
 
+                        //CF hack to force the svg format  (puts the svg filename before the png filename on ACMedia's vector of thumbnail filenames)
+                        {
+                        ACMediaThumbnail* thumbnail = new ACMediaThumbnail(MEDIA_TYPE_IMAGE);
+                        thumbnail->setFileName(svg_filename);
+                        thumbnail->setName(thumbnails_specs[_thumbname].name);
+                        thumbnail->setWidth(thumbnails_specs[_thumbname].width);
+                        thumbnail->setHeight(thumbnails_specs[_thumbname].height);
+                        thumbnail->setLength(thumbnails_specs[_thumbname].length);
+                        thumbnail->setCircular(thumbnails_specs[_thumbname].circular);
+                        thumbnails.push_back(thumbnail);
+                        }
+
                         rsvg_convert(svg_filename.c_str(),png_filename.c_str(),"png");
 
                         bool png_thumbnail_exists = true;
