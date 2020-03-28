@@ -1,8 +1,8 @@
 /**
  * @brief ACAppleMultitouchTrackpadSupport.cpp
  * @author Christian Frisson
- * @date 15/10/2013
- * @copyright (c) 2013 – UMONS - Numediart
+ * @date 28/03/2020
+ * @copyright (c) 2020 – UMONS - Numediart
  * 
  * MediaCycle of University of Mons – Numediart institute is 
  * licensed under the GNU AFFERO GENERAL PUBLIC LICENSE Version 3 
@@ -34,59 +34,68 @@
 static int _callback(int device, Finger *data, int nFingers, double timestamp, int frame) {
 
     std::vector<Finger*> fingers;
-	fingers.resize(nFingers);
-	
-	 for (int i=0; i<nFingers; i++) {
-	/*	 
-	 Finger *f = &data[i];
-	 
-	 printf("Frame %7d: Angle %6.2f, ellipse %6.3f x%6.3f; "
-	 "position (%6.3f,%6.3f) vel (%6.3f,%6.3f) "
-	 "ID %d, state %d [%d %d?] size %6.3f, %6.3f?\n",
-	 f->frame,
-	 f->angle * 90 / atan2(1,0),
-	 f->majorAxis,
-	 f->minorAxis,
-	 f->normalized.pos.x,
-	 f->normalized.pos.y,
-	 f->normalized.vel.x,
-	 f->normalized.vel.y,
-	 f->identifier, f->state, f->foo3, f->foo4,
-	 f->size, f->unk2);
-	 }
-	 printf("\n");
-	 */
-	 fingers[i] = &data[i];
-	 }	 
-	
-	for (std::vector< ACAppleMultitouchTrackpadSupport* >::iterator instance = instances.begin(); instance < instances.end(); instance++) 
-	{	
+    fingers.resize(nFingers);
+
+    for (int i=0; i<nFingers; i++) {
+        /*
+     Finger *f = &data[i];
+
+     printf("Frame %7d: Angle %6.2f, ellipse %6.3f x%6.3f; "
+     "position (%6.3f,%6.3f) vel (%6.3f,%6.3f) "
+     "ID %d, state %d [%d %d?] size %6.3f, %6.3f?\n",
+     f->frame,
+     f->angle * 90 / atan2(1,0),
+     f->majorAxis,
+     f->minorAxis,
+     f->normalized.pos.x,
+     f->normalized.pos.y,
+     f->normalized.vel.x,
+     f->normalized.vel.y,
+     f->identifier, f->state, f->foo3, f->foo4,
+     f->size, f->unk2);
+     }
+     printf("\n");
+     */
+        fingers[i] = &data[i];
+    }
+
+    for (std::vector< ACAppleMultitouchTrackpadSupport* >::iterator instance = instances.begin(); instance < instances.end(); instance++)
+    {
         (*instance)->callback(device, data, nFingers, timestamp, frame);
-	}	
-	return 0;
+    }
+    return 0;
 }
 
 void ACAppleMultitouchTrackpadSupport::start()
 {	
-	if (instances.empty()) {
-		dev = MTDeviceCreateDefault();
+    if (instances.empty()) {
+
+        CFArrayRef deviceList = MTDeviceCreateList(); //grab our device list
+
+        for(int i = 0; i<CFArrayGetCount(deviceList); i++) //iterate available devices
+        {
+            MTRegisterContactFrameCallback((MTDeviceRef)CFArrayGetValueAtIndex(deviceList,i), _callback); //assign callback for device
+            MTDeviceStart((MTDeviceRef)CFArrayGetValueAtIndex(deviceList,i), 0); //start sending events
+        }
+
+        /*dev = MTDeviceCreateDefault();
         MTRegisterContactFrameCallback(dev, _callback);
-		MTDeviceStart(dev, 0);
-	}
-	if (find(instances.begin(), instances.end(), this) == instances.end())
-		instances.push_back(this);
+        MTDeviceStart(dev, 0);*/
+    }
+    if (find(instances.begin(), instances.end(), this) == instances.end())
+        instances.push_back(this);
 }
 
 void ACAppleMultitouchTrackpadSupport::stop()
 {
-	std::vector<ACAppleMultitouchTrackpadSupport*>::iterator it = find(instances.begin(), instances.end(), this);
-	if (it != instances.end())
-	instances.erase(it);
-	assert(find(instances.begin(), instances.end(), this) == instances.end());
-	if (instances.empty()) {
+    std::vector<ACAppleMultitouchTrackpadSupport*>::iterator it = find(instances.begin(), instances.end(), this);
+    if (it != instances.end())
+        instances.erase(it);
+    assert(find(instances.begin(), instances.end(), this) == instances.end());
+    if (instances.empty()) {
         MTUnregisterContactFrameCallback(dev, _callback);
-		MTDeviceStop(dev);
-		MTDeviceRelease(dev);
-		dev = 0;
-	}
+        MTDeviceStop(dev);
+        MTDeviceRelease(dev);
+        dev = 0;
+    }
 }

@@ -69,7 +69,9 @@ typedef struct {
 typedef void* MTDeviceRef;
 typedef int (*MTContactCallbackFunction)(int,Finger*,int,double,int);
 
+CFArrayRef MTDeviceCreateList();
 MTDeviceRef MTDeviceCreateDefault();
+MTDeviceRef MTDeviceCreateFromDeviceID(int64_t);
 void MTRegisterContactFrameCallback(MTDeviceRef, MTContactCallbackFunction);
 void MTUnregisterContactFrameCallback(MTDeviceRef, MTContactCallbackFunction);
 void MTDeviceStart(MTDeviceRef, int);
