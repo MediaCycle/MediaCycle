@@ -79,6 +79,7 @@ public:
     virtual void prepareTimeline(){}
     ACAbstractBrowserRenderer* getBrowser(){return 0;}
     ACAbstractTimelineRenderer* getTimeline(){return 0;}
+    virtual void clean(/*bool updategl=true*/);
 
     virtual void contextMenuEvent(QContextMenuEvent *);
 

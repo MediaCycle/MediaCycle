@@ -105,7 +105,7 @@ void ACWebkitViewQt::setWebpageRelativeSourcePath(QString _name)
         //return;
     }
     QString _webpageFilename = QString(webpage_filename.string().c_str());
-    qDebug() << "_webpageFilename " << _webpageFilename;
+    //qDebug() << "_webpageFilename " << _webpageFilename;
 
     fs::path webpage_folder_path = webpage_file_path.parent_path();
     if ( !fs::exists( webpage_folder_path ) )
@@ -115,11 +115,11 @@ void ACWebkitViewQt::setWebpageRelativeSourcePath(QString _name)
         //return;
     }
     QString _webpagePath = QString(webpage_folder_path.string().c_str());
-    qDebug() << "_webpagePath " << _webpagePath;
+    //qDebug() << "_webpagePath " << _webpagePath;
 
     fs::path webpage_folder_name = webpage_folder_path.stem();
     QString _webpageFolderName = QString(webpage_folder_name.string().c_str());
-    qDebug() << "_webpageFolderName " << _webpageFolderName;
+    //qDebug() << "_webpageFolderName " << _webpageFolderName;
 
 #if defined(__APPLE__) && !defined(USE_DEBUG)
     fs::path executable_path( getExecutablePath() );
@@ -135,8 +135,10 @@ void ACWebkitViewQt::setWebpageRelativeSourcePath(QString _name)
     webFolder = _webpagePath;
 #endif
 
+    //qDebug() << "webFolder " << webFolder;
+
     mainUrl = QUrl("file://" + webFolder + QString(slash.c_str()) + _webpageFilename);
-    qDebug() << "mainUrl " << mainUrl;
+    //qDebug() << "mainUrl " << mainUrl;
 
     // Init library file
     this->updateLibrary();
@@ -183,6 +185,10 @@ void ACWebkitViewQt::pluginLoaded(std::string plugin_name){
     }
 }
 
+void ACWebkitViewQt::clean(){
+    emit this->needsUpdate();
+}
+
 void ACWebkitViewQt::updateLibrary(){
 
     if(media_cycle /*&& media_cycle->getLibrarySize()>0*/){
@@ -191,7 +197,7 @@ void ACWebkitViewQt::updateLibrary(){
 
     QString code = "updateData()";
     QVariant result = this->page()->mainFrame()->evaluateJavaScript(code);
-    qDebug() << result.toString();
+    //qDebug() << result.toString();
 
     //CF page reloading makes the view flicker
     //this->reload();
