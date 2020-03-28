@@ -28,12 +28,12 @@ FIND_PATH(FREETYPE_INCLUDE_DIR_ft2build ft2build.h
   PATHS
   $ENV{FREETYPE_DIR}
   NO_DEFAULT_PATH
-  PATH_SUFFIXES include    
+  PATH_SUFFIXES include include/freetype2
 )
 FIND_PATH(FREETYPE_INCLUDE_DIR_ft2build ft2build.h 
   PATHS ${CMAKE_PREFIX_PATH} # Unofficial: We are proposing this.
   NO_DEFAULT_PATH
-  PATH_SUFFIXES include
+  PATH_SUFFIXES include include/freetype2
 )
 FIND_PATH(FREETYPE_INCLUDE_DIR_ft2build ft2build.h 
   PATHS
@@ -48,7 +48,7 @@ FIND_PATH(FREETYPE_INCLUDE_DIR_ft2build ft2build.h
   /opt/csw
   /opt
   /usr/freeware
-  PATH_SUFFIXES include
+  PATH_SUFFIXES include include/freetype2
 )
 
 FIND_PATH(FREETYPE_INCLUDE_DIR_freetype2 freetype/config/ftheader.h 

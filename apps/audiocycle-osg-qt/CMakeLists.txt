@@ -15,7 +15,7 @@ IF ( BUILD_AUDIOCYCLE_APP AND SUPPORT_AUDIO AND (USE_QT4 OR USE_QT5) AND USE_OSG
             ENDIF()
             LIST(APPEND MC_PLUGINS "visualisation-mapping;visualisation-mlpack")
         ENDIF()
-        IF(APPLE)
+        IF(LIBDISPATCH_FOUND)
             LIST(APPEND MC_PLUGINS "visualisation-divvy")
         ENDIF()
         IF(NEWMAT_FOUND)

@@ -646,6 +646,8 @@ ENDIF()
 FOREACH(PLUGIN ${PLUGINS})
 	MESSAGE(STATUS "Bundled with ${PROGNAME}: ${PLUGIN}")
 ENDFOREACH(PLUGIN)
+# For Qt 5.5 linking XCTest Framework in QTest Framework using rpath
+LIST(APPEND LINKED_DIRECTORIES "/Applications/Xcode.app/Contents/Developer/Platforms/MacOSX.platform/Developer/Library/Frameworks") 
 INSTALL(CODE "
     include(BundleUtilities)
     fixup_bundle(\"${APPS}\" \"${PLUGINS}\" \"${LINKED_DIRECTORIES}\")

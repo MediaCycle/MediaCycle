@@ -6,7 +6,7 @@ IF (SUPPORT_AUDIO AND USE_AUDIOGARDEN AND (USE_QT4 OR USE_QT5) AND USE_OSG AND U
 	SET(WITH_OSC ON)
 
 	SET(MEDIA_TYPE "MEDIA_TYPE_AUDIO")
-        SET(MC_PLUGINS "audio-engine;audio-features-yaafe;audio-reader-sndfile;audio-osg;audio-segmentation;audio-thumbnailer-waveform;audiogarden;file;pcapreprocess;segmentation;visualisation")
+        SET(MC_PLUGINS "audio-engine;audio-features-yaafe;audio-reader-sndfile;audio-osg;audio-segmentation;audio-thumbnailer-waveform-svg;audiogarden;file;pcapreprocess;segmentation;visualisation")
         SET(CLUSTERS_METHOD "MediaCycle KMeans")
         SET(CLUSTERS_POSITIONS "AudioGarden Flower")
         SET(OSG_PLUGINS "")

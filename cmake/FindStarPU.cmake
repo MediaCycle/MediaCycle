@@ -24,9 +24,9 @@
 # (To distributed this file outside of CMake, substitute the full
 #  License text for the above reference.)
 
-FIND_PATH(STARPU_INCLUDE_DIR starpu_config.h)
+FIND_PATH(STARPU_INCLUDE_DIR starpu_config.h PATH_SUFFIXES starpu/1.3)
 
-SET(STARPU_NAMES ${STARPU_NAMES} starpu)
+SET(STARPU_NAMES ${STARPU_NAMES} starpu starpu-1.3)
 FIND_LIBRARY(STARPU_LIBRARY NAMES ${STARPU_NAMES} )
 
 # handle the QUIETLY and REQUIRED arguments and set STARPU_FOUND to TRUE if 

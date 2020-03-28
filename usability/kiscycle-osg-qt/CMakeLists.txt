@@ -11,7 +11,7 @@ IF ( SUPPORT_AUDIO AND (USE_QT4 OR USE_QT5) AND USE_OSG AND MLPACK_FOUND AND APP
 
 	SET(MEDIA_TYPE "MEDIA_TYPE_AUDIO")
         SET(MC_PLUGINS "usability-kis;audio-engine-stk-sounddesign;audio-features-yaafe;audio-reader-sndfile;audio-osg;audio-thumbnailer-waveform-svg;audio-thumbnailer-features-svg;visualisation;io-osc")#visualisation-advanced
-	LIST(APPEND MC_PLUGINS "visualisation-mlpack")
+	LIST(APPEND MC_PLUGINS "visualisation-mapping;visualisation-mlpack")
 	IF(USE_FALCON)
 		LIST(APPEND MC_PLUGINS "io-novint-falcon")
 	ENDIF()

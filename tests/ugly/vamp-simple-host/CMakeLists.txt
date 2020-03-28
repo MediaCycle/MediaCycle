@@ -7,7 +7,7 @@ IF(SUPPORT_AUDIO AND USE_VAMP)
 
 	ADD_EXECUTABLE(vamp-simple-host ${SRC} ${HDR})
 
-	ADD_DEPENDENCIES(vamp-simple-host vamp-simple-hostsdk)
+	ADD_DEPENDENCIES(vamp-simple-host vamp-hostsdk)
 
 	TARGET_LINK_LIBRARIES(vamp-simple-host vamp-hostsdk vamp-sdk ${SNDFILE_LIBRARIES}  stdc++)
 	IF(NOT MINGW)
