@@ -22,7 +22,7 @@
 # (To distributed this file outside of CMake, substitute the full
 #  License text for the above reference.)
 
-FIND_PATH(STK_INCLUDE_DIR stk.h PATH_SUFFIXES stk)
+FIND_PATH(STK_INCLUDE_DIR Stk.h PATH_SUFFIXES stk)
 
 FIND_LIBRARY(STK_LIBRARY NAMES stk)
 
