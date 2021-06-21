@@ -243,10 +243,10 @@ _rsvg_render_check_type (RsvgRender *render,
 #define _RSVG_RENDER_CIC(render, render_type, RenderCType) \
   ((RenderCType*) _rsvg_render_check_type ((render), (render_type)))
 
-typedef struct {
-    double length;
-    char factor;
-} RsvgLength;
+// typedef struct {
+//     double length;
+//     char factor;
+// } RsvgLength;
 
 typedef struct {
     cairo_rectangle_t rect;
