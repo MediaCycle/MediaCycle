@@ -412,7 +412,7 @@ void ACNovintFalconPlugin::nifalcon_update_loop()
         }
         if(coordinate_changed){
 
-            boost::array<double, 3> pos = m_falconDevice.getPosition();
+            std::array<double, 3> pos = m_falconDevice.getPosition();
             if(m_isInitializing)
             {
                 if(!m_hasPrintedInitMsg)
@@ -455,7 +455,7 @@ void ACNovintFalconPlugin::nifalcon_update_loop()
                     //std::cout << pos[0] << " " << pos[1] << " " << pos[2] << " "<< std::endl;
                 }
 
-                boost::array<double, 3> force;
+                std::array<double, 3> force;
                 force[0] = 0.0;
                 force[1] = 0.0;
                 force[2] = 0.0;

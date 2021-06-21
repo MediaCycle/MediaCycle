@@ -43,6 +43,8 @@
 #include "falcon/firmware/FalconFirmwareNovintSDK.h"
 #include "falcon/util/FalconFirmwareBinaryNvent.h"
 
+#include <array>
+
 #ifndef ACNovintFalconPlugin_H
 #define	ACNovintFalconPlugin_H
 
@@ -107,8 +109,8 @@ private:
     bool m_inRawMode;
     bool m_isInited;
     int m_ledState;
-    boost::array<double,3> m_motorVectorForce;
-    boost::array<int,3> m_motorRawForce;
+    std::array<double,3> m_motorVectorForce;
+    std::array<int,3> m_motorRawForce;
     bool m_homingMode;
 
     bool m_runThread;
