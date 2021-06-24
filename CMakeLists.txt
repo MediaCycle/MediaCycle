@@ -60,6 +60,7 @@ IF(COMMAND cmake_policy)
 			cmake_policy(SET CMP0046 NEW) # CF comment this to debug the empty ADD_DEPENDENCIES
 		ENDIF()
 	ENDIF()
+	cmake_policy(SET CMP0058 NEW) # Default configs are not specified as the OUTPUT or BYPRODUCTS of any add_custom_command or add_custom_target
 ENDIF(COMMAND cmake_policy)
 
 # Checking Apple OSX versions and generator
