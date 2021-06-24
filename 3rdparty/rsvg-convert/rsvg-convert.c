@@ -328,17 +328,17 @@ rsvg_convert(const char* file, const char* output, char* format)
         }
 
         // Set background color
-        if (background_color_str && g_ascii_strcasecmp(background_color_str, "none") != 0) {
-            background_color = rsvg_css_parse_color(background_color_str, FALSE);
+        // if (background_color_str && g_ascii_strcasecmp(background_color_str, "none") != 0) {
+        //     background_color = rsvg_css_parse_color(background_color_str, FALSE);
 
-            cairo_set_source_rgb (
-                cr, 
-                ((background_color >> 16) & 0xff) / 255.0, 
-                ((background_color >> 8) & 0xff) / 255.0, 
-                ((background_color >> 0) & 0xff) / 255.0);
-            cairo_rectangle (cr, 0, 0, dimensions.width, dimensions.height);
-            cairo_fill (cr);
-        }
+        //     cairo_set_source_rgb (
+        //         cr, 
+        //         ((background_color >> 16) & 0xff) / 255.0, 
+        //         ((background_color >> 8) & 0xff) / 255.0, 
+        //         ((background_color >> 0) & 0xff) / 255.0);
+        //     cairo_rectangle (cr, 0, 0, dimensions.width, dimensions.height);
+        //     cairo_fill (cr);
+        // }
 
         rsvg_handle_render_cairo (rsvg, cr);
 
