@@ -43,6 +43,8 @@ using namespace mlpack::metric;
 using namespace mlpack::util;
 #endif
 
+namespace mediacycle {
+
 arma::mat emst(arma::mat desc_m, bool naive, const size_t leafSize){
 
     arma::mat mst;
@@ -92,4 +94,6 @@ arma::mat emst(arma::mat desc_m, bool naive, const size_t leafSize){
 
     }
     return mst;
+}
+
 }

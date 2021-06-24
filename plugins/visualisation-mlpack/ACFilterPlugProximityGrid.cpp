@@ -76,6 +76,7 @@ using namespace mlpack::util;
 // Convenience typedef.
 typedef NSModel<NearestNeighborSort> KNNModel;
 #endif
+using namespace mediacycle;
 
 ACFilterPlugProximityGrid::ACFilterPlugProximityGrid() : ACFilteringPlugin(),
     min_x(1),min_y(1),max_x(-1),max_y(-1){

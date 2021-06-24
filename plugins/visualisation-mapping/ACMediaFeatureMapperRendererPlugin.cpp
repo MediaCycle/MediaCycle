@@ -464,7 +464,7 @@ void ACMediaFeatureMapperRendererPlugin::updateLinks(){
         // empirically best performance, but at the cost of greater memory requirements. default 1);
         bool naive = false;
         const size_t leafSize = 1;
-        mst = emst(desc_m,naive,leafSize);
+        mst = mediacycle::emst(desc_m,naive,leafSize);
     }
     else if(sorting == "Closest Neighbor"){
 

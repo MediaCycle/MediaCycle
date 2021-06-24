@@ -50,6 +50,7 @@ using namespace arma;
 using namespace mlpack::emst;
 using namespace mlpack::tree;
 using namespace std;*/
+using namespace mediacycle;
 
 ACPosPlugMinSpanGrid::ACPosPlugMinSpanGrid() : ACClusterPositionsPlugin() {
     this->mMediaType = MEDIA_TYPE_ALL;

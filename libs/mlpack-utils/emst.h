@@ -34,4 +34,8 @@
 #include "mlpack/methods/neighbor_search/neighbor_search.hpp"
 #include <mlpack/core/metrics/lmetric.hpp>
 
-arma::mat emst(arma::mat desc_m, bool naive=false, const size_t leafSize=1);
+namespace mediacycle {
+
+    arma::mat emst(arma::mat desc_m, bool naive=false, const size_t leafSize=1);
+
+}
