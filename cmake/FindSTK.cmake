@@ -10,7 +10,7 @@
 
 #=============================================================================
 # Author: Christian Frisson
-# Copyright (c) 2012 – UMONS - Numediart
+# Copyright (c) 2021 – UMONS - Numediart
 #
 # Distributed under the OSI-approved BSD License (the "License");
 # see accompanying file Copyright.txt for details.
