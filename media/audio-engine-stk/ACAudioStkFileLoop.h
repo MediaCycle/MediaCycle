@@ -62,7 +62,8 @@ class ACAudioStkFileLoop : public stk::FileWvIn
 
   //! Class constructor that opens a specified file.
   ACAudioStkFileLoop( std::string fileName, bool raw = false, bool doNormalize = true,
-            unsigned long chunkThreshold = 1000000, unsigned long chunkSize = 1024 );
+            unsigned long chunkThreshold = 1000000, unsigned long chunkSize = 1024,
+            bool doInt2FloatScaling = true );
 
   //! Class destructor.
   ~ACAudioStkFileLoop( void );
@@ -77,7 +78,7 @@ class ACAudioStkFileLoop : public stk::FileWvIn
     limits.  If the data format is floating-point, no scaling is
     performed.
   */
-  void openFile( std::string fileName, bool raw = false, bool doNormalize = true );
+  void openFile( std::string fileName, bool raw = false, bool doNormalize = true, bool doInt2FloatScaling = true );
 
   //! Close a file if one is open.
   void closeFile( void ) { stk::FileWvIn::closeFile(); }

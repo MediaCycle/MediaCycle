@@ -333,7 +333,7 @@ ACAudioStkEngineRendererPlugin::~ACAudioStkEngineRendererPlugin(){
         try {
         dac->abortStream();
     }
-    catch ( RtError &error ) {
+    catch ( RtAudioError &error ) {
         error.printMessage();
         //return false;
     }
@@ -341,7 +341,7 @@ ACAudioStkEngineRendererPlugin::~ACAudioStkEngineRendererPlugin(){
         try {
             dac->closeStream();
         }
-        catch ( RtError &error ) {
+        catch ( RtAudioError &error ) {
             error.printMessage();
             //return false;
         }
@@ -430,7 +430,7 @@ void ACAudioStkEngineRendererPlugin::stopSource(long int mediaId){
     }
 }
 
-void ACAudioStkEngineRendererPlugin::errorCallback( RtError::Type type, const std::string &errorText ){
+void ACAudioStkEngineRendererPlugin::errorCallback( RtAudioError::Type type, const std::string &errorText ){
     std::cerr << "RtAudio Error: " << errorText << std::endl;
 }
 
@@ -484,7 +484,7 @@ int ACAudioStkEngineRendererPlugin::tick( void *outputBuffer, void *inputBuffer,
                 loops[n]->tick( *(loop_frames[n]));
                 this->justReadFrames(loop_ids[n],(int)(rate * loops[n]->channelsOut()*nBufferFrames));
             }
-            catch(RtError& e){
+            catch(RtAudioError& e){
                 std::cerr << "Couldn't tick loop frames due to error: "<< e.getMessage() << std::endl;
             }
         }
@@ -496,7 +496,7 @@ int ACAudioStkEngineRendererPlugin::tick( void *outputBuffer, void *inputBuffer,
                 inputs[n]->tick( *(input_frames[n]));
                 this->justReadFrames(input_ids[n],(int)(rate * inputs[n]->channelsOut()*nBufferFrames));
             }
-            catch(RtError& e){
+            catch(RtAudioError& e){
                 std::cerr << "Couldn't tick input frames due to error: "<< e.getMessage() << std::endl;
             }
         }
@@ -1396,7 +1396,7 @@ openstream:
     if(action == "play" || action == "hear"){
         try{
             if(input_frames[id]){
-                input_frames[id]->clear();
+                //input_frames[id]->clear(); // StkFrames::clear() deprecated
                 //input_frames[id]->resize( bufferFrames, channels );
             }
             //else{
@@ -1404,14 +1404,14 @@ openstream:
             //}
             input_ids[id] = mediaId;
         }
-        catch( RtError &e ){
+        catch( RtAudioError &e ){
             std::cerr << "ACAudioStkEngineRendererPlugin::performActionOnMedia: couldn't allocate frames for media " << mediaId << std::endl;
         }
     }
     else if(action == "loop"){
         try{
             if(loop_frames[id]){
-                loop_frames[id]->clear();
+                //loop_frames[id]->clear(); // StkFrames::clear() deprecated
                 //loop_frames[id]->resize( bufferFrames, channels );
             }
             //else{
@@ -1419,7 +1419,7 @@ openstream:
             //}
             loop_ids[id] = mediaId;
         }
-        catch( RtError &e ){
+        catch( RtAudioError &e ){
             std::cerr << "ACAudioStkEngineRendererPlugin::performActionOnMedia: couldn't allocate frames for media " << mediaId << std::endl;
         }
     }
@@ -1460,7 +1460,7 @@ bool ACAudioStkEngineRendererPlugin::openStream(unsigned int & bufferFrames){
             dac->openStream( &parameters, NULL, format, (unsigned int)Stk::sampleRate(), &bufferFrames, &ACAudioStkEngineRendererPlugin::tickWrapper, this, options, &ACAudioStkEngineRendererPlugin::errorCallback );
         }
     }
-    catch ( RtError &e ) {
+    catch ( RtAudioError &e ) {
         std::cerr << "ACAudioStkEngineRendererPlugin::performActionOnMedia: couldn't start stream: error " << e.getMessage() << std::endl;
         return false;
     }
@@ -1472,7 +1472,7 @@ bool ACAudioStkEngineRendererPlugin::startStream(){
         if(!dac->isStreamRunning())
             dac->startStream();
     }
-    catch ( RtError &error ) {
+    catch ( RtAudioError &error ) {
         error.printMessage();
         return false;
     }

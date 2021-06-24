@@ -41,11 +41,12 @@
 
 #ifdef __APPLE__
 #define __OS_MACOSX__
-#elif defined (UNIX)
+#elif defined(unix) || defined(__unix) || defined(__unix__)
 #define __OS_LINUX__
 #elif defined (WIN32) || defined (_WIN32) || defined (__WIN32__)
 #define __OS_WINDOWS__
 #endif
+
 #include <Mutex.h>
 
 #include <ACAudioStkFileWvIn.h>
@@ -117,7 +118,7 @@ private:
 
     void midiInCallback( double timeStamp, std::vector<unsigned char> *message);
     static void midiInCallbackWrapper( double timeStamp, std::vector<unsigned char> *message, void *userData);
-    static void errorCallback( RtError::Type type, const std::string &errorText );
+    static void errorCallback( RtAudioError::Type type, const std::string &errorText );
 
 protected:
     bool openStream(unsigned int& bufferFrames);

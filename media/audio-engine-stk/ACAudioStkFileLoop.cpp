@@ -30,7 +30,8 @@ ACAudioStkFileLoop :: ACAudioStkFileLoop( unsigned long chunkThreshold, unsigned
 }
 
 ACAudioStkFileLoop :: ACAudioStkFileLoop( std::string fileName, bool raw, bool doNormalize,
-                      unsigned long chunkThreshold, unsigned long chunkSize )
+                      unsigned long chunkThreshold, unsigned long chunkSize,
+                      bool doInt2FloatScaling )
   : FileWvIn( chunkThreshold, chunkSize ), phaseOffset_(0.0)
 {
   this->openFile( fileName, raw, doNormalize );
@@ -42,7 +43,7 @@ ACAudioStkFileLoop :: ~ACAudioStkFileLoop( void )
   Stk::removeSampleRateAlert( this );
 }
 
-void ACAudioStkFileLoop ::  openFile( std::string fileName, bool raw, bool doNormalize )
+void ACAudioStkFileLoop ::  openFile( std::string fileName, bool raw, bool doNormalize, bool doInt2FloatScaling )
 {
   // Call close() in case another file is already open.
   this->closeFile();
@@ -60,29 +61,26 @@ void ACAudioStkFileLoop ::  openFile( std::string fileName, bool raw, bool doNor
     chunking_ = true;
     chunkPointer_ = 0;
     data_.resize( chunkSize_ + 1, file_.channels() );
-    if ( doNormalize ) normalizing_ = true;
-    else normalizing_ = false;
   }
   else {
     chunking_ = false;
     data_.resize( file_.fileSize() + 1, file_.channels() );
   }
 
+  if ( doInt2FloatScaling )
+    int2floatscaling_ = true;
+  else
+    int2floatscaling_ = false;
+
   // Load all or part of the data.
-  file_.read( data_, 0, doNormalize );
+  file_.read( data_, 0, int2floatscaling_ );
 
-  if ( chunking_ ) { // If chunking, save the first sample frame for later.
-    firstFrame_.resize( 1, data_.channels() );
-    for ( unsigned int i=0; i<data_.channels(); i++ )
-      firstFrame_[i] = data_[i];
-  }
-  else {  // If not chunking, copy the first sample frame to the last.
-    for ( unsigned int i=0; i<data_.channels(); i++ )
-      data_( data_.frames() - 1, i ) = data_[i];
-  }
-
-  // Resize our lastOutputs container.
+  // Resize our lastFrame container.
   lastFrame_.resize( 1, file_.channels() );
+
+  // Close the file unless chunking
+  fileSize_ = file_.fileSize();
+  if ( !chunking_ ) file_.close();
 
   // Set default rate based on file sampling rate.
   this->setRate( data_.dataRate() / Stk::sampleRate() );
@@ -134,32 +132,20 @@ StkFloat ACAudioStkFileLoop :: tick( unsigned int channel )
 {
 #if defined(_STK_DEBUG_)
   if ( channel >= data_.channels() ) {
-    oStream_ << "ACAudioStkFileLoop::tick(): channel argument and soundfile data are incompatible!";
+    oStream_ << "FileWvIn::tick(): channel argument and soundfile data are incompatible!";
     handleError( StkError::FUNCTION_ARGUMENT );
   }
 #endif
 
-  // Check limits of time address ... if necessary, recalculate modulo
-  // fileSize.
-  StkFloat fileSize = file_.fileSize();
+  if ( finished_ ) return 0.0;
 
-  if(fileSize==0)//CF
-    return 0;//CF
-
-  while ( time_ < 0.0 )
-    time_ += fileSize;
-  while ( time_ >= fileSize )
-    time_ -= fileSize;
-
-  StkFloat tyme = time_;
-  if ( phaseOffset_ ) {
-    tyme += phaseOffset_;
-    while ( tyme < 0.0 )
-      tyme += fileSize;
-    while ( tyme >= fileSize )
-      tyme -= fileSize;
+  if ( time_ < 0.0 || time_ > (StkFloat) ( fileSize_ - 1.0 ) ) {
+    for ( unsigned int i=0; i<lastFrame_.size(); i++ ) lastFrame_[i] = 0.0;
+    finished_ = true;
+    return 0.0;
   }
 
+  StkFloat tyme = time_;
   if ( chunking_ ) {
 
     // Check the time address vs. our current buffer limits.
@@ -172,16 +158,12 @@ StkFloat ACAudioStkFileLoop :: tick( unsigned int channel )
       }
       while ( time_ > (StkFloat) ( chunkPointer_ + chunkSize_ - 1 ) ) { // positive rate
         chunkPointer_ += chunkSize_ - 1; // overlap chunks by one frame
-        if ( chunkPointer_ + chunkSize_ > file_.fileSize() ) { // at end of file
-          chunkPointer_ = file_.fileSize() - chunkSize_ + 1; // leave extra frame at end of buffer
-          // Now fill extra frame with first frame data.
-          for ( unsigned int j=0; j<firstFrame_.channels(); j++ )
-            data_( data_.frames() - 1, j ) = firstFrame_[j];
-        }
+        if ( chunkPointer_ + chunkSize_ > fileSize_ ) // at end of file
+          chunkPointer_ = fileSize_ - chunkSize_;
       }
 
       // Load more data.
-      file_.read( data_, chunkPointer_, normalizing_ );
+      file_.read( data_, chunkPointer_, int2floatscaling_ );
     }
 
     // Adjust index for the current buffer.
