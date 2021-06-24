@@ -848,6 +848,7 @@ ENDIF(SUPPORT_VIDEO OR SUPPORT_IMAGE)
                 FIND_PACKAGE_HANDLE_STANDARD_ARGS(OPENGL DEFAULT_MSG OPENGL_gl_LIBRARY OPENGL_INCLUDE_DIR)
                 SET(OPENGL_LIBRARIES "-lglu32" "-lopengl32")
          ELSE()
+		 		SET(OpenGL_GL_PREFERENCE "GLVND") # or "LEGACY"
                 FIND_PACKAGE( OpenGL REQUIRED ) # the default FindOpenGL.cmake is deprecated for MINGW but required by FindQt4 et al...
                 #SET(OPENGL_LIBRARIES ${OPENGL_gl_LIBRARY} ${OPENGL_glu_LIBRARY})
         ENDIF()
