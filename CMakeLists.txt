@@ -171,7 +171,7 @@ OPTION(USE_OPENAL "Use OpenAL" ON)
 OPTION(USE_PORTAUDIO "Use PortAudio" ON)
 OPTION(USE_STARPU "Use StarPU for CPU/GPU parallel feature extraction" ON)
 OPTION(USE_OPENMP "Use OpenMP" ON) # doesn't work on Snow Leopard, returns readv failed on Ubuntu 10.04
-OPTION(USE_CORE_DISPATCH "Use Grand Central Dispatch in core" ON)
+OPTION(USE_CORE_DISPATCH "Use Grand Central Dispatch in core" OFF)
 IF ( NOT APPLE_IOS_DEV AND NOT APPLE_IOS_SIM AND NOT APPLE_IOS_XCODE )
 	IF(APPLE)
 		OPTION(USE_COCOA "Use Cocoa" OFF)
@@ -1306,7 +1306,7 @@ IF(SUPPORT_AUDIO AND USE_PORTAUDIO)
 ENDIF()
 
 # libdispatch
-FIND_PACKAGE( Libdispatch )
+#FIND_PACKAGE( Libdispatch )
 IF(LIBDISPATCH_FOUND)
 	IF(USE_CORE_DISPATCH)
 		ADD_DEFINITIONS(-DUSE_CORE_DISPATCH)
