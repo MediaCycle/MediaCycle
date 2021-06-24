@@ -94,10 +94,10 @@ void ACMlPackGMMPlugin::updateClusters(ACMediaBrowser* mediaBrowser,bool needsCl
     urowvec _tag;
     vector<string> featureNames;
     extractDescMatrix(mediaBrowser, desc_m, featureNames,_tag);
-    mlpack::gmm::GMM<> algo(clusterCount,desc_m.n_cols);
+    mlpack::gmm::GMM algo(clusterCount,desc_m.n_cols);
     descD_m=desc_m.t();
-    algo.Estimate(descD_m);
-    arma::Col<size_t> assignments;
+    algo.Train(descD_m);
+    arma::Row<size_t> assignments;
     algo.Classify(descD_m,assignments);
     
     
@@ -116,13 +116,16 @@ void ACMlPackGMMPlugin::updateClusters(ACMediaBrowser* mediaBrowser,bool needsCl
     }
     cout<<"centroid:"<<endl;
     //Set ClusterCenters
-    std::vector<arma::vec> gmmMeans=algo.Means();
-    std::vector<arma::mat> gmmCov=algo.Covariances();
-    arma::mat centers(desc_m.n_cols,gmmMeans.size());
+    // std::vector<arma::vec> gmmMeans=algo.Means();
+    // std::vector<arma::mat> gmmCov=algo.Covariances();
+    // arma::mat centers(desc_m.n_cols,gmmMeans.size());
+    arma::mat centers(desc_m.n_cols,clusterCount);
     for (int i=0;i<centers.n_cols;i++){
-        centers.col(i)=gmmMeans[i];
-        cout<<gmmMeans[i]<<endl;
-        cout<<gmmCov[i]<<endl;
+        //centers.col(i)=gmmMeans[i];
+        centers.col(i)=algo.Component(i).Mean();
+        cout<<centers.col(i)<<endl;
+        //cout<<gmmCov[i]<<endl;
+        cout<<algo.Component(i).Covariance()<<endl;
     }
     cout<<"weight"<<endl;
     cout<<algo.Weights()<<endl;

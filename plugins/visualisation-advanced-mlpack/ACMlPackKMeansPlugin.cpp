@@ -95,7 +95,7 @@ void ACMlPackKMeansPlugin::updateClusters(ACMediaBrowser* mediaBrowser,bool need
     vector<string> featureNames;
     extractDescMatrix(mediaBrowser, desc_m, featureNames,_tag);
     mlpack::kmeans::KMeans<> algo;
-    arma::Col<size_t> assignments;
+    arma::Row<size_t> assignments;
     descD_m=desc_m.t();
     algo.Cluster(descD_m,clusterCount,assignments,centroid);
     

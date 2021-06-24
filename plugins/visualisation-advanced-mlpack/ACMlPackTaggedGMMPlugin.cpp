@@ -96,12 +96,13 @@ void ACMlPackTaggedGMMPlugin::updateClusters(ACMediaBrowser* mediaBrowser,bool n
     if (taggedIndex.n_elem>0){
         clusterCount=max(_tag+1);
         media_cycle->setClusterNumber(clusterCount);
-       // mlpack::gmm::GMM<> algo(clusterCount,desc_m.n_cols);
+       // mlpack::gmm::GMM algo(clusterCount,desc_m.n_cols);
         
         
         urowvec v = linspace<urowvec>(0, desc_m.n_cols-1, desc_m.n_cols);
-        std::vector<arma::vec> _means;
-        std::vector<arma::mat> _covariances;
+        // std::vector<arma::vec> _means;
+        // std::vector<arma::mat> _covariances;
+        std::vector<mlpack::distribution::GaussianDistribution> _dists;
         arma::vec _weights(clusterCount);
         
         for (int clusterId=0;clusterId<clusterCount;clusterId++){
@@ -115,28 +116,29 @@ void ACMlPackTaggedGMMPlugin::updateClusters(ACMediaBrowser* mediaBrowser,bool n
             }
             vector<double> evalLike;
             for (int i=1;i<=10;i++){
-                mlpack::gmm::GMM<> locAlgo(i,desc_m.n_cols);
-                evalLike.push_back(locAlgo.Estimate(descD_m));
-                cout<<(locAlgo.Means())[0]<<endl;
+                mlpack::gmm::GMM locAlgo(i,desc_m.n_cols);
+                evalLike.push_back(locAlgo.Train(descD_m));
+                cout<<(locAlgo.Component(0).Mean())<<endl;
             }
             for (int i=0;i<evalLike.size();i++){
                 cout<<evalLike[i]<<" ";
             }
             cout<<endl;
-            mlpack::gmm::GMM<> locAlgo(1,desc_m.n_cols);
-            cout<<locAlgo.Estimate(descD_m)<<endl;
+            mlpack::gmm::GMM locAlgo(1,desc_m.n_cols);
+            cout<<locAlgo.Train(descD_m)<<endl;
             //cout<<"preprocessed"<<endl;
             //cout<<clusterId<<endl;
             //cout<<(locAlgo.Means())[0]<<endl;
             //cout<<(locAlgo.Covariances())[0]<<endl;
-            _means.push_back((locAlgo.Means())[0]);
-            _covariances.push_back((locAlgo.Covariances())[0]);
-                _weights[clusterId]=(float)locTaggedIndex.n_elem/taggedIndex.n_elem;
+            // _means.push_back(locAlgo.Component(0).Mean());
+            // _covariances.push_back(locAlgo.Component(0).Covariance());
+            _dists.push_back(locAlgo.Component(0));
+            _weights[clusterId]=(float)locTaggedIndex.n_elem/taggedIndex.n_elem;
         }
-        mlpack::gmm::GMM<> algo(_means,_covariances,_weights);
+        mlpack::gmm::GMM algo(_dists,_weights);
         
         descD_m=desc_m.t();
-        arma::Col<size_t> assignments;
+        arma::Row<size_t> assignments;
         cout<<assignments<<endl;
         algo.Classify(descD_m,assignments);
       
@@ -156,11 +158,12 @@ void ACMlPackTaggedGMMPlugin::updateClusters(ACMediaBrowser* mediaBrowser,bool n
             
         }
         //Set ClusterCenters
-        std::vector<arma::vec> gmmMeans=algo.Means();
-        std::vector<arma::mat> gmmCov=algo.Covariances();
-        arma::mat centers(desc_m.n_cols,gmmMeans.size());
+        // std::vector<arma::vec> gmmMeans=algo.Means();
+        // std::vector<arma::mat> gmmCov=algo.Covariances();
+        arma::mat centers(desc_m.n_cols,clusterCount);
         for (int i=0;i<centers.n_cols;i++){
-            centers.col(i)=gmmMeans[i];
+            //centers.col(i)=gmmMeans[i];
+            centers.col(i)=algo.Component(i).Mean();
             //cout<<gmmMeans[i]<<endl;
             //cout<<gmmCov[i]<<endl;
         }
