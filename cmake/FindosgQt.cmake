@@ -25,6 +25,7 @@
 #
 # Created by Eric Wing.
 # Modified to work with osgQt by Robert Osfield, January 2012.
+# Modified to work with osgQOpenGL by Christian Frisson, 2021.
 
 #=============================================================================
 # Copyright 2007-2009 Kitware, Inc.
@@ -44,8 +45,8 @@
 # #include <osgQt/GraphicsWindowQt>
 
 include(Findosg_functions)
-OSG_FIND_PATH   (OSGQT osgQt/GraphicsWindowQt)
-OSG_FIND_LIBRARY(OSGQT osgQt)
+OSG_FIND_PATH   (OSGQT osgQOpenGL/osgQOpenGLWidget)
+OSG_FIND_LIBRARY(OSGQT osgQOpenGL)
 
 #include(${CMAKE_CURRENT_LIST_DIR}/FindPackageHandleStandardArgs.cmake)
 include(FindPackageHandleStandardArgs)
