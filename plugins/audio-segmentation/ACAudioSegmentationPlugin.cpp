@@ -142,7 +142,7 @@ std::vector<ACMedia*> ACAudioSegmentationPlugin::_segment(ACMediaTimedFeature* d
     case 1:{
         desc_v = conv_to<fcolvec>::from(desc_mf->delta()->getValue());
         time_v = desc_mf->getTime();
-        peaks_v = findpeaks(desc_v, min((unsigned int) 200, desc_v.n_elem-1)); //200 ccl original:10
+        peaks_v = findpeaks(desc_v, min((long long unsigned int) 200, desc_v.n_elem-1)); //200 ccl original:10
         break;
     }
     case 2:{ //FASTBIC
