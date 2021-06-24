@@ -11,7 +11,9 @@
 #include <math.h>
 #include <float.h>
 #include <dispatch/dispatch.h>
+#ifdef __APPLE__
 #include <Accelerate/Accelerate.h>
+#endif
 
 dispatch_queue_t queue;
 

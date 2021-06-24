@@ -15,8 +15,13 @@
 #include <math.h>
 #include <dispatch/dispatch.h>
 
+#ifdef __APPLE__
 #include <vecLib/cblas.h>
 #include <vecLib/clapack.h>
+#else
+#include <cblas.h>
+#include <lapack.h>
+#endif
 
 #include "indexing.h"
 

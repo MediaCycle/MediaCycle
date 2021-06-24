@@ -9,7 +9,9 @@
 
 #include "pca.h"
 #include <string.h>
+#ifdef __APPLE__
 #include <Accelerate/Accelerate.h>
+#endif
 
 
 void reduce_data(float* X, int D, int N, float* Y, int no_dims) {
