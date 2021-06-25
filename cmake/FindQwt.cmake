@@ -28,7 +28,10 @@ foreach(version ${_Qwt_KNOWN_VERSIONS})
   list(APPEND _Qwt_TEST_VERSIONS_LIBRARY "qwt-${version}/lib")
 endforeach()
 
-FIND_PATH(QWT_INCLUDE_DIR qwt.h PATH_SUFFIXES "qwt" "qwt-qt4" "qwt-qt5" "qwt/include" ${_Qwt_TEST_VERSIONS_INCLUDE} "qt/include")
+FIND_PATH(QWT_INCLUDE_DIR qwt.h 
+  PATH_SUFFIXES "qwt" "qwt-qt4" "qwt-qt5" "qwt/include" ${_Qwt_TEST_VERSIONS_INCLUDE} "qt/include"
+  PATHS /usr/local/lib # Homebrew qwt.framework location
+)
 
 SET(QWT_NAMES ${QWT_NAMES} qwt qwt-qt4 qwt-qt5)
 FIND_LIBRARY(QWT_LIBRARY NAMES ${QWT_NAMES} PATH_SUFFIXES ${_Qwt_TEST_VERSIONS_LIBRARY} "qt/lib")
