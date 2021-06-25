@@ -128,12 +128,13 @@ bool ACNovintFalconPlugin::init_device(){
 
 ACNovintFalconPlugin::~ACNovintFalconPlugin(){
 
+    if(this->active)
+        this->WaitForInternalThreadToExit();
+
     this->active = false;
     m_alwaysOutput = false;
     if(m_runThread) nifalcon_stop();
     m_falconDevice.close();
-
-    this->WaitForInternalThreadToExit();
 
 #ifdef WIN32
     system("pause");
