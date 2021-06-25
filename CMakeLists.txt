@@ -211,6 +211,7 @@ OPTION(BUILD_TEXTCYCLE_APP "Build TextCycle app" OFF)
 OPTION(BUILD_VIDEOCYCLE_APP "Build VideoCycle app" OFF)
 OPTION(BUILD_CLIS "Build command-line interface applications" ON)	
 OPTION(USE_SDIF "Use SDIF" OFF)
+OPTION(USE_PHONON "Use Phonon" OFF)
 OPTION(USE_WEBKIT "Use WebKit" OFF)
 
 # Current working config for cross-compiling with MXE
@@ -1185,7 +1186,9 @@ IF( USE_QT5 )
 
 	MESSAGE("QT_LIBRARIES ${QT_LIBRARIES}")
 
+	IF(USE_PHONON)
 	find_package(Phonon4Qt5 REQUIRED)
+	ENDIF(USE_PHONON)
 	if(Phonon4Qt5_FOUND)
 		set(QT_PHONON_FOUND ON)
 	endif()
