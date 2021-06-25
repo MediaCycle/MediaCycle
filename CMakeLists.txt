@@ -211,7 +211,7 @@ OPTION(BUILD_TEXTCYCLE_APP "Build TextCycle app" OFF)
 OPTION(BUILD_VIDEOCYCLE_APP "Build VideoCycle app" OFF)
 OPTION(BUILD_CLIS "Build command-line interface applications" ON)	
 OPTION(USE_SDIF "Use SDIF" OFF)
-OPTION(BUILD_DOCUMENTATION "Build MediaCycle reference documentation using doxygen (use: make documentation)" OFF)
+OPTION(USE_WEBKIT "Use WebKit" OFF)
 
 # Current working config for cross-compiling with MXE
 IF(MINGW AND CMAKE_TOOLCHAIN_FILE)
@@ -1168,8 +1168,9 @@ IF( USE_QT5 )
         find_package(Qt5OpenGL REQUIRED HINTS ${QT5_MACPORTS})
         find_package(Qt5Xml REQUIRED HINTS ${QT5_MACPORTS})
         find_package(Qt5Widgets REQUIRED HINTS ${QT5_MACPORTS})
+		IF(USE_WEBKIT)
         find_package(Qt5WebKitWidgets REQUIRED HINTS ${QT5_MACPORTS})
-
+		ENDIF(USE_WEBKIT)
 	add_definitions(${Qt5Widgets_DEFINITIONS})
 	set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} ${Qt5Widgets_EXECUTABLE_COMPILE_FLAGS}")
 
@@ -1178,7 +1179,9 @@ IF( USE_QT5 )
         LIST(APPEND QT_LIBRARIES ${Qt5OpenGL_LIBRARIES})
         LIST(APPEND QT_LIBRARIES ${Qt5Multimedia_LIBRARIES})
 	LIST(APPEND QT_LIBRARIES ${Qt5Widgets_LIBRARIES})
+	IF(USE_WEBKIT)
 	LIST(APPEND QT_LIBRARIES ${Qt5WebKitWidgets_LIBRARIES})
+	ENDIF(USE_WEBKIT)
 
 	MESSAGE("QT_LIBRARIES ${QT_LIBRARIES}")
 
