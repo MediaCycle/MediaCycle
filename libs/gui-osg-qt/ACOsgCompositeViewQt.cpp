@@ -4,7 +4,7 @@
 *
 *  @author Christian Frisson
 *  @date 29/04/10
-*  @copyright (c) 2010 – UMONS - Numediart
+*  @copyright (c) 2021 – UMONS - Numediart
 *  
 *  MediaCycle of University of Mons – Numediart institute is 
 *  licensed under the GNU AFFERO GENERAL PUBLIC LICENSE Version 3 
@@ -56,7 +56,7 @@ namespace fs = boost::filesystem;
 using namespace osg;
 
 ACOsgCompositeViewQt::ACOsgCompositeViewQt( QWidget * parent, const char * name, const QGLWidget * shareWidget, WindowFlags f)
-    : QGLWidget(parent, shareWidget, f),ACEventListener(), ACAbstractViewQt(), media_cycle(0),font(0),
+    : ACOsgQOpenGLWidget(0, parent), ACEventListener(), ACAbstractViewQt(), media_cycle(0),font(0),
       browser_renderer(0), browser_event_handler(0), timeline_renderer(0), timeline_event_handler(0), hud_renderer(0), hud_view(0),
       mousedown(0), borderdown(0),
       refx(0.0f), refy(0.0f),
@@ -71,16 +71,18 @@ ACOsgCompositeViewQt::ACOsgCompositeViewQt( QWidget * parent, const char * name,
       translateBrowserAction(0), addMediaOnTimelineTrackAction(0), toggleTimelinePlaybackAction(0), adjustTimelineHeightAction(0),
       discardMediaAction(0),
       setting(AC_SETTING_NONE),
-      mouse_disabled(false)
+      mouse_disabled(false),
+      scaleX(1.0), scaleY(1.0)
 {
-#ifdef UNIX
+// #ifdef UNIX
     osg::setNotifyLevel(osg::DEBUG_INFO);
-#endif
+// #endif
 
-    browser_viewer = new osgViewer::GraphicsWindowEmbedded(0,0,QGLWidget::width(),QGLWidget::height());
-    QGLWidget::setFocusPolicy(Qt::StrongFocus);// CF instead of ClickFocus
+    browser_viewer = new osgViewer::GraphicsWindowEmbedded(0,0,width(),height());
 
-    setThreadingModel(osgViewer::CompositeViewer::SingleThreaded);
+    //QGLWidget::setFocusPolicy(Qt::StrongFocus);// CF instead of ClickFocus
+
+    // setThreadingModel(osgViewer::CompositeViewer::SingleThreaded);
     /*
   CF: other threading models to test are:
    SingleThreaded
@@ -91,10 +93,10 @@ ACOsgCompositeViewQt::ACOsgCompositeViewQt( QWidget * parent, const char * name,
    ThreadPerCamera
    AutomaticSelection
   */
-    this->setRunFrameScheme( osgViewer::Viewer::ON_DEMAND );
+    //this->setRunFrameScheme( osgViewer::Viewer::ON_DEMAND );
 
-    connect(&_timer, SIGNAL(timeout()), this, SLOT(updateGL()));
-    _timer.start(10);
+    // connect(&_timer, SIGNAL(timeout()), this, SLOT(updateGL()));
+    // _timer.start(10);
 
     // Share identical images between renderers
     //osgDB::Registry::instance()->setReadFileCallback( new ACOsgReadAndShareImageCallback);
@@ -116,31 +118,23 @@ ACOsgCompositeViewQt::ACOsgCompositeViewQt( QWidget * parent, const char * name,
         browser_renderer->setFont(font);
     }
 
-    //this->setAttribute(Qt::WA_Hover, true);
+    this->setAttribute(Qt::WA_Hover, true);
     setMouseTracking(true); //CF necessary for the hover callback
 
     // Views
     sepy = 0;//height()/4;// CF browser/timeline proportions at startup
 
-    browser_view = new osgViewer::View;
-    browser_view->getCamera()->setGraphicsContext(this->getGraphicsWindow());
-    this->updateBrowserView(width(),height());
-    this->addView(browser_view);
 
-    timeline_view = new osgViewer::View;
-    timeline_view->getCamera()->setGraphicsContext(this->getGraphicsWindow());
-    this->updateTimelineView(width(),height());
-    this->addView(timeline_view);
-
-    // full screen antialiasing (if supported)
-    //osg::DisplaySettings::instance()->setNumMultiSamples( 4 );
+    QObject::connect(this,
+        SIGNAL(initialized()),
+        SLOT(initialize()));
 
     // Event handlers
     browser_event_handler = new ACOsgBrowserEventHandler;
-    browser_view->addEventHandler(browser_event_handler);
+    // browser_view->addEventHandler(browser_event_handler);
 
     timeline_event_handler = new ACOsgTimelineEventHandler;
-    timeline_view->addEventHandler(timeline_event_handler); // CF ((osgViewer::Viewer*) (this))->addEventHandler for the simple Viewer
+    // timeline_view->addEventHandler(timeline_event_handler); // CF ((osgViewer::Viewer*) (this))->addEventHandler for the simple Viewer
     timeline_event_handler->setRenderer(timeline_renderer);
 
     // HUD renderer
@@ -154,9 +148,9 @@ ACOsgCompositeViewQt::ACOsgCompositeViewQt( QWidget * parent, const char * name,
     timeline_renderer->setScreenWidth(screen_width);
     timeline_renderer->updateSize(width(),sepy);
 
-    grabGesture(Qt::PanGesture);
-    grabGesture(Qt::PinchGesture);
-    grabGesture(Qt::SwipeGesture);
+    // grabGesture(Qt::PanGesture);
+    // grabGesture(Qt::PinchGesture);
+    // grabGesture(Qt::SwipeGesture);
 
     osg::setNotifyLevel(osg::WARN);//remove the NaN CullVisitor messages
     this->initInputActions();
@@ -164,6 +158,46 @@ ACOsgCompositeViewQt::ACOsgCompositeViewQt( QWidget * parent, const char * name,
     setAcceptDrops(true);
     //setRunFrameScheme( osgViewer::Viewer::ON_DEMAND );
     dragFlag=false;
+
+}
+
+void ACOsgCompositeViewQt::initialize(){
+    std::cout << "initialize" << std::endl;
+
+    // Views
+    
+    browser_view = new osgViewer::View;
+    browser_view->getCamera()->setGraphicsContext(this->getGraphicsWindow());
+    this->addOsgView(browser_view);
+    this->updateBrowserView(width(),height());
+    
+    timeline_view = new osgViewer::View;
+    timeline_view->getCamera()->setGraphicsContext(this->getGraphicsWindow());
+    this->updateTimelineView(width(),height());
+    this->addView(timeline_view);
+
+    // full screen antialiasing (if supported)
+    //osg::DisplaySettings::instance()->setNumMultiSamples( 4 );
+
+    // Event handlers
+    // browser_event_handler = new ACOsgBrowserEventHandler;
+    browser_view->addEventHandler(browser_event_handler);
+
+    // timeline_event_handler = new ACOsgTimelineEventHandler;
+    timeline_view->addEventHandler(timeline_event_handler); // CF ((osgViewer::Viewer*) (this))->addEventHandler for the simple Viewer
+    // timeline_event_handler->setRenderer(timeline_renderer);
+
+    // HUD renderer
+    hud_renderer->getCamera()->setGraphicsContext(this->getGraphicsWindow());
+    hud_view->setCamera(hud_renderer->getCamera());
+    this->updateHUDCamera(width(),height());
+    this->addView(hud_view);
+
+    // Audio waveforms
+    screen_width = QApplication::desktop()->screenGeometry().width();
+    timeline_renderer->setScreenWidth(screen_width);
+    timeline_renderer->updateSize(width(),sepy);
+
 }
 
 void ACOsgCompositeViewQt::dragEnterEvent(QDragEnterEvent *event)
@@ -363,8 +397,8 @@ void ACOsgCompositeViewQt::initFont()
         std::cerr << "ACOsgCompositeViewQt::initFont: couldn't load font " << _font_file << std::endl;
 }
 
-void ACOsgCompositeViewQt::initializeGL()
-{
+// void ACOsgCompositeViewQt::initializeGL()
+// {
     /*if (getGraphicsWindow()->isRealized()) {
   unsigned int _screen_width, _screen_height;
   if ( screen_width != _screen_width){
@@ -374,10 +408,19 @@ void ACOsgCompositeViewQt::initializeGL()
    //timeline_renderer->updateScreenWidth(_screen_width);
   }
  }*/
-}
+// }
 
 void ACOsgCompositeViewQt::resizeGL( int w, int h )
 {
+    double x = QGuiApplication::primaryScreen()->physicalDotsPerInchX();
+    double y = QGuiApplication::primaryScreen()->physicalDotsPerInchY();
+    // values 284 and 285 are the reference values
+    scaleX = 284.0/double(x);
+    scaleY = 285.0/double(y);
+
+    w*=scaleX;
+    h*=scaleY;
+
     if (isRealized()){
         //std::cout << "height() " << browser_view->getCamera()->getViewport()->height()+timeline_view->getCamera()->getViewport()->height() << " height " << height << std::endl;
         float prevheight = browser_view->getCamera()->getViewport()->height()+timeline_view->getCamera()->getViewport()->height();
@@ -411,29 +454,47 @@ void ACOsgCompositeViewQt::resizeGL( int w, int h )
 // CF to do: understand paintGL vs updateGL to use them more correctly
 void ACOsgCompositeViewQt::paintGL()
 {
-    browser_renderer->mutexLock();
-    timeline_renderer->mutexLock();
     try{
-        frame(); // put this first otherwise we don't get a clean background in the browser
+        ACOsgQOpenGLWidget::paintGL();
     }
     catch(...){
         std::cerr << "ACOsgCompositeViewQt::paintGL: couldn't update frame "<< std::endl;
     }
-    browser_renderer->mutexLock();
-    timeline_renderer->mutexLock();
-    if (media_cycle == 0) return;
 
-    //CF to improve, we want to know if the view is being animated to force a frequent refresh of the positions:
-    //SD 2010feb22 to allow auto update whith threaded import
-    //if (media_cycle && media_cycle->hasBrowser() && media_cycle->getBrowser()->getState() == AC_CHANGING)
-    updateTransformsFromBrowser(media_cycle->getFrac());
+    this->updateGL();
+    // browser_renderer->mutexLock();
+    // timeline_renderer->mutexLock();
+    // try{
+    //     frame(); // put this first otherwise we don't get a clean background in the browser
+    // }
+    // catch(...){
+    //     std::cerr << "ACOsgCompositeViewQt::paintGL: couldn't update frame "<< std::endl;
+    // }
+    // browser_renderer->mutexLock();
+    // timeline_renderer->mutexLock();
+    // if (media_cycle == 0) return;
+
+    // //CF to improve, we want to know if the view is being animated to force a frequent refresh of the positions:
+    // //SD 2010feb22 to allow auto update whith threaded import
+    // //if (media_cycle && media_cycle->hasBrowser() && media_cycle->getBrowser()->getState() == AC_CHANGING)
+    // updateTransformsFromBrowser(media_cycle->getFrac());
+}
+
+int ACOsgCompositeViewQt::height()
+{ 
+    return scaleY*QWidget::height(); 
+}
+
+int ACOsgCompositeViewQt::width()
+{ 
+    return scaleX*QWidget::width(); 
 }
 
 // called according to timer
 void ACOsgCompositeViewQt::updateGL()
 {
-    browser_renderer->mutexLock();
-    timeline_renderer->mutexLock();
+    // browser_renderer->mutexLock();
+    // timeline_renderer->mutexLock();
     double frac = 0.0;
 
     if (media_cycle == 0) return;
@@ -497,10 +558,10 @@ void ACOsgCompositeViewQt::updateGL()
  if (frac != 0.0)
   setMouseTracking(true); //CF necessary for the hover callback
  */
-    QGLWidget::updateGL();
+    // QGLWidget::updateGL();
     media_cycle->setNeedsDisplay(false);
-    browser_renderer->mutexLock();
-    timeline_renderer->mutexLock();
+    // browser_renderer->mutexLock();
+    // timeline_renderer->mutexLock();
 }
 
 void ACOsgCompositeViewQt::addInputAction(ACInputActionQt* _action)
@@ -1133,12 +1194,12 @@ void ACOsgCompositeViewQt::mouseReleaseEvent( QMouseEvent* event )
     media_cycle->setNeedsDisplay(true);
 }
 
-bool ACOsgCompositeViewQt::event(QEvent *event)
-{
-    if (event->type() == QEvent::Gesture)
-        return gestureEvent(static_cast<QGestureEvent*>(event));
-    return QGLWidget::event(event);
-}
+// bool ACOsgCompositeViewQt::event(QEvent *event)
+// {
+//     if (event->type() == QEvent::Gesture)
+//         return gestureEvent(static_cast<QGestureEvent*>(event));
+//     return QGLWidget::event(event);
+// }
 
 bool ACOsgCompositeViewQt::gestureEvent(QGestureEvent *event)
 {
@@ -1212,6 +1273,7 @@ void ACOsgCompositeViewQt::pinchTriggered(QPinchGesture* gesture){
 
 void ACOsgCompositeViewQt::prepareBrowser()
 {
+    if (browser_view == 0) return;
     //setMouseTracking(false); //CF necessary for the hover callback
     browser_renderer->prepareNodes();
     browser_renderer->prepareLabels();
@@ -1219,6 +1281,8 @@ void ACOsgCompositeViewQt::prepareBrowser()
     hud_renderer->prepareLibrary(browser_view);
     //hud_renderer->prepareMediaActions(browser_view); // CF: temporarily disabled, makes MashtaCycle crash
     browser_view->setSceneData(browser_renderer->getShapes());
+
+    // this->getOsgViewer()->setSceneData(browser_renderer->getShapes());
 
     //    osgDB::SharedStateManager* ssm = osgDB::Registry::instance()->getSharedStateManager();
     //    if ( ssm )
@@ -1232,6 +1296,7 @@ void ACOsgCompositeViewQt::prepareBrowser()
 // check that it does not do too many things
 void ACOsgCompositeViewQt::updateTransformsFromBrowser( double frac)
 {
+    if (browser_view == 0) return;
     if (media_cycle == 0) return;
 
     browser_renderer->prepareNodes();

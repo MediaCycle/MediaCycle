@@ -4,7 +4,7 @@
 *
 *  @author Christian Frisson
 *  @date 29/04/10
-*  @copyright (c) 2010 – UMONS - Numediart
+*  @copyright (c) 2021 – UMONS - Numediart
 *  
 *  MediaCycle of University of Mons – Numediart institute is 
 *  licensed under the GNU AFFERO GENERAL PUBLIC LICENSE Version 3 
@@ -38,6 +38,8 @@
 #ifndef HEADER_AC_COMPOSITE_VIEW_OSG_QT
 #define HEADER_AC_COMPOSITE_VIEW_OSG_QT
 
+#include "ACOsgQOpenGLWidget.h"
+
 #include <osgViewer/Viewer>
 #include <osgViewer/CompositeViewer>
 //#include <osgViewer/ViewerEventHandlers>
@@ -64,11 +66,12 @@ using Qt::WindowFlags;
 #include <ACInputActionQt.h>
 #include <ACAbstractViewQt.h>
 
-class ACOsgCompositeViewQt : public QGLWidget, public osgViewer::CompositeViewer, public ACEventListener, public ACAbstractViewQt
+class ACOsgCompositeViewQt : public ACOsgQOpenGLWidget, public osgViewer::CompositeViewer, public ACEventListener, public ACAbstractViewQt
 {
     Q_OBJECT
 
 public slots:
+    void initialize();
 
     // Library
     void openMediaExternally(); // open file using the default application for the media type (to configure)
@@ -100,14 +103,16 @@ public:
     virtual void clean(/*bool updategl=true*/);
     osgViewer::GraphicsWindow* getGraphicsWindow() { return browser_viewer; }//.get(); }
     const osgViewer::GraphicsWindow* getGraphicsWindow() const { return browser_viewer; }//.get(); }
-    virtual void paintGL();
+    void paintGL() override;
+    int width();
+    int height();
 
 protected:
     void dragEnterEvent(QDragEnterEvent *event);
     void dropEvent(QDropEvent *event);
     virtual void initFont();
-    virtual void initializeGL();
-    virtual void resizeGL( int width, int height );
+    // virtual void initializeGL();
+    void resizeGL(int w, int h) override;
     virtual void updateGL();
     //virtual bool event( QEvent* event );
     void propagateEventToActions( QEvent* event );
@@ -120,7 +125,7 @@ protected:
     QTimer _timer;
 
 protected:
-    bool event(QEvent *event);
+    // bool event(QEvent *event);
     //void paintEvent(QPaintEvent *event);
     //void resizeEvent(QResizeEvent *event);
     //void mouseDoubleClickEvent(QMouseEvent *event);
@@ -197,6 +202,7 @@ private:
     QPoint dragStartPosition;
     bool dragFlag;
     bool mouse_disabled;
+    double scaleX, scaleY;
 
     //MediaBlender specific members:
 private:
