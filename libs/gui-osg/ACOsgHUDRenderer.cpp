@@ -214,7 +214,7 @@ void ACOsgHUDRenderer::updatePointers(osgViewer::View* view) {
 
     int w, h;
     h = 1; w = 1;
-    if (view->getViewerBase()->isRealized()) {
+    if (view->getViewerBase() && view->getViewerBase()->isRealized()) {
         w = view->getCamera()->getViewport()->width();
         h = view->getCamera()->getViewport()->height();
     }
@@ -236,7 +236,7 @@ void ACOsgHUDRenderer::updateLibrary(osgViewer::View* view) {
         camera->removeChild(library_renderer->getNode());       
         int w, h;
         h = 1; w = 1;
-        if (view->getViewerBase()->isRealized()) {
+        if (view->getViewerBase() && view->getViewerBase()->isRealized()) {
             w = view->getCamera()->getViewport()->width();
             h = view->getCamera()->getViewport()->height();
         }
@@ -263,7 +263,7 @@ void ACOsgHUDRenderer::updateMediaActions(osgViewer::View* view) {
         camera->removeChild(media_actions_renderer->getNode());
         int w, h;
         h = 1; w = 1;
-        if (view->getViewerBase()->isRealized()) {
+        if (view->getViewerBase() && view->getViewerBase()->isRealized()) {
             w = view->getCamera()->getViewport()->width();
             h = view->getCamera()->getViewport()->height();
         }
