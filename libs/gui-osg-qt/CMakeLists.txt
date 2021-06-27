@@ -31,7 +31,7 @@ IF(USE_OSG AND (USE_QT4 OR USE_QT5) AND QWT_FOUND)
         TARGET_LINK_LIBRARIES(${TARGET_NAME} mediacycle-osg mediacycle-qt ${OPENSCENEGRAPH_LIBRARIES})
 	
 	IF(USE_QT5)
-                qt5_use_modules(${TARGET_NAME} Core Gui OpenGL Widgets WebKitWidgets)
+                qt5_use_modules(${TARGET_NAME} Core Gui OpenGL Widgets)
                 #set_target_properties(${TARGET_NAME} PROPERTIES AUTOMOC ON)
                 #target_include_directories(${TARGET_NAME} PRIVATE ${CMAKE_CURRENT_BINARY_DIR})
 	ENDIF()
