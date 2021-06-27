@@ -81,5 +81,6 @@ demos/*.pbxuser
 demos/*.perspectivev3
 demos/*.pbxproj
 doc/macports/ports/PortIndex*
+.vscode
 
 # switch to regexp syntax.
