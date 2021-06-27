@@ -183,7 +183,13 @@ public:
 
 int main(int argc, char *argv[])
 {
-        ACApplicationOsgQt app(argc, argv);
+    #ifdef Q_OS_WIN
+        SetProcessDPIAware(); // call before the main event loop
+    #endif // Q_OS_WIN 
+    #if QT_VERSION >= QT_VERSION_CHECK(5,6,0)
+        QApplication::setAttribute(Qt::AA_EnableHighDpiScaling);
+	#endif // QT_VERSION
+	ACApplicationOsgQt app(argc, argv);
 	app.setOrganizationName(\"UMONS/numediart\");
 	app.setOrganizationDomain(\"mediacycle.org\");
 	app.setApplicationName(\"${TARGET_NAME}\");
