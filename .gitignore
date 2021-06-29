@@ -82,5 +82,7 @@ demos/*.perspectivev3
 demos/*.pbxproj
 doc/macports/ports/PortIndex*
 .vscode
+.clangd
+compile_commands.json
 
 # switch to regexp syntax.
