@@ -348,11 +348,7 @@ void ACVideoBrowserShowdownPlugin::submitCallback(){
 
     std::stringstream basename;
     boost::filesystem::path media_path(timeline_renderer->getTrack(0)->getMedia()->getFileName().c_str());
-#ifdef __APPLE__
     basename << media_path.stem().string();
-#else // this seems required on ubuntu to compile...
-    basename << media_path.stem();
-#endif
     std::string numbers = basename.str();
     command << numbers.substr(0,3);
 

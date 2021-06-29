@@ -125,11 +125,7 @@ std::string ACVideoFFmpegSlitScanThumbnailerPlugin::createFileName(std::string _
 #ifdef WIN32
     slash = "\\";
 #endif
-#ifdef __APPLE__
     thumbnail_path << media_path.parent_path().string() << slash << media_path.stem().string() << "_" << thumbnail_suffix;
-#else // this seems required on ubuntu to compile...
-    thumbnail_path << media_path.parent_path() << slash << media_path.stem() << "_" << thumbnail_suffix;
-#endif
     if(segment_id>0)
         thumbnail_path << "_" << segment_id;
     thumbnail_path << _thumbnail_extension;

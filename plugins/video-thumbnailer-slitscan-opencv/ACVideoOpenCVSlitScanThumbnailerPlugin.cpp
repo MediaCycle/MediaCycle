@@ -82,11 +82,7 @@ std::string ACVideoOpenCVSlitScanThumbnailerPlugin::createFileName(std::string _
 #ifdef WIN32
     slash = "\\";
 #endif
-#ifdef __APPLE__
     thumbnail_path << media_path.parent_path().string() << slash << media_path.stem().string() << "_" << thumbnail_suffix << _extension;
-#else // this seems required on ubuntu to compile...
-    thumbnail_path << media_path.parent_path() << slash << media_path.stem() << "_" << thumbnail_suffix << _extension;
-#endif
     return thumbnail_path.str();
 }
 
@@ -219,7 +215,7 @@ std::vector<ACMediaThumbnail*> ACVideoOpenCVSlitScanThumbnailerPlugin::computeSl
                 //        INTER_MAX=7,
                 //        WARP_INVERSE_MAP=CV_WARP_INVERSE_MAP
 
-                if(compute["Circular slit-scan"] && f%((int) ((float)total_frames/360.0f*angle)) == 0){
+                if(compute["Circular slit-scan"] && f % ((int) ((float)total_frames/360.0f*angle)) == 0 ){
                     // Circ slit scan, copying the slit to the thumbnail then rotating, very smeared
 
 

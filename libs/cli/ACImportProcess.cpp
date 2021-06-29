@@ -163,11 +163,7 @@ void ACImportProcess::run(int argc, char *argv[]){
 #ifdef WIN32
         slash = "\\";
 #endif
-#ifdef __APPLE__
         csv_path << folder_path.parent_path().string() << slash << folder_path.stem().string();
-#else // this seems required on ubuntu to compile...
-        csv_path << folder_path.parent_path() << slash << folder_path.stem();
-#endif
         csv_path << ".csv";
         csv = csv_path.str();
         std::cout <<  "ACImportProcess: no csv file specified, will save as '" << csv << "'" << std::endl;
@@ -178,11 +174,7 @@ void ACImportProcess::run(int argc, char *argv[]){
 #ifdef WIN32
         slash = "\\";
 #endif
-#ifdef __APPLE__
         xml_path << folder_path.parent_path().string() << slash << folder_path.stem().string();
-#else // this seems required on ubuntu to compile...
-        xml_path << folder_path.parent_path() << slash << folder_path.stem();
-#endif
         xml_path << ".xml";
         xml = xml_path.str();
         std::cout <<  "ACImportProcess: no xml file specified, will save as '" << xml << "'" << std::endl;
@@ -193,11 +185,7 @@ void ACImportProcess::run(int argc, char *argv[]){
 #ifdef WIN32
         slash = "\\";
 #endif
-#ifdef __APPLE__
         json_path << folder_path.parent_path().string() << slash << folder_path.stem().string();
-#else // this seems required on ubuntu to compile...
-        json_path << folder_path.parent_path() << slash << folder_path.stem();
-#endif
         json_path << ".json";
         json = json_path.str();
         std::cout <<  "ACImportProcess: no JSON file specified, will save as '" << json << "'" << std::endl;

@@ -165,11 +165,7 @@ void ACGridNeighborsProcess::run(int argc, char *argv[]){
 #ifdef WIN32
         slash = "\\";
 #endif
-#ifdef __APPLE__
         xml_path << folder_path.parent_path().string() << slash << folder_path.stem().string();
-#else // this seems required on ubuntu to compile...
-        xml_path << folder_path.parent_path() << slash << folder_path.stem();
-#endif
         xml_path << ".xml";
         xml = xml_path.str();
         std::cout <<  "ACGridNeighborsProcess: no xml file specified, will save as '" << xml << "'" << std::endl;
