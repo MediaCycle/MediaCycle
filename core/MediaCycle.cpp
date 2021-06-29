@@ -412,7 +412,10 @@ int MediaCycle::processTcpMessage(char* buffer, int l, char **buffer_send, int *
 // (XS or Observer Pattern...)
 
 void *threadImport(void *import_thread_arg) {
-    ((MediaCycle*)import_thread_arg)->importDirectories();
+    MediaCycle* mc = (MediaCycle*)import_thread_arg;
+    if(mc) 
+        mc->importDirectories();
+    return 0;
 }
 
 
@@ -1371,6 +1374,7 @@ int MediaCycle::getClusterNumber() {
     if(mediaBrowser){
         return mediaBrowser->getClusterNumber();
     }
+    return 0;
 }
 
 void MediaCycle::setWeight(int i, float weight) {
@@ -1675,6 +1679,7 @@ vector<int>* MediaCycle::getNeedsActivityUpdateMedia() {
     if (mediaBrowser) {
         return mediaBrowser->getNeedsActivityUpdateMedia();
     }
+    return 0;
 }
 // == callbacks
 
@@ -1977,6 +1982,7 @@ int MediaCycle::readXMLConfigFileCore(TiXmlHandle _rootHandle) {
     n = this->mediaLibrary->getSize(); // segmentation might have increased the number of medias in the library
     
     this->mediaImported(n,n,-1);
+    return 1;
 }
 
 // XS TODO return value, tests
@@ -2095,12 +2101,13 @@ int MediaCycle::readXMLConfigFilePlugins(TiXmlHandle _rootHandle) {
             
         }
     }
+    return 1;
 }
 
 // XS TODO return value, tests
 int MediaCycle::readXMLConfigFile(string _fname) {
     TiXmlHandle rootHandle = readXMLConfigFileHeader (_fname);
-    this->readXMLConfigFileCore (rootHandle);
+    return this->readXMLConfigFileCore (rootHandle);
 }
 
 std::string MediaCycle::getPluginPathFromBaseName(std::string basename)

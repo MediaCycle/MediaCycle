@@ -1069,6 +1069,7 @@ int ACMediaBrowser::getKSortedOnFeature(int k, int f, int dim, bool revert) {
     for (int i = 0; i<k; i++) {
         cout << feature_to_sort[i].first << "\t" <<  feature_to_sort[i].second << endl;
     }
+    return 1;
 }
 
 /*
@@ -1801,6 +1802,7 @@ std::list<long int> ACMediaBrowser::getNeighborNodeIds()
     }
     else
         std::cerr << "ACMediaBrowser::getNeighborNodeIds: not in neighbor mode" << std::endl;
+    return std::list<long int>();
 }
 
 std::list<long int> ACMediaBrowser::getNeighborNodeIds(long _id)
@@ -1813,6 +1815,7 @@ std::list<long int> ACMediaBrowser::getNeighborNodeIds(long _id)
     }
     else
         std::cerr << "ACMediaBrowser::getNeighborNodeIds: not in neighbor mode" << std::endl;
+    return std::list<long int>();
 }
 
 bool ACMediaBrowser::addNeighborNode(long int _parentId, long int _mediaId, int _clickTime)
@@ -2269,6 +2272,7 @@ bool ACMediaBrowser::changeFilteringPlugin(ACPlugin* acpl)
     
     this->commitPositions();
     this->setNeedsDisplay(true);
+    return true; 
 }
 
 /*
