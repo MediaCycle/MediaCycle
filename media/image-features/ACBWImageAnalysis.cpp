@@ -36,6 +36,7 @@
 #include <fstream>
 #include <cmath>
 #include <iomanip>
+#include <opencv2/imgcodecs.hpp>
 
 using std::cerr;
 using std::cout;
@@ -78,7 +79,7 @@ ACBWImageAnalysis::ACBWImageAnalysis(const string &filename){
 	reset();
 	setFileName(filename);
 	// forcing it to be read as grayscale
-	cv::Mat imgp_full_mat = cv::imread(filename, CV_LOAD_IMAGE_GRAYSCALE); 
+	cv::Mat imgp_full_mat = cv::imread(filename, cv::IMREAD_GRAYSCALE); 
 	scaleImage(imgp_full_mat);
 }
 
@@ -94,7 +95,7 @@ ACBWImageAnalysis::ACBWImageAnalysis(cv::Mat img_full_mat){
 	else if (img_full_mat.channels() == 3){
 		// assume incoming color model is "BGR"
 		cv::Mat bw_img_mat;
-		cv::cvtColor(img_full_mat, bw_img_mat, CV_BGR2GRAY);
+		cv::cvtColor(img_full_mat, bw_img_mat, cv::COLOR_BGR2GRAY);
 		scaleImage(bw_img_mat, 1.0);
 		}
 	else {
@@ -193,7 +194,7 @@ void ACBWImageAnalysis::computeFFT2D_complex (){
 	}
 	
 //	// XS test
-//	IplImage* test  = cvCreateImage(cvSize(2*width,2*height),IPL_DEPTH_8U,1);
+//	cv::Mat test  = cv::Mat(2*width,2*height,IPL_DEPTH_8U);
 //	BwImage Imtest(test);
 //	k=0;
 //	for(int i=0; i< 2*height; i++){
@@ -202,11 +203,11 @@ void ACBWImageAnalysis::computeFFT2D_complex (){
 //			k++;
 //		}
 //	}
-//	cvNamedWindow("test", 1);
-//	cvShowImage("test",test );
+//	cv::namedWindow("test", 1);
+//	cv::imshow("test",test );
 //	cvResizeWindow("test",height,width); 
-//	cvWaitKey();
-//	cvDestroyWindow("test");
+//	cv::waitKey();
+//	cv::destroyWindow("test");
 	
 	
 	fftw_plan p = fftw_plan_dft_2d(2*height, 2*width, data_in, fft,  FFTW_FORWARD, FFTW_ESTIMATE); 
@@ -274,7 +275,7 @@ void ACBWImageAnalysis::computeHuMoments(int thresh){
 	if (thresh !=0) {
 		// avoid overwriting image when computing threshold
 		cv::Mat BWimg_mat (this->getSize(), CV_8UC1); 
-		cv::threshold(imgp_mat, BWimg_mat, thresh, 255, CV_THRESH_BINARY_INV ); 
+		cv::threshold(imgp_mat, BWimg_mat, thresh, 255, cv::THRESH_BINARY_INV ); 
 		local_raw_moments = cv::moments(BWimg_mat);
 	}
 	else {
@@ -309,8 +310,8 @@ void ACBWImageAnalysis::computeHuMoments(int thresh){
 //		return;
 //	}
 //	// we create again a BW image because threshold would overwrite it
-//	IplImage *BWimg = cvCreateImage (cvSize (this->getWidth(), this->getHeight()), IPL_DEPTH_8U, 1); 
-//	cvThreshold(imgp, BWimg, thresh, 255, CV_THRESH_BINARY_INV ); 
+//	cv::Mat BWimg = cvCreateImage (cvSize (this->getWidth(), this->getHeight(), IPL_DEPTH_8U); 
+//	cvThreshold(imgp, BWimg, thresh, 255, cv::THRESH_BINARY_INV ); 
 //	CvMemStorage*  storage  = cvCreateMemStorage(0);
 //	CvSeq* contours = 0;
 //	cvFindContours( BWimg, storage, &contours ); 
@@ -366,21 +367,21 @@ void ACBWImageAnalysis::computeGaborMoments_fft(int numPha_, int numFreq_, uint 
     //CF Gabor* gabor = new Gabor(dynamic_cast<ACImageAnalysis*>(this));
     Gabor* gabor = new Gabor(this->getImageMat());
 	gabor->calculate(numPha_, numFreq_, horizonalMargin_, verticalMargin_);
-	CvScalar mean, stdev;
+	cv::Scalar mean, stdev;
 	for(uint i=0;i<numPha_*numFreq_;++i) {
-		IplImage* gaborImage=gabor->getImage(i);
-		cvNormalize((IplImage*)gaborImage, (IplImage*)gaborImage, 0, 255, CV_MINMAX, 0 );
+		cv::Mat gaborImage=gabor->getImage(i);
+		cv::normalize(gaborImage, gaborImage, 0, 255, cv::NORM_MINMAX, 0 );
 		//XS test
-		cvNamedWindow("test2", CV_WINDOW_AUTOSIZE);
-		cvShowImage("test2", gaborImage);
-		cvWaitKey(0);
-		cvDestroyWindow("test2");
+		cv::namedWindow("test2", cv::WINDOW_AUTOSIZE);
+		cv::imshow("test2", gaborImage);
+		cv::waitKey(0);
+		cv::destroyWindow("test2");
 		//
 		
-		cvAvgSdv( gaborImage, &mean, &stdev); 
+		cv::meanStdDev(gaborImage, mean, stdev); 
 		gabor_moments.push_back(mean.val[0]);
 		gabor_moments.push_back(stdev.val[0]);
-		cvReleaseImage(&gaborImage);
+		// cvReleaseImage(&gaborImage);
 	}
 	delete gabor;
 }
@@ -410,10 +411,10 @@ void ACBWImageAnalysis::computeFourierMellinMoments(){
 	fourier_mellin_moments.clear();
 	
 #ifdef VISUAL_CHECK
-	cvNamedWindow( "orig", 1 );
-//	cvShowImage( "orig", this->getImage() );
-	cvWaitKey();
-	cvDestroyWindow("orig");
+	cv::namedWindow( "orig", 1 );
+//	cv::imshow( "orig", this->getImage() );
+	cv::waitKey();
+	cv::destroyWindow("orig");
 #endif // VISUAL_CHECK
 
 	// XS TODO check if FFT -- here: complex -- has been computed
@@ -422,8 +423,8 @@ void ACBWImageAnalysis::computeFourierMellinMoments(){
 	int height = 2*this->getHeight();
 	int width = 2*this->getWidth();
 	
-	IplImage* fftimage_logpolar = cvCreateImage( cvSize(width,height), IPL_DEPTH_32F, 1 );
-	IplImage* fftimage  = cvCreateImage(cvSize(width,height),IPL_DEPTH_32F,1);
+	cv::Mat fftimage_logpolar = cv::Mat(width,height, IPL_DEPTH_32F);
+	cv::Mat fftimage  = cv::Mat(width,height,IPL_DEPTH_32F);
 	BwImageFloat Bwfftimage(fftimage); // to handle more easily pixel access in fftimage
 	
 	int x=0;
@@ -449,19 +450,19 @@ void ACBWImageAnalysis::computeFourierMellinMoments(){
 	// XS remove DC component
 	//Bwfftimage[0][0] = 0.0;
 
-	cvLogPolar( fftimage, fftimage_logpolar, cvPoint2D32f(width/2, height/2), 40, CV_INTER_LINEAR+CV_WARP_FILL_OUTLIERS );
+	cv::logPolar( fftimage, fftimage_logpolar, cvPoint2D32f(width/2, height/2), 40, cv::INTER_LINEAR+cv::WARP_FILL_OUTLIERS );
 	//cvAbs(fftimage_logpolar, fftimage_logpolar);
-//	cvNormalize(fftimage_logpolar, fftimage_logpolar, 1024);
+//	cv::normalize(fftimage_logpolar, fftimage_logpolar, 1024);
 //	cvSmooth(fftimage_logpolar, fftimage_logpolar, CV_GAUSSIAN, 3, 3);	
 	
 	BwImage FFTImLP(fftimage_logpolar);	
 
 #ifdef VISUAL_CHECK
-	cvNamedWindow( "log-polar1", 1 );
-	cvShowImage( "log-polar1", fftimage_logpolar );
+	cv::namedWindow( "log-polar1", 1 );
+	cv::imshow( "log-polar1", fftimage_logpolar );
 //	cvSetMouseCallback("log-polar1", mouseHandler, (void*) FFTImLP);
-	cvWaitKey();
-	cvDestroyWindow("log-polar1");
+	cv::waitKey();
+	cv::destroyWindow("log-polar1");
 #endif // VISUAL_CHECK
 
 	fftw_complex *fft_lp;
@@ -490,7 +491,7 @@ void ACBWImageAnalysis::computeFourierMellinMoments(){
 	fftw_execute(p);
 	fftw_destroy_plan(p);
 	
-	IplImage* fftimageLP  = cvCreateImage(cvSize(width,height),IPL_DEPTH_32F,1);
+	cv::Mat fftimageLP  = cv::Mat(width,height,IPL_DEPTH_32F);
 	BwImageFloat BwfftimageLP(fftimageLP); // to handle more easily pixel access in fftimage
 	k=0;
 	double xnorm=0.0;
@@ -516,31 +517,31 @@ void ACBWImageAnalysis::computeFourierMellinMoments(){
 //	cout << endl;
 	}
 #ifdef VISUAL_CHECK
-	cvNamedWindow( "log-polar", 1 );
-	cvShowImage( "log-polar", fftimageLP );
-	cvWaitKey();
-	cvDestroyWindow("log-polar");
+	cv::namedWindow( "log-polar", 1 );
+	cv::imshow( "log-polar", fftimageLP );
+	cv::waitKey();
+	cv::destroyWindow("log-polar");
 #endif // VISUAL_CHECK
 
-	IplImage* fftimage_logpolar2  = cvCreateImage(cvSize(width,height),IPL_DEPTH_8U,1);
-	IplImage* fftimageLP2  = cvCreateImage(cvSize(width,height),IPL_DEPTH_8U,1);
-	IplImage* fftimage2  = cvCreateImage(cvSize(width,height),IPL_DEPTH_8U,1);
+	// cv::Mat fftimage_logpolar2  = cv::Mat(width,height,IPL_DEPTH_8U);
+	// cv::Mat fftimageLP2  = cv::Mat(width,height,IPL_DEPTH_8U);
+	// cv::Mat fftimage2  = cv::Mat(width,height,IPL_DEPTH_8U);
 
-	cvConvertImage(fftimage_logpolar, fftimage_logpolar2);
-	cvConvertImage(fftimageLP, fftimageLP2);
-	cvConvertImage(fftimage, fftimage2);
+	// cvConvertImage(fftimage_logpolar, fftimage_logpolar2);
+	// cvConvertImage(fftimageLP, fftimageLP2);
+	// cvConvertImage(fftimage, fftimage2);
 
 //	cvSaveImage("/Users/xavier/Desktop/fftimage_logpolar-M90.png", fftimage_logpolar2);
 //	cvSaveImage("/Users/xavier/Desktop/fftimageLP-M90.png", fftimageLP2);
 //	cvSaveImage("/Users/xavier/Desktop/fftimage-M90.png", fftimage2);
 	
-	cvReleaseImage(&fftimage_logpolar2);
-	cvReleaseImage(&fftimage2);
-	cvReleaseImage(&fftimageLP2);
+	//cvReleaseImage(&fftimage_logpolar2);
+	//cvReleaseImage(&fftimage2);
+	//cvReleaseImage(&fftimageLP2);
 	
-	cvReleaseImage(&fftimage_logpolar);
-	cvReleaseImage(&fftimage);
-	cvReleaseImage(&fftimageLP);
+	//cvReleaseImage(&fftimage_logpolar);
+	//cvReleaseImage(&fftimage);
+	//cvReleaseImage(&fftimageLP);
 	delete fft_lp;
 	delete data_in;
 
@@ -678,9 +679,9 @@ void ACBWImageAnalysis::computeFourierPolarMoments(int RadialBins, int AngularBi
 //	
 //	image_histogram.clear();
 //
-//	IplImage* histo;
+//	cv::Mat histo;
 //	histo = cvCreateImage(cvSize (w, h), this->getDepth(), this->getNumberOfChannels());
-//	cvResize(this->getImage(), histo, CV_INTER_CUBIC);
+//	cvResize(this->getImage(), histo, cv::INTER_CUBIC);
 //	BwImage Im(histo);
 //	for(int i=0; i<h; i++){
 //		for (int j=0; j< w; j++){
@@ -697,31 +698,31 @@ void ACBWImageAnalysis::computeFourierPolarMoments(int RadialBins, int AngularBi
 void ACBWImageAnalysis::showThreshold(int thresh){
 	// we create again a BW image because threshold would overwrite it
 	cv::Mat BWimg_mat (this->getSize(), CV_8UC1);
-	cv::threshold(imgp_mat, BWimg_mat, thresh, 255, CV_THRESH_BINARY_INV ); 
-	cv::namedWindow( "Orig", CV_WINDOW_AUTOSIZE ); 
+	cv::threshold(imgp_mat, BWimg_mat, thresh, 255, cv::THRESH_BINARY_INV ); 
+	cv::namedWindow( "Orig", cv::WINDOW_AUTOSIZE ); 
 	cv::imshow( "Orig", imgp_mat ); 
-	cv::namedWindow( "Threshold", CV_WINDOW_AUTOSIZE ); 
+	cv::namedWindow( "Threshold", cv::WINDOW_AUTOSIZE ); 
 	cv::imshow( "Threshold", imgp_mat ); 
-	cvWaitKey(0); 
+	cv::waitKey(0); 
 }
 
 //void ACBWImageAnalysis::showContours(int thresh){
 //	// we create again a BW image because threshold would overwrite it
-//	IplImage *BWimg = cvCreateImage (cvSize (this->getWidth(), this->getHeight()), IPL_DEPTH_8U, 1); 
-//	cvThreshold(imgp, BWimg, thresh, 255, CV_THRESH_BINARY_INV ); 
+//	cv::Mat BWimg = cvCreateImage (cvSize (this->getWidth(), this->getHeight(), IPL_DEPTH_8U); 
+//	cvThreshold(imgp, BWimg, thresh, 255, cv::THRESH_BINARY_INV ); 
 //	CvMemStorage*  storage  = cvCreateMemStorage(0);
 //	CvSeq* contours = 0;
 //	cvFindContours( BWimg, storage, &contours ); 
-//	IplImage* cont_img = cvCreateImage( cvGetSize(BWimg), 8, 1 );
+//	cv::Mat cont_img = cvCreateImage( cvGetSize(BWimg), 8, 1 );
 //	cvZero( cont_img); 	
 //	if( contours ) cvDrawContours( cont_img, contours, cvScalarAll(255), cvScalarAll(255), thresh ); 
-//	cvNamedWindow( "Orig", CV_WINDOW_AUTOSIZE ); 
-//	cvShowImage( "Orig", imgp ); 
-//	cvNamedWindow( "Contour", CV_WINDOW_AUTOSIZE ); 
-//	cvShowImage( "Contour", cont_img ); 
-//	cvWaitKey(0); 
-//	cvDestroyWindow("Orig");
-//	cvDestroyWindow("Contour");
+//	cv::namedWindow( "Orig", cv::WINDOW_AUTOSIZE ); 
+//	cv::imshow( "Orig", imgp ); 
+//	cv::namedWindow( "Contour", cv::WINDOW_AUTOSIZE ); 
+//	cv::imshow( "Contour", cont_img ); 
+//	cv::waitKey(0); 
+//	cv::destroyWindow("Orig");
+//	cv::destroyWindow("Contour");
 //	cvReleaseImage(&BWimg);
 //	cvReleaseImage(&cont_img);
 //}
@@ -730,7 +731,7 @@ void ACBWImageAnalysis::showFFTInWindow(const std::string title){
 	int height = this->getHeight();
 	int width = this->getWidth();
 
-	IplImage* fftimage  = cvCreateImage(cvSize(width/2 +1,height),8,1);
+	cv::Mat fftimage  = cv::Mat(width/2 +1,height,8,1);
 	BwImage Bwfftimage(fftimage);
 	int k = 0;
 	for(int i=0; i< height; i++){
@@ -739,18 +740,18 @@ void ACBWImageAnalysis::showFFTInWindow(const std::string title){
 			k++;
 		}
 	}
-	cvNamedWindow(title.c_str() ,CV_WINDOW_AUTOSIZE);
-	cvShowImage(title.c_str(),fftimage);
-	cvWaitKey(0);
-	cvReleaseImage(&fftimage);
-	cvDestroyWindow(title.c_str());
+	cv::namedWindow(title.c_str() ,cv::WINDOW_AUTOSIZE);
+	cv::imshow(title.c_str(),fftimage);
+	cv::waitKey(0);
+	//cvReleaseImage(&fftimage);
+	cv::destroyWindow(title.c_str());
 }
 
 void ACBWImageAnalysis::showFFTComplexInWindow(const std::string title){
 	int height = this->getHeight();
 	int width = this->getWidth();
 
-	IplImage* fftimage  = cvCreateImage(cvSize(width,height),IPL_DEPTH_32F,1);
+	cv::Mat fftimage  = cv::Mat(width,height,IPL_DEPTH_32F);
 	BwImageFloat Bwfftimage(fftimage);
 	int x=0;
 	int y=0;
@@ -774,21 +775,21 @@ void ACBWImageAnalysis::showFFTComplexInWindow(const std::string title){
 			k++;
 		}
 	}
-//	cvNamedWindow(title.c_str() ,CV_WINDOW_AUTOSIZE);
-	cvShowImage(title.c_str(),fftimage);
-	cvWaitKey(0);
-	cvReleaseImage(&fftimage);
-//	cvDestroyWindow(title.c_str());
+//	cv::namedWindow(title.c_str() ,cv::WINDOW_AUTOSIZE);
+	cv::imshow(title.c_str(),fftimage);
+	cv::waitKey(0);
+	//cvReleaseImage(&fftimage);
+//	cv::destroyWindow(title.c_str());
 }
 
 //void ACBWImageAnalysis::showLogPolarInWindow(const std::string title){
-//	IplImage* dst = cvCreateImage( cvSize(this->getWidth(),this->getHeight()), IPL_DEPTH_32F, 1 );
-//	IplImage* src2 = cvCreateImage( cvGetSize(this->getImage()), IPL_DEPTH_32F, 1 );
+//	cv::Mat dst = cv::Mat(this->getWidth(),this->getHeight(), IPL_DEPTH_32F);
+//	cv::Mat src2 = cvCreateImage( cvGetSize(this->getImage(), IPL_DEPTH_32F);
 //	
 //	this->computeFFT2D_complex();
 //	int height = this->getHeight();
 //	int width = this->getWidth();
-//	IplImage* fftimage  = cvCreateImage(cvSize(this->getWidth(),this->getHeight()),IPL_DEPTH_32F,1);
+//	cv::Mat fftimage  = cv::Mat(this->getWidth(),this->getHeight(),IPL_DEPTH_32F);
 //	BwImageFloat Bwfftimage(fftimage);
 //	int x=0;
 //	int y=0;
@@ -813,18 +814,18 @@ void ACBWImageAnalysis::showFFTComplexInWindow(const std::string title){
 //		}
 //	}
 //	
-//	cvLogPolar( fftimage, dst, cvPoint2D32f(this->getWidth()/2, this->getHeight()/2), 20	, CV_INTER_LINEAR+CV_WARP_FILL_OUTLIERS );
+//	cv::logPolar( fftimage, dst, cvPoint2D32f(this->getWidth()/2, this->getHeight()/2), 20	, cv::INTER_LINEAR+cv::WARP_FILL_OUTLIERS );
 //
 //	cvAbs(dst,dst);
-//	cvLogPolar( dst, src2, cvPoint2D32f(this->getWidth()/2, this->getHeight()/2), 20, CV_INTER_LINEAR+CV_WARP_FILL_OUTLIERS+CV_WARP_INVERSE_MAP );
-//	cvNamedWindow( "log-polar", 1 );
-//	cvShowImage( "log-polar", dst );
-//	cvNamedWindow( "inverse log-polar", 1 );
-//	cvShowImage( "inverse log-polar", src2 );
-//	cvWaitKey();
-//	cvDestroyWindow("log-polar");
-//	cvDestroyWindow("inverse log-polar");
-//	cvReleaseImage(&fftimage);
+//	cv::logPolar( dst, src2, cvPoint2D32f(this->getWidth()/2, this->getHeight()/2), 20, cv::INTER_LINEAR+cv::WARP_FILL_OUTLIERS+CV_WARP_INVERSE_MAP );
+//	cv::namedWindow( "log-polar", 1 );
+//	cv::imshow( "log-polar", dst );
+//	cv::namedWindow( "inverse log-polar", 1 );
+//	cv::imshow( "inverse log-polar", src2 );
+//	cv::waitKey();
+//	cv::destroyWindow("log-polar");
+//	cv::destroyWindow("inverse log-polar");
+//	//cvReleaseImage(&fftimage);
 //}
 
 

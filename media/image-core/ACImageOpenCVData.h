@@ -1,5 +1,5 @@
 /**
- * @brief Image model data and IplImage container, implemented with OpenCV
+ * @brief Image model data container, implemented with OpenCV
  * @author Xavier Siebert, Christian Frisson
  * @date 7/04/2011
  * @copyright (c) 2011 – UMONS - Numediart
@@ -38,29 +38,23 @@
 class ACImageOpenCVDataContainer : public ACMediaDataContainer, public ACSpatialData {
 public:
     ACImageOpenCVDataContainer()
-        : ACMediaDataContainer(), ACSpatialData(), data(0)
+        : ACMediaDataContainer(), ACSpatialData()
     {}
     virtual ~ACImageOpenCVDataContainer(){
-        if(data)
-            cvReleaseImage(&data);
-        data = 0;
     }
-    void setData(IplImage* _data){
-        if(data)
-            cvReleaseImage(&data);
-        data = 0;
+    void setData(cv::Mat _data){
         data = _data;
     }
-    IplImage* getData(){return data;}
+    cv::Mat getData(){return data;}
 protected:
-    IplImage* data;
+    cv::Mat data;
 };
 
 class ACImageOpenCVData: public ACImageData {
 public:
-    ACImageOpenCVData():ACImageData(),image(0){}
+    ACImageOpenCVData():ACImageData(){}
     virtual ~ACImageOpenCVData(){}
-    virtual std::string getName(){return "OpenCV IplImage";}
+    virtual std::string getName(){return "OpenCV Mat";}
 
     virtual bool readData(std::string _fname);
     virtual bool closeFile(){return true;}
@@ -69,7 +63,7 @@ public:
     virtual int getWidth();
     virtual int getHeight();
 protected:
-    IplImage* image;
+    cv::Mat image;
 };
 
 

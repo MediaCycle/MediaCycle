@@ -43,16 +43,16 @@
 #ifdef MAC_FRAMEWORKS
 #include <OpenCV/cv.h>
 #include <OpenCV/cxcore.h>
-#include <OpenCV/highgui.h> // for cvloadimage
+#include <OpenCV/highgui.h> // for cv::imread
 #else
 #ifdef APPLE_IOS //CF in reality, it is because of OpenCV 2.1... test to improve!
 #include <cv.h>
 #include <cxcore.h>
-//#include <highgui.h> // for cvloadimage
+//#include <highgui.h> // for cv::imread
 #else
 #include "OpenCV/cv.h"
 #include "OpenCV/cxcore.h"
-#include "OpenCV/highgui.h" // for cvloadimage
+#include "OpenCV/highgui.h" // for cv::imread
 #include <opencv2/opencv.hpp>
 #include <opencv2/highgui/highgui.hpp>
 #include <opencv2/core/core.hpp>
@@ -66,6 +66,9 @@
 #include <opencv2/highgui/highgui.hpp>
 #include <opencv2/core/core.hpp>
 #endif
+
+#include <opencv2/core/types_c.h> // IPL_DEPTH_...
+// #include <opencv2/imgcodecs/imgcodecs_c.h> // cv::IMREAD_COLOR
 
 // Since we need OpenCV 2.x.x
 #include <opencv2/core/version.hpp>
@@ -86,15 +89,16 @@
 
 template<class T> class Image {
 private:
-    IplImage* imgp;
+    cv::Mat imgp;
 public:
-    Image(IplImage* img=0) {imgp=img;}
-    ~Image(){imgp=0;}
-    void operator=(IplImage* img) {imgp=img;}
+    Image() {}
+    Image(cv::Mat img) {imgp=img;}
+    ~Image(){}
+    void operator=(cv::Mat img) {imgp=img;}
     inline T* operator[](const int rowIndx) {
-        return ((T *)(imgp->imageData + rowIndx*imgp->widthStep));
+        return ((T *)(imgp.data + rowIndx*imgp.step));
     }
-    IplImage* getImage(){return imgp;}
+    cv::Mat getImage(){return imgp;}
 };
 
 typedef struct{

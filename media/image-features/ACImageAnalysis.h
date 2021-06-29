@@ -92,7 +92,7 @@ public:
 	// computation of features - opencv 2.*
 	void computeHoughLines(); // XS TODO add parameters
 	void computeHoughLinesP(); // XS TODO add parameters
-	void computeNumberOfFaces(const std::string& cascadeFile, const float& scale=1.3, const float& searchScaleFactor=1.2, const int& minNeighbors=4,  const int& flags=CV_HAAR_SCALE_IMAGE, const cv::Size& minFeatureSize=cv::Size(20, 20));
+	void computeNumberOfFaces(const std::string& cascadeFile, const float& scale=1.3, const float& searchScaleFactor=1.2, const int& minNeighbors=4,  const int& flags=cv::CASCADE_SCALE_IMAGE, const cv::Size& minFeatureSize=cv::Size(20, 20));
 	
 	// features accessors
 	vector <float> getRawMoments(){return raw_moments;}

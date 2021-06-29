@@ -1,5 +1,5 @@
 /**
- * @brief Image model data and IplImage container, implemented with OpenCV
+ * @brief Image model data container, implemented with OpenCV
  * @author Xavier Siebert, Christian Frisson
  * @date 7/04/2011
  * @copyright (c) 2011 – UMONS - Numediart
@@ -41,11 +41,11 @@ bool ACImageOpenCVData::readData(std::string _fname){
         std::cerr << "ACImageOpenCVData::readData: filename not set" << std::endl;
         return false;
     }
-    image = cvLoadImage(_fname.c_str(), CV_LOAD_IMAGE_COLOR);
+    image = cv::imread(_fname.c_str(), cv::IMREAD_COLOR);
     try {
-        if (!image) {
+        if (image.empty()) {
             cerr << "Check file name : " << _fname << endl;
-            throw(string(" <ACImageData::readData> CV_LOAD_IMAGE_COLOR : not a color image !"));
+            throw(string(" <ACImageData::readData> cv::IMREAD_COLOR : not a color image !"));
         }
     }
     catch (const string& not_image_file) {
@@ -60,16 +60,16 @@ bool ACImageOpenCVData::readData(std::string _fname){
 }
 
 int ACImageOpenCVData::getWidth(){
-    if(image){
-        return image->width;
+    if(!image.empty()){
+        return image.cols;
     }
     else
         return 0;
 }
 
 int ACImageOpenCVData::getHeight(){
-    if(image){
-        return image->height;
+    if(!image.empty()){
+        return image.rows;
     }
     else
         return 0;

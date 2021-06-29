@@ -46,6 +46,7 @@
 #include <sstream>
 #include <cmath> // for fabs
 #include <opencv2/video/tracking.hpp>
+#include <opencv2/optflow.hpp>
 #include <iomanip>
 using namespace std;
 
@@ -142,10 +143,10 @@ void ACVideoAnalysis::clean() {
 // XS double rewind to make sure first frame is zero (or frameStart)
 void ACVideoAnalysis::rewind() {
     progress = 0;
-    capture->set(CV_CAP_PROP_POS_FRAMES, this->frameStart);
+    capture->set(cv::CAP_PROP_POS_FRAMES, this->frameStart);
     cv::Mat tmp_frame;
     *capture >> tmp_frame;
-    capture->set(CV_CAP_PROP_POS_FRAMES, this->frameStart);
+    capture->set(cv::CAP_PROP_POS_FRAMES, this->frameStart);
 }
 
 ACVideoAnalysis::~ACVideoAnalysis() {
@@ -174,17 +175,17 @@ int ACVideoAnalysis::initialize(int _frameStart, int _frameStop) {
     }
 
     // Get capture device properties;
-    width = (int) capture->get(CV_CAP_PROP_FRAME_WIDTH);
-    height = (int) capture->get(CV_CAP_PROP_FRAME_HEIGHT);
-    fps = (int) capture->get(CV_CAP_PROP_FPS);
+    width = (int) capture->get(cv::CAP_PROP_FRAME_WIDTH);
+    height = (int) capture->get(cv::CAP_PROP_FRAME_HEIGHT);
+    fps = (int) capture->get(cv::CAP_PROP_FPS);
     if (fps != 0)
         spf = 1.0 / fps;
     else
         // in case fps is badly encoded, time_stamp = frame_stamp
         spf = 1.0;
-    nframes = (int) capture->get(CV_CAP_PROP_FRAME_COUNT) - 1; // XS -1 seems necessary in OpenCV 2.3
+    nframes = (int) capture->get(cv::CAP_PROP_FRAME_COUNT) - 1; // XS -1 seems necessary in OpenCV 2.3
 
-    //	videocodec = (int) cvGetCaptureProperty(capture,  CV_CAP_PROP_FOURCC);
+    //	videocodec = (int) cvGetCaptureProperty(capture,  cv::CAP_PROP_FOURCC);
     // extra, not stored in capture
     if (nframes == 0) {
         cerr << "<ACVideoAnalysis::initialize> : zero frames for " << file_name << endl;
@@ -241,19 +242,19 @@ cv::Mat ACVideoAnalysis::getFrame(int i) {
         return cv::Mat();
     }
     cv::Mat img;
-    capture->set(CV_CAP_PROP_POS_FRAMES, i);
+    capture->set(cv::CAP_PROP_POS_FRAMES, i);
     *capture >> img;
     return img;
 }
 
 void ACVideoAnalysis::setFramePosition(int pos) {
     if ((pos >= frameStart) && (pos < frameStop)) {
-        capture->set(CV_CAP_PROP_POS_FRAMES, pos);
+        capture->set(cv::CAP_PROP_POS_FRAMES, pos);
     }
 }
 
 int ACVideoAnalysis::getFramePosition() {
-    return capture->get(CV_CAP_PROP_POS_FRAMES); // XS TODO check borders
+    return capture->get(cv::CAP_PROP_POS_FRAMES); // XS TODO check borders
 }
 
 void ACVideoAnalysis::clearStamps() {
@@ -262,12 +263,12 @@ void ACVideoAnalysis::clearStamps() {
 }
 
 void ACVideoAnalysis::stamp() {
-    int _frame_number = capture->get(CV_CAP_PROP_POS_FRAMES); // XS TODO check borders
+    int _frame_number = capture->get(cv::CAP_PROP_POS_FRAMES); // XS TODO check borders
     time_stamps.push_back(_frame_number * spf); // in seconds
     frame_stamps.push_back(_frame_number); // in frames
 }
 
-//void ACVideoAnalysis::histogramEqualize(const IplImage* bg_img) {
+//void ACVideoAnalysis::histogramEqualize(const cv::Mat bg_img) {
 //	if (bg_img == 0){
 //		bg_img = this->computeMedianImage();
 //		if (bg_img == 0){
@@ -278,8 +279,8 @@ void ACVideoAnalysis::stamp() {
 //	}
 //	
 //#ifdef VISUAL_CHECK
-//	cvNamedWindow( "Source", 1) ;
-//	cvNamedWindow( "Back Projection", 1) ;
+//	cv::namedWindow( "Source", 1) ;
+//	cv::namedWindow( "Back Projection", 1) ;
 //#endif // VISUAL_CHECK
 //	
 //	// Build and fill the histogram
@@ -303,31 +304,31 @@ void ACVideoAnalysis::stamp() {
 //		cv::Mat s_plane (size.width, size.height, CV_8UC1);
 //		cv::Mat v_plane (size.width, size.height, CV_8UC1);
 //
-////		IplImage* back_img = cvCreateImage( cvGetSize( frame ), IPL_DEPTH_8U, 1 );
-////		IplImage* hsv = cvCreateImage( cvGetSize(frame), IPL_DEPTH_8U, 3 );
-////		IplImage* h_plane = cvCreateImage( cvGetSize( frame ), 8, 1 );
-////		IplImage* s_plane = cvCreateImage( cvGetSize( frame ), 8, 1 );
-////		IplImage* v_plane = cvCreateImage( cvGetSize( frame ), 8, 1 );
-////		IplImage* planes[] = { h_plane, s_plane };
+////		cv::Mat back_img = cvCreateImage( cvGetSize( frame , IPL_DEPTH_8U);
+////		cv::Mat hsv = cvCreateImage( cvGetSize(frame), IPL_DEPTH_8U, 3 );
+////		cv::Mat h_plane = cvCreateImage( cvGetSize( frame ), 8, 1 );
+////		cv::Mat s_plane = cvCreateImage( cvGetSize( frame ), 8, 1 );
+////		cv::Mat v_plane = cvCreateImage( cvGetSize( frame ), 8, 1 );
+////		cv::Mat planes[] = { h_plane, s_plane };
 //		
 //		cvAbsDiff(frame, bg_img, frame);
 //		
-//		cvCvtColor( frame, hsv, CV_BGR2HSV );
+//		cvCvtColor( frame, hsv, cv::COLOR_BGR2HSV );
 //		cvCvtPixToPlane( hsv, h_plane, s_plane, v_plane, 0 );
 //		
 //		hist = cvCreateHist( 2, hist_size, CV_HIST_ARRAY, ranges, 1 );
 //		cvCalcHist( planes, hist, 0, 0 );
-//		cvNormalizeHist( hist, 20*255 );
+//		cv::normalizeHist( hist, 20*255 );
 //		
 //		cvCalcBackProject( planes, back_img, hist );
-//		cvNormalizeHist( hist, 1.0 );
+//		cv::normalizeHist( hist, 1.0 );
 //#ifdef VISUAL_CHECK
-//		cvShowImage( "Source", frame );
+//		cv::imshow( "Source", frame );
 //#endif // VISUAL_CHECK
 //		
 //		// Create an image to visualize the histogram
 //		//	int scale = 10;
-//		//	IplImage* hist_img = cvCreateImage( cvSize( h_bins * scale, s_bins * scale ), 8, 3 );
+//		//	cv::Mat hist_img = cv::Mat(h_bins * scale, s_bins * scale, 8, 3 );
 //		//	cvZero ( hist_img );
 //		//	
 //		//	// populate the visualization
@@ -347,13 +348,13 @@ void ACVideoAnalysis::stamp() {
 //		
 //		
 //		// Show back projection
-//		cvShowImage( "Back Projection", back_img );
+//		cv::imshow( "Back Projection", back_img );
 //		
 //		// Show histogram equalized
-//		//	cvNamedWindow( "H-S Histogram", 1) ;
-//		//	cvShowImage( "H-S Histogram", hist_img );
+//		//	cv::namedWindow( "H-S Histogram", 1) ;
+//		//	cv::imshow( "H-S Histogram", hist_img );
 //		
-//		cvWaitKey(20);
+//		cv::waitKey(20);
 //		
 //		cvReleaseImage( &back_img );
 //		cvReleaseImage( &hsv );
@@ -365,13 +366,13 @@ void ACVideoAnalysis::stamp() {
 //	return;
 //}
 
-//void ACVideoAnalysis::histogramEqualizeUL(const IplImage* const bg_img) {
+//void ACVideoAnalysis::histogramEqualizeUL(const cv::Mat const bg_img) {
 //	// bg_img should not be modified
 //	// Set up images
 //	// Show original
-//	cvNamedWindow( "Source U", 1) ;
-//	cvNamedWindow( "Source L", 1) ;
-//	cvNamedWindow( "Back Projection", 1) ;
+//	cv::namedWindow( "Source U", 1) ;
+//	cv::namedWindow( "Source L", 1) ;
+//	cv::namedWindow( "Back Projection", 1) ;
 //	int ystar=220;
 //
 //	// Build and fill the histogram
@@ -383,13 +384,13 @@ void ACVideoAnalysis::stamp() {
 //	float* ranges[] = { h_ranges, s_ranges };
 //	
 //	for(int i = 1; i < nframes-1; i++){
-//		IplImage* frame = getNextFrame();
-//		IplImage* back_img = cvCreateImage( cvGetSize( frame ), IPL_DEPTH_8U, 1 );
-//		IplImage* hsv = cvCreateImage( cvGetSize(frame), IPL_DEPTH_8U, 3 );
-//		IplImage* h_plane = cvCreateImage( cvGetSize( frame ), 8, 1 );
-//		IplImage* s_plane = cvCreateImage( cvGetSize( frame ), 8, 1 );
-//		IplImage* v_plane = cvCreateImage( cvGetSize( frame ), 8, 1 );
-//		IplImage* planes[] = { h_plane, s_plane };
+//		cv::Mat frame = getNextFrame();
+//		cv::Mat back_img = cvCreateImage( cvGetSize( frame , IPL_DEPTH_8U);
+//		cv::Mat hsv = cvCreateImage( cvGetSize(frame), IPL_DEPTH_8U, 3 );
+//		cv::Mat h_plane = cvCreateImage( cvGetSize( frame ), 8, 1 );
+//		cv::Mat s_plane = cvCreateImage( cvGetSize( frame ), 8, 1 );
+//		cv::Mat v_plane = cvCreateImage( cvGetSize( frame ), 8, 1 );
+//		cv::Mat planes[] = { h_plane, s_plane };
 //		// XS try show half
 ////		cvSetImageROI(frame, cvRect(0,0,width,ystar));		
 ////		cvSetImageROI(bg_img, cvRect(0,0,width,ystar));		
@@ -400,17 +401,17 @@ void ACVideoAnalysis::stamp() {
 ////		cvSetImageROI(v_plane, cvRect(0,0,width,ystar));		
 //
 //		cvAbsDiff(frame, bg_img, frame);
-//		cvCvtColor( frame, hsv, CV_BGR2HSV );
+//		cvCvtColor( frame, hsv, cv::COLOR_BGR2HSV );
 //		cvCvtPixToPlane( hsv, h_plane, s_plane, v_plane, 0 );
 //		
 //		hist = cvCreateHist( 2, hist_size, CV_HIST_ARRAY, ranges, 1 );
 //		cvCalcHist( planes, hist, 0, 0 ); // Compute histogram
-//		cvNormalizeHist( hist, 20*255 ); // Normalize it
+//		cv::normalizeHist( hist, 20*255 ); // Normalize it
 //		
 //		cvCalcBackProject( planes, back_img, hist );// Calculate back projection
-//		cvNormalizeHist( hist, 1.0 ); // Normalize it
+//		cv::normalizeHist( hist, 1.0 ); // Normalize it
 //		// XS try show half
-//		cvShowImage( "Source U", frame );
+//		cv::imshow( "Source U", frame );
 //		
 //		
 //		
@@ -424,7 +425,7 @@ void ACVideoAnalysis::stamp() {
 ////		
 ////		
 ////		cvAbsDiff(frame, bg_img, frame);
-////		cvCvtColor( frame, hsv, CV_BGR2HSV );
+////		cvCvtColor( frame, hsv, cv::COLOR_BGR2HSV );
 ////		cvCvtPixToPlane( hsv, h_plane, s_plane, v_plane, 0 );
 ////		
 ////		int hist_size[] = { h_bins, s_bins };
@@ -433,12 +434,12 @@ void ACVideoAnalysis::stamp() {
 ////		float* ranges[] = { h_ranges, s_ranges };
 ////		hist = cvCreateHist( 2, hist_size, CV_HIST_ARRAY, ranges, 1 );
 ////		cvCalcHist( planes, hist, 0, 0 ); // Compute histogram
-////		cvNormalizeHist( hist, 20*255 ); // Normalize it
+////		cv::normalizeHist( hist, 20*255 ); // Normalize it
 ////		
 ////		cvCalcBackProject( planes, back_img, hist );// Calculate back projection
-////		cvNormalizeHist( hist, 1.0 ); // Normalize it
+////		cv::normalizeHist( hist, 1.0 ); // Normalize it
 ////		// XS try show half
-////		cvShowImage( "Source L", frame );
+////		cv::imshow( "Source L", frame );
 ////		
 ////		cvSetImageROI(frame, cvRect(0,0,width,height));		
 ////		cvSetImageROI(bg_img, cvRect(0,0,width,height));		
@@ -450,7 +451,7 @@ void ACVideoAnalysis::stamp() {
 //		
 //		// Create an image to visualize the histogram
 //		//	int scale = 10;
-//		//	IplImage* hist_img = cvCreateImage( cvSize( h_bins * scale, s_bins * scale ), 8, 3 );
+//		//	cv::Mat hist_img = cv::Mat(h_bins * scale, s_bins * scale, 8, 3 );
 //		//	cvZero ( hist_img );
 //		//	
 //		//	// populate the visualization
@@ -470,13 +471,13 @@ void ACVideoAnalysis::stamp() {
 //		
 //	
 //		// Show back projection
-//		cvShowImage( "Back Projection", back_img );
+//		cv::imshow( "Back Projection", back_img );
 //		
 //		// Show histogram equalized
-//		//	cvNamedWindow( "H-S Histogram", 1) ;
-//		//	cvShowImage( "H-S Histogram", hist_img );
+//		//	cv::namedWindow( "H-S Histogram", 1) ;
+//		//	cv::imshow( "H-S Histogram", hist_img );
 //		
-//		cvWaitKey(20);
+//		cv::waitKey(20);
 //		
 //		cvReleaseImage( &back_img );
 //		//	cvReleaseImage( &hist_img );
@@ -523,12 +524,12 @@ void ACVideoAnalysis::computeBlobs(const cv::Mat& bg_img, int bg_thresh, int big
     int thickness = 0.7;
     cv::Point textOrg(10, 20);
 
-    cv::namedWindow("ORIG-BG", CV_WINDOW_AUTOSIZE);
-    cvMoveWindow("ORIG-BG", 50, 50);
-    cv::namedWindow("BW", CV_WINDOW_AUTOSIZE);
-    cvMoveWindow("BW", 700, 400);
-    cv::namedWindow("BLOBS", CV_WINDOW_AUTOSIZE);
-    cvMoveWindow("BLOBS", 50, 400);
+    cv::namedWindow("ORIG-BG", cv::WINDOW_AUTOSIZE);
+    cv::moveWindow("ORIG-BG", 50, 50);
+    cv::namedWindow("BW", cv::WINDOW_AUTOSIZE);
+    cv::moveWindow("BW", 700, 400);
+    cv::namedWindow("BLOBS", cv::WINDOW_AUTOSIZE);
+    cv::moveWindow("BLOBS", 50, 400);
 #endif // VISUAL_CHECK
 
     for (int i = this->frameStart+1; i < this->frameStop; i++) {
@@ -538,11 +539,11 @@ void ACVideoAnalysis::computeBlobs(const cv::Mat& bg_img, int bg_thresh, int big
             break;
         }
         cv::absdiff(frame, bg_img_local, frame);
-        cv::cvtColor(frame, bwImage, CV_BGR2GRAY);
-        cv::threshold(bwImage, bitImage, bg_thresh, 255, CV_THRESH_BINARY_INV);
+        cv::cvtColor(frame, bwImage, cv::COLOR_BGR2GRAY);
+        cv::threshold(bwImage, bitImage, bg_thresh, 255, cv::THRESH_BINARY_INV);
         CBlobResult blobs;
-        IplImage ipl_img = bitImage;
-        blobs = CBlobResult(&ipl_img, 0, 255); // find blobs in image, still using the 1.* opencv interface
+        cv::Mat ipl_img = bitImage;
+        blobs = CBlobResult(ipl_img, cv::Mat(), 255); // find blobs in image, still using the 1.* opencv interface
         blobs.Filter(blobs, B_EXCLUDE, CBlobGetArea(), B_LESS, big_blob);
         // XS TODO for dancers we only stored when there was a blob
         //		if (blobs.GetNumBlobs() > 0){
@@ -552,10 +553,10 @@ void ACVideoAnalysis::computeBlobs(const cv::Mat& bg_img, int bg_thresh, int big
 #ifdef VISUAL_CHECK
         string txt;
         std::stringstream stxt;
-        stxt << capture->get(CV_CAP_PROP_POS_FRAMES) << " : " << blobs.GetNumBlobs() << "blobs";
+        stxt << capture->get(cv::CAP_PROP_POS_FRAMES) << " : " << blobs.GetNumBlobs() << "blobs";
         stxt >> txt;
         cv::putText(frame, txt, textOrg, fontFace, fontScale, cv::Scalar::all(255), thickness, 8); // CV_RGB (0, 255, 100));
-        IplImage ipl_img2 = frame;
+        cv::Mat ipl_img2 = frame;
 
         if (blobs.GetNumBlobs() > 0) {
             // for visual purposes only, blobs are not really "merged"
@@ -575,7 +576,7 @@ void ACVideoAnalysis::computeBlobs(const cv::Mat& bg_img, int bg_thresh, int big
             CvPoint ff = cvPoint(rbox.x + rbox.width, rbox.y + rbox.height);
             cvRectangle(&ipl_img2, ii, ff, CV_RGB(255, 255, 0), 2, 8, 0); // thickness, linetype, shift
         } else {
-            cout << "no blobs for frame: " << capture->get(CV_CAP_PROP_POS_FRAMES) << endl;
+            cout << "no blobs for frame: " << capture->get(cv::CAP_PROP_POS_FRAMES) << endl;
         }
         //frame and ipl_img2 share the data !
         cv::imshow("ORIG-BG", frame);
@@ -593,7 +594,7 @@ void ACVideoAnalysis::computeBlobs(const cv::Mat& bg_img, int bg_thresh, int big
     HAS_BLOBS = true;
 }
 
-//void ACVideoAnalysis::computeBlobsInteractively(IplImage* bg_img, bool merge_blobs, int bg_thesh, int big_blob, int small_blob){
+//void ACVideoAnalysis::computeBlobsInteractively(cv::Mat bg_img, bool merge_blobs, int bg_thesh, int big_blob, int small_blob){
 //	all_blobs.clear();
 //	all_blobs_time_stamps.clear();	// just to make sure...
 //	all_blobs_frame_stamps.clear();	// just to make sure...
@@ -617,24 +618,24 @@ void ACVideoAnalysis::computeBlobs(const cv::Mat& bg_img, int bg_thresh, int big
 //	int slider_bg_thresh = bg_thesh;
 //	
 //	// to display image with blobs superimposed
-//	IplImage *saveImage = cvCreateImage(cvSize(width,height),depth,1);
+//	cv::Mat saveImage = cv::Mat(width,height,depth,1);
 //	// font for frame and blob counter; 
 //	CvFont font;
 //	char str[64];
 //	cvInitFont (&font, CV_FONT_HERSHEY_COMPLEX, 0.7, 0.7);
-//	cvNamedWindow("ORIG-BG", CV_WINDOW_AUTOSIZE);
-//	cvMoveWindow("ORIG-BG", 50, 50);
-//	cvNamedWindow( "BW", CV_WINDOW_AUTOSIZE);
-//	cvMoveWindow("BW", 700, 400);
-//	cvNamedWindow( "BLOBS", CV_WINDOW_AUTOSIZE);
-//	cvMoveWindow("BLOBS", 50, 400);	
+//	cv::namedWindow("ORIG-BG", cv::WINDOW_AUTOSIZE);
+//	cv::moveWindow("ORIG-BG", 50, 50);
+//	cv::namedWindow( "BW", cv::WINDOW_AUTOSIZE);
+//	cv::moveWindow("BW", 700, 400);
+//	cv::namedWindow( "BLOBS", cv::WINDOW_AUTOSIZE);
+//	cv::moveWindow("BLOBS", 50, 400);	
 //	cvCreateTrackbar("Biggest Blob","BLOBS", &slider_big_blob, 1000 ,0);
 //	cvCreateTrackbar("Threshold","BLOBS",&slider_bg_thresh,255,0);
 //	
-//	IplImage* frame;
+//	cv::Mat frame;
 //	// 1 channel temporary images
-//	IplImage* bitImage = cvCreateImage(cvSize(width,height),depth,1);
-//	IplImage* bwImage = cvCreateImage(cvSize(width,height),depth,1);
+//	cv::Mat bitImage = cv::Mat(width,height,depth,1);
+//	cv::Mat bwImage = cv::Mat(width,height,depth,1);
 //	
 //	int xi,xf,yi,yf;
 //	CBlobResult blobs;
@@ -643,8 +644,8 @@ void ACVideoAnalysis::computeBlobs(const cv::Mat& bg_img, int bg_thresh, int big
 //		frame = getNextFrame();
 //		saveImage =cvCloneImage(frame);
 //		cvAbsDiff(frame, bg_img, frame);
-//		cvCvtColor(frame, bwImage,CV_BGR2GRAY);
-//		cvThreshold(bwImage, bitImage, slider_bg_thresh,255,CV_THRESH_BINARY_INV);
+//		cvCvtColor(frame, bwImage,cv::COLOR_BGR2GRAY);
+//		cvThreshold(bwImage, bitImage, slider_bg_thresh,255,cv::THRESH_BINARY_INV);
 //		
 //		// XS closing filter (to remove dips) 
 //		cvDilate(bitImage, bitImage);
@@ -653,7 +654,7 @@ void ACVideoAnalysis::computeBlobs(const cv::Mat& bg_img, int bg_thresh, int big
 //		blobs = CBlobResult( bitImage, 0, 255 );
 //		blobs.Filter( blobs, B_EXCLUDE, CBlobGetArea(), B_INSIDE,  slider_big_blob );
 //		all_blobs.push_back(blobs);
-//		int _frame_number = capture.get(CV_CAP_PROP_POS_FRAMES);
+//		int _frame_number = capture.get(cv::CAP_PROP_POS_FRAMES);
 //		all_blobs_time_stamps.push_back(_frame_number*1.0/fps); // in seconds
 //		all_blobs_frame_stamps.push_back(_frame_number); // in frames
 //
@@ -694,22 +695,22 @@ void ACVideoAnalysis::computeBlobs(const cv::Mat& bg_img, int bg_thresh, int big
 //			}
 //		}
 //		else {
-//			cout << "no blobs for frame: " << capture.get(CV_CAP_PROP_POS_FRAMES) <<endl;
+//			cout << "no blobs for frame: " << capture.get(cv::CAP_PROP_POS_FRAMES) <<endl;
 //		}
 //		
-//		cvShowImage("ORIG-BG",frame);
-//		cvShowImage("BLOBS", saveImage );					
-//		cvShowImage("BW",bitImage);
-//		int	c = cvWaitKey(20);
+//		cv::imshow("ORIG-BG",frame);
+//		cv::imshow("BLOBS", saveImage );					
+//		cv::imshow("BW",bitImage);
+//		int	c = cv::waitKey(20);
 //		if( (char) c == 27 )
-//			cvWaitKey(0); //break;			
+//			cv::waitKey(0); //break;			
 //	}
 //	cvReleaseImage(&bitImage);
 //	cvReleaseImage(&bwImage);
 //	cvReleaseImage(&saveImage);
-//	cvDestroyWindow("ORIG-BG");
-//	cvDestroyWindow("BW");
-//	cvDestroyWindow("BLOBS");
+//	cv::destroyWindow("ORIG-BG");
+//	cv::destroyWindow("BW");
+//	cv::destroyWindow("BLOBS");
 //	HAS_BLOBS = true;
 //
 //}
@@ -748,19 +749,19 @@ void ACVideoAnalysis::computeBlobsUL(const cv::Mat& bg_img, bool merge_blobs, in
     cv::Mat bwImage(size.height, size.width, CV_8UC1);
 
     // XS Essai running avg
-    //	IplImage* r_avg_img = cvCreateImage(cvSize(width,height),IPL_DEPTH_32F,1);
+    //	cv::Mat r_avg_img = cv::Mat(width,height,IPL_DEPTH_32F);
 #ifdef VISUAL_CHECK
     int fontFace = CV_FONT_HERSHEY_SCRIPT_SIMPLEX;
     double fontScale = 0.7;
     int thickness = 0.7;
     cv::Point textOrg(10, 20);
 
-    cv::namedWindow("ORIG-BG", CV_WINDOW_AUTOSIZE);
-    cvMoveWindow("ORIG-BG", 50, 50);
-    cv::namedWindow("BW", CV_WINDOW_AUTOSIZE);
-    cvMoveWindow("BW", 700, 400);
-    cv::namedWindow("BLOBS", CV_WINDOW_AUTOSIZE);
-    cvMoveWindow("BLOBS", 50, 400);
+    cv::namedWindow("ORIG-BG", cv::WINDOW_AUTOSIZE);
+    cv::moveWindow("ORIG-BG", 50, 50);
+    cv::namedWindow("BW", cv::WINDOW_AUTOSIZE);
+    cv::moveWindow("BW", 700, 400);
+    cv::namedWindow("BLOBS", cv::WINDOW_AUTOSIZE);
+    cv::moveWindow("BLOBS", 50, 400);
 #endif // VISUAL_CHECK
 
     int t_u = threshU * 2;
@@ -774,19 +775,19 @@ void ACVideoAnalysis::computeBlobsUL(const cv::Mat& bg_img, bool merge_blobs, in
             break;
         }
         cv::absdiff(frame, bg_img_local, frame);
-        cv::cvtColor(frame, bwImage, CV_BGR2GRAY);
+        cv::cvtColor(frame, bwImage, cv::COLOR_BGR2GRAY);
 
         //UP
         cv::Rect roi_up(0, 0, width, joeystar);
         cv::Mat bwImage_up = bwImage(roi_up);
         cv::Mat bitImage_up = bitImage(roi_up);
-        cv::threshold(bwImage_up, bitImage_up, t_u, 255, CV_THRESH_BINARY_INV);
+        cv::threshold(bwImage_up, bitImage_up, t_u, 255, cv::THRESH_BINARY_INV);
 
         // LOW
         cv::Rect roi_lo(0, joeystar, width, height - joeystar);
         cv::Mat bwImage_lo = bwImage(roi_lo);
         cv::Mat bitImage_lo = bitImage(roi_lo);
-        cv::threshold(bwImage_lo, bitImage_lo, t_l, 255, CV_THRESH_BINARY_INV);
+        cv::threshold(bwImage_lo, bitImage_lo, t_l, 255, cv::THRESH_BINARY_INV);
 
 
         // tried this to smooth the blob, but it removes too much of the blob
@@ -798,8 +799,8 @@ void ACVideoAnalysis::computeBlobsUL(const cv::Mat& bg_img, bool merge_blobs, in
         //		cvConvertImage(r_avg_img, bitImage);
 
         CBlobResult blobs;
-        IplImage ipl_img = bitImage;
-        blobs = CBlobResult(&ipl_img, 0, 255); // find blobs in image, still using the 1.* opencv interface
+        cv::Mat ipl_img = bitImage;
+        blobs = CBlobResult(ipl_img, cv::Mat(), 255); // find blobs in image, still using the 1.* opencv interface
         blobs.Filter(blobs, B_EXCLUDE, CBlobGetArea(), B_LESS, big_blob);
 
         // XS for dancers we only stored when there was a blob
@@ -810,10 +811,10 @@ void ACVideoAnalysis::computeBlobsUL(const cv::Mat& bg_img, bool merge_blobs, in
 #ifdef VISUAL_CHECK
         string txt;
         std::stringstream stxt;
-        stxt << capture->get(CV_CAP_PROP_POS_FRAMES) << " : " << blobs.GetNumBlobs() << "blobs";
+        stxt << capture->get(cv::CAP_PROP_POS_FRAMES) << " : " << blobs.GetNumBlobs() << "blobs";
         stxt >> txt;
         cv::putText(frame, txt, textOrg, fontFace, fontScale, cv::Scalar::all(255), thickness, 8); // CV_RGB (0, 255, 100));
-        IplImage ipl_img2 = frame;
+        cv::Mat ipl_img2 = frame;
         if (blobs.GetNumBlobs() > 0) {
             if (merge_blobs) {
                 // for visual purposes only, blobs are not really "merged"
@@ -838,7 +839,7 @@ void ACVideoAnalysis::computeBlobsUL(const cv::Mat& bg_img, bool merge_blobs, in
                 }
             }
         } else {
-            cout << "no blobs for frame: " << capture->get(CV_CAP_PROP_POS_FRAMES) << endl;
+            cout << "no blobs for frame: " << capture->get(cv::CAP_PROP_POS_FRAMES) << endl;
         }
 
         //frame and ipl_img2 share the data !
@@ -864,7 +865,7 @@ void ACVideoAnalysis::computeOpticalFlow() {
     int add_remove_pt = 0;
     cv::Point2f pt;
 #ifdef VISUAL_CHECK
-    cv::namedWindow("Camera", CV_WINDOW_AUTOSIZE);
+    cv::namedWindow("Camera", cv::WINDOW_AUTOSIZE);
     cvResizeWindow("Camera", 800, 600);
 #endif // VISUAL_CHECK
     // reset the capture to the beginning of the video
@@ -908,7 +909,7 @@ void ACVideoAnalysis::computeOpticalFlow() {
  #ifdef VISUAL_CHECK
         frame.copyTo(image);
  #endif //VISUAL_CHECK
-        cv::cvtColor(frame, grey, CV_BGR2GRAY); // convert frame to grayscale
+        cv::cvtColor(frame, grey, cv::COLOR_BGR2GRAY); // convert frame to grayscale
         if (need_to_init) {
             double quality = 0.01;
             double min_distance = 4;
@@ -1024,7 +1025,7 @@ void ACVideoAnalysis::computeOpticalFlow2() {
     cv::Size winSize(31, 31);
 
 #ifdef VISUAL_CHECK
-    cv::namedWindow("Video", CV_WINDOW_AUTOSIZE);
+    cv::namedWindow("Video", cv::WINDOW_AUTOSIZE);
     // XS could use a mouse callback to add points interactively
     // cv::setMouseCallback( "Video", onMouse, 0 );
     //cv::resizeWindow("Video", 800, 600);
@@ -1067,7 +1068,7 @@ void ACVideoAnalysis::computeOpticalFlow2() {
  #ifdef VISUAL_CHECK
         frame.copyTo(image);
  #endif //VISUAL_CHECK
-        cv::cvtColor(frame, grey, CV_BGR2GRAY); // convert frame to grayscale
+        cv::cvtColor(frame, grey, cv::COLOR_BGR2GRAY); // convert frame to grayscale
         if (need_to_init) {
             // automatic initialization
             cv::goodFeaturesToTrack(grey, points[1], MAX_COUNT, quality, min_distance, cv::Mat(), blockSize, useHarrisDetector, k);
@@ -1166,7 +1167,7 @@ void ACVideoAnalysis::computeMergedBlobsTrajectory(float blob_dist) {
         vector<float> tmp;
         currentBlob = all_blobs[i];
         if (currentBlob.GetNumBlobs() > 0) {
-            CvPoint center = currentBlob.GetCenter();
+            cv::Point center = currentBlob.GetCenter();
             tmp.push_back(center.x);
             tmp.push_back(center.y);
 #ifdef VISUAL_CHECK_GNUPLOT
@@ -1245,7 +1246,7 @@ void ACVideoAnalysis::computeMergedBlobsSpeeds(float blob_dist) {
     }
 }
 
-//IplImage* ACVideoAnalysis::computeAverageImage(int nskip, int nread, int njump, string fsave) { 
+//cv::Mat ACVideoAnalysis::computeAverageImage(int nskip, int nread, int njump, string fsave) { 
 //	// nskip = number of frames to skip at the beginning
 //	// nread = number of frames to read in the video
 //	// ncalc = number of frames to consider
@@ -1266,17 +1267,17 @@ void ACVideoAnalysis::computeMergedBlobsSpeeds(float blob_dist) {
 //	cout << "(by jumps of) " << njump << endl;
 //#endif // VERBOSE
 //	
-//	IplImage *frame;
-//	IplImage *av_img = cvCreateImage (cvSize (width, height), IPL_DEPTH_32F, 3);
+//	cv::Mat frame;
+//	cv::Mat av_img = cvCreateImage (cvSize (width, height), IPL_DEPTH_32F, 3);
 //	int cnt = 0; 
 //	
 //	// to skip nskip frames:
 //	int cursor = nskip;
-//	capture.set(CV_CAP_PROP_POS_FRAMES, cursor); 	
+//	capture.set(cv::CAP_PROP_POS_FRAMES, cursor); 	
 //	
 //#ifdef VISUAL_CHECK
 //	string title = "check average";
-//	cvNamedWindow(title.c_str(), CV_WINDOW_AUTOSIZE);
+//	cv::namedWindow(title.c_str(), cv::WINDOW_AUTOSIZE);
 //	CvFont font;
 //	cvInitFont (&font, CV_FONT_HERSHEY_COMPLEX, 0.7, 0.7);
 //	char str[64];
@@ -1294,15 +1295,15 @@ void ACVideoAnalysis::computeMergedBlobsSpeeds(float blob_dist) {
 //#endif // VISUAL_CHECK
 //		cursor+=njump;	
 //		if (cursor >= nframes) break; // safety
-//		capture.set(CV_CAP_PROP_POS_FRAMES, cursor);
+//		capture.set(cv::CAP_PROP_POS_FRAMES, cursor);
 //	}
 //	cvConvertScale (av_img, av_img, 1.0 / cnt);
-//	IplImage *result_img = cvCreateImage (cvSize (width, height), IPL_DEPTH_8U, 3);
+//	cv::Mat result_img = cvCreateImage (cvSize (width, height), IPL_DEPTH_8U, 3);
 //	cvConvert (av_img, result_img);
 //	
 //#ifdef VISUAL_CHECK
-//	cvWaitKey(0);
-//	cvDestroyWindow("test");	
+//	cv::waitKey(0);
+//	cv::destroyWindow("test");	
 //#endif // VISUAL_CHECK
 //	
 //	if (fsave != "")
@@ -1349,11 +1350,11 @@ cv::Mat ACVideoAnalysis::computeMedianImage(int nskip, int nread, int njump, str
 
     // to skip nskip frames:
     int cursor = nskip;
-    capture->set(CV_CAP_PROP_POS_FRAMES, cursor);
+    capture->set(cv::CAP_PROP_POS_FRAMES, cursor);
 
 #ifdef VISUAL_CHECK
     string title = "check median";
-    cv::namedWindow(title.c_str(), CV_WINDOW_AUTOSIZE);
+    cv::namedWindow(title.c_str(), cv::WINDOW_AUTOSIZE);
     int fontFace = CV_FONT_HERSHEY_SCRIPT_SIMPLEX;
     double fontScale = 2;
     int thickness = 3;
@@ -1387,7 +1388,7 @@ cv::Mat ACVideoAnalysis::computeMedianImage(int nskip, int nread, int njump, str
 
         cursor += njump;
         if (cursor >= nframes) break; // safety
-        capture->set(CV_CAP_PROP_POS_FRAMES, cursor);
+        capture->set(cv::CAP_PROP_POS_FRAMES, cursor);
     }
 #ifdef VISUAL_CHECK
     cv::destroyWindow(title.c_str());
@@ -1426,7 +1427,7 @@ cv::Mat ACVideoAnalysis::computeMedianImage(int nskip, int nread, int njump, str
 
 #ifdef VISUAL_CHECK
     cv::imshow(title.c_str(), result_frame);
-    cvWaitKey(0);
+    cv::waitKey(0);
 #endif // VISUAL_CHECK
 
     // XS to get separate thresholds -- this is dancers-specific
@@ -1481,7 +1482,7 @@ cv::Mat ACVideoAnalysis::computeMedianImage(int nskip, int nread, int njump, str
     return result_frame;
 }
 
-//IplImage* ACVideoAnalysis::computeMedianNoBlobImage(string fsave, IplImage *first_guess){
+//cv::Mat ACVideoAnalysis::computeMedianNoBlobImage(string fsave, cv::Mat first_guess){
 //	// only on frames that have no blobs
 //	if (all_blobs_time_stamps.size()==0 || all_blobs.size()==0) {
 //		// XS debug
@@ -1507,25 +1508,25 @@ cv::Mat ACVideoAnalysis::computeMedianImage(int nskip, int nread, int njump, str
 //		histograms[i].r=0;
 //	}
 //	
-//	IplImage *frame;
+//	cv::Mat frame;
 //	int cnt = 0; 
 //	
 //	int cursor;
 //	
 //#ifdef VISUAL_CHECK
-//	cvNamedWindow("NOBLOBS", CV_WINDOW_AUTOSIZE);
-//	cvMoveWindow("NOBLOBS", 50, 400);	
+//	cv::namedWindow("NOBLOBS", cv::WINDOW_AUTOSIZE);
+//	cv::moveWindow("NOBLOBS", 50, 400);	
 //#endif // VISUAL_CHECK
 //	
 //	for (unsigned int i=0;i<all_blobs.size();i++){
 //		if (all_blobs[i].GetNumBlobs() == 0){
 //			cnt++;
 //			cursor = all_blobs_time_stamps[i];
-//			capture.set(CV_CAP_PROP_POS_FRAMES, cursor); 	
+//			capture.set(cv::CAP_PROP_POS_FRAMES, cursor); 	
 //			frame = getNextFrame();
 //#ifdef VISUAL_CHECK
-//			cvShowImage("NOBLOBS", frame );		
-//			cvWaitKey(0);
+//			cv::imshow("NOBLOBS", frame );		
+//			cv::waitKey(0);
 //#endif // VISUAL_CHECK
 //			BgrImage bgr_image(frame); // XS new ?
 //			for (int r=0; r<height; r++){
@@ -1538,13 +1539,13 @@ cv::Mat ACVideoAnalysis::computeMedianImage(int nskip, int nread, int njump, str
 //		}
 //	}
 //#ifdef VISUAL_CHECK
-//	cvDestroyWindow("NOBLOBS");
+//	cv::destroyWindow("NOBLOBS");
 //#endif // VISUAL_CHECK
 //	
 //	float mid=cnt/2; // *nbins
 //	
 //	// output median image
-//	IplImage *result_frame = cvCreateImage (cvSize (width, height), IPL_DEPTH_8U, 3);
+//	cv::Mat result_frame = cvCreateImage (cvSize (width, height), IPL_DEPTH_8U, 3);
 //	
 //	for (int r=0; r<height; r++){
 //		for (int c=0; c<width; c++){
@@ -1608,8 +1609,8 @@ void ACVideoAnalysis::computeBlobPixelSpeed() {
     cv::Scalar sum_diff_frames;
 
 #ifdef VISUAL_CHECK
-    cvNamedWindow("Input", CV_WINDOW_AUTOSIZE);
-    cvNamedWindow("Subtraction", CV_WINDOW_AUTOSIZE);
+    cv::namedWindow("Input", cv::WINDOW_AUTOSIZE);
+    cv::namedWindow("Subtraction", cv::WINDOW_AUTOSIZE);
 #endif //VISUAL_CHECK
 
     // same loop as in computeGlobalPixelsSpeed but restricted to frames with blobs
@@ -1637,14 +1638,14 @@ void ACVideoAnalysis::computeBlobPixelSpeed() {
 #ifdef VISUAL_CHECK
             cv::imshow("Input", tmp_frame);
             cv::imshow("Subtraction", diff_frames);
-            cvWaitKey(10);
+            cv::waitKey(10);
 #endif //VISUAL_CHECK
         }
     }
 
 #ifdef VISUAL_CHECK
-    cvDestroyWindow("Input");
-    cvDestroyWindow("Substraction");
+    cv::destroyWindow("Input");
+    cv::destroyWindow("Substraction");
 #endif //VISUAL_CHECK
 }
 
@@ -1660,7 +1661,7 @@ void ACVideoAnalysis::computeGlobalPixelsSpeed() {
     }
     this->rewind();
     cv::Mat tmp_frame;
-    CvScalar sum_diff_frames;
+    cv::Scalar sum_diff_frames;
     float speed = 0.0;
 
     // XS NOTE : this should work for all architectures
@@ -1674,7 +1675,7 @@ void ACVideoAnalysis::computeGlobalPixelsSpeed() {
     //	ACFFmpegToOpenCV file_cap;
     //	int i = 0;
     //	file_cap.init(file_name.c_str());
-    //	tmp_frame = cvCreateImage(cvSize(file_cap.nCols,file_cap.nRows),IPL_DEPTH_8U,3);
+    //	tmp_frame = cv::Mat(file_cap.nCols,file_cap.nRows),IPL_DEPTH_8U,3);
     //	file_cap.getframe(&tmp_frame);
     //	#endif
 
@@ -1690,8 +1691,8 @@ void ACVideoAnalysis::computeGlobalPixelsSpeed() {
     double fontScale = 0.7;
     int thickness = 0.7;
     cv::Point textOrg(10, 20);
-    cv::namedWindow("Input", CV_WINDOW_AUTOSIZE);
-    cv::namedWindow("Subtraction", CV_WINDOW_AUTOSIZE);
+    cv::namedWindow("Input", cv::WINDOW_AUTOSIZE);
+    cv::namedWindow("Subtraction", cv::WINDOW_AUTOSIZE);
 #endif //VISUAL_CHECK
 
     for (int i = this->frameStart+1; i < this->frameStop; i++) {
@@ -1720,9 +1721,9 @@ void ACVideoAnalysis::computeGlobalPixelsSpeed() {
 
             global_pixel_speeds.push_back(speed);
             // XS TEST to recuperate missing frames
-  //          cvWaitKey(20);
+  //          cv::waitKey(20);
 #ifdef VERBOSE
-            cout << "frame " << i << "(" << capture->get(CV_CAP_PROP_POS_FRAMES) << ") : pixel speed = " << speed << endl;
+            cout << "frame " << i << "(" << capture->get(cv::CAP_PROP_POS_FRAMES) << ") : pixel speed = " << speed << endl;
 #endif // VERBOSE
 
 #ifdef VISUAL_CHECK
@@ -1797,7 +1798,7 @@ void ACVideoAnalysis::computeColorMoments(int n, string cm) {
     this->rewind(); // reset the capture to the beginning of the video
     this->clearStamps();
 #ifdef VISUAL_CHECK
-    cv::namedWindow("Color Image", CV_WINDOW_AUTOSIZE);
+    cv::namedWindow("Color Image", cv::WINDOW_AUTOSIZE);
 #endif //VISUAL_CHECK
 
     cv::Mat current_frame;
@@ -1815,7 +1816,7 @@ void ACVideoAnalysis::computeColorMoments(int n, string cm) {
 
 #ifdef VISUAL_CHECK
         color_frame.showInWindow("Color Image");
-        cvWaitKey(10);
+        cv::waitKey(10);
 #endif //VISUAL_CHECK
 
         color_moments.push_back(color_frame.getColorMoments());
@@ -1837,7 +1838,7 @@ void ACVideoAnalysis::computeHuMoments(int thresh, cv::Mat bg_img) {
     this->rewind(); // reset the capture to the beginning of the video
     this->clearStamps();
 #ifdef VISUAL_CHECK
-    cv::namedWindow("Thresh", CV_WINDOW_AUTOSIZE);
+    cv::namedWindow("Thresh", cv::WINDOW_AUTOSIZE);
 #endif //VISUAL_CHECK
 
     cv::Mat current_frame;
@@ -1854,7 +1855,7 @@ void ACVideoAnalysis::computeHuMoments(int thresh, cv::Mat bg_img) {
 
 #ifdef VISUAL_CHECK
         color_frame.showInWindow("Thresh");
-        cvWaitKey(10);
+        cv::waitKey(10);
 #endif //VISUAL_CHECK
 
         raw_moments.push_back(color_frame.getRawMoments());
@@ -2036,7 +2037,7 @@ void ACVideoAnalysis::computeGlobalOrientation() {
         cv::Point center;
         cv::Scalar color = CV_RGB(255, 0, 0);
 
-        cv::cvtColor(current_frame, buf_mat[last], CV_BGR2GRAY); // convert frame to grayscale
+        cv::cvtColor(current_frame, buf_mat[last], cv::COLOR_BGR2GRAY); // convert frame to grayscale
 
         idx2 = (last + 1) % N; // index of (last - (N-1))th frame
         last = idx2;
@@ -2045,7 +2046,7 @@ void ACVideoAnalysis::computeGlobalOrientation() {
         cv::absdiff(buf_mat[idx1], buf_mat[idx2], silh_mat); // get difference between frames
 
         cv::threshold(silh_mat, silh_mat, diff_threshold, 1, CV_THRESH_BINARY); // and threshold it
-        cv::updateMotionHistory(silh_mat, mhi_mat, timestamp, MHI_DURATION); // update MHI
+        cv::motempl::updateMotionHistory(silh_mat, mhi_mat, timestamp, MHI_DURATION); // update MHI
         mhi_mat.convertTo(mask_mat, CV_8UC1, 255. / MHI_DURATION,
                 (MHI_DURATION - timestamp)*255. / MHI_DURATION);
 
@@ -2061,11 +2062,11 @@ void ACVideoAnalysis::computeGlobalOrientation() {
 #endif //VISUAL_CHECK	
 
         // calculate motion gradient orientation and valid orientation mask
-        cv::calcMotionGradient(mhi_mat, mask_mat, orient_mat, MAX_TIME_DELTA, MIN_TIME_DELTA, SOBEL_SIZE);
+        cv::motempl::calcMotionGradient(mhi_mat, mask_mat, orient_mat, MAX_TIME_DELTA, MIN_TIME_DELTA, SOBEL_SIZE);
 
         // segment motion: get sequence of motion components
         // segmask is marked motion components map. It is not used further
-        cv::segmentMotion(mhi_mat, segmask_mat, storage_rects, timestamp, MAX_TIME_DELTA);
+        cv::motempl::segmentMotion(mhi_mat, segmask_mat, storage_rects, timestamp, MAX_TIME_DELTA);
         // iterate through the motion components,
         float global_orientation = 0;
 
@@ -2085,7 +2086,7 @@ void ACVideoAnalysis::computeGlobalOrientation() {
             cv::Mat mask_roi = mask_mat(comp_rect_roi);
 
             // calculate orientation
-            angle = cv::calcGlobalOrientation(orient_roi, mask_roi, mhi_roi, timestamp, MHI_DURATION);
+            angle = cv::motempl::calcGlobalOrientation(orient_roi, mask_roi, mhi_roi, timestamp, MHI_DURATION);
             angle = (360.0 - angle) * CV_PI / 180; // adjust for images with top-left origin
             cosa = cos(angle);
             sina = sin(angle);
@@ -2155,7 +2156,7 @@ vector<float> ACVideoAnalysis::getHuMoment(int momi) {
 void ACVideoAnalysis::showFrameInWindow(string title, const cv::Mat& frame, bool has_win) {
     // by default has_win = true, we don't make a new window for each frame !
     if (not has_win)
-        cv::namedWindow(title.c_str(), CV_WINDOW_AUTOSIZE);
+        cv::namedWindow(title.c_str(), cv::WINDOW_AUTOSIZE);
     if (frame.data) {
         cv::imshow(title.c_str(), frame);
         cv::waitKey(20); // wait 20 ms, necesary to display properly.
@@ -2164,7 +2165,7 @@ void ACVideoAnalysis::showFrameInWindow(string title, const cv::Mat& frame, bool
 
 void ACVideoAnalysis::showInWindow(string title, bool has_win) {
     if (not has_win)
-        cv::namedWindow(title.c_str(), CV_WINDOW_AUTOSIZE);
+        cv::namedWindow(title.c_str(), cv::WINDOW_AUTOSIZE);
 
     int fontFace = CV_FONT_HERSHEY_SCRIPT_SIMPLEX;
     double fontScale = 0.7;
@@ -2180,7 +2181,7 @@ void ACVideoAnalysis::showInWindow(string title, bool has_win) {
         }
         string txt;
         std::stringstream stxt;
-        stxt << capture->get(CV_CAP_PROP_POS_FRAMES);
+        stxt << capture->get(cv::CAP_PROP_POS_FRAMES);
         stxt >> txt;
         cv::putText(current_frame, txt, textOrg, fontFace, fontScale, cv::Scalar::all(255), thickness, 8); // CV_RGB (0, 255, 100));
         cv::imshow(title.c_str(), current_frame);
@@ -2196,7 +2197,7 @@ void ACVideoAnalysis::showInWindow(string title, bool has_win) {
 
 void ACVideoAnalysis::showFFTInWindow(string title, bool has_win) {
     if (not has_win)
-        cv::namedWindow(title.c_str(), CV_WINDOW_AUTOSIZE);
+        cv::namedWindow(title.c_str(), cv::WINDOW_AUTOSIZE);
 
     cv::Mat current_frame;
     for (int ifram = this->frameStart; ifram < this->frameStop; ifram++) {
@@ -2228,7 +2229,7 @@ void ACVideoAnalysis::onTrackbarSlide(int pos, void* video_instance) {
 void ACVideoAnalysis::browseWithTrackbarInWindow(string title, bool has_win) {
     g_slider_position = 0;
     if (not has_win)
-        cv::namedWindow(title.c_str(), CV_WINDOW_AUTOSIZE);
+        cv::namedWindow(title.c_str(), cv::WINDOW_AUTOSIZE);
     int fontFace = CV_FONT_HERSHEY_SCRIPT_SIMPLEX;
     double fontScale = 0.7;
     int thickness = 0.7;
@@ -2236,16 +2237,16 @@ void ACVideoAnalysis::browseWithTrackbarInWindow(string title, bool has_win) {
     cv::createTrackbar("Video Frame", title.c_str(), &g_slider_position, nframes, &ACVideoAnalysis::onTrackbarSlide, this);
     cv::setTrackbarPos("Video Frame", title.c_str(), 0);
     cv::Mat img;
-    capture->set(CV_CAP_PROP_POS_FRAMES, 0);
+    capture->set(cv::CAP_PROP_POS_FRAMES, 0);
     for (int i = this->frameStart; i < this->frameStop; i++) {
         *capture >> img;
-        cv::setTrackbarPos("Video Frame", title.c_str(), capture->get(CV_CAP_PROP_POS_FRAMES));
+        cv::setTrackbarPos("Video Frame", title.c_str(), capture->get(cv::CAP_PROP_POS_FRAMES));
         if (cv::waitKey(20) == '\x1b') // press ESC to pause the video, then any key to continue
             cv::waitKey(0);
         string txt;
         std::stringstream stxt;
-        if ((!img.data) || capture->get(CV_CAP_PROP_POS_FRAMES) > nframes) break;
-        stxt << capture->get(CV_CAP_PROP_POS_FRAMES);
+        if ((!img.data) || capture->get(cv::CAP_PROP_POS_FRAMES) > nframes) break;
+        stxt << capture->get(cv::CAP_PROP_POS_FRAMES);
         stxt >> txt;
         cv::putText(img, txt, textOrg, fontFace, fontScale, cv::Scalar::all(255), thickness, 8); // CV_RGB (0, 255, 100));
         cv::imshow(title.c_str(), img);
@@ -2257,7 +2258,7 @@ void ACVideoAnalysis::browseWithTrackbarInWindow(string title, bool has_win) {
 
 //XS TODO fixme
 //bool ACVideoAnalysis::saveInFile (string fileout, int nskip){
-//	// CV_FOURCC('M','J','P','G')
+//	// cv::VideoWriter::fourcc('M','J','P','G')
 //	bool ok = true;
 //	if (this->getNumberOfFrames() <=0) ok = false;
 //	CvVideoWriter* video_writer = cvCreateVideoWriter( fileout.c_str(), -1, fps, cvSize(width,height) );  // "-1" pops up a nice GUI (Windows only)
@@ -2280,14 +2281,14 @@ void ACVideoAnalysis::browseWithTrackbarInWindow(string title, bool has_win) {
 //}
 
 // saves in fileout a video (i.e., not an thumbnail image) thumnail consisting of frames from the video 
-// format : CV_FOURCC('M','J','P','G')
+// format : cv::VideoWriter::fourcc('M','J','P','G')
 // optionally:
 //   - reduced to size wxh
 //   - skips the first nskip frames
 //   - by steps of istep frames
 // XS TODO start & stop
 void ACVideoAnalysis::writeToFile(const string& fileout, int _w, int _h, int _nskip, int _istep) {
-    cv::VideoWriter video_writer(fileout, CV_FOURCC('X', 'V', 'I', 'D'), fps, cv::Size(_w, _h));
+    cv::VideoWriter video_writer(fileout, cv::VideoWriter::fourcc('X', 'V', 'I', 'D'), fps, cv::Size(_w, _h));
     rewind();
     for (int i = _nskip; i < nframes - 1; i += _istep) {
         cv::Mat frame = getFrame(i);
@@ -2443,16 +2444,16 @@ string ACVideoAnalysis::extractFilename(string path) {
     return path.substr(index + 1);
 }
 
-void ACVideoAnalysis::test_match_shapes(ACVideoAnalysis *V2, IplImage* bg_img) {
+void ACVideoAnalysis::test_match_shapes(ACVideoAnalysis *V2, cv::Mat bg_img) {
     // XS TODO CVMATCHSHAPES
 }
 
 // TODO: detect blob on a selected channel
 // (suffit de nettoyer ci-dessous)
 //
-//void ACVideoAnalysis::detectBlobs(int ichannel, string cmode, IplImage* bg_img, int bg_thesh, int big_blob, int small_blob){
+//void ACVideoAnalysis::detectBlobs(int ichannel, string cmode, cv::Mat bg_img, int bg_thesh, int big_blob, int small_blob){
 //	// works on ichannel_th channel (if < 0 : use BW image)
-//	IplImage* frame = getNextFrame();
+//	cv::Mat frame = getNextFrame();
 //	frame = getNextFrame();
 //	ACAnalysedImage* im = new ACAnalysedImage();
 //
@@ -2474,7 +2475,7 @@ void ACVideoAnalysis::test_match_shapes(ACVideoAnalysis *V2, IplImage* bg_img) {
 //			
 //			saveImage =cvCloneImage(frame);
 //			
-//			cvThreshold(im->getChannel(ichannel), bitImage, slider_bg_thresh,255,CV_THRESH_BINARY_INV);
+//			cvThreshold(im->getChannel(ichannel), bitImage, slider_bg_thresh,255,cv::THRESH_BINARY_INV);
 //			// get blobs and filter them using its area
 //			CBlobResult blobs;
 //			CBlob *currentBlob;
@@ -2505,17 +2506,17 @@ void ACVideoAnalysis::test_match_shapes(ACVideoAnalysis *V2, IplImage* bg_img) {
 //				cvEllipseBox( saveImage, currentBlob->GetEllipse(), CV_RGB(255,0,255), 2,8,0); 
 //			}
 //			
-//			cvShowImage( "BLOBS", saveImage );		
-//			cvShowImage("BW",bitImage);
+//			cv::imshow( "BLOBS", saveImage );		
+//			cv::imshow("BW",bitImage);
 //			
-//			int	c = cvWaitKey(10);
+//			int	c = cv::waitKey(10);
 //			if( (char) c == 27 )
 //				break;
 //		}
 //		
 //		cvReleaseCapture( &capture );
-//		//		cvDestroyWindow("CamSub");
-//		//		cvDestroyWindow("CamSub 1");	
+//		//		cv::destroyWindow("CamSub");
+//		//		cv::destroyWindow("CamSub 1");	
 //	}
 //}
 

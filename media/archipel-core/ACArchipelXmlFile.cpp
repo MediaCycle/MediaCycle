@@ -61,8 +61,8 @@ string ACArchipelLabelFileRead(string filePath){
         return string("");
 }
 
-IplImage* ACArchipelThumbFileRead(std::string filePath){
-    IplImage* thumb = 0;
+cv::Mat ACArchipelThumbFileRead(std::string filePath){
+    cv::Mat thumb = 0;
     string ext=fs::extension(filePath);
     if (ext==string(".xml")){
         ACArchipelReader doc(filePath);
@@ -105,11 +105,11 @@ IplImage* ACArchipelThumbFileRead(std::string filePath){
             std::cout << "Extra: " << doc.getExtra();
         }
 
-        thumb = cvLoadImage((fs::path(filePath).parent_path().string()+string("/")+doc.getThumbPath()).c_str(), CV_LOAD_IMAGE_COLOR);
+        thumb = cv::imread((fs::path(filePath).parent_path().string()+string("/")+doc.getThumbPath()).c_str(), cv::IMREAD_COLOR);
         try {
             if (!thumb) {
                 cerr << "Check file name : " << fs::path(filePath).parent_path().string()+string("/")+doc.getThumbPath() << endl;
-                throw(string(" <ACArchipelThumbFileRead> CV_LOAD_IMAGE_COLOR : not a color image !"));
+                throw(string(" <ACArchipelThumbFileRead> cv::IMREAD_COLOR : not a color image !"));
             }
         }
         catch (const string& not_image_file) {

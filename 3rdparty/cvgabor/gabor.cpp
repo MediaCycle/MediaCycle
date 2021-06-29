@@ -79,9 +79,9 @@ void Gabor::calculate(int numPha_, int numFreq_, uint horizonalMargin_, uint ver
 // the feature number is calculated as "f * # phases + p"
 // the result is undefined if the call to this method is not
 // preceded by a call to "calculate()"
-IplImage* Gabor::getImage(int layer) {
-	if (layer > zsize_ ) return 0;
-	IplImage *newimage = cvCreateImage(cvSize(this->xsize_, this->ysize_), IPL_DEPTH_32F, 1 );
+cv::Mat Gabor::getImage(int layer) {
+	if (layer > zsize_ ) return cv::Mat();
+	cv::Mat newimage = cv::Mat(this->xsize_, this->ysize_, IPL_DEPTH_32F);
 	BwImage Im(newimage);
 	for (uint x = 0; x < this->xsize_; x++)
 		for (uint y = 0; y < this->ysize_; y++) {
@@ -91,10 +91,10 @@ IplImage* Gabor::getImage(int layer) {
 		
 		}
 	//XS test
-	cvNamedWindow("test", CV_WINDOW_AUTOSIZE);
-    cvShowImage("test", newimage);
-	cvWaitKey(0);
-	cvDestroyWindow("test");
+	cv::namedWindow("test", cv::WINDOW_AUTOSIZE);
+    cv::imshow("test", newimage);
+	cv::waitKey(0);
+	cv::destroyWindow("test");
 	//
 	return newimage;
 }
@@ -155,7 +155,7 @@ void Gabor::init(fftw_complex* &bwTransformed) {
 	// XS TODO check this 2.*
 //	BwImage Im(analysed_image->getImage());
 	
-	cv::namedWindow("0", CV_WINDOW_AUTOSIZE);
+	cv::namedWindow("0", cv::WINDOW_AUTOSIZE);
     //CF cv::imshow("0", analysed_image->getImageMat());
     cv::imshow("0", analysed_image);
 	cv::waitKey(0);
@@ -178,7 +178,7 @@ void Gabor::init(fftw_complex* &bwTransformed) {
 	
 	
 	//XS TEST
-	IplImage* fftimage  = cvCreateImage(cvSize(paddedWidth,paddedHeight),IPL_DEPTH_8U,1);
+	cv::Mat fftimage  = cv::Mat(paddedWidth,paddedHeight,IPL_DEPTH_8U);
 	BwImage Bwfftimage(fftimage);
 	int k=0;
 	for(int x=0; x< paddedWidth; x++){
@@ -187,17 +187,17 @@ void Gabor::init(fftw_complex* &bwTransformed) {
 			k++;
 		}
 	}
-	cvNamedWindow("bwIn", CV_WINDOW_AUTOSIZE);
-	cvShowImage("bwIn", fftimage);
-	cvWaitKey(0);
-	cvReleaseImage(&fftimage);
-	cvDestroyWindow("bwIn");
+	cv::namedWindow("bwIn", cv::WINDOW_AUTOSIZE);
+	cv::imshow("bwIn", fftimage);
+	cv::waitKey(0);
+	// //cvReleaseImage(&fftimage);
+	cv::destroyWindow("bwIn");
 	// XS END TEST
 	
 	fftw_execute(p);
 	
 	//XS TEST
-	IplImage* fftimage2  = cvCreateImage(cvSize(paddedWidth,paddedHeight),IPL_DEPTH_8U,1);
+	cv::Mat fftimage2  = cv::Mat(paddedWidth,paddedHeight,IPL_DEPTH_8U);
 	BwImage Bwfftimage2(fftimage2);
 	k=0;
 	for(int x=0; x< paddedWidth; x++){
@@ -206,15 +206,15 @@ void Gabor::init(fftw_complex* &bwTransformed) {
 			k++;
 		}
 	}
-	cvNamedWindow("bwIn2", CV_WINDOW_AUTOSIZE);
-	cvShowImage("bwIn2", fftimage2);
-	cvWaitKey(0);
-	cvReleaseImage(&fftimage2);
-	cvDestroyWindow("bwIn2");
+	cv::namedWindow("bwIn2", cv::WINDOW_AUTOSIZE);
+	cv::imshow("bwIn2", fftimage2);
+	cv::waitKey(0);
+	//cvReleaseImage(&fftimage2);
+	cv::destroyWindow("bwIn2");
 	// XS END TEST
 
 	//XS TEST
-	IplImage* fftimage3  = cvCreateImage(cvSize(paddedWidth,paddedHeight),IPL_DEPTH_32S,1);
+	cv::Mat fftimage3  = cv::Mat(paddedWidth,paddedHeight,IPL_DEPTH_32S);
 	BwImageFloat Bwfftimage3(fftimage3);
 	k=0;
 	for(int x=0; x< paddedWidth; x++){
@@ -223,11 +223,11 @@ void Gabor::init(fftw_complex* &bwTransformed) {
 			k++;
 		}
 	}
-	cvNamedWindow("bwTransformed", CV_WINDOW_AUTOSIZE);
-	cvShowImage("bwTransformed", fftimage3);
-	cvWaitKey(0);
-	cvReleaseImage(&fftimage3);
-	cvDestroyWindow("bwTransformed");
+	cv::namedWindow("bwTransformed", cv::WINDOW_AUTOSIZE);
+	cv::imshow("bwTransformed", fftimage3);
+	cv::waitKey(0);
+	//cvReleaseImage(&fftimage3);
+	cv::destroyWindow("bwTransformed");
 	// XS END TEST
 	
 	fftw_destroy_plan(p);
@@ -321,7 +321,7 @@ void Gabor::extractGabor(fftw_complex* bwTransformed) {
 				}
 			}
 			//XS TEST
-			IplImage* fftimage3  = cvCreateImage(cvSize(paddedWidth,paddedHeight),IPL_DEPTH_8U,1);
+			cv::Mat fftimage3  = cv::Mat(paddedWidth,paddedHeight,IPL_DEPTH_8U);
 			BwImage Bwfftimage3(fftimage3);
 			int k=0;
 			for(int x=0; x< paddedWidth; x++){
@@ -330,18 +330,18 @@ void Gabor::extractGabor(fftw_complex* bwTransformed) {
 					k++;
 				}
 			}
-			cvNamedWindow("bwTransformed", CV_WINDOW_AUTOSIZE);
-			cvShowImage("bwTransformed", fftimage3);
-			cvWaitKey(0);
-			cvReleaseImage(&fftimage3);
-			cvDestroyWindow("bwTransformed");
+			cv::namedWindow("bwTransformed", cv::WINDOW_AUTOSIZE);
+			cv::imshow("bwTransformed", fftimage3);
+			cv::waitKey(0);
+			//cvReleaseImage(&fftimage3);
+			cv::destroyWindow("bwTransformed");
 			// XS END TEST
 			
 			// Fourier-Transformation backwards
 			//fftwnd_one(plan, bwTransformed, bwResult);
 			fftw_execute(p);
 			//XS TEST
-			IplImage* fftimage4  = cvCreateImage(cvSize(paddedWidth,paddedHeight),IPL_DEPTH_8U,1);
+			cv::Mat fftimage4  = cv::Mat(paddedWidth,paddedHeight,IPL_DEPTH_8U);
 			BwImage Bwfftimage4(fftimage3);
 			k=0;
 			for(int x=0; x< paddedWidth; x++){
@@ -350,11 +350,11 @@ void Gabor::extractGabor(fftw_complex* bwTransformed) {
 					k++;
 				}
 			}
-			cvNamedWindow("bwResult", CV_WINDOW_AUTOSIZE);
-			cvShowImage("bwResult", fftimage4);
-			cvWaitKey(0);
-			cvReleaseImage(&fftimage4);
-			cvDestroyWindow("bwResult");
+			cv::namedWindow("bwResult", cv::WINDOW_AUTOSIZE);
+			cv::imshow("bwResult", fftimage4);
+			cv::waitKey(0);
+			//cvReleaseImage(&fftimage4);
+			cv::destroyWindow("bwResult");
 			// XS END TEST
 			
 			// Save calculated feature

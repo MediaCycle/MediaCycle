@@ -95,7 +95,7 @@ bool ACImageAnalysis::scaleImage(const cv::Mat& imgp_full_mat, const float _scal
 	}
 	
 //	cout << "new scale = " << scale << endl;
-	cv::resize(imgp_full_mat, imgp_mat, cv::Size (scale*original_width, scale*original_height), 0, 0, CV_INTER_CUBIC);
+	cv::resize(imgp_full_mat, imgp_mat, cv::Size (scale*original_width, scale*original_height), 0, 0, cv::INTER_CUBIC);
 	return check_imgp_mat(); 
 }
 
@@ -222,12 +222,12 @@ void ACImageAnalysis::showInWindow(const std::string title){
 }
 
 void ACImageAnalysis::showInNewWindow(const std::string title){
-	cv::namedWindow(title.c_str(), CV_WINDOW_AUTOSIZE);
+	cv::namedWindow(title.c_str(), cv::WINDOW_AUTOSIZE);
     cv::imshow(title.c_str(), imgp_mat);
 }
 
 void ACImageAnalysis::closeNewWindow(const std::string title){
-	cvDestroyWindow(title.c_str());
+	cv::destroyWindow(title.c_str());
 }
 
 bool ACImageAnalysis::saveInFile (string filename){

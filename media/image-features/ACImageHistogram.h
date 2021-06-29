@@ -46,11 +46,10 @@
 // XS TODO remove these cmode
 class ACImageHistogram{
 public:
-	//ACImageHistogram(IplImage** image, std::string cmode= "BGR", int size = 128, int norm = 1); // if image already split in 3
-	ACImageHistogram(IplImage* image, std::string cmode= "BGR", int size = 128, int norm = 1){}; // image still to be splitted
+	ACImageHistogram(cv::Mat image, std::string cmode= "BGR", int size = 128, int norm = 1){}; // image still to be splitted
 	virtual ~ACImageHistogram() = 0;
 
-	void initialize(IplImage** image, std::string cmode= "BGR", int size = 128, int norm = 1); 
+	void initialize(cv::Mat image, std::string cmode= "BGR", int size = 128, int norm = 1); 
 
 	virtual ACImageHistogram& operator+= (const ACImageHistogram& H){}; 
 	// XS  NB: You can't overload a relational operator for a pointer type.

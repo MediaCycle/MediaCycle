@@ -143,7 +143,7 @@ private:
 	void init();
 	bool computeThumbnail(std::string _fname, int w=0, int h=0);
 //	bool computeThumbnail(ACMediaDocumentData* data_ptr, int w=0, int h=0);
-//	bool computeThumbnail(IplImage* img, int w=0, int h=0);
+//	bool computeThumbnail(cv::Mat img, int w=0, int h=0);
 	bool computeThumbnailSize(int w_, int h_);
 	void deleteMedia();
 public:

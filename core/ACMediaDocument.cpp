@@ -186,7 +186,7 @@ bool ACMediaDocument::computeThumbnail(string _fname, int w, int h){
 }
 
 
-/*bool ACMediaDocument::computeThumbnail(IplImage* img, int w, int h){
+/*bool ACMediaDocument::computeThumbnail(cv::Mat img, int w, int h){
 	bool ok = true;
 	return ok;
 }*/

@@ -785,16 +785,12 @@ ENDIF(SUPPORT_AUDIO)
 
 # OpenCV
 IF(SUPPORT_VIDEO OR SUPPORT_IMAGE)
-	IF(SUPPORT_VIDEO)
-	    SET(OpenCV_MIN_VERSION "2.3.1")
-	ELSE()
-	   SET(OpenCV_MIN_VERSION "2.0.0")
-	ENDIF()
+	SET(OpenCV_MIN_VERSION "4.0.0")
 
 	find_path(OpenCV_DIR NAMES opencv-config.cmake OpenCVConfig.cmake PATH_SUFFIXES lib/cmake) # for MacPorts
 
         #FIND_PACKAGE ( OpenCV REQUIRED COMPONENTS core contrib features2d imgproc legacy objdetect video highgui) # < 3.0.0
-        FIND_PACKAGE ( OpenCV REQUIRED COMPONENTS core features2d imgproc objdetect video highgui) # >= 3.0.0
+        FIND_PACKAGE ( OpenCV REQUIRED COMPONENTS core features2d imgproc objdetect video highgui optflow) # >= 3.0.0
 
         # other components (at v. 2.2.0): calib3d ffmpeg? flann gpu haartraining ml traincascade
         # other components (at v. 2.3.0): androidcamera calib3d flann gpu haartraining ml stitching traincascade ts

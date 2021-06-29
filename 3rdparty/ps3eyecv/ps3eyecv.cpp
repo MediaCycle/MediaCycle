@@ -148,7 +148,7 @@ void ps3eyecv::thread()
 bool ps3eyecv::getVideo(cv::Mat& output) {
     m_rgb_mutex.lock();
     if(m_new_rgb_frame) {
-        cv::cvtColor(rgbMat, output, CV_RGB2GRAY /*CV_RGB2BGR*/);
+        cv::cvtColor(rgbMat, output, cv::COLOR_RGB2GRAY /*cv::COLOR_RGB2BGR*/);
         m_new_rgb_frame = false;
         m_rgb_mutex.unlock();
         return true;

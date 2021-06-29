@@ -118,7 +118,7 @@ int main(int argc, char** argv)
 	int kernel_size = 21;
 	double th = 90; 
 	
-    cvtColor(image, src, CV_BGR2GRAY);
+    cvtColor(image, src, cv::COLOR_BGR2GRAY);
     src.convertTo(src_f, CV_32F, 1.0/255, 0);
 	
     if (!kernel_size%2)
@@ -128,7 +128,7 @@ int main(int argc, char** argv)
 
     Mat Ori =  GaborBankScale(src_f,th,kernel_size);
 	
-	namedWindow("Ori", CV_WINDOW_AUTOSIZE );
+	namedWindow("Ori", cv::WINDOW_AUTOSIZE );
 	imshow("Ori",Ori);
 	
     waitKey(0);	

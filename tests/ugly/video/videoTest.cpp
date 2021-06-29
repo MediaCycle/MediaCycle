@@ -114,15 +114,15 @@ void get_all_images(){
 		cout << movie_file << endl;
 		ACVideoAnalysis* V = new ACVideoAnalysis(movie_file);
 		clock_t t0=clock();
-//		IplImage *median_img =	V->computeMedianImage(200, 0, 50, median_file);
+//		cv::Mat median_img =	V->computeMedianImage(200, 0, 50, median_file);
 		string first_guess_file= videodir+"median/Bru_101#1_med.jpg";
-		IplImage *first_guess_img = cvLoadImage(first_guess_file.c_str(), CV_LOAD_IMAGE_COLOR);
+		cv::Mat first_guess_img = cv::imread(first_guess_file.c_str(), cv::IMREAD_COLOR);
 
-//		IplImage *median_img =	V->computeMedianNoBlobImage(median_file_noblob, first_guess_img);
+//		cv::Mat median_img =	V->computeMedianNoBlobImage(median_file_noblob, first_guess_img);
 		clock_t t1=clock();
 		cout<<"Median execution time: " << (t1-t0)/CLOCKS_PER_SEC << " s." << endl;
 //		V->rewind();
-//		IplImage *average_img =	V->computeAverageImage(200, 0, 50, average_file);
+//		cv::Mat average_img =	V->computeAverageImage(200, 0, 50, average_file);
 //		clock_t t2=clock();
 //		cout<<"Average execution time: " << (t2-t1)/CLOCKS_PER_SEC << " s." << endl;	
 		delete V;
@@ -140,11 +140,11 @@ void test_med_ave(std::string movie_file){
 	cv::Mat median_img = V->computeMedianImage(200, 0, 50, median_file);
 	clock_t t1=clock();
 	cout<<"Median execution time: " << (t1-t0)/CLOCKS_PER_SEC << " s." << endl;
-	cv::namedWindow("BGLOCAL", CV_WINDOW_AUTOSIZE);
+	cv::namedWindow("BGLOCAL", cv::WINDOW_AUTOSIZE);
 	cv::imshow("BGLOCAL", median_img);
 	cv::waitKey(0);
 //	V->rewind();
-//	IplImage *average_img =	V->computeAverageImage(200, 0, 50,  average_file);
+//	cv::Mat average_img =	V->computeAverageImage(200, 0, 50,  average_file);
 //	clock_t t2=clock();
 //	cout<<"Average execution time: " << (t2-t1)/CLOCKS_PER_SEC << " s." << endl;	
 //	delete V;
@@ -167,7 +167,7 @@ void test_histogram_equalize(std::string dancer){
 	cout << movie_file << endl;
 	ACVideoAnalysis* V = new ACVideoAnalysis(movie_file);
 	clock_t t0=clock();
-	IplImage *imgp_bg = cvLoadImage(median_file.c_str(), CV_LOAD_IMAGE_COLOR);
+	cv::Mat imgp_bg = cv::imread(median_file.c_str(), cv::IMREAD_COLOR);
 	//XS TODO port to 2.*
 	//	V->histogramEqualize(imgp_bg);
 	clock_t t1=clock();
@@ -182,7 +182,7 @@ void test_bg_substraction(std::string dancer){
 	cout << movie_file << endl;
 	ACVideoAnalysis* V = new ACVideoAnalysis(movie_file);
 	clock_t t0=clock();
-	IplImage *imgp_bg = cvLoadImage(median_file.c_str(), CV_LOAD_IMAGE_COLOR);
+	cv::Mat imgp_bg = cv::imread(median_file.c_str(), cv::IMREAD_COLOR);
 //	V->computeBlobsInteractively(imgp_bg, true);
 	V->computeBlobsUL();
 
@@ -272,7 +272,7 @@ void test_blobs(std::string movie_file){
 	clock_t t0=clock();
 	
 	// XS TODO tmp hack
-	//IplImage *imgp_bg = cvLoadImage("/Users/xavier/numediart/Project10.1-Borderlands/work/bg_black.png", CV_LOAD_IMAGE_COLOR);
+	//cv::Mat imgp_bg = cv::imread("/Users/xavier/numediart/Project10.1-Borderlands/work/bg_black.png", cv::IMREAD_COLOR);
 	//V->computeBlobs();
 	V->computeBlobsUL();
 	//V->computeMergedBlobsTrajectory();
@@ -364,7 +364,7 @@ void test_optical_flow2(std::string full_video_path){
 
 void test_video_similarity_hu(std::string full_video_path){
 	ACVideoAnalysis* V = new ACVideoAnalysis(full_video_path);
-	IplImage *bg_img = cvLoadImage("/Users/xavier/numediart/Project10.1-Borderlands/bg/bg_blue.png", CV_LOAD_IMAGE_COLOR);
+	cv::Mat bg_img = cv::imread("/Users/xavier/numediart/Project10.1-Borderlands/bg/bg_blue.png", cv::IMREAD_COLOR);
 
 	V->computeHuMoments(0,bg_img);
 	std::vector< float > M1 = V->getHuMoment(1);
@@ -381,7 +381,7 @@ void test_video_similarity_hu(std::string full_video_path){
 void test_video_similarity_hu(std::string full_video_path1, std::string full_video_path2){
 	ACVideoAnalysis* V1 = new ACVideoAnalysis(full_video_path1);
 	ACVideoAnalysis* V2 = new ACVideoAnalysis(full_video_path2);
-	IplImage *bg_img = cvLoadImage("/Users/xavier/numediart/Project10.1-Borderlands/bg/bg_blue.png", CV_LOAD_IMAGE_COLOR);
+	cv::Mat bg_img = cv::imread("/Users/xavier/numediart/Project10.1-Borderlands/bg/bg_blue.png", cv::IMREAD_COLOR);
 
 	V1->computeHuMoments(20, bg_img);
 	V2->computeHuMoments(20, bg_img);
@@ -513,28 +513,28 @@ bool test_video_read(string s){
 	else {
 		cv::VideoCapture* cap = new cv::VideoCapture(s); 
 		cv::Mat frame; 
-		cout << "testing video " << s << " with " << cap->get(CV_CAP_PROP_FRAME_COUNT) << " frames..." << endl;
+		cout << "testing video " << s << " with " << cap->get(cv::CAP_PROP_FRAME_COUNT) << " frames..." << endl;
 #ifdef VISUAL_CHECK
 		cv::namedWindow("video", 1); 
 #endif //VISUAL_CHECK
-		for(int ifram=0; ifram < cap->get(CV_CAP_PROP_FRAME_COUNT)-1; ifram++) { 
-			// -1 appears to be necessary, otherwise we get no data for frame 3227 in video /usr/local/share/mediacycle/data/video/001011.mov, where CV_CAP_PROP_FRAME_COUNT = 3228
+		for(int ifram=0; ifram < cap->get(cv::CAP_PROP_FRAME_COUNT)-1; ifram++) { 
+			// -1 appears to be necessary, otherwise we get no data for frame 3227 in video /usr/local/share/mediacycle/data/video/001011.mov, where cv::CAP_PROP_FRAME_COUNT = 3228
 			*cap >> frame; 
 			if(!frame.data) {
-				cerr << "<test_video_read> : no data for frame " << cap->get(CV_CAP_PROP_POS_FRAMES) << " in video " << s << endl;
+				cerr << "<test_video_read> : no data for frame " << cap->get(cv::CAP_PROP_POS_FRAMES) << " in video " << s << endl;
 				ok = false;
 				break;
 			}
 			else {
-				cout << ifram << " - "<< cap->get(CV_CAP_PROP_POS_FRAMES) << endl;
-//				if (ifram != cap->get(CV_CAP_PROP_POS_FRAMES)-1){ // -1 because pointer >> already switched to next frame
-//					cerr << "<test_video_read> : inconsistent frame index (" << ifram << " - "<< cap->get(CV_CAP_PROP_POS_FRAMES)-1 << ") in video " << s << endl;
+				cout << ifram << " - "<< cap->get(cv::CAP_PROP_POS_FRAMES) << endl;
+//				if (ifram != cap->get(cv::CAP_PROP_POS_FRAMES)-1){ // -1 because pointer >> already switched to next frame
+//					cerr << "<test_video_read> : inconsistent frame index (" << ifram << " - "<< cap->get(cv::CAP_PROP_POS_FRAMES)-1 << ") in video " << s << endl;
 //					ok = false;
 //					break;
 //				}
 
 #ifdef VISUAL_CHECK
-//				cout << cap->get(CV_CAP_PROP_POS_FRAMES) << " - " << cap->get(CV_CAP_PROP_POS_MSEC) << endl;
+//				cout << cap->get(cv::CAP_PROP_POS_FRAMES) << " - " << cap->get(cv::CAP_PROP_POS_MSEC) << endl;
 				cv::imshow("video", frame); 
 				if(cv::waitKey(10) >= 0) break; 
 #endif //VISUAL_CHECK
@@ -553,11 +553,11 @@ bool test_video_get_set_position(string s){
 		cv::VideoCapture* cap = new cv::VideoCapture(s);
                 cv::Mat frame;
                 (*cap) >> frame;
-		cout << "testing video " << s << " with " << cap->get(CV_CAP_PROP_FRAME_COUNT) << " frames..." << endl;
-		for (int i=1; i< cap->get(CV_CAP_PROP_FRAME_COUNT)+1; i++){
-			cap->set(CV_CAP_PROP_POS_FRAMES,i);
+		cout << "testing video " << s << " with " << cap->get(cv::CAP_PROP_FRAME_COUNT) << " frames..." << endl;
+		for (int i=1; i< cap->get(cv::CAP_PROP_FRAME_COUNT)+1; i++){
+			cap->set(cv::CAP_PROP_POS_FRAMES,i);
                         (*cap) >> frame;
-			cout << i << ": position set to "<< cap->get(CV_CAP_PROP_POS_FRAMES) << " -" << cap->get(CV_CAP_PROP_POS_MSEC) << endl;
+			cout << i << ": position set to "<< cap->get(cv::CAP_PROP_POS_FRAMES) << " -" << cap->get(cv::CAP_PROP_POS_MSEC) << endl;
 		}
 		delete cap;
 		
@@ -572,9 +572,9 @@ bool test_video_width_height(string s){
 		ok = false;
 	else{
 		cv::VideoCapture* cap = new cv::VideoCapture(s); 
-		cout << "testing video " << s << " with " << cap->get(CV_CAP_PROP_FRAME_COUNT) << " frames..." << endl;
-		width = cap->get(CV_CAP_PROP_FRAME_WIDTH);
-		height = cap->get(CV_CAP_PROP_FRAME_HEIGHT);
+		cout << "testing video " << s << " with " << cap->get(cv::CAP_PROP_FRAME_COUNT) << " frames..." << endl;
+		width = cap->get(cv::CAP_PROP_FRAME_WIDTH);
+		height = cap->get(cv::CAP_PROP_FRAME_HEIGHT);
 		cout << "frame width : " << width << endl;
 		cout << "frame height : " << height << endl;
 		cout << "getting first frame as matrix..." << endl;
@@ -633,18 +633,18 @@ void test_xml2acl(string s) {
 void test_optical_flow_Farneback() {
     int scale = 5;
 
-    cvNamedWindow("vel", 1);
-    cvNamedWindow("image1", 1);
-    cvNamedWindow("image2", 1);
+    cv::namedWindow("vel", 1);
+    cv::namedWindow("image1", 1);
+    cv::namedWindow("image2", 1);
 
     CvSize isize = cvSize(80, 80);
     CvSize vsize = cvSize(isize.width * scale, isize.height * scale);
-    IplImage *image1 = cvCreateImage(isize, 8, 1);
-    IplImage *image2 = cvCreateImage(isize, 8, 1);
-    IplImage *velx = cvCreateImage(isize, IPL_DEPTH_32F, 1);
-    IplImage *vely = cvCreateImage(isize, IPL_DEPTH_32F, 1);
-    IplImage *vel = cvCreateImage(vsize, 8, 3);
-    IplImage *flow = cvCreateImage(isize, IPL_DEPTH_32F, 2);
+    cv::Mat image1 = cvCreateImage(isize, 8, 1);
+    cv::Mat image2 = cvCreateImage(isize, 8, 1);
+    cv::Mat velx = cvCreateImage(isize, IPL_DEPTH_32F);
+    cv::Mat vely = cvCreateImage(isize, IPL_DEPTH_32F);
+    cv::Mat vel = cvCreateImage(vsize, 8, 3);
+    cv::Mat flow = cvCreateImage(isize, IPL_DEPTH_32F, 2);
 
     int sim = 0;
     for (;;) {
@@ -667,9 +667,9 @@ void test_optical_flow_Farneback() {
         // icvCalcOpticalFlowBBW( im1, im2, _flow, 1, 1, 1, 0 );
         {
             for (int y = 0; y < flow->height; y++) {
-                float* vx = (float*) (velx->imageData + velx->widthStep * y);
-                float* vy = (float*) (vely->imageData + vely->widthStep * y);
-                const float* f = (const float*) (flow->imageData + flow->widthStep * y);
+                float* vx = (float*) (velx.data + velx.step * y);
+                float* vy = (float*) (vely.data + vely.step * y);
+                const float* f = (const float*) (flow.data + flow.step * y);
                 for (int x = 0; x < flow->width; x++) {
                     vx[x] = f[2 * x];
                     vy[x] = f[2 * x + 1];
@@ -699,12 +699,12 @@ void test_optical_flow_Farneback() {
                     cvLine(vel, p, p2, CV_RGB(0, 255, 0), 1, 8);
                 }
             }
-        cvShowImage("vel", vel);
-        cvShowImage("image1", image1);
-        cvShowImage("image2", image2);
+        cv::imshow("vel", vel);
+        cv::imshow("image1", image1);
+        cv::imshow("image2", image2);
         printf("ave=(%.2f,%.2f)\n", ave.x, ave.y);
 
-        if (cvWaitKey(300) == 'q')
+        if (cv::waitKey(300) == 'q')
             break;
     }
 }
@@ -745,7 +745,7 @@ int main( int argc, char** argv )
             break;
 
         frame.copyTo(image);
-        cv::cvtColor(image, gray, CV_BGR2GRAY);
+        cv::cvtColor(image, gray, cv::COLOR_BGR2GRAY);
 
         if( nightMode )
             image = cv::Scalar::all(0);

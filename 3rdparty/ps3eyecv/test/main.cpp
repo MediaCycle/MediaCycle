@@ -68,13 +68,13 @@ int main(int argc, char **argv) {
 
     ps3eyecv device = ps3eyecv(_width,_height,_framerate);
 
-    namedWindow("rgb",CV_WINDOW_AUTOSIZE);
-    namedWindow("slice",CV_WINDOW_AUTOSIZE);
+    namedWindow("rgb",cv::WINDOW_AUTOSIZE);
+    namedWindow("slice",cv::WINDOW_AUTOSIZE);
 
     //    for(int s=0;s<_bits;s++){
     //        std::stringstream _name;
     //        _name << "slice " << s;
-    //        namedWindow(_name.str(),CV_WINDOW_AUTOSIZE);
+    //        namedWindow(_name.str(),cv::WINDOW_AUTOSIZE);
     //    }
 
     int value = 0;
@@ -179,7 +179,7 @@ int main(int argc, char **argv) {
             std::cout << std::endl;
         }
         value = _value;
-        char k = cvWaitKey(5);
+        char k = cv::waitKey(5);
         //usleep(8000); // 8ms @ 125fps
     }
     return 0;

@@ -3,64 +3,84 @@
 
 
 #include "list"
-#include "ACOpenCVInclude.h"
+// #include "opencv/cv.h"
+// #include "opencv/cxcore.h"
+#include <opencv2/opencv.hpp>
+#include <opencv2/core/core.hpp>
+
+#include "opencv2/core/types.hpp"
+#include "opencv2/imgproc/imgproc.hpp"
+#include <opencv2/imgproc/imgproc_c.h> // for cvGetSpatialMoment, ...
+
+#include <list>
+
+
+class CBlob; //Forward declaration in order to enable the "parent" field
 
 //! Type of chain codes
 typedef unsigned char t_chainCode;
 //! Type of list of chain codes
-typedef CvSeq* t_chainCodeList;
+typedef std::vector<t_chainCode> t_chainCodeList;
+typedef std::vector<t_chainCodeList> t_chainCodeContours;	//In order to emulate CvSeq objects and to comply with opencv 2.0 interface
 //! Type of list of points
-typedef CvSeq* t_PointList;
+typedef std::vector<cv::Point> t_PointList;
+typedef std::vector<t_PointList> t_contours;
 
 
 //! Max order of calculated moments
 #define MAX_MOMENTS_ORDER		3
 
-
 //! Blob contour class (in crack code)
 class CBlobContour
 {
 	friend class CBlob;
-	
+	friend class myCompLabeler;
 public:
 	//! Constructors
 	CBlobContour();
-	CBlobContour(CvPoint startPoint, CvMemStorage *storage );
+	//Size is used to empirically reserve internal vectors for contour points.
+	//This can be a help for very small images, where the vector would be too large.
+	CBlobContour(cv::Point startPoint, const cv::Size &imageRes = cv::Size(-1,-1));
 	//! Copy constructor
-	CBlobContour( CBlobContour *source );
+	CBlobContour(CBlobContour *source );
+	//CBlobContour(CBlobContour &source);
+	CBlobContour(const CBlobContour &source);
 
 	~CBlobContour();
 	//! Assigment operator
 	CBlobContour& operator=( const CBlobContour &source );
 
-	//! Add chain code to contour
+	//! Add point to end of contour, according to chain code.
 	void AddChainCode(t_chainCode code);
 
 	//! Return freeman chain coded contour
-	t_chainCodeList GetChainCode()
+	t_chainCodeList& GetChainCodeList()
 	{
-		return m_contour;
+		return m_contour[0];
 	}
 
 	bool IsEmpty()
 	{
-		return m_contour == 0 || m_contour->total == 0;
+		return m_contour.size() == 0;
 	}
 
-	//! Return all contour points
-	t_chainCodeList GetContourPoints();
+	//! Returns first contour
+	const t_PointList& GetContourPoints();
+	//! Returns all contours (compatible with drawContours structure)
+	t_contours& GetContours();
 
-protected:	
-
-	CvPoint GetStartPoint() const
+	void ShiftBlobContour(int x,int y);
+	
+	cv::Point GetStartPoint() const
 	{
 		return m_startPoint;
 	}
+protected:	
 
-	//! Clears chain code contour
-	void ResetChainCode();
 	
 
+	//! Clears chain code contour
+	void Reset();
 	
 	//! Computes area from contour
 	double GetArea();
@@ -70,26 +90,28 @@ protected:
 	double GetMoment(int p, int q);
 
 	//! Crack code list
-	t_chainCodeList m_contour; 	
+	t_chainCodeContours m_contour;
 
 private:
 	//! Starting point of the contour
-	CvPoint m_startPoint;
+	cv::Point m_startPoint;
 	//! All points from the contour
-	t_PointList m_contourPoints;
-
-
+	t_contours m_contourPoints;
 
 	//! Computed area from contour
 	double m_area;
 	//! Computed perimeter from contour
 	double m_perimeter;
 	//! Computed moments from contour
-	CvMoments m_moments;
+	cv::Moments m_moments;
+   	static const t_PointList EMPTY_LIST;
 
-	//! Pointer to storage
-	CvMemStorage *m_parentStorage;
+	//This value is actually used mainly in the detection part, for the labels.
+	CBlob* parent;
 };
+
+t_chainCode points2ChainCode(cv::Point p1, cv::Point p2);
+cv::Point chainCode2Point(cv::Point origin,t_chainCode code);
 
 #endif	//!BLOBCONTOUR_H_INCLUDED
 

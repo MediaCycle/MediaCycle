@@ -102,22 +102,22 @@ public:
     void setFramePosition(int pos);
     int getFramePosition();
 
-    //	IplImage* computeAverageImage(int nskip = 0, int nread = 0, int njump = -1, std::string s ="");
+    //	cv::Mat computeAverageImage(int nskip = 0, int nread = 0, int njump = -1, std::string s ="");
     cv::Mat computeMedianImage(int nskip = 0, int nread = 0, int njump = -1, std::string s = "");
-    //	IplImage* computeMedianNoBlobImage(std::string s ="",IplImage *first_guess=0);
-    void backgroundSubstraction(IplImage* bg_img, int nskip = 0, std::string cmode = "BGR");
+    //	cv::Mat computeMedianNoBlobImage(std::string s ="",cv::Mat first_guess=0);
+    void backgroundSubstraction(cv::Mat bg_img, int nskip = 0, std::string cmode = "BGR");
     // blob detection could be per channel or in color image
-    //	void detectBlobs(int ichannel=0, std::string cmode="HSV", IplImage* bg_img=0, int bg_thesh=40, int big_blob=200, int small_blob=0);
+    //	void detectBlobs(int ichannel=0, std::string cmode="HSV", cv::Mat bg_img=0, int bg_thesh=40, int big_blob=200, int small_blob=0);
 
     // XS not so useful
     // XS eventually translate into 2.* (started...)
-    //void histogramEqualize(const IplImage* bg_img);
+    //void histogramEqualize(const cv::Mat bg_img);
 
     // raw features computation
     //   - on blobs
     void computeBlobs(const cv::Mat&bg_img = cv::Mat(), int bg_thesh = 10, int big_blob = 200, int small_blob = 0);
     // XS 280611 removed the following one for the moment (migration openCV 2.*)
-    //	void computeBlobsInteractively(IplImage* bg_img=0, bool merge_blobs=false, int bg_thesh=20, int big_blob=200, int small_blob=0);
+    //	void computeBlobsInteractively(cv::Mat bg_img=0, bool merge_blobs=false, int bg_thesh=20, int big_blob=200, int small_blob=0);
     void computeBlobsUL(const cv::Mat& bg_img = cv::Mat(), bool merge_blobs = true, int big_blob = 200, int small_blob = 0);
     //   - general (not on blobs)
     void computeOpticalFlow();
@@ -243,14 +243,14 @@ public:
     std::string extractFilename(std::string path);
 
     // XS tmp tests
-    void test_match_shapes(ACVideoAnalysis *V2, IplImage* bg_img);
+    void test_match_shapes(ACVideoAnalysis *V2, cv::Mat bg_img);
 
 private:
     void stamp(); // fill in time and frame stamps for current frame
     void clearStamps();
     
     std::string file_name;
-    std::string color_model; // "BGR" or "HSV" : these are already in IPLimage, but not used in OpenCV (see manual !)
+    std::string color_model; // "BGR" or "HSV"
 
     cv::VideoCapture* capture;
     int frame_counter;

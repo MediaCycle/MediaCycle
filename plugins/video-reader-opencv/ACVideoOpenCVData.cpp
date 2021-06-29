@@ -103,8 +103,8 @@ ACMediaDataContainer* ACVideoOpenCVData::getBuffer(int start_frame, int number_o
         return 0;
     }
 
-    capture->set(CV_CAP_PROP_POS_FRAMES, start_frame);
-    int current_frame = (int)(capture->get(CV_CAP_PROP_POS_FRAMES));
+    capture->set(cv::CAP_PROP_POS_FRAMES, start_frame);
+    int current_frame = (int)(capture->get(cv::CAP_PROP_POS_FRAMES));
     if(current_frame != start_frame){
         std::cerr << "ACVideoOpenCVData::getBuffer: couldn't seek to frame " << start_frame << ", got " << current_frame << " instead" << std::endl;
         return 0;
@@ -121,7 +121,7 @@ ACMediaDataContainer* ACVideoOpenCVData::getBuffer(int start_frame, int number_o
 float ACVideoOpenCVData::getSampleRate()
 {
     if(capture)
-        return (float)(capture->get(CV_CAP_PROP_FPS));
+        return (float)(capture->get(cv::CAP_PROP_FPS));
     else
         return 0.0f;
 }
@@ -137,7 +137,7 @@ int ACVideoOpenCVData::getNumberOfChannels()
 int ACVideoOpenCVData::getNumberOfFrames()
 {
     if(capture)
-        return (int)(capture->get(CV_CAP_PROP_FRAME_COUNT)) -1;  // XS -1 seems necessary in OpenCV 2.3
+        return (int)(capture->get(cv::CAP_PROP_FRAME_COUNT)) -1;  // XS -1 seems necessary in OpenCV 2.3
     else
         return 0;
 }
@@ -145,7 +145,7 @@ int ACVideoOpenCVData::getNumberOfFrames()
 int ACVideoOpenCVData::getWidth()
 {
     if(capture)
-        return (int)(capture->get(CV_CAP_PROP_FRAME_WIDTH));
+        return (int)(capture->get(cv::CAP_PROP_FRAME_WIDTH));
     else
         return 0;
 }
@@ -153,7 +153,7 @@ int ACVideoOpenCVData::getWidth()
 int ACVideoOpenCVData::getHeight()
 {
     if(capture)
-        return (int)(capture->get(CV_CAP_PROP_FRAME_HEIGHT));
+        return (int)(capture->get(cv::CAP_PROP_FRAME_HEIGHT));
     else
         return 0;
 }

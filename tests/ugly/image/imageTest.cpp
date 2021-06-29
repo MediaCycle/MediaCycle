@@ -98,7 +98,7 @@ void displayrect(){
 	CvScalar c_middle = cvScalar(0,255,255);
 	CvScalar c_high = cvScalar(0,255,0);
 
-	IplImage* im;
+	cv::Mat im;
 	im = cvCreateImage(cvSize (1200, 800), 8, 3);
 	cvRectangle( im, 
 				cvPoint(10,10), 
@@ -115,10 +115,10 @@ void displayrect(){
 				cvPoint(90,30), 
 				c_high,CV_FILLED
 				); 
-	cvNamedWindow("rect", CV_WINDOW_AUTOSIZE);
-    cvShowImage("rect", im);
-	cvWaitKey(0);
-    cvDestroyWindow("rect");
+	cv::namedWindow("rect", cv::WINDOW_AUTOSIZE);
+    cv::imshow("rect", im);
+	cv::waitKey(0);
+    cv::destroyWindow("rect");
 }
 
 // XS for cluster:
@@ -143,7 +143,7 @@ int makeNumbered(string sdir, int n){
 		stringstream imfile;
 		imfile << sdir << "/number" << i << ".jpg" ;		
 		const char *imfile_char = imfile.str().c_str();
-		IplImage* img = cvCreateImage(cvSize(128,128),IPL_DEPTH_8U,3);
+		cv::Mat img = cv::Mat(128,128),IPL_DEPTH_8U,3);
 		snprintf (str, 64, "%04d", i);
 		cvPutText (img, str, cvPoint (10, 72), &font, CV_RGB (0, 255, 100));
 		if( cvSaveImage(imfile_char, img )) {
@@ -210,11 +210,11 @@ void test_multiple_import_normalize(){
 
 void testOpenCV_2_0(string sim1){
 	cout << "starting..." << endl;
-	cv::Mat Real = cv::imread(sim1,CV_LOAD_IMAGE_COLOR);
+	cv::Mat Real = cv::imread(sim1,cv::IMREAD_COLOR);
 	cout << "done" << endl;
-	cv::namedWindow("Real", CV_WINDOW_AUTOSIZE);
+	cv::namedWindow("Real", cv::WINDOW_AUTOSIZE);
 	cv::imshow("Real", Real);
-	cv::namedWindow("Real", CV_WINDOW_AUTOSIZE);
+	cv::namedWindow("Real", cv::WINDOW_AUTOSIZE);
 	cv::waitKey();
 }
 
@@ -239,7 +239,7 @@ int test_histogram_0(string imageFile){
 	cv::Mat src, hsv; 
 	if( !(src=cv::imread(imageFile, 1)).data ) 
 		return -1; 
-	cv::cvtColor(src, hsv, CV_BGR2HSV);			
+	cv::cvtColor(src, hsv, cv::COLOR_BGR2HSV);			
 	// Quantize the hue to 30 levels 
 	// and the saturation to 32 levels 
 	int hbins = 30, sbins = 32; 

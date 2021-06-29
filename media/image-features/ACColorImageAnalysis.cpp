@@ -59,7 +59,7 @@ ACColorImageAnalysis::ACColorImageAnalysis(const string& filename) : ACImageAnal
 	reset();
 	setFileName(filename);
 	
-	cv::Mat imgp_full_mat = cv::imread(filename, CV_LOAD_IMAGE_COLOR); // BGR
+	cv::Mat imgp_full_mat = cv::imread(filename, cv::IMREAD_COLOR); // BGR
 
 	// original image (imgp_full_map) reduced to imgp_map
 	// this reduces the memory use (imgp_full_map gets destroyed imediately)
@@ -76,7 +76,7 @@ ACColorImageAnalysis::ACColorImageAnalysis(const cv::Mat& img_full_mat) : ACImag
 /*ACColorImageAnalysis::ACColorImageAnalysis(ACMediaData* image_data) : ACImageAnalysis(){
 	reset();
 	setFileName(image_data->getFileName());	
-	IplImage* tmp = static_cast<IplImage*> (image_data->getData());
+	cv::Mat tmp = image_data->getData();
 	cv::Mat img_full_mat (tmp);
 	scaleImage(img_full_mat);
 }*/
@@ -108,7 +108,7 @@ void ACColorImageAnalysis::makeBWImage(){
 	if (HAS_BW) return;
 	else {
 		bw_imgp_mat = cv::Mat(this->getSize(), CV_8UC1);
-		cv::cvtColor(imgp_mat,bw_imgp_mat, CV_BGR2GRAY);
+		cv::cvtColor(imgp_mat,bw_imgp_mat, cv::COLOR_BGR2GRAY);
 		if(!bw_imgp_mat.data)
 			cerr << "<ACColorImageAnalysis::makeBWImage> : BW image empty" << endl;
 		else
@@ -142,7 +142,7 @@ bool ACColorImageAnalysis::splitChannels(const std::string& cmode){ // "BGR" by 
 		removeChannels();
 		HAS_CHANNELS = false;
 		cv::Mat tmp_im_mat(this->getSize(),CV_8UC3); // tmp image for storing 3-channels image with new color model 
-		cv::cvtColor(imgp_mat, tmp_im_mat, CV_BGR2HSV);
+		cv::cvtColor(imgp_mat, tmp_im_mat, cv::COLOR_BGR2HSV);
 		for (int i = 0; i < 3; i++)
 			channel_img_mat.push_back(cv::Mat (this->getSize(),CV_8UC1));
 		cv::split(tmp_im_mat, channel_img_mat);		
@@ -199,7 +199,7 @@ void ACColorImageAnalysis::computeFFT2D (const string& cmode){
 		}
 		ddata = (uchar*) channel_img_mat[i].data;
 
-		//		ddata = (uchar*) channel_img[i]->imageData;
+		//		ddata = (uchar*) channel_img[i].data;
 		for (int j = 0; j < area; j++)
 			data_in[j] = (double) ddata[j];
 		fftw_plan p = fftw_plan_dft_r2c_2d(height, width, data_in, fft[i], FFTW_ESTIMATE); 
@@ -306,7 +306,7 @@ void ACColorImageAnalysis::computeColorMoments(const int& n, const string& cm){
 	ACColorImageHistogram* tmp_hist;
 	if (cm=="HSV"){
 		cv::Mat hsv_mat;
-		cv::cvtColor(imgp_mat, hsv_mat, CV_BGR2HSV);
+		cv::cvtColor(imgp_mat, hsv_mat, cv::COLOR_BGR2HSV);
 		tmp_hist= new ACColorImageHistogram(hsv_mat, cm);
 	}
 	else //if (cm =="BGR")
@@ -342,7 +342,7 @@ void ACColorImageAnalysis::computeHoughLinesP(){
 	cv::Size size = src.size();
 	
 	cv::Mat src2(size, CV_8UC1);
-	cv::cvtColor( src, src2, CV_BGR2GRAY );
+	cv::cvtColor( src, src2, cv::COLOR_BGR2GRAY );
 	
 	cv::Mat dst(size, CV_8UC1);
 
@@ -381,7 +381,7 @@ void ACColorImageAnalysis::computeHoughLines(){
 	cv::Size size = src.size();
 	
 	cv::Mat src2(size, CV_8UC1);
-	cv::cvtColor( src, src2, CV_BGR2GRAY );
+	cv::cvtColor( src, src2, cv::COLOR_BGR2GRAY );
 	
 	cv::Mat dst(size, CV_8UC1);
 	
@@ -419,7 +419,7 @@ void ACColorImageAnalysis::computeHoughLines(){
 // cf. detectAndDrawFaces + detectManyObjects/detectLargestObject
 // * scale = How much to shrink the image before face detection (to run faster)
 //           A value upto 1.3f will make it run faster and detect faces almost as reliably.
-// * flags = CV_HAAR_SCALE_IMAGE 	// detectManyObjects
+// * flags = cv::CASCADE_SCALE_IMAGE 	// detectManyObjects
 // * flags = CV_HAAR_FIND_BIGGEST_OBJECT | CV_HAAR_DO_ROUGH_SEARCH // detectLargestObject
 //           For Haar detectors, detectLargestObject() should be faster than detectManyObjects().
 // * cv::Size minFeatureSize = cv::Size(20, 20); // Smallest object size.
@@ -434,7 +434,7 @@ void ACColorImageAnalysis::computeNumberOfFaces(const string& cascadeFile, const
 	vector<cv::Rect> faces;
 	cv::CascadeClassifier classif;
 	bool showRect = true ; // display rectangle around face if true, otherwise circle
-	CvScalar color = CV_RGB(0,255,0) ; // green
+	cv::Scalar color = CV_RGB(0,255,0) ; // green
 	int thickness = 2;
 //	string cascadeFileHaar = "/Users/xavier/numediart/Project14.5-DiskHover/tests/haarcascade_frontalface_alt.xml";
 //	string cascadeFileLBP = "/Users/xavier/numediart/Project14.5-DiskHover/tests/lbpcascade_frontalface.xml";
@@ -451,7 +451,7 @@ void ACColorImageAnalysis::computeNumberOfFaces(const string& cascadeFile, const
 	cv::Mat imgp_mat = this->getImageMat();	
 	cv::Mat gray;
 	
-	cv::cvtColor(imgp_mat,gray,CV_BGR2GRAY);
+	cv::cvtColor(imgp_mat,gray,cv::COLOR_BGR2GRAY);
 	cv::Size size = imgp_mat.size();
 	
 	bool scaled=false;
@@ -459,7 +459,7 @@ void ACColorImageAnalysis::computeNumberOfFaces(const string& cascadeFile, const
 	if (scale < 0.9999f || scale > 1.0001f){
 		int smallWidth = round(imgp_mat.cols/scale);
 		int smallHeight = round(imgp_mat.rows/scale);
-		cv::resize( gray, gray, cv::Size(smallHeight,smallWidth), 0,0, CV_INTER_LINEAR );
+		cv::resize( gray, gray, cv::Size(smallHeight,smallWidth), 0,0, cv::INTER_LINEAR );
 		scaled=true;
 	}
 	
@@ -531,11 +531,11 @@ void ACColorImageAnalysis::computeNumberOfFaces(const string& cascadeFile, const
 void ACColorImageAnalysis::showChannels(const string& cmode){
 	// cmode default = "BGR"
 	splitChannels(cmode);
-	cv::namedWindow("0", CV_WINDOW_AUTOSIZE);
+	cv::namedWindow("0", cv::WINDOW_AUTOSIZE);
 	cv::imshow("0", channel_img_mat[0]);
-	cv::namedWindow("1", CV_WINDOW_AUTOSIZE);
+	cv::namedWindow("1", cv::WINDOW_AUTOSIZE);
 	cv::imshow("1", channel_img_mat[1]);
-	cv::namedWindow("2", CV_WINDOW_AUTOSIZE);
+	cv::namedWindow("2", cv::WINDOW_AUTOSIZE);
 	cv::imshow("2", channel_img_mat[2]);
 	cv::waitKey(0);
 	cv::destroyWindow("0");
@@ -547,32 +547,32 @@ void ACColorImageAnalysis::showFFTInWindow(const string& title){
 	int height = this->getHeight();
 	int width = this->getWidth();
 
-	IplImage* fftimage[3];
+	cv::Mat fftimage[3];
 	string t[3];
 	
 	for(int ic=0; ic< 3; ic++){
 		std::ostringstream oss;
-		fftimage[ic] = cvCreateImage(cvSize(width,height),8,1);
+		fftimage[ic] = cv::Mat(width,height,8,1);
 		oss << title << ic;
 		t[ic] = oss.str();
 	}
 	
 	for(int ic=0; ic< 3; ic++){
-		cvNamedWindow(t[ic].c_str() ,CV_WINDOW_AUTOSIZE);
+		cv::namedWindow(t[ic].c_str() ,cv::WINDOW_AUTOSIZE);
 		int k = 0;
 		for(int i=0; i< width; i++){
 			for (int j=0; j< height; j++){
-				fftimage[ic]->imageData[i*width + j] = (uchar)(sqrt(fft[ic][k][0]*fft[ic][k][0]+fft[ic][k][1]*fft[ic][k][1]));
+				fftimage[ic].data[i*width + j] = (uchar)(sqrt(fft[ic][k][0]*fft[ic][k][0]+fft[ic][k][1]*fft[ic][k][1]));
 				k++;
 			}
 		}
-		cvWaitKey(0);
-		cvShowImage(t[ic].c_str(),fftimage[ic]);
+		cv::waitKey(0);
+		cv::imshow(t[ic].c_str(),fftimage[ic]);
 	}
-	cvWaitKey(0);
+	cv::waitKey(0);
 	for(int ic=0; ic< 3; ic++){
-		cvReleaseImage(&fftimage[ic]);
-		cvDestroyWindow(t[ic].c_str());
+		//cvReleaseImage(&fftimage[ic]);
+		cv::destroyWindow(t[ic].c_str());
 	}
 }
 

@@ -41,6 +41,6 @@
 
 std::string* ACArchipelXmlFileRead(std::string filePath);
 std::string ACArchipelLabelFileRead(std::string filePath);
-IplImage*  ACArchipelThumbFileRead(std::string filePath);
+cv::Mat  ACArchipelThumbFileRead(std::string filePath);
 std::string ACArchipelGetThumbFileName(std::string filePath);
 #endif

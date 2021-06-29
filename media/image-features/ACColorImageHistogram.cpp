@@ -177,7 +177,7 @@ void ACColorImageHistogram::show() {
 						  colorsBGR[i]);
 		}
 	}
-	cv::namedWindow("Histogram", CV_WINDOW_AUTOSIZE);
+	cv::namedWindow("Histogram", cv::WINDOW_AUTOSIZE);
 	cv::imshow("Histogram", hist_img_mat);
 	cv::waitKey(0);
 }

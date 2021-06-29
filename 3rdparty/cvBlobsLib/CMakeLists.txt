@@ -1,4 +1,4 @@
-# http://opencv.willowgarage.com/wiki/cvBlobsLib
+# https://github.com/OpenCVBlobsLib/opencvblobslib
 SET(TARGET_NAME "cvBlobsLib")
 IF(OpenCV_FOUND)
 	FILE(GLOB SRC *.cpp)

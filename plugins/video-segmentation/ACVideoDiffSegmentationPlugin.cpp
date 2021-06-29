@@ -50,14 +50,14 @@ std::vector<ACMedia*> ACVideoDiffSegmentationPlugin::segment(ACMedia* theMedia) 
 
     vector<ACMedia*> segments;
     cv::VideoCapture cvVideo(video_filename);
-    if (cvVideo.isOpened()&&cvVideo.get(CV_CAP_PROP_FRAME_COUNT)>4){
-        int lMax=cvVideo.get(CV_CAP_PROP_FRAME_COUNT);
-        float fps=cvVideo.get(CV_CAP_PROP_FPS);
+    if (cvVideo.isOpened()&&cvVideo.get(cv::CAP_PROP_FRAME_COUNT)>4){
+        int lMax=cvVideo.get(cv::CAP_PROP_FRAME_COUNT);
+        float fps=cvVideo.get(cv::CAP_PROP_FPS);
         fcolvec diffImage(lMax);
         cv::Mat imgCurr,imgNext,imgTemp,imgTemp2;
         cvVideo>>imgTemp;
         if (imgTemp.channels()==3)
-            cv::cvtColor(imgTemp, imgCurr, CV_BGR2GRAY);
+            cv::cvtColor(imgTemp, imgCurr, cv::COLOR_BGR2GRAY);
         else
             imgCurr=imgTemp;
         {
@@ -72,7 +72,7 @@ std::vector<ACMedia*> ACVideoDiffSegmentationPlugin::segment(ACMedia* theMedia) 
             if (imgTemp.empty())
                 continue;
             if (imgTemp.channels()==3)
-                cv::cvtColor(imgTemp, imgNext, CV_BGR2GRAY);
+                cv::cvtColor(imgTemp, imgNext, cv::COLOR_BGR2GRAY);
             else
                 imgNext=imgTemp;
             cv::absdiff(imgNext,imgCurr,imgTemp2);

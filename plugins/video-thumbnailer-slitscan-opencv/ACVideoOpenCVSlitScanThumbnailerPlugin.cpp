@@ -157,10 +157,10 @@ std::vector<ACMediaThumbnail*> ACVideoOpenCVSlitScanThumbnailerPlugin::computeSl
         return thumbnails;
     }
 
-    int width   = (int) capture->get(CV_CAP_PROP_FRAME_WIDTH);
-    int height  = (int) capture->get(CV_CAP_PROP_FRAME_HEIGHT);
-    //int fps     = (int) capture->get(CV_CAP_PROP_FPS);
-    int total_frames = (int) capture->get(CV_CAP_PROP_FRAME_COUNT)-1; // XS -1 seems necessary in OpenCV 2.3
+    int width   = (int) capture->get(cv::CAP_PROP_FRAME_WIDTH);
+    int height  = (int) capture->get(cv::CAP_PROP_FRAME_HEIGHT);
+    //int fps     = (int) capture->get(cv::CAP_PROP_FPS);
+    int total_frames = (int) capture->get(cv::CAP_PROP_FRAME_COUNT)-1; // XS -1 seems necessary in OpenCV 2.3
 
     //cv::Mat circular_slit_scan(2*height, 2*height, CV_8UC4);
     cv::Mat circular_slit_scan(4*height, 4*height, CV_8UC4);
@@ -178,7 +178,7 @@ std::vector<ACMediaThumbnail*> ACVideoOpenCVSlitScanThumbnailerPlugin::computeSl
 
         bool init = false;
         for (unsigned int f=0;f<total_frames;f++){
-            int c = (int)(capture->get(CV_CAP_PROP_POS_FRAMES));
+            int c = (int)(capture->get(cv::CAP_PROP_POS_FRAMES));
             *capture >> current_frame;
 
             if (current_frame.data) {
@@ -194,7 +194,7 @@ std::vector<ACMediaThumbnail*> ACVideoOpenCVSlitScanThumbnailerPlugin::computeSl
 
                 cv::Mat transparent_frame(current_frame.size(), CV_8UC4);
 
-                cv::cvtColor(current_frame, transparent_frame, CV_RGB2RGBA, 4);
+                cv::cvtColor(current_frame, transparent_frame, cv::COLOR_RGB2RGBA, 4);
 
                 cv::Mat slit(transparent_frame, cv::Rect((int)(0.5f*width), 0, 1, height));
 
@@ -211,11 +211,11 @@ std::vector<ACMediaThumbnail*> ACVideoOpenCVSlitScanThumbnailerPlugin::computeSl
                 //        BORDER_TRANSPARENT=IPL_BORDER_TRANSPARENT,
                 //        BORDER_DEFAULT=BORDER_REFLECT_101, BORDER_ISOLATED=16
                 //
-                //        INTER_NEAREST=CV_INTER_NN, //!< nearest neighbor interpolation
-                //        INTER_LINEAR=CV_INTER_LINEAR, //!< bilinear interpolation
-                //        INTER_CUBIC=CV_INTER_CUBIC, //!< bicubic interpolation
-                //        INTER_AREA=CV_INTER_AREA, //!< area-based (or super) interpolation
-                //        INTER_LANCZOS4=CV_INTER_LANCZOS4, //!< Lanczos interpolation over 8x8 neighborhood
+                //        INTER_NEAREST=cv::INTER_NN, //!< nearest neighbor interpolation
+                //        INTER_LINEAR=cv::INTER_LINEAR, //!< bilinear interpolation
+                //        INTER_CUBIC=cv::INTER_CUBIC, //!< bicubic interpolation
+                //        INTER_AREA=cv::INTER_AREA, //!< area-based (or super) interpolation
+                //        INTER_LANCZOS4=cv::INTER_LANCZOS4, //!< Lanczos interpolation over 8x8 neighborhood
                 //        INTER_MAX=7,
                 //        WARP_INVERSE_MAP=CV_WARP_INVERSE_MAP
 
@@ -294,7 +294,7 @@ std::vector<ACMediaThumbnail*> ACVideoOpenCVSlitScanThumbnailerPlugin::computeSl
                     std::cout << "ACVideoOpenCVSlitScanThumbnailerPlugin::computeCircSlitScans: frame " << f << "("<< c <<")" << " / " << total_frames << " angle " <<   ceil((float)f/(float)total_frames*360.0f/angle) << " sliced " << sliced /*<< " border " << border << " fills " << fills*/ << std::endl;
 
                     //                vector<int> _compression_params;
-                    //                _compression_params.push_back(CV_IMWRITE_PNG_COMPRESSION);
+                    //                _compression_params.push_back(cv::IMWRITE_PNG_COMPRESSION);
                     //                _compression_params.push_back(9); // default: 3
                     //                std::stringstream _circular_name;
                     //                _circular_name << "Circular slit-scan " << iteration;
@@ -366,7 +366,7 @@ std::vector<ACMediaThumbnail*> ACVideoOpenCVSlitScanThumbnailerPlugin::computeSl
     }
 
     vector<int> compression_params;
-    compression_params.push_back(CV_IMWRITE_PNG_COMPRESSION);
+    compression_params.push_back(cv::IMWRITE_PNG_COMPRESSION);
     compression_params.push_back(9); // default: 3
 
     std::string _name("Slit-scan");

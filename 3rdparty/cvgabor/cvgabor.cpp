@@ -29,7 +29,6 @@ using namespace std;
 CvGabor::CvGabor() {
     bInitialised = false;
     bKernel = false;
-    cv::Mat src_image();
 }
 
 CvGabor::~CvGabor() {
@@ -41,7 +40,6 @@ CvGabor::~CvGabor() {
 CvGabor::CvGabor(int iMu, int iNu, double dSigma, double dF) {
     bInitialised = true;
     bKernel = false;
-    cv::Mat src_image();
     reset(iMu, iNu, dSigma, dF);
 }
 
@@ -49,7 +47,6 @@ CvGabor::CvGabor(int iMu, int iNu, double dSigma, double dF) {
 CvGabor::CvGabor(double dPhi, int iNu, double dSigma, double dF) {
     bInitialised = false;
     bKernel = false;
-    cv::Mat src_image();
     reset(dPhi, iNu, dSigma, dF);
 }
 
@@ -160,9 +157,9 @@ void CvGabor::showKernel() {
     cv::Mat realKernelU(Width, Width, CV_8UC1);
     cv::Mat imagKernelF(Width, Width, CV_8UC1);
     cv::Mat imagKernelU(Width, Width, CV_8UC1);
-    cv::normalize(Real,realKernelF, 0, 255, CV_MINMAX);
+    cv::normalize(Real,realKernelF, 0, 255, cv::NORM_MINMAX);
     realKernelF.convertTo(realKernelU, CV_8UC1);
-    cv::normalize(Imag,imagKernelF, 0, 255, CV_MINMAX);
+    cv::normalize(Imag,imagKernelF, 0, 255, cv::NORM_MINMAX);
     imagKernelF.convertTo(imagKernelU, CV_8UC1);
 
 //    for (int i = 0; i < Width; i++) {
@@ -171,14 +168,14 @@ void CvGabor::showKernel() {
 //        }
 //    }
 
-    cv::namedWindow("Real Kernel", CV_WINDOW_AUTOSIZE);
+    cv::namedWindow("Real Kernel", cv::WINDOW_AUTOSIZE);
     cv::imshow("Real Kernel", realKernelU);
-    cvMoveWindow("Real Kernel", 50, 50);
+    cv::moveWindow("Real Kernel", 50, 50);
     cv::waitKey(0);
     cv::destroyWindow("Real Kernel");
-    cv::namedWindow("Imag Kernel", CV_WINDOW_AUTOSIZE);
+    cv::namedWindow("Imag Kernel", cv::WINDOW_AUTOSIZE);
     cv::imshow("Imag Kernel", imagKernelU);
-    cvMoveWindow("Imag Kernel", 150, 50);
+    cv::moveWindow("Imag Kernel", 150, 50);
     cv::waitKey(0);
     cv::destroyWindow("Imag Kernel");
 }
@@ -190,10 +187,10 @@ void CvGabor::showConvolImage() {
     }
     cv::Mat convol_imageF(convol_image.size(), CV_32FC1);
     cv::Mat convol_imageU(convol_image.size(), CV_8UC1);
-    cv::normalize(convol_image, convol_imageF, 0, 255, CV_MINMAX);
+    cv::normalize(convol_image, convol_imageF, 0, 255, cv::NORM_MINMAX);
     convol_imageF.convertTo(convol_imageU, CV_8UC1);
     cv::imshow("Convoluted Image (magnitude)", convol_imageU);
-    cvMoveWindow("Convoluted Image (magnitude)", 50, 50);
+    cv::moveWindow("Convoluted Image (magnitude)", 50, 50);
     cv::waitKey(0);
     cv::destroyWindow("Convoluted Image (magnitude)");
 }

@@ -60,7 +60,7 @@ public:
     void saveXMLSpecific(TiXmlElement* _media);
     int loadXMLSpecific(TiXmlElement* _pMediaNode);
 
-    //void setThumbnail(IplImage *_thumbnail) { thumbnail = _thumbnail; thumbnail_width = _thumbnail->width; thumbnail_height = _thumbnail->height; }
+    //void setThumbnail(cv::Mat _thumbnail) { thumbnail = _thumbnail; thumbnail_width = _thumbnail->width; thumbnail_height = _thumbnail->height; }
     osg::ref_ptr<osg::Image> getThumbnail() { return thumbnail; }
     osg::ref_ptr<osg::Texture2D> getTexture() { return image_texture; }
 

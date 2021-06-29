@@ -79,18 +79,18 @@ void cpu_codelet(void *descr[], void *_args)
 	int h1= 512;
 
 	float *res = (float *)STARPU_VECTOR_GET_PTR(descr[0]);
-	IplImage* resultat1=cvCreateImage(cvSize(l1,h1),IPL_DEPTH_8U,1);
+	cv::Mat resultat1=cv::Mat(l1,h1,IPL_DEPTH_8U);
 	int y,p;
 	for(y = 0; y < (l1*h1); y++)
 	{
-		resultat1->imageData[y] = res[y];
+		resultat1.data[y] = res[y];
 	}
 
 	cvSmooth(resultat1, resultat1, CV_GAUSSIAN, 3, 7, 3, 0);
 	cvCanny(resultat1, resultat1, 20, 20 * 3, 3);
 	
 	uchar* ddata;
-	ddata = (uchar*) resultat1->imageData;
+	ddata = (uchar*) resultat1.data;
 
 	for (p = 0; p < (l1*h1); p++)
 	{
@@ -111,23 +111,23 @@ std::vector<ACMediaFeatures*> ACHuMomentsVideoPlugin::calculate(ACMediaData* _da
 	vector<float>time_stamps;
 	
 	cv::VideoCapture capture;
-	IplImage *img;
-	IplImage *resultat;
-	IplImage *frame;
-	IplImage *frame1;
+	cv::Mat img;
+	cv::Mat resultat;
+	cv::Mat frame;
+	cv::Mat frame1;
 
 	capture.open(aFileName.c_str());
-	int width = capture.get(CV_CAP_PROP_FRAME_WIDTH);
-	int height = capture.get(CV_CAP_PROP_FRAME_HEIGHT);
-	resultat = cvCreateImage(cvSize(width, height), IPL_DEPTH_8U, 1);
-	frame1 = cvCreateImage(cvSize(512, 512), IPL_DEPTH_8U, 1);
-	frame = cvCreateImage(cvSize(width, height), IPL_DEPTH_8U, 1);
+	int width = capture.get(cv::CAP_PROP_FRAME_WIDTH);
+	int height = capture.get(cv::CAP_PROP_FRAME_HEIGHT);
+	resultat = cv::Mat(width, height, IPL_DEPTH_8U);
+	frame1 = cv::Mat(512, 512, IPL_DEPTH_8U);
+	frame = cv::Mat(width, height, IPL_DEPTH_8U);
 
 	int p, n, j;
 	const int area = width*height;
 	float * data_in1 = (float*) malloc(area * sizeof (float));
 	uchar* ddata;
-	int nframe = (int) capture.get(CV_CAP_PROP_FRAME_COUNT);
+	int nframe = (int) capture.get(cv::CAP_PROP_FRAME_COUNT);
 
 	CvMoments myRawmoments;
 	CvHuMoments myHumoments;
@@ -147,12 +147,12 @@ std::vector<ACMediaFeatures*> ACHuMomentsVideoPlugin::calculate(ACMediaData* _da
 	/// end of new version
 	
 	for (j = 0; j < nframe; ++j) {
-		capture.set(CV_CAP_PROP_POS_FRAMES, j);
+		capture.set(cv::CAP_PROP_POS_FRAMES, j);
 		cvGrabFrame(capture);
 		img = cvRetrieveFrame(capture, 0);
-		cvCvtColor(img, frame, CV_BGR2GRAY);
-		cvResize(frame, frame1, CV_INTER_CUBIC);
-		ddata = (uchar*) frame1->imageData;
+		cvCvtColor(img, frame, cv::COLOR_BGR2GRAY);
+		cvResize(frame, frame1, cv::INTER_CUBIC);
+		ddata = (uchar*) frame1.data;
 
 		for (p = 0; p < area; p++) {
 			data_in1[p] = (float) ddata[p];
@@ -175,7 +175,7 @@ std::vector<ACMediaFeatures*> ACHuMomentsVideoPlugin::calculate(ACMediaData* _da
 		int x = 0;
 		//for (x = 0; x < (l * h); x++) {//old version
 		for (x = 0; x < (area); x++) {//new version	
-			resultat->imageData[x] = data_in1[x];
+			resultat.data[x] = data_in1[x];
 		}
 		cvMoments(resultat, &myRawmoments, 0);
 		cvGetHuMoments(&myRawmoments, &myHumoments);

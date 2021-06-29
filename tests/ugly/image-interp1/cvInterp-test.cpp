@@ -173,7 +173,7 @@ int main( int argc, char** argv )
 
     // Pre-process: resize, color transformation, convert double and normalize
     resize(src, src_resized,Size(200,200));
-    cvtColor(src_resized, ycbcr, CV_BGR2YCrCb);
+    cvtColor(src_resized, ycbcr, cv::COLOR_BGR2YCrCb);
     split( ycbcr, planes);
 
     int ymax = ycbcr.rows;
@@ -281,14 +281,14 @@ int main( int argc, char** argv )
     applyColorMap(TEST, TEST, COLORMAP_SUMMER);
 
     // Affichage
-/*    namedWindow("calcHist Demo", CV_WINDOW_AUTOSIZE );
+/*    namedWindow("calcHist Demo", cv::WINDOW_AUTOSIZE );
     imshow("calcHist Demo", histImage );
 
 
-    namedWindow("calcHist Demo1", CV_WINDOW_AUTOSIZE );
+    namedWindow("calcHist Demo1", cv::WINDOW_AUTOSIZE );
     imshow("calcHist Demo1", im_y_pyr[2] );*/
 
-    namedWindow("calcHist Demo2", CV_WINDOW_AUTOSIZE );
+    namedWindow("calcHist Demo2", cv::WINDOW_AUTOSIZE );
     imshow("calcHist Demo2", TEST );
 
     waitKey(0);

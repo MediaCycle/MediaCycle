@@ -58,7 +58,7 @@ public:
 	// the call must be 'getImage(0)'
 	// the result is undefined if the call to this method is not
 	// preceded by a call to "calculate()"
-	IplImage* getImage(int l);
+	cv::Mat getImage(int l);
 	
 	virtual double& operator()(uint x, uint y, uint c) {  return data_[c][y*xsize_+x];}
 

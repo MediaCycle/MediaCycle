@@ -116,8 +116,8 @@ int ACVideo::loadACLSpecific(ifstream &library_file) {
 	// XS removed this !
 //	if ((width == 16)&&(height == 16)){
 //		cv::VideoCapture* tmp(filename.c_str());	
-//		width = (int) tmp.get(CV_CAP_PROP_FRAME_WIDTH);
-//		height = (int) tmp.get(CV_CAP_PROP_FRAME_HEIGHT);
+//		width = (int) tmp.get(cv::CAP_PROP_FRAME_WIDTH);
+//		height = (int) tmp.get(cv::CAP_PROP_FRAME_HEIGHT);
 //		tmp.release();
 //		if ((width != 16)&&(height != 16))// if the image size isn't actually 64x64
 //			std::cout << "Please re-save your ACL library, old format with corrupted video size." << std::endl;
@@ -156,7 +156,7 @@ int ACVideo::loadXMLSpecific(TiXmlElement* _pMediaNode){
 	if (t < 0){
 		//throw runtime_error("corrupted XML file, wrong video frame rate");
         //cv::VideoCapture* capture = this->getData();
-        //this->end = (double) capture->get(CV_CAP_PROP_FRAME_COUNT) * 1.0/(float) capture->get(CV_CAP_PROP_FPS);
+        //this->end = (double) capture->get(cv::CAP_PROP_FRAME_COUNT) * 1.0/(float) capture->get(cv::CAP_PROP_FPS);
         if(this->getMediaData()==0){
             std::cerr << "ACVideo::loadXMLSpecific: no media data set" << std::endl;
             return false;
@@ -188,7 +188,7 @@ int ACVideo::loadXMLSpecific(TiXmlElement* _pMediaNode){
 	if (_fps < 0){
 		//throw runtime_error("corrupted XML file, wrong video frame rate");
         /*cv::VideoCapture* capture = this->getData();
-        this->fps = (float) capture->get(CV_CAP_PROP_FPS);*/
+        this->fps = (float) capture->get(cv::CAP_PROP_FPS);*/
         if(this->getMediaData()==0){
             std::cerr << "ACVideo::loadXMLSpecific: no media data set" << std::endl;
             return false;
