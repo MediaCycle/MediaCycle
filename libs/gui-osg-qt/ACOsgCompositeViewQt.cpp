@@ -57,6 +57,7 @@ using namespace osg;
 
 ACOsgCompositeViewQt::ACOsgCompositeViewQt( QWidget * parent, const char * name, const QGLWidget * shareWidget, WindowFlags f)
     : ACOsgQOpenGLWidget(0, parent), ACEventListener(), ACAbstractViewQt(), media_cycle(0),font(0),
+      browser_viewer(0),
       browser_renderer(0), browser_event_handler(0), timeline_renderer(0), timeline_event_handler(0), hud_renderer(0), hud_view(0),
       mousedown(0), borderdown(0),
       refx(0.0f), refy(0.0f),
@@ -78,25 +79,9 @@ ACOsgCompositeViewQt::ACOsgCompositeViewQt( QWidget * parent, const char * name,
     osg::setNotifyLevel(osg::DEBUG_INFO);
 // #endif
 
-    browser_viewer = new osgViewer::GraphicsWindowEmbedded(0,0,width(),height());
+    // browser_viewer = new osgViewer::GraphicsWindowEmbedded(0,0,width(),height());
 
     //QGLWidget::setFocusPolicy(Qt::StrongFocus);// CF instead of ClickFocus
-
-    // setThreadingModel(osgViewer::CompositeViewer::SingleThreaded);
-    /*
-  CF: other threading models to test are:
-   SingleThreaded
-   CullDrawThreadPerContext
-   ThreadPerContext
-   DrawThreadPerContext
-   CullThreadPerCameraDrawThreadPerContext
-   ThreadPerCamera
-   AutomaticSelection
-  */
-    //this->setRunFrameScheme( osgViewer::Viewer::ON_DEMAND );
-
-    // connect(&_timer, SIGNAL(timeout()), this, SLOT(updateGL()));
-    // _timer.start(10);
 
     // Share identical images between renderers
     //osgDB::Registry::instance()->setReadFileCallback( new ACOsgReadAndShareImageCallback);
@@ -138,10 +123,10 @@ ACOsgCompositeViewQt::ACOsgCompositeViewQt( QWidget * parent, const char * name,
     timeline_event_handler->setRenderer(timeline_renderer);
 
     // HUD renderer
-    hud_renderer->getCamera()->setGraphicsContext(this->getGraphicsWindow());
-    hud_view->setCamera(hud_renderer->getCamera());
-    this->updateHUDCamera(width(),height());
-    this->addView(hud_view);
+    // hud_renderer->getCamera()->setGraphicsContext(this->getGraphicsWindow());
+    // hud_view->setCamera(hud_renderer->getCamera());
+    // this->updateHUDCamera(width(),height());
+    // this->addView(hud_view);
 
     // Audio waveforms
     screen_width = QApplication::desktop()->screenGeometry().width();
@@ -164,17 +149,21 @@ ACOsgCompositeViewQt::ACOsgCompositeViewQt( QWidget * parent, const char * name,
 void ACOsgCompositeViewQt::initialize(){
     std::cout << "initialize" << std::endl;
 
+
+    browser_viewer = this->getCompositeViewer()->getGraphicsWindow();
+
     // Views
     
     browser_view = new osgViewer::View;
     browser_view->getCamera()->setGraphicsContext(this->getGraphicsWindow());
-    this->addOsgView(browser_view);
+    this->addOsgView(browser_view); // ACOsgQOpenGLWidget
+    // this->addView(browser_view);
     this->updateBrowserView(width(),height());
     
     timeline_view = new osgViewer::View;
     timeline_view->getCamera()->setGraphicsContext(this->getGraphicsWindow());
     this->updateTimelineView(width(),height());
-    this->addView(timeline_view);
+    this->addOsgView(timeline_view);
 
     // full screen antialiasing (if supported)
     //osg::DisplaySettings::instance()->setNumMultiSamples( 4 );
@@ -191,7 +180,7 @@ void ACOsgCompositeViewQt::initialize(){
     hud_renderer->getCamera()->setGraphicsContext(this->getGraphicsWindow());
     hud_view->setCamera(hud_renderer->getCamera());
     this->updateHUDCamera(width(),height());
-    this->addView(hud_view);
+    this->addOsgView(hud_view);
 
     // Audio waveforms
     screen_width = QApplication::desktop()->screenGeometry().width();
@@ -282,10 +271,10 @@ void ACOsgCompositeViewQt::dropEvent(QDropEvent *event)
 }
 
 
-void ACOsgCompositeViewQt::updateBrowserView(int _width, int _height){
+void ACOsgCompositeViewQt::updateBrowserView(double _width, double _height){
     if (browser_view){
         browser_view->getCamera()->setViewport(new osg::Viewport(0,sepy,_width,_height-sepy)); // CF: for OSG y=0 is on the bottom, for Qt on the top
-        browser_view->getCamera()->setProjectionMatrixAsPerspective(45.0f, static_cast<double>(width())/static_cast<double>(_height-sepy), 0.001f, 10.0f);
+        browser_view->getCamera()->setProjectionMatrixAsPerspective(45.0f, static_cast<double>(_width)/static_cast<double>(_height-sepy), 0.001f, 10.0f);
         browser_view->getCamera()->getViewMatrix().makeIdentity();
         browser_view->getCamera()->setViewMatrixAsLookAt(Vec3(0,0,0.8), Vec3(0,0,0), Vec3(0,1,0));
         //browser_view->getCamera()->setClearColor(Vec4f(0.0,0.0,0.0,0.0));
@@ -293,14 +282,14 @@ void ACOsgCompositeViewQt::updateBrowserView(int _width, int _height){
     }
 }
 
-void ACOsgCompositeViewQt::updateHUDCamera(int _width, int _height){
+void ACOsgCompositeViewQt::updateHUDCamera(double _width, double _height){
     if(hud_view){
         hud_view->getCamera()->setViewport(new osg::Viewport(0,sepy,_width,_height)); // CF: for OSG y=0 is on the bottom, for Qt on the top
         hud_view->getCamera()->setProjectionMatrix(osg::Matrix::ortho2D(0,_width, 0, _height));
     }
 }
 
-void ACOsgCompositeViewQt::updateTimelineView(int _width, int _height){
+void ACOsgCompositeViewQt::updateTimelineView(double _width, double _height){
     if (timeline_view){
         //timeline_view->getCamera()->setClearColor(Vec4f(0.0,0.0,0.0,0.0));
         timeline_view->getCamera()->setClearColor(Vec4f(0.14,0.14,0.28,1.0));
@@ -412,26 +401,28 @@ void ACOsgCompositeViewQt::initFont()
 
 void ACOsgCompositeViewQt::resizeGL( int w, int h )
 {
-    double x = QGuiApplication::primaryScreen()->physicalDotsPerInchX();
-    double y = QGuiApplication::primaryScreen()->physicalDotsPerInchY();
-    // values 284 and 285 are the reference values
-    scaleX = 284.0/double(x);
-    scaleY = 285.0/double(y);
+    ACOsgQOpenGLWidget::resizeGL(w,h);
+
+    int devicePixelRatio = QApplication::desktop()->devicePixelRatio();
+    scaleX = devicePixelRatio;
+    scaleY = devicePixelRatio;
 
     w*=scaleX;
     h*=scaleY;
 
-    if (isRealized()){
+    if (getGraphicsWindow() && getGraphicsWindow()->isRealized()){
         //std::cout << "height() " << browser_view->getCamera()->getViewport()->height()+timeline_view->getCamera()->getViewport()->height() << " height " << height << std::endl;
         float prevheight = browser_view->getCamera()->getViewport()->height()+timeline_view->getCamera()->getViewport()->height();
         sepy *= h/prevheight;
         timeline_renderer->updateSize(width(),sepy);
     }
 
-    browser_viewer->getEventQueue()->windowResize(0, 0, w, h);
-    browser_viewer->resized(0,0,w,h);
+    // if(browsegetGraphicsWindow() && getGraphicsWindow()->r_viewer){
+    //     browser_viewer->getEventQueue()->windowResize(0, 0, w, h);
+    //     browser_viewer->resized(0,0,w,h);
+    // }
 
-    if (isRealized()){
+    if (getGraphicsWindow() && getGraphicsWindow()->isRealized()){
         this->updateBrowserView(w,h);
         this->updateTimelineView(w,h);
         this->updateHUDCamera(w,h);
@@ -450,6 +441,16 @@ void ACOsgCompositeViewQt::resizeGL( int w, int h )
    */
     }
 }
+
+osgViewer::GraphicsWindow* ACOsgCompositeViewQt::getGraphicsWindow()
+{ 
+    return browser_viewer; 
+}
+
+// const osgViewer::GraphicsWindow* ACOsgCompositeViewQt::getGraphicsWindow() const
+// { 
+//     return browser_viewer;
+// }
 
 // CF to do: understand paintGL vs updateGL to use them more correctly
 void ACOsgCompositeViewQt::paintGL()
@@ -480,12 +481,12 @@ void ACOsgCompositeViewQt::paintGL()
     // updateTransformsFromBrowser(media_cycle->getFrac());
 }
 
-int ACOsgCompositeViewQt::height()
+double ACOsgCompositeViewQt::height()
 { 
     return scaleY*QWidget::height(); 
 }
 
-int ACOsgCompositeViewQt::width()
+double ACOsgCompositeViewQt::width()
 { 
     return scaleX*QWidget::width(); 
 }
@@ -854,7 +855,7 @@ void ACOsgCompositeViewQt::changeReferenceNode(){
 
 void ACOsgCompositeViewQt::toggleMediaHover(bool toggle){
     if (media_cycle == 0) return;
-    //std::cout << "Toggle Media hover " << toggle << std::endl;
+    std::cout << "Toggle Media hover " << toggle << std::endl;
     media_cycle->setAutoPlay(toggle);
 }
 
@@ -1039,6 +1040,7 @@ void ACOsgCompositeViewQt::keyPressEvent( QKeyEvent* event )
 {
     this->propagateEventToActions(event);
     if (media_cycle == 0) return;
+    ACOsgQOpenGLWidget::keyPressEvent(event);
     browser_view->getEventQueue()->keyPress( (osgGA::GUIEventAdapter::KeySymbol) *(event->text().toStdString().data() ) );
 }
 
@@ -1046,11 +1048,13 @@ void ACOsgCompositeViewQt::keyReleaseEvent( QKeyEvent* event )
 {
     this->propagateEventToActions(event);
     if (media_cycle == 0) return;
+    ACOsgQOpenGLWidget::keyReleaseEvent(event);
     browser_view->getEventQueue()->keyRelease( (osgGA::GUIEventAdapter::KeySymbol) *(event->text().toStdString().data() ) );
 }
 
 void ACOsgCompositeViewQt::mousePressEvent( QMouseEvent* event )
 {
+    ACOsgQOpenGLWidget::mousePressEvent(event);
     int button = 0;
     mousedown = 1;
     switch(event->button())
@@ -1062,7 +1066,8 @@ void ACOsgCompositeViewQt::mousePressEvent( QMouseEvent* event )
     default: button = 0; break;
     }
     //this->propagateEventToActions(event);
-    browser_view->getEventQueue()->mouseButtonPress(event->x(), event->y(), button);
+    browser_view->getEventQueue()->mouseButtonPress(event->x() * scaleX, event->y() * scaleY, button);
+
     //std::cout << "ACOsgCompositeViewQt::mousePressEvent clicked node " << media_cycle->getClickedNode() << std::endl;
     //browser_view->getEventQueue()->mouseButtonPress(event->x(), event->y()-sepy, button);
 
@@ -1096,6 +1101,7 @@ void ACOsgCompositeViewQt::mousePressEvent( QMouseEvent* event )
 
 void ACOsgCompositeViewQt::mouseMoveEvent( QMouseEvent* event )
 {
+    ACOsgQOpenGLWidget::mouseMoveEvent(event);
     //CF disabling drag temporarily
     /*if (media_cycle&&event->buttons() ){
 
@@ -1142,7 +1148,7 @@ void ACOsgCompositeViewQt::mouseMoveEvent( QMouseEvent* event )
     case(Qt::NoButton): button = 0; break;
     default: button = 0; break;
     }
-    browser_view->getEventQueue()->mouseMotion(event->x(), event->y());
+    browser_view->getEventQueue()->mouseMotion( event->x() * scaleX, event->y() * scaleY);
     if (media_cycle == 0) return;
 
     float zoom, angle;
@@ -1172,6 +1178,7 @@ void ACOsgCompositeViewQt::mouseMoveEvent( QMouseEvent* event )
 
 void ACOsgCompositeViewQt::mouseReleaseEvent( QMouseEvent* event )
 {
+    ACOsgQOpenGLWidget::mouseReleaseEvent(event);
     dragFlag=false;
     int button = 0;
     switch(event->button())
@@ -1183,15 +1190,45 @@ void ACOsgCompositeViewQt::mouseReleaseEvent( QMouseEvent* event )
     default: button = 0; break;
     }
     this->propagateEventToActions(event);
-    browser_view->getEventQueue()->mouseButtonRelease(event->x(), event->y(), button);
+    browser_view->getEventQueue()->mouseButtonRelease(event->x() * scaleX, event->y() * scaleY, button);
     //std::cout << "ACOsgCompositeViewQt::mouseReleaseEvent clicked node " << media_cycle->getClickedNode() << std::endl;
     if (media_cycle == 0) return;
     if (media_cycle->getClickedNode()>-1)
         media_cycle->setClickedNode(-1);
-    std::cout << "mouseReleaseEvent clicked node erased " << std::endl;
+    // std::cout << "mouseReleaseEvent clicked node erased " << std::endl;
     mousedown = 0;
     borderdown = 0;
     media_cycle->setNeedsDisplay(true);
+}
+
+void ACOsgCompositeViewQt::mouseDoubleClickEvent(QMouseEvent* event)
+{
+    //ACOsgQOpenGLWidget::mouseDoubleClickEvent(event);
+    int button = 0;
+
+    switch(event->button())
+    {
+    case Qt::LeftButton:
+        button = 1;
+        break;
+
+    case Qt::MidButton:
+        button = 2;
+        break;
+
+    case Qt::RightButton:
+        button = 3;
+        break;
+
+    case Qt::NoButton:
+        button = 0;
+        break;
+
+    default:
+        button = 0;
+        break;
+    }
+
 }
 
 // bool ACOsgCompositeViewQt::event(QEvent *event)

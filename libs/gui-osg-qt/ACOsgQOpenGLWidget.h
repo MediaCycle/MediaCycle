@@ -61,6 +61,8 @@ protected:
     //! call createRender. If overloaded, this method must send initialized signal at end
     void initializeGL() override; // so that we can call our own createRenderer()
 
+    void resizeGL(int w, int h) override;
+
     //! lock scene graph and call osgViewer::frame()
     void paintGL() override;
 

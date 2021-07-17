@@ -98,6 +98,17 @@ void ACOsgQOpenGLWidget::initializeGL()
     emit initialized();
 }
 
+void ACOsgQOpenGLWidget::resizeGL(int w, int h)
+{
+    Q_ASSERT(m_renderer);
+    QScreen* screen = windowHandle()
+                      && windowHandle()->screen() ? windowHandle()->screen() :
+                      qApp->screens().front();
+
+    ACOsgQtRenderer* _renderer = dynamic_cast<ACOsgQtRenderer*>(m_renderer);
+    if (_renderer) _renderer->resize(w, h, screen->devicePixelRatio());
+}
+
 void ACOsgQOpenGLWidget::paintGL()
 {
     OpenThreads::ScopedReadLock locker(_osgMutex);
@@ -127,5 +138,7 @@ void ACOsgQOpenGLWidget::createRenderer()
 	QScreen* screen = windowHandle()
                       && windowHandle()->screen() ? windowHandle()->screen() :
                       qApp->screens().front();
-    m_renderer->setupOSG(width(), height(), screen->devicePixelRatio());
+    
+    ACOsgQtRenderer* _renderer = dynamic_cast<ACOsgQtRenderer*>(m_renderer);
+    if (_renderer) _renderer->setupOSG(width(), height(), screen->devicePixelRatio());
 }

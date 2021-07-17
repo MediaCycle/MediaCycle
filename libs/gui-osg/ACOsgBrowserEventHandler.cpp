@@ -167,7 +167,7 @@ void ACOsgBrowserEventHandler::clickNode(osgViewer::View* view, const osgGA::GUI
 	float y = ea.getY();
     
 	float xx = ea.getXnormalized();
-	float yy = ea.getYnormalized();
+	float yy = -ea.getYnormalized();
     
 	//printf("pick (%f, %f)\n", x, y);
     
@@ -243,7 +243,7 @@ void ACOsgBrowserEventHandler::pick(osgViewer::View* view, const osgGA::GUIEvent
 	float y = ea.getY();
 
 	float xx = ea.getXnormalized();
-	float yy = ea.getYnormalized();
+	float yy = -ea.getYnormalized();
 
 	//printf("pick (%f, %f)\n", x, y);
 

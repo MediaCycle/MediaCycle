@@ -66,7 +66,9 @@ using Qt::WindowFlags;
 #include <ACInputActionQt.h>
 #include <ACAbstractViewQt.h>
 
-class ACOsgCompositeViewQt : public ACOsgQOpenGLWidget, public osgViewer::CompositeViewer, public ACEventListener, public ACAbstractViewQt
+class ACOsgCompositeViewQt : public ACOsgQOpenGLWidget, 
+// public osgViewer::CompositeViewer, 
+public ACEventListener, public ACAbstractViewQt
 {
     Q_OBJECT
 
@@ -100,28 +102,29 @@ public slots:
 public:
     ACOsgCompositeViewQt( QWidget * parent = 0, const char * name = 0, const QGLWidget * shareWidget = 0, WindowFlags f = 0 );
     ~ACOsgCompositeViewQt();
-    virtual void clean(/*bool updategl=true*/);
-    osgViewer::GraphicsWindow* getGraphicsWindow() { return browser_viewer; }//.get(); }
-    const osgViewer::GraphicsWindow* getGraphicsWindow() const { return browser_viewer; }//.get(); }
+    virtual void clean(/*bool updategl=true*/) override;
+    osgViewer::GraphicsWindow* getGraphicsWindow();
+    // const osgViewer::GraphicsWindow* getGraphicsWindow();
     void paintGL() override;
-    int width();
-    int height();
+    double width();
+    double height();
 
 protected:
-    void dragEnterEvent(QDragEnterEvent *event);
-    void dropEvent(QDropEvent *event);
+    void dragEnterEvent(QDragEnterEvent *event) override;
+    void dropEvent(QDropEvent *event) override;
     virtual void initFont();
     // virtual void initializeGL();
     void resizeGL(int w, int h) override;
     virtual void updateGL();
     //virtual bool event( QEvent* event );
     void propagateEventToActions( QEvent* event );
-    virtual void keyPressEvent( QKeyEvent* event );
-    virtual void keyReleaseEvent( QKeyEvent* event );
-    virtual void mousePressEvent( QMouseEvent* event );
-    virtual void mouseReleaseEvent( QMouseEvent* event );
-    virtual void mouseMoveEvent( QMouseEvent* event );
-    osg::ref_ptr<osgViewer::GraphicsWindowEmbedded> browser_viewer;
+    virtual void keyPressEvent( QKeyEvent* event ) override;
+    virtual void keyReleaseEvent( QKeyEvent* event ) override;
+    virtual void mousePressEvent( QMouseEvent* event ) override;
+    virtual void mouseReleaseEvent( QMouseEvent* event ) override;
+    virtual void mouseDoubleClickEvent(QMouseEvent* event) override;
+    virtual void mouseMoveEvent( QMouseEvent* event ) override;
+    osg::ref_ptr<osgViewer::GraphicsWindow> browser_viewer;
     QTimer _timer;
 
 protected:
@@ -159,34 +162,34 @@ private:
 
     void initInputActions();
 public:
-    virtual void addInputAction(ACInputActionQt* _action);
+    virtual void addInputAction(ACInputActionQt* _action) override;
 
     // MediaCycle listener callback
-    virtual void pluginLoaded(std::string plugin_name);
-    void mediaImported(int n,int nTot,int mId);
+    virtual void pluginLoaded(std::string plugin_name) override;
+    void mediaImported(int n,int nTot,int mId) override;
 
 private:
-    void updateBrowserView(int width, int height);
-    void updateHUDCamera(int width, int height);
-    void updateTimelineView(int width, int height);
+    void updateBrowserView(double width, double height);
+    void updateHUDCamera(double width, double height);
+    void updateTimelineView(double width, double height);
 
 public:
     // needs to be called when medias are added or removed
-    virtual void prepareBrowser();
+    virtual void prepareBrowser() override;
     // needs to be called when node positions are changed
     void updateTransformsFromBrowser( double frac);
-    void setMediaCycle(MediaCycle* _media_cycle);
+    void setMediaCycle(MediaCycle* _media_cycle) override;
     // needs to be called when tracks are added or removed
-    virtual void prepareTimeline();
+    virtual void prepareTimeline() override;
     // needs to be called when tracks positions are changed
     void updateTransformsFromTimeline( double frac);
     ACOsgBrowserRenderer* getBrowserRenderer(){return browser_renderer;}
     ACOsgHUDRenderer* getHUDRenderer(){return hud_renderer;}
-    ACOsgTimelineRenderer* getTimelineRenderer(){return timeline_renderer;}
-    virtual ACAbstractBrowserRenderer* getBrowser(){return browser_renderer;}
-    virtual ACAbstractTimelineRenderer* getTimeline(){return timeline_renderer;}
-    virtual bool isLibraryLoaded(){return library_loaded;}
-    virtual void setLibraryLoaded(bool load_status){library_loaded = load_status;}
+    ACOsgTimelineRenderer* getTimelineRenderer() {return timeline_renderer;}
+    virtual ACAbstractBrowserRenderer* getBrowser() override {return browser_renderer;}
+    virtual ACAbstractTimelineRenderer* getTimeline() override {return timeline_renderer;}
+    virtual bool isLibraryLoaded() override {return library_loaded;}
+    virtual void setLibraryLoaded(bool load_status) override {library_loaded = load_status;}
 
 private:
     int mousedown, borderdown;
@@ -212,7 +215,7 @@ private:
 protected:
     ACSettingType setting;
 public:
-    virtual void changeSetting(ACSettingType _setting);
+    virtual void changeSetting(ACSettingType _setting) override;
 //CF signals:
 //    void importDirectoriesThreaded(std::vector<std::string> directories,bool flag);
 };

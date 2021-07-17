@@ -33,16 +33,26 @@
 *
 */
 
+#ifndef HEADER_AC_OSG_QT_RENDERER
+#define HEADER_AC_OSG_QT_RENDERER
+
 #include <osgQOpenGL/OSGRenderer>
 #include <osgViewer/CompositeViewer>
 
-#ifndef HEADER_AC_OSG_QT_RENDERER
-#define HEADER_AC_OSG_QT_RENDERER
+class QInputEvent;
+class QKeyEvent;
+class QMouseEvent;
+class QWheelEvent;
 
 class ACOsgQtRenderer : 
 // public QObject, 
 public OSGRenderer, public osgViewer::CompositeViewer
 {
+    bool                                       m_osgInitialized {false};
+    osg::ref_ptr<osgViewer::GraphicsWindow>    m_osgWinEmb;
+    float                                      m_windowScale {1.0f};
+
+    int                                        _timerId{0};
     osg::Timer                                 _lastFrameStartTime;
 
 public:
@@ -51,16 +61,31 @@ public:
 
     ~ACOsgQtRenderer() override;
 
+    virtual void keyPressEvent(QKeyEvent* event) override;
+    virtual void keyReleaseEvent(QKeyEvent* event) override;
+    virtual void mousePressEvent(QMouseEvent* event) override;
+    virtual void mouseReleaseEvent(QMouseEvent* event) override;
+    virtual void mouseDoubleClickEvent(QMouseEvent* event) override;
+    virtual void mouseMoveEvent(QMouseEvent* event) override;
+    virtual void wheelEvent(QWheelEvent* event) override;
+
+    virtual void resize(int windowWidth, int windowHeight, float windowScale) override;
+
     void setupOSG(int windowWidth, int windowHeight, float windowScale);
+
+    osg::ref_ptr<osgViewer::GraphicsWindow> getGraphicsWindow(){return m_osgWinEmb;}
 
     // overrided from osgViewer::ViewerBase
     void frame(double simulationTime = USE_REFERENCE_TIME) override;
 
-    virtual osg::Object* clone(const osg::CopyOp& obj) const {return osgViewer::CompositeViewer::clone(obj);}
-    virtual bool isSameKindAs(const osg::Object* obj) const {return osgViewer::CompositeViewer::isSameKindAs(obj);}
-    virtual const char* libraryName() const {return osgViewer::CompositeViewer::libraryName();}
-    virtual const char* className() const {return osgViewer::CompositeViewer::className();}
-    virtual osg::Object* cloneType() const  {return osgViewer::CompositeViewer::cloneType();}
+    virtual osg::Object* clone(const osg::CopyOp& obj) const override {return osgViewer::CompositeViewer::clone(obj);}
+    virtual bool isSameKindAs(const osg::Object* obj) const override {return osgViewer::CompositeViewer::isSameKindAs(obj);}
+    virtual const char* libraryName() const override {return osgViewer::CompositeViewer::libraryName();}
+    virtual const char* className() const override {return osgViewer::CompositeViewer::className();}
+    virtual osg::Object* cloneType() const override {return osgViewer::CompositeViewer::cloneType();}
+
+protected:
+    void setKeyboardModifiers(QInputEvent* event);
 
 };
 
