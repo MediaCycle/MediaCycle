@@ -1377,7 +1377,7 @@ IF (ARMADILLO_FOUND)
 		INCLUDE_DIRECTORIES(${LIBXML2_INCLUDE_DIR})
 		# c++11 support required by mlpack 2.x for unordered maps
 		SET(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -std=c++11")
-		SET(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -std=c++11")
+		#SET(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -std=c++11")
 	ENDIF()
 ELSE (ARMADILLO_FOUND)
 	MESSAGE(FATAL_ERROR "Armadillo not found.")
