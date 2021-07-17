@@ -656,6 +656,7 @@ int ACAvailablePlugins<T>::clean() {
         iter_map->second.clear(); //to clean
     }
     this->mCurrPlugin.clear(); // to clean
+    return 1;
 }
 
 template <typename T>
