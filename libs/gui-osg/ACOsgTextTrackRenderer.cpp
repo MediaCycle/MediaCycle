@@ -40,6 +40,7 @@
 #include <sstream>
 #include <osg/Version>
 #include <textFile.h>
+#include <osg/Notify>
 
 namespace fs = boost::filesystem;
 
@@ -83,18 +84,20 @@ void ACOsgTextTrackRenderer::textGeode() {
     text->setFontResolution(textCharacterSize,textCharacterSize);
     text->setAlignment( osgText::Text::LEFT_TOP);
     text->setDrawMode(osgText::Text::TEXT);
-
+    
     if(media){
-        std::string* string = 0;
-        string = textFileRead(media->getFileName());//TR to replace to adapt to Navimed and archipel
-        if(string)
-            text->setText(*string,osgText::String::ENCODING_UTF8);
+        //string = textFileRead(media->getFileName());//TR to replace to adapt to Navimed and archipel
+        utf8_string=media->getTextMetaData();
+        //utf8_string=string("test\ntest\ntest\ntest\ntest\ntest\ntest\ntest");
+        if(utf8_string!=std::string(""))
+            text->setText(utf8_string,osgText::String::ENCODING_UTF8);
         else
             std::cerr << "ACOsgTextTrackRenderer::textGeode text failed" << std::endl;
     }
+    std::cout<<text->getText().createUTF8EncodedString()<<std::endl;
     text->setMaximumWidth(width/xspan);
-    text_geode->addDrawable(text);
-    text_transform->addChild(text_geode);
+    bool test=text_geode->addDrawable(text);
+     test=text_transform->addChild(text_geode);
 }
 
 void ACOsgTextTrackRenderer::prepareTracks() {
@@ -114,7 +117,6 @@ void ACOsgTextTrackRenderer::prepareTracks() {
 }
 
 void ACOsgTextTrackRenderer::updateTracks(double ratio) {
-
     if (media_changed)
     {
         if(text_transform)
@@ -130,6 +132,8 @@ void ACOsgTextTrackRenderer::updateTracks(double ratio) {
             text=0;
             textGeode();
         }
+        std::cout<<"test2:"<<text->getText().createUTF8EncodedString()<<std::endl;
+        
         track_node->addChild(text_transform);
     }
 
@@ -187,5 +191,6 @@ void ACOsgTextTrackRenderer::updateTracks(double ratio) {
     selection_begin_pos_changed = false;
     selection_end_pos_changed = false;
     selection_center_pos_changed = false;
+    
 }
 #endif //defined (SUPPORT_TEXT)

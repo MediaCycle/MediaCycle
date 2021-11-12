@@ -43,6 +43,7 @@ class NavimedMediaDocument: public ACMediaDocument{
 public:
 	NavimedMediaDocument();
 	int import(std::string _filename, int _mid=0, ACPluginManager *acpl=0, bool _save_timed_feat=false);
+    virtual std::string getTextMetaData(){return (activeMedia? activeMedia->getTextMetaData():std::string("")); };
 };
 
 

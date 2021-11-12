@@ -182,7 +182,11 @@ void recursXmlParser(TiXmlNode* parent,string* out,string encoding){
 	while( child = parent->IterateChildren( child ) ){
 		TiXmlText* tempText=child->ToText();
 		if (tempText){
-			std::string utf8_string = conv::to_utf<char>(tempText->ValueStr(),encoding);
+            std::string utf8_string ;
+            if (encoding!=string("UTF-8"))
+                 utf8_string = conv::to_utf<char>(tempText->ValueStr(),encoding);
+            else
+                utf8_string=tempText->ValueStr();
 			(*out)+=utf8_string+string(" ");
 		}
 		recursXmlParser(child,out,encoding);

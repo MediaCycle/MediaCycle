@@ -1,5 +1,9 @@
 # Core dependency
 #add_subdirectory(armadillo-utils) #done by the root CMakeLists.txt
+IF ( ARMADILLO_FOUND )
+	add_subdirectory(armadillo-isomap)
+ENDIF()
+
 
 # audioengine (currently required by gui and osc)
 IF(SUPPORT_AUDIO AND SNDFILE_FOUND AND (OPENAL_FOUND OR PORTAUDIO_FOUND))

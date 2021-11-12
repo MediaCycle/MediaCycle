@@ -60,6 +60,7 @@ public:
 	std::map<std::string,float> *getBioParam(void);
 	std::string getReference(void); // getLaMediathequeReference
 	std::vector<std::string> getRadiosName(void);
+    std::string getMetaData();
 	std::string getThumbPath(void);
 	
     //std::string getArtistType(void); // info>type -> ex: solo

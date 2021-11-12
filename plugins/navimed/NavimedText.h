@@ -60,6 +60,8 @@ private:
 public:
 	NavimedText();	
 	bool extractData(std::string fname);
+    virtual std::string getTextMetaData();
+	
 	
 };
 

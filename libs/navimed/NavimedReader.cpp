@@ -224,6 +224,52 @@ vector<std::string> navimedReader::getRadiosName(void){
 	return ret;
 }
 
+std::string navimedReader::getMetaData(){
+    if (this->isNavimedBiology()){
+        string ret;
+        TiXmlNode* child= mDoc->FirstChild("XMLResult" );
+        TiXmlText* textChild;
+        
+        for( child = child->FirstChild(string("XMLEncodedValue")); child; child = child->NextSibling(string("XMLEncodedValue")) ){
+            if (child->FirstChild(string("libelle"))==0)
+                continue;
+            if (child->FirstChild(string("libelle"))->FirstChild()==0)
+                continue;
+            if (child->FirstChild(string("libelle"))->FirstChild()->ToText()==0)
+                continue;
+            float paramValue;
+            ret+=std::string("\t");
+            ret+= conv::to_utf<char>(child->FirstChild(string("libelle"))->FirstChild()->ToText()->ValueStr(),mEncoding);
+            ret+=std::string(" ");
+            if (child->FirstChild(string("indice"))!=0){
+                ret+=child->FirstChild(string("indice"))->FirstChild()->ToText()->ValueStr();
+            }
+            else{
+                ret+=std::string("0");
+            }
+            ret+=std::string("\n");
+        }
+        return ret;
+        
+    }
+    else{
+        if (this->isNavimedRadiography()){
+            string ret;
+            ret=this->getDescription();
+            ret+=std::string("\n");
+            ret+=this->getText();
+            
+            
+            return ret;
+            
+        }
+        else{
+            return std::string("");
+        }
+    }
+    
+}
+
 std::string navimedReader::getThumbPath(void){
 	string ret;
 	TiXmlHandle docHandle( mDoc );

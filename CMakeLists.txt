@@ -25,7 +25,6 @@ ENDIF()
 #MESSAGE("Current MC revision: ${MediaCycle_VERSION}")
 SET(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -DMC_VERSION=${MediaCycle_VERSION}")
 SET(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -DMC_VERSION=${MediaCycle_VERSION}")
-
 INCLUDE(${MediaCycle_SOURCE_DIR}/CMakeModules/FindLinkedDirectories.cmake)
 
 cmake_minimum_required(VERSION 2.6.2)
@@ -172,7 +171,7 @@ OPTION(BUILD_TEXTCYCLE_APP "Build TextCycle app" OFF)
 OPTION(BUILD_VIDEOCYCLE_APP "Build VideoCycle app" OFF)
 OPTION(BUILD_CLIS "Build command-line interface applications" ON)	
 OPTION(USE_SDIF "Use SDIF" OFF)
-OPTION(BUILD_DOCUMENTATION "Build MediaCycle reference documentation using doxygen (use: make documentation)" OFF)
+OPTION(BUILD_DOCUMENTATION "Build MediaCycle reference documentation using doxygen (use: make documentation)" ON)
 
 # Current working config for cross-compiling with MXE
 IF(MINGW AND CMAKE_TOOLCHAIN_FILE)

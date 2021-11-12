@@ -8,7 +8,7 @@
 #if LIBAVCODEC_VERSION_MAJOR >= 53
 extern "C"
 {
-    #include <parseutils.h>
+    #include <libavutil/parseutils.h>
 }
 #define av_parse_video_frame_size av_parse_video_size
 #define av_parse_video_frame_rate av_parse_video_rate
@@ -19,7 +19,7 @@ extern "C"
 
     extern "C"
     {
-        #include <pixdesc.h>
+        #include <libavutil/pixdesc.h>
     }
     
     inline PixelFormat osg_av_get_pix_fmt(const char *name) { return av_get_pix_fmt(name); }

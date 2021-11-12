@@ -59,9 +59,9 @@ ACOsgMediaRenderer::ACOsgMediaRenderer() {
     node_color = Vec4(1,1,0.5,1); //CF seminal yellow
     cluster_colors.push_back(osg::Vec4(1,1,0.5,1));
     cluster_colors.push_back(osg::Vec4(1,0.5,1,1));
+    cluster_colors.push_back(osg::Vec4(0.5,1,0.5,1));
     cluster_colors.push_back(osg::Vec4(0.5,1,1,1));
     cluster_colors.push_back(osg::Vec4(1,0.5,0.5,1));
-    cluster_colors.push_back(osg::Vec4(0.5,1,0.5,1));
     neighbor_color = Vec4(1,1,1,1);
     user_defined_color = false;
 
@@ -144,6 +144,7 @@ void ACOsgMediaRenderer::metadataGeode() {
     if(media->getLabel() != ""){
         content << " - Label: " << media->getLabel();
     }
+    std::cout<<content.str()<<std::endl;
     metadata->setText( content.str() );
 
     //state = text_geode->getOrCreateStateSet();

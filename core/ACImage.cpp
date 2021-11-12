@@ -36,6 +36,7 @@
 
 #include "ACImage.h"
 #include <fstream>
+#include <osgDB/FileNameUtils>
 #include <osg/ImageUtils>
 #include <boost/filesystem.hpp>
 
@@ -119,10 +120,13 @@ bool ACImage::computeThumbnail(IplImage* img, int w, int h){
     //this->thumbnail = this->openCVToOSG(img,thumbnail_width,thumbnail_height);
 
     // option 3) using OSG -- with ref_ptr to ensure proper garbage collection
-    osg::ref_ptr<osgDB::ReaderWriter> readerWriter = osgDB::Registry::instance()->getReaderWriterForExtension(boost::filesystem::extension(filename).substr(1));
+    string extension=boost::filesystem::extension(filename).substr(1);
+    
+    std::string ext = osgDB::getFileExtension( filename );
+    osg::ref_ptr<osgDB::ReaderWriter> readerWriter = osgDB::Registry::instance()->getReaderWriterForExtension(ext);
 
     if (!readerWriter){
-        cerr << "<ACImage::computeThumbnail> (image id = " << this->getId() << ") : problem loading file, no OSG plugin available" << endl;
+        cerr << "<ACImage::computeThumbnail> (image id = " << this->getId() << ") : problem loading file, no OSG plugin available for "<<ext << endl;
         return false;
     }
     else{

@@ -65,8 +65,10 @@ public:
 #ifdef USE_AV_LOCK_MANAGER
         // enable thread locking
 		#ifdef __APPLE__
+            #ifndef __clang__
 		av_lockmgr_register(&lockMgr);
-		#endif
+            #endif
+        #endif
 #endif
         // Register all FFmpeg formats/codecs
         av_register_all();

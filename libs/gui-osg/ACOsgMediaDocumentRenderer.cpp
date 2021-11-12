@@ -231,9 +231,9 @@ void ACOsgMediaDocumentRenderer::updateNodes(double ratio) {
                 const vector<int> centerNodeIds=media_cycle->getBrowser()->getIdNodeClusterCenter();
                 if(cluster_colors.size()>0){
                     ((ShapeDrawable*)entry_geode->getDrawable(0))->setColor(cluster_colors[attribute->getClusterId()%cluster_colors.size()]);
-                    if(centerNodeIds.size() != 0 && attribute->getClusterId() < centerNodeIds.size())
-                        if (centerNodeIds[attribute->getClusterId()]==attribute->getMediaId())
-                            ((ShapeDrawable*)entry_geode->getDrawable(0))->setColor(osg::Vec4(0,0,0,1));
+                  //  if(centerNodeIds.size() != 0 && attribute->getClusterId() < centerNodeIds.size())
+                    //    if (centerNodeIds[attribute->getClusterId()]==attribute->getMediaId())
+                      //      ((ShapeDrawable*)entry_geode->getDrawable(0))->setColor(osg::Vec4(0,0,0,1));
                 }
             }
             //			((ShapeDrawable*)entry_geode->getDrawable(0))->setColor(cluster_colors[attribute->getClusterId()%cluster_colors.size()]);
@@ -251,7 +251,7 @@ void ACOsgMediaDocumentRenderer::updateNodes(double ratio) {
             T =  Matrix::rotate(-media_cycle_angle,Vec3(0.0,0.0,1.0)) * Matrix::scale(localscale/media_cycle_zoom,localscale/media_cycle_zoom,localscale/media_cycle_zoom) * T;
         }
 
-
+        
         if (attribute->getActivity()>=2){//hover
             std::vector<ACMedia*> tmpSegments;
             tmpSegments = media->getAllSegments();

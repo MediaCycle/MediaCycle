@@ -1,7 +1,7 @@
 /**
  * @brief ACVisPlugin2Desc.cpp
- * @author Christian Frisson
- * @date 03/08/2012
+ * @author Thierry Ravet
+ * @date 12/11/2012
  * @copyright (c) 2012 – UMONS - Numediart
  * 
  * MediaCycle of University of Mons – Numediart institute is 
@@ -115,7 +115,7 @@ void ACVisPlugin2Desc::updateNextPositions(ACMediaBrowser* mediaBrowser){
         std::cout << "Not enough features for this display" << std::endl;
         ACPoint p;
         for (int i=0; i<ids.size(); i++){
-            mediaBrowser->setMediaNodeDisplayed(ids[i], true);
+            //mediaBrowser->setMediaNodeDisplayed(ids[i], true);
             // TODO: make sure you meant next
             p.x = 0.f;//posDisp_m(i,0);
             p.y = 0.f;//posDisp_m(i,1);
@@ -133,7 +133,7 @@ void ACVisPlugin2Desc::updateNextPositions(ACMediaBrowser* mediaBrowser){
 
     ACPoint p;
     for (int i=0; i<ids.size(); i++){
-        mediaBrowser->setMediaNodeDisplayed(ids[i], true);
+        //mediaBrowser->setMediaNodeDisplayed(ids[i], true);
         // TODO: make sure you meant next
         p.x = desc_m(i,0)*.1;
         p.y = desc_m(i,1)*.1;

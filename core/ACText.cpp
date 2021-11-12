@@ -84,6 +84,21 @@ bool ACText::extractData(string fname){
 	//height = thumbnail_height;
 	return true;
 }
+std::string ACText::getTextMetaData(){
+    string ret;
+    if (data==0){
+        this->extractData(filename);
+        if (data!=0)
+            ret=(*((string*)data->getData()));
+        this->deleteData();
+    }
+    else{
+        ret=(*((string*)data->getData()));
+    }
+    return ret;
+    
+}
+
 
 void* ACText::getThumbnailPtr(){
 	return 0;

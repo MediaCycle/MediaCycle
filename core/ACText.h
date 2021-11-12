@@ -58,6 +58,8 @@ public:
 	bool extractData(std::string fname);
 	ACMediaData* getMediaData(){return data;} // XS TODO : needs dynamic_cast<ACMediaData*> (data) ??;
 	
+    virtual std::string getTextMetaData();
+
 	void* getThumbnailPtr();
 	void setDocIndex(int pDocIndex){docIndex=pDocIndex;}
 	int getDocIndex(void){return docIndex;}

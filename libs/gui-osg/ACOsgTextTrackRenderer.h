@@ -54,6 +54,7 @@ protected:
 
     void textGeode();
     bool isSliderVisible;
+    std::string utf8_string ;
 
 public:
     ACOsgTextTrackRenderer();

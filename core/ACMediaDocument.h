@@ -162,7 +162,7 @@ protected:
 	std::vector<ACMediaFeatures*> tempVect;
 	std::vector<std::string> tempString;
 	std::vector<std::string> activableMediaKey;
-private:
+protected:
 	ACMedia* activeMedia;
 	std::string activeMediaKey;
 

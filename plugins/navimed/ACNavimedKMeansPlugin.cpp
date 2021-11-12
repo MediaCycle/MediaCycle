@@ -93,6 +93,7 @@ ACNavimedKMeansPlugin::ACNavimedKMeansPlugin() {
     this->mName = "ACNavimedKMeans";
     this->mDescription = "Clustering";
     this->mId = "";
+    this->addNumberParameter("clusters",5,1,10,1,"number of desired clusters",boost::bind(&ACNavimedKMeansPlugin::clusterNumberChanged,this));
 }
 
 ACNavimedKMeansPlugin::~ACNavimedKMeansPlugin() {
@@ -100,6 +101,9 @@ ACNavimedKMeansPlugin::~ACNavimedKMeansPlugin() {
 
 
 void ACNavimedKMeansPlugin::updateClusters(ACMediaBrowser* mediaBrowser,bool needsCluster){
+    
+    int clusterCount=this->getNumberParameterValue("clusters");
+    
     ACMediaLibrary *library=mediaBrowser->getLibrary();
 
     int i,j,d,f;
@@ -125,15 +129,15 @@ void ACNavimedKMeansPlugin::updateClusters(ACMediaBrowser* mediaBrowser,bool nee
         bool validFlag=true;
         vector<ACMediaFeatures*> featVects=theMedia->getAllPreProcFeaturesVectors();
         vector<ACMediaFeatures*>::iterator it;
-        int j=0;
+        int jCpt=0;
         for (it=featVects.begin();it!=featVects.end();it++){
-            if (featureWeights[j]!=0.f&&(*it)->getFeatureElement(0)==-1000.f){
+            if (featureWeights[jCpt]!=0.f&&(*it)->getFeatureElement(0)==-1000.f){
                 validFlag=false;
                 mediaBrowser->getMediaNode(locId)->setDisplayed(false);
                 mediaBrowser->getMediaNode(locId)->setClusterId(0);
                 break;
             }
-            j++;
+            jCpt++;
         }
         if (validFlag) {
 
@@ -158,7 +162,6 @@ void ACNavimedKMeansPlugin::updateClusters(ACMediaBrowser* mediaBrowser,bool nee
     // XS note: problem if all media don't have the same number of features
     //          but we suppose it is not going to happen
     int feature_count = library->getMedia(currId[0])->getNumberOfPreProcFeaturesVectors();
-    int clusterCount=mediaBrowser->getClusterCount();
     vector< int > cluster_counts;
     vector<vector< FeaturesVector > >cluster_accumulators; // cluster, feature, desc
     vector< float > cluster_distances; // for computation
@@ -353,4 +356,14 @@ void ACNavimedKMeansPlugin::updateClusters(ACMediaBrowser* mediaBrowser,bool nee
     mediaBrowser->setIdNodeClusterCenter(idNodeClusterCenters);
 
 
+}
+void ACNavimedKMeansPlugin::clusterNumberChanged(){
+    if(!this->media_cycle) return;
+    
+    media_cycle->setClusterNumber( this->getNumberParameterValue("clusters") );
+    // XSCF251003 added this
+    media_cycle->updateDisplay(true); //XS 250310 was: media_cycle->updateClusters(true);
+    // XS 310310 removed media_cycle->setNeedsDisplay(true); // now in updateDisplay
+    //osg_view->updateTransformsFromBrowser(1.0); //CF 29/06/2012, this is called by ACOsgCompositeViewQt::updateGL if mediacycle needs display
+    media_cycle->setNeedsDisplay(true);
 }

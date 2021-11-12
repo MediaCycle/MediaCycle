@@ -47,6 +47,7 @@ public:
 	ACNavimedKMeansPlugin();
 	~ACNavimedKMeansPlugin();
 	void updateClusters(ACMediaBrowser* mediaBrowser,bool needsCluster=true);//updateClustersKMeans(animate, needsCluster)
+    void clusterNumberChanged();
 	
 //	void updateNextPositions(ACMediaBrowser*  );
 

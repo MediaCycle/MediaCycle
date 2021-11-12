@@ -111,6 +111,14 @@ bool NavimedText::extractData(std::string fname){
 	//height = thumbnail_height;
 	return true;
 }
+std::string NavimedText::getTextMetaData(){
+    string ret;
+	navimedReader reader(this->filename);
+    ret=reader.getMetaData();
+    
+    return ret;
+}
+
 
 
 #endif

@@ -847,6 +847,9 @@ void ACMediaFactory::addAvailableOsgFileExtensions(){
 		rw_itr != osgDB::Registry::instance()->getReaderWriterList().end();
 		++rw_itr)
 	{
+#ifdef PARSE_OSG_PLUGINS_VERBOSE
+        std::cout <<"- plugin name:"<<(*rw_itr)->className()<<std::endl;
+#endif//def PARSE_OSG_PLUGINS_VERBOSE
 		osgDB::ReaderWriter::FormatDescriptionMap rwfdm = (*rw_itr)->supportedExtensions();
 		osgDB::ReaderWriter::FormatDescriptionMap::iterator fdm_itr;
 		for(fdm_itr = rwfdm.begin();fdm_itr != rwfdm.end();++fdm_itr)

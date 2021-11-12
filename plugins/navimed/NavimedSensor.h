@@ -58,6 +58,8 @@ private:
 public:
 	NavimedSensor();	
 	bool extractData(std::string fname);
+    
+    virtual std::string getTextMetaData();
 	
 };
 

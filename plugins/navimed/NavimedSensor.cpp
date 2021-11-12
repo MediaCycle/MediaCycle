@@ -170,4 +170,12 @@ bool NavimedSensor::extractData(std::string fname){
 }
 
 
+std::string NavimedSensor::getTextMetaData(){
+    string ret("test");
+    
+	navimedReader reader(this->filename);
+    ret=reader.getMetaData();
+    
+    return ret;
+}
 #endif

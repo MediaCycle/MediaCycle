@@ -30,7 +30,11 @@ int ACFFmpegToOpenCV::init(const char * file)
     av_register_all();
 
 	// Open video file
+#if LIBAVFORMAT_BUILD < (54<<16 | 29<<8 | 0)
     if(av_open_input_file(&pFormatCtx, file, NULL, 0, NULL)!=0){
+#else
+    if(avformat_open_input(&pFormatCtx, file, 0, 0) < 0){
+#endif
     	std::cerr << "ACFFmpegToOpenCV Couldn't open file " << file << std::endl;
     	return -1;
     }
@@ -42,7 +46,11 @@ int ACFFmpegToOpenCV::init(const char * file)
     }
 
 	// Dump information about file onto standard error
+#if LIBAVFORMAT_BUILD < (54<<16 | 29<<8 | 0)
     dump_format(pFormatCtx, 0, file, 0);
+#else
+    av_dump_format(pFormatCtx, 0, file, 0);
+#endif
 
 	// Find the first video stream
     videoStream=-1;

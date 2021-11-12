@@ -268,7 +268,7 @@ void ACDockWidgetsManagerQt::updateDockHeight()
     else
         windowWidth = windowHeight + 250; // magic number, dock widgets width;
     mainWindow->setMinimumHeight(windowHeight + 3*26); // titlebar, toolbar, statusbar
-    mainWindow->setMinimumWidth(windowWidth);
+   // mainWindow->setMinimumWidth(windowWidth);
     //mainWindow->resize(mainWindow->sizeHint());
     //std::cout << "window height " << mainWindow->minimumHeight() << " or " << windowHeight << " / availHeight " << availHeight << std::endl;
 }

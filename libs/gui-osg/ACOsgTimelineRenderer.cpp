@@ -108,12 +108,14 @@ bool ACOsgTimelineRenderer::addTrack(ACMedia* _media){
 #endif //defined (SUPPORT_TEXT)
     }
     break;
-    /*
-    case MEDIA_TYPE_SENSORDATA:
-    track_renderer[i] = new ACOsgSensorDataTrackRenderer();
-    break;
-    //... ;-)
-    */
+    
+    case MEDIA_TYPE_SENSOR:
+    {
+#if defined (SUPPORT_SENSOR)
+        track_renderer.resize(n+1);
+        track_renderer[n] = new ACOsgTextTrackRenderer();
+#endif //defined (SUPPORT_SENSOR)
+    }
     default:
         break;
     }

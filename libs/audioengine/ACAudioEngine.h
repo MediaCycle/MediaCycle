@@ -145,10 +145,10 @@ public:
 	bool isCaptureAvailable(const char* deviceName = 0){return recorder->isCaptureAvailable(deviceName);}
 	
 	// Feedback Engine
-	void threadAudioEngine(){feedback->threadAudioEngine();}
-	void threadAudioUpdate(){feedback->threadAudioUpdate();}
-	void startAudioEngine(){feedback->startAudioEngine();}
-	void stopAudioEngine(){feedback->stopAudioEngine();}
+    void threadAudioEngine(){if (feedback)feedback->threadAudioEngine();}
+    void threadAudioUpdate(){if (feedback)feedback->threadAudioUpdate();}
+    void startAudioEngine(){if (feedback)feedback->startAudioEngine();}
+    void stopAudioEngine(){if (feedback) feedback->stopAudioEngine();}
 	
 	// Recorder
 	bool initCapture(const char* deviceName = 0){return recorder->initCapture(deviceName);}

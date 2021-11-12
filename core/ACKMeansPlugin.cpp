@@ -308,7 +308,8 @@ void ACKMeansPlugin::updateClusters(ACMediaBrowser* mediaBrowser,bool needsClust
     for(i=0; i<object_count; i++) {
         // check if we should include this object
         if(mediaBrowser->getMediaNode(currId[i])->getNavigationLevel() < mediaBrowser->getNavigationLevel()) continue;
-
+        
+        mediaBrowser->setMediaNodeDisplayed(currId[i], true);
         // compute distance between this object and every cluster
         for(j=0; j<clusterCount; j++) {
             cluster_distances[j] = 0;
